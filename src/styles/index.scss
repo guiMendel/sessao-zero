@@ -1,0 +1,78 @@
+//=== Remote imports
+// Icons
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+// Fonts
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;1,100;1,200;1,300;1,400;1,500;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@300;400;600;800&display=swap');
+
+//=== Local imports
+@import './variables.scss';
+@import './css-reset.scss';
+@import './mixins.scss';
+@import './accessibility.scss';
+
+//=== Global style
+
+:root {
+  font-size: 18px;
+}
+
+#app {
+  font-family: 'Josefin Sans', 'Source Sans Pro', Helvetica, Arial, sans-serif;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  text-align: center;
+
+  min-height: 100vh;
+
+  color: var(--tx-gray-dark);
+}
+
+button,
+a,
+input[type='submit'],
+input[type='button'] {
+  cursor: pointer;
+}
+
+// Use flexbox always
+div,
+main,
+section,
+header,
+footer,
+form,
+button,
+p,
+span,
+label {
+  display: flex;
+  align-items: flex-start;
+}
+
+input,
+textarea,
+button {
+  @include text-input;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--tx-gray);
+}
+
+button {
+  @include button;
+}
+
+h1 {
+  font-size: 1.3rem;
+  font-weight: 500;
+}
+
+body {
+  background-color: var(--bg-white);
+}

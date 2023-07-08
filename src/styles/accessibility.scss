@@ -1,0 +1,54 @@
+.high-contrast {
+  button,
+  input,
+  textarea,
+  select {
+    background-color: var(--accessibility-background);
+
+    border: 2px solid var(--accessibility-text);
+  }
+
+  background-color: var(--accessibility-background);
+  color: var(--tx-gray-dark);
+
+  // Redefine as variaveis
+  --tx-main-washed: var(--accessibility-text);
+  --tx-main-lighter: var(--accessibility-text);
+  --tx-main-light: var(--accessibility-text);
+  --tx-main: var(--accessibility-text);
+  --tx-main-dark: var(--accessibility-text);
+  --tx-main-darker: var(--accessibility-text);
+
+  --tx-white: var(--accessibility-text);
+  --tx-gray-washed: var(--accessibility-text);
+  --tx-gray-lighter: var(--accessibility-text);
+  --tx-gray-light: var(--accessibility-text);
+  --tx-gray: var(--accessibility-text);
+  --tx-gray-dark: var(--accessibility-text);
+  --tx-gray-darker: var(--accessibility-text);
+
+  --tx-error-washed: var(--accessibility-text);
+  --tx-error-lighter: var(--accessibility-text);
+  --tx-error-light: var(--accessibility-text);
+  --tx-error: var(--accessibility-text);
+  --tx-error-dark: var(--accessibility-text);
+
+  --bg-main-lighter: var(--accessibility-background);
+  --bg-main-light: var(--accessibility-background);
+  --bg-main: var(--accessibility-background);
+  --bg-main-dark: var(--accessibility-background);
+
+  --bg-white: var(--accessibility-background);
+  --bg-gray-washed: var(--accessibility-background);
+  --bg-gray-lighter: var(--accessibility-background);
+  --bg-gray-light: var(--accessibility-background);
+  --bg-gray: var(--accessibility-background);
+  --bg-gray-dark: var(--accessibility-background);
+  --bg-gray-darker: var(--accessibility-background);
+
+  --bg-error-washed: var(--accessibility-background);
+  --bg-error-lighter: var(--accessibility-background);
+  --bg-error-light: var(--accessibility-background);
+  --bg-error: var(--accessibility-background);
+  --bg-error-dark: var(--accessibility-background);
+}

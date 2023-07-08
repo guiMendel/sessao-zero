@@ -1,5 +1,11 @@
+import './styles/index.scss'
 import { createApp } from 'vue'
-import './style.css'
 import App from './App.vue'
+import router from './router'
+import './style.scss'
+import { validateEnvironment } from './utils'
 
-createApp(App).mount('#app')
+createApp(App).use(router).mount('#app')
+
+// Ensure the environment is appropriate for running the app
+validateEnvironment()

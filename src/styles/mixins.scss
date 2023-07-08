@@ -1,0 +1,152 @@
+// Introduz uma borda de alto contraste
+@mixin high-contrast-border {
+  border: 2px solid var(--accessibility-text);
+}
+
+// Indicacao visual de que esta desabilitado. Pode se rusado em botoes, input, etc
+@mixin disabled {
+  background-color: var(--bg-gray-washed);
+  color: var(--tx-gray-light);
+  box-shadow: none;
+  border-color: transparent;
+
+  .material-symbols-rounded {
+    color: inherit;
+  }
+
+  &:active {
+    filter: none;
+  }
+
+  &:hover {
+    filter: none;
+    cursor: inherit;
+  }
+
+  .high-contrast & {
+    text-decoration: line-through;
+  }
+}
+
+// O container de uma pagina, em geral
+@mixin page-container {
+  padding: 2rem;
+
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+// Qualquer caixa com conteudo
+@mixin content-container {
+  padding: 2rem;
+  border-radius: $border-radius;
+
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+
+  .high-contrast & {
+    @include high-contrast-border;
+  }
+}
+
+// Coisas clicaveis: faz reagir ao hover e ao clique
+@mixin clickable {
+  cursor: pointer;
+  user-select: none;
+
+  transition: filter 200ms;
+
+  box-shadow: 0 1px 2px $box-shadow-intensity;
+
+  &:hover {
+    filter: brightness(1.02);
+  }
+
+  &:active {
+    filter: brightness(0.95);
+    box-shadow: inset 0 1px 2px $box-shadow-intensity;
+  }
+
+  .high-contrast & {
+    @include high-contrast-border;
+  }
+}
+
+// Botoes
+@mixin button {
+  @include clickable;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--gray-lighter);
+  border-radius: $border-radius;
+
+  min-width: 6rem;
+  min-height: 2rem;
+  width: unset;
+
+  gap: 0.3rem;
+
+  > span {
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .icon,
+  .material-symbols-rounded {
+    color: var(--tx-main);
+  }
+
+  .high-contrast & {
+    @include high-contrast-border;
+  }
+
+  &:disabled {
+    @include disabled;
+  }
+}
+
+// Inputs de texto
+@mixin text-input {
+  width: 15rem;
+  height: 2rem;
+
+  padding: 0.5rem 1rem;
+
+  background-color: var(--bg-white);
+
+  border-bottom: 1px solid var(--tx-gray-lighter);
+  border-radius: $border-radius;
+
+  transition: border-color 300ms;
+
+  &.error {
+    border: 2px solid var(--tx-error);
+  }
+}
+
+// Transforma o elemento num circulo. Use a variavel --size para definir um tamanho
+@mixin circle {
+  // Valor padrao
+  padding: 0.3rem;
+
+  aspect-ratio: 1 / 1;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  width: unset;
+  height: unset;
+  min-width: unset;
+  min-height: unset;
+}
+
+// Coloca uma bordinha nos conteudos (expecialmente util para texto
+@mixin text-outline {
+  filter: drop-shadow(1px 0 0 var(--bg-white))
+    drop-shadow(-1px 0 0 var(--bg-white)) drop-shadow(0 1px 0 var(--bg-white))
+    drop-shadow(0 -1px 0 var(--bg-white));
+}

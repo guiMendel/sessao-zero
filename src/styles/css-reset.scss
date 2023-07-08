@@ -1,0 +1,24 @@
+* {
+  margin: 0;
+  padding: 0;
+  border: none;
+
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+// Remove ugly style for links
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+// Stuff that should look like everything else but doesn't
+button,
+input,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+}

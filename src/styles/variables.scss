@@ -1,0 +1,116 @@
+// Obs. pode usar variaveis de scss quando elas forem sempre constantes. As cores por exemplo nao podem ser, pois podem ser substituidas se o usuario ativar algumas opcoes de acessibilidade
+$border-radius: 20px;
+
+$box-shadow-intensity: 1px rgba(128, 128, 128, 0.157);
+
+// === Z-INDEX LAYERS
+
+@function layer-background($offset: 0) {
+  @return calc(-1000 + $offset);
+}
+
+@function layer-text($offset: 0) {
+  @return calc(0 + $offset);
+}
+
+@function layer-hover($offset: 0) {
+  @return calc(1000 + $offset);
+}
+
+@function layer-attention($offset: 0) {
+  @return calc(2000 + $offset);
+}
+
+// === FLOATING ICONS
+// Define variaveis para serem utilizadas pelos icones flutuantes no topo da tela
+
+// Tamanho dos icones
+$floating-icon-size: 2rem;
+
+// Espaco acima dos icones
+$floating-icon-margin: 1rem;
+
+// Duracao de animacoes
+$floating-icon-animation-duration: 400ms;
+
+// === LEGENDA
+
+// A fim de facilitar as configuracoes de acessibilidade:
+// Cores precedidas por tx sao utilizadas como texto ou elementos de destaque
+// Cores precedidas por bg sao utilizadas como plano de fundo
+
+:root {
+  //=== CORES DE TX
+
+  // As graduacoes de cor seguem a seuinte ordem, do mais claro ao mais escuro: washed -> lighter -> light -> dark -> darker -> blackish
+  --tx-main-washed: rgb(235, 252, 235);
+  --tx-main-lighter: rgb(193, 248, 193);
+  --tx-main-light: rgb(104, 231, 104);
+  --tx-main: rgb(34, 201, 34);
+  --tx-main-dark: rgb(46, 147, 46);
+  --tx-main-darker: rgb(45, 121, 45);
+
+  --tx-white: white;
+  --tx-gray-washed: rgb(250, 250, 250);
+  --tx-gray-lighter: rgb(233, 233, 233);
+  --tx-gray-light: rgb(202, 202, 202);
+  --tx-gray: rgb(187, 187, 187);
+  --tx-gray-dark: rgb(143, 143, 143);
+  --tx-gray-darker: rgb(85, 85, 85);
+
+  --tx-error-washed: rgb(255, 218, 218);
+  --tx-error-lighter: rgb(255, 172, 172);
+  --tx-error-light: rgb(253, 107, 107);
+  --tx-error: rgb(255, 24, 24);
+  --tx-error-dark: rgb(210, 22, 22);
+
+  --tx-warning-washed: rgb(255, 254, 246);
+  --tx-warning-lighter: rgb(253, 247, 196);
+  --tx-warning-light: rgb(255, 240, 131);
+  --tx-warning: rgb(250, 222, 9);
+  --tx-warning-dark: rgb(212, 188, 11);
+
+  --tx-blue-lighter: rgb(167, 204, 254);
+  --tx-blue-light: rgb(104, 169, 253);
+  --tx-blue: rgb(20, 122, 255);
+  --tx-blue-dark: rgb(5, 87, 193);
+
+  // === CORES DE BG
+
+  --bg-main-washed: var(--tx-main-washed);
+  --bg-main-lighter: var(--tx-main-lighter);
+  --bg-main-light: var(--tx-main-light);
+  --bg-main: var(--tx-main);
+  --bg-main-dark: var(--tx-main-dark);
+  --bg-main-darker: var(--tx-main-darker);
+
+  --bg-white: var(--tx-white);
+  --bg-gray-washed: var(--tx-gray-washed);
+  --bg-gray-lighter: var(--tx-gray-lighter);
+  --bg-gray-light: var(--tx-gray-light);
+  --bg-gray: var(--tx-gray);
+  --bg-gray-dark: var(--tx-gray-dark);
+  --bg-gray-darker: var(--tx-gray-darker);
+
+  --bg-error-washed: var(--tx-error-washed);
+  --bg-error-lighter: var(--tx-error-lighter);
+  --bg-error-light: var(--tx-error-light);
+  --bg-error: var(--tx-error);
+  --bg-error-dark: var(--tx-error-dark);
+
+  --bg-warning-washed: var(--tx-warning-washed);
+  --bg-warning-lighter: var(--tx-warning-lighter);
+  --bg-warning-light: var(--tx-warning-light);
+  --bg-warning: var(--tx-warning);
+  --bg-warning-dark: var(--tx-warning-dark);
+
+  --bg-blue-lighter: var(--tx-blue-lighter);
+  --bg-blue-light: var(--tx-blue-light);
+  --bg-blue: var(--tx-blue);
+  --bg-blue-dark: var(--tx-blue-dark);
+
+  // === ACESSIBILIDADE
+
+  --accessibility-text: yellow;
+  --accessibility-background: black;
+}

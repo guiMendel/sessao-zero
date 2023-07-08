@@ -1,5 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <RouterView />
+  <div>
+    <p>In Access Prompt</p>
+  </div>
 </template>
