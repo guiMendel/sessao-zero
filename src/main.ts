@@ -1,12 +1,17 @@
-import './styles/index.scss'
-import { createApp } from 'vue'
-import App from './App.vue'
-import router from './router'
-import './style.scss'
-import { validateEnvironment } from './utils'
 import { createPinia } from 'pinia'
+import { createApp } from 'vue'
+import { VueFire, VueFireAuth } from 'vuefire'
+import App from './App.vue'
+import { firebaseApp } from './api/firebase'
+import router from './router'
+import './styles/index.scss'
+import { validateEnvironment } from './utils'
 
-createApp(App).use(createPinia()).use(router).mount('#app')
+createApp(App)
+  .use(VueFire, { firebaseApp, modules: [VueFireAuth()] })
+  .use(createPinia())
+  .use(router)
+  .mount('#app')
 
 // Ensure the environment is appropriate for running the app
 validateEnvironment()

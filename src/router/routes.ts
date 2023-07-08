@@ -16,15 +16,15 @@ import BetaWelcome from '../views/Prompts/BetaWelcome.vue'
 /** As rotas da aplicacao */
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/beta-welcome',
-    component: BetaWelcome,
-    name: 'beta-welcome',
-    meta: { firstVisitPrompt: true, noGoBackButton: true },
-  },
-  {
     path: '/acessibility-prompt',
     component: AcessibilityPrompt,
     name: 'acessibility-prompt',
+    meta: { firstVisitPrompt: true, noGoBackButton: true },
+  },
+  {
+    path: '/beta-welcome',
+    component: BetaWelcome,
+    name: 'beta-welcome',
     meta: { firstVisitPrompt: true, noGoBackButton: true },
   },
   {

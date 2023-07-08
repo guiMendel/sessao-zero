@@ -1,6 +1,6 @@
 import 'vue-router'
 import { createRouter, createWebHistory } from 'vue-router'
-import { navigationGuard } from './navigationGuard'
+import { navigationGuard } from './guard'
 import routes from './routes'
 import { setTitle } from './utils/setTitle'
 
