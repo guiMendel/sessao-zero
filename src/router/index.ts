@@ -1,15 +1,15 @@
 import 'vue-router'
 import { createRouter, createWebHistory } from 'vue-router'
-// import { navigationGuard } from './navigationGuard'
-import { setTitle } from './utils/setTitle'
+import { navigationGuard } from './navigationGuard'
 import routes from './routes'
+import { setTitle } from './utils/setTitle'
 
 // === TIPAGEM DO META
 
 declare module 'vue-router' {
   interface RouteMeta {
-    /** Quando o jogador deve estar logado */
-    requiresAuthentication?: boolean
+    /** Que tipo de autenticacao o jogador deve ter */
+    requireAuth?: 'authenticated' | 'unauthenticated'
 
     /** Atualiza o titulo da pagina (aparece na aba do chrome) */
     title?: string
@@ -33,7 +33,7 @@ const router = createRouter({
 })
 
 // Apply the navigation guard
-// router.beforeEach(navigationGuard)
+router.beforeEach(navigationGuard)
 
 router.afterEach((to) => setTitle(to.meta.title as string | undefined))
 

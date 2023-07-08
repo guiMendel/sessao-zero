@@ -37,20 +37,24 @@ const routes: Array<RouteRecordRaw> = [
     path: '/login',
     component: Login,
     name: 'login',
-    meta: { title: 'Login', noGoBackButton: true },
+    meta: {
+      title: 'Login',
+      requireAuth: 'unauthenticated',
+      noGoBackButton: true,
+    },
   },
   {
     path: '/create-player',
     component: CreatePlayer,
     name: 'create-player',
     props: true,
-    meta: { title: 'Criar Conta' },
+    meta: { title: 'Criar Conta', requireAuth: 'unauthenticated' },
   },
   {
     path: '/',
     component: Home,
     name: 'home',
-    meta: { requiresAuthentication: true },
+    meta: { requireAuth: 'authenticated' },
     children: [
       {
         path: '',

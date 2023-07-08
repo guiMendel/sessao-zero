@@ -1,8 +1,5 @@
 /** Ensures all necessary environment variables are set for the current environment (production / development) */
 export function validateEnvironment() {
-  /** What environment the app is currently in */
-  const isProduction = import.meta.env.PROD
-
   /** Helper that allows to quickly check if an env variable is set, and throws an error in case not
    * @param variable Which variable to check for
    * @param errorMessage Provides the reason why this variable is necessary
@@ -17,8 +14,7 @@ export function validateEnvironment() {
       )
   }
 
-  // Production requirements
-  if (isProduction) {
-    checkVariable('VITE_BASE_URL', 'unable to make api calls')
-  }
+  checkVariable('VITE_API_KEY', 'api key para acessar o firebase')
+  checkVariable('VITE_MESSAGING_SENDER_ID', 'messaging sender id para interagir com o firebase')
+  checkVariable('VITE_APP_ID', 'app id para acessar o app do firebase')
 }
