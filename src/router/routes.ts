@@ -32,6 +32,7 @@ const routes: Array<RouteRecordRaw> = [
     path: makeGuildInvitation(false),
     props: true,
     component: GuildInvitation,
+    name: 'guild-invitation',
   },
   {
     path: '/login',

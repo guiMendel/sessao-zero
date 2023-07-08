@@ -17,7 +17,7 @@ declare module 'vue-router' {
     /** Nao mostra o menu principal (info sobre usuario & logout) */
     noMainMenu?: boolean
 
-    /** Se esta pagina deve ser apresentada ao usuario caso essa seja sua primeira visita */
+    /** Se esta pagina deve ser apresentada ao usuario caso essa seja sua primeira visita. So eh valido em rotas raizes */
     firstVisitPrompt?: boolean
 
     /** Se esta pagina nao deve mostrar o botao de voltar de pagina */
