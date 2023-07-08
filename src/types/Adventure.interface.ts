@@ -1,4 +1,4 @@
-import { Player, IndexPlayer } from './Player.interface'
+import { IndexPlayer } from './Player.interface'
 
 /** Define os atributos de uma aventura */
 export interface Adventure {
