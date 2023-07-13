@@ -114,15 +114,17 @@
 
   padding: 0.5rem 1rem;
 
-  background-color: var(--bg-white);
+  background: none;
 
-  border-bottom: 1px solid var(--tx-gray-lighter);
+  box-shadow: 0 2px 0 4px var(--tx-gray-lighter);
   border-radius: $border-radius;
+
+  background-color: rgba(0, 0, 0, 0.1);
 
   transition: border-color 300ms;
 
   &.error {
-    border: 2px solid var(--tx-error);
+    box-shadow: 0 2px 0 4px var(--tx-error);
   }
 }
 

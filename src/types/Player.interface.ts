@@ -1,30 +1,19 @@
-import { IndexGuild } from './Guild.interface'
+import { Resource } from './Resource.interface'
 
-/** Defines the attributes for a regular user. May or may not contain the auth fields */
-export interface Player extends Partial<AuthenticationFields> {
-  id: number
+/** Atributos de um usuario padrao, denominado "jogador" */
+export interface Player extends PlayerResource {
+  id: string
+}
+
+/** Atributos do jogador como armazenados no firestore */
+export interface PlayerResource extends Resource {
   name: string
   nickname: string
-  admin: boolean
-  guilds: Array<IndexGuild>
+  about: string
+  
+  admin?: boolean
+  // guilds: Array<IndexGuild>
 
-  registration?: string
-}
-
-/** Defines the attributes for a regular user, without the id field */
-export type PlayerWithoutId = Omit<Player, 'id'>
-
-/** Defines the fields necessary for player authentication */
-export interface AuthenticationFields {
   email: string
   password: string
-}
-
-/** Define os campos que devem ser preenchidos para criar um jogardor */
-export type PlayerFields = Omit<Omit<PlayerWithoutId, 'admin'>, 'guilds'>
-
-/** Formato retornado por metodos de indexagem */
-export interface IndexPlayer {
-  id: number
-  nickname: string
 }

@@ -3,24 +3,6 @@ $border-radius: 20px;
 
 $box-shadow-intensity: 1px rgba(128, 128, 128, 0.157);
 
-// === Z-INDEX LAYERS
-
-@function layer-background($offset: 0) {
-  @return calc(-1000 + $offset);
-}
-
-@function layer-text($offset: 0) {
-  @return calc(0 + $offset);
-}
-
-@function layer-hover($offset: 0) {
-  @return calc(1000 + $offset);
-}
-
-@function layer-attention($offset: 0) {
-  @return calc(2000 + $offset);
-}
-
 // === FLOATING ICONS
 // Define variaveis para serem utilizadas pelos icones flutuantes no topo da tela
 
@@ -43,18 +25,18 @@ $floating-icon-animation-duration: 400ms;
   //=== CORES DE TX
 
   // As graduacoes de cor seguem a seuinte ordem, do mais claro ao mais escuro: washed -> lighter -> light -> dark -> darker -> blackish
-  --tx-main-washed: rgb(235, 252, 235);
-  --tx-main-lighter: rgb(193, 248, 193);
-  --tx-main-light: rgb(104, 231, 104);
-  --tx-main: rgb(34, 201, 34);
-  --tx-main-dark: rgb(46, 147, 46);
-  --tx-main-darker: rgb(45, 121, 45);
+  --tx-main-washed: #ebfceb;
+  --tx-main-lighter: #c1f8c1;
+  --tx-main-light: #68e768;
+  --tx-main: #22c922;
+  --tx-main-dark: #2e932e;
+  --tx-main-darker: #2d792d;
 
   --tx-white: white;
   --tx-gray-washed: rgb(250, 250, 250);
   --tx-gray-lighter: rgb(233, 233, 233);
   --tx-gray-light: rgb(202, 202, 202);
-  --tx-gray: rgb(187, 187, 187);
+  --tx-gray: #bbbbbb;
   --tx-gray-dark: rgb(143, 143, 143);
   --tx-gray-darker: rgb(85, 85, 85);
 
@@ -69,11 +51,6 @@ $floating-icon-animation-duration: 400ms;
   --tx-warning-light: rgb(255, 240, 131);
   --tx-warning: rgb(250, 222, 9);
   --tx-warning-dark: rgb(212, 188, 11);
-
-  --tx-blue-lighter: rgb(167, 204, 254);
-  --tx-blue-light: rgb(104, 169, 253);
-  --tx-blue: rgb(20, 122, 255);
-  --tx-blue-dark: rgb(5, 87, 193);
 
   // === CORES DE BG
 
@@ -103,11 +80,6 @@ $floating-icon-animation-duration: 400ms;
   --bg-warning-light: var(--tx-warning-light);
   --bg-warning: var(--tx-warning);
   --bg-warning-dark: var(--tx-warning-dark);
-
-  --bg-blue-lighter: var(--tx-blue-lighter);
-  --bg-blue-light: var(--tx-blue-light);
-  --bg-blue: var(--tx-blue);
-  --bg-blue-dark: var(--tx-blue-dark);
 
   // === ACESSIBILIDADE
 
