@@ -1,18 +1,16 @@
 // Introduz uma borda de alto contraste
 @mixin high-contrast-border {
-  border: 2px solid var(--accessibility-text);
+  .high-contrast & {
+    border: 2px solid var(--accessibility-text);
+  }
 }
 
 // Indicacao visual de que esta desabilitado. Pode se rusado em botoes, input, etc
 @mixin disabled {
-  background-color: var(--bg-gray-washed);
-  color: var(--tx-gray-light);
+  background-color: var(--bg-trans-1);
+  color: var(--tx-trans-3);
   box-shadow: none;
   border-color: transparent;
-
-  .material-symbols-rounded {
-    color: inherit;
-  }
 
   &:active {
     filter: none;
@@ -56,9 +54,7 @@
   cursor: pointer;
   user-select: none;
 
-  transition: filter 200ms;
-
-  box-shadow: 0 1px 2px $box-shadow-intensity;
+  transition: all 100ms;
 
   &:hover {
     filter: brightness(1.02);
@@ -66,7 +62,6 @@
 
   &:active {
     filter: brightness(0.95);
-    box-shadow: inset 0 1px 2px $box-shadow-intensity;
   }
 
   .high-contrast & {
@@ -79,30 +74,62 @@
   @include clickable;
   align-items: center;
   justify-content: center;
-  background-color: var(--gray-lighter);
+
+  background-color: var(--bg-trans-03);
+  font-weight: 900;
+  text-transform: lowercase;
+
+  box-shadow: 0 2px 0 1px var(--trans-3);
   border-radius: $border-radius;
 
   min-width: 6rem;
   min-height: 2rem;
-  width: unset;
 
   gap: 0.3rem;
+
+  position: relative;
+
+  transition: all 100ms;
+
+  &::after {
+    content: '';
+    position: absolute;
+    border-radius: inherit;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.1;
+
+    pointer-events: none;
+
+    transition: all 100ms;
+  }
 
   > span {
     align-items: center;
     gap: 0.3rem;
   }
 
-  .icon,
-  .material-symbols-rounded {
-    color: var(--tx-main);
+  &:hover::after {
+    background-color: white;
+
+    .high-contrast & {
+      background: none;
+    }
+  }
+
+  &:active {
+    translate: 0 3px;
+    box-shadow: 0 0 0 0 var(--trans-3);
   }
 
   .high-contrast & {
     @include high-contrast-border;
   }
 
-  &:disabled {
+  &:disabled,
+  &.disabled {
     @include disabled;
   }
 }

@@ -6,6 +6,7 @@ import { useFirestore } from 'vuefire'
 import InputField from '../components/InputField.vue'
 import { useCurrentPlayer, useNotification } from '../stores'
 import { usePlayerFields } from '../utils'
+import IconButton from '../components/IconButton.vue'
 
 // =======================================================
 // PLAYER DATA
@@ -144,6 +145,9 @@ const submitEmail = async () => {
   emailConfirmed.value = true
 }
 
+/** Volta para o passo 1 */
+const returnStep = () => (emailConfirmed.value = false)
+
 // ==============================
 // PASSO 2 — FORNECER SENHA
 // ==============================
@@ -179,8 +183,10 @@ const submit = () => {
   <main :class="{ confirmed: emailConfirmed }">
     <form class="login">
       <!-- Back button -->
-      <p>seta pa volta</p>
-      
+      <div class="back-button">
+        <IconButton @click="returnStep" icon="hand-point-left" />
+      </div>
+
       <!-- Title -->
       <h1>Sessão Zero</h1>
 
@@ -221,6 +227,13 @@ const submit = () => {
         :class="email.valid || 'disabled'"
         id="login"
       >
+        <font-awesome-icon
+          v-if="emailConfirmed"
+          :icon="['fas', 'right-to-bracket']"
+        />
+
+        <font-awesome-icon v-else :icon="['fas', 'paper-plane']" />
+
         {{ emailConfirmed ? 'Entrar' : 'Enviar' }}
       </button>
     </form>
@@ -271,10 +284,16 @@ main {
 
     z-index: 10;
 
+    position: relative;
+
     h1 {
       font-family: 'Titan One', cursive;
       font-size: 2rem;
-      transition: 800ms;
+      transition: 500ms ease-out;
+
+      margin-bottom: 0.3rem;
+
+      text-shadow: 0 2px 0 var(--trans-3);
     }
 
     .input {
@@ -284,12 +303,6 @@ main {
     button {
       width: 50%;
       max-width: 100%;
-
-      background-color: var(--bg-trans-03);
-      font-weight: 900;
-      text-transform: lowercase;
-
-      box-shadow: 0 2px 0 1px var(--trans-3);
     }
 
     .email-display {
@@ -297,12 +310,43 @@ main {
       padding: 0.4rem 1rem;
       background-color: var(--bg-trans-1);
       border-radius: $border-radius;
+      transition: 100ms;
+      cursor: pointer;
+
+      margin-bottom: -1rem;
+
+      &:hover {
+        background-color: var(--bg-trans-3);
+      }
+
+      @include high-contrast-border;
+    }
+
+    #forgot-password {
+      margin-block: 0.5rem -0.3rem;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 0.5rem;
+      left: 1rem;
+
+      transition: all 300ms ease-out;
     }
   }
 
   &.confirmed {
     h1 {
-      transform: scale(0.7);
+      font-size: 1.5rem;
+    }
+  }
+
+  &:not(.confirmed) {
+    .back-button {
+      opacity: 0;
+      left: -1rem;
+      pointer-events: none;
+      scale: 20%;
     }
   }
 }

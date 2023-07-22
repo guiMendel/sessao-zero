@@ -72,9 +72,12 @@ const raiseLabel = computed(
     :class="{ error: errorMessage != '', dark: props.variant === 'dark' }"
     @focusout="showErrors = true"
   >
-    <label :class="raiseLabel && 'raised'" :for="modelValue.name">{{
-      splitCamelCase(modelValue.name)
-    }}</label>
+    <label
+      class="hint"
+      :class="raiseLabel && 'raised'"
+      :for="modelValue.name"
+      >{{ splitCamelCase(modelValue.name) }}</label
+    >
     <textarea
       v-if="multiline && inferredType != 'color'"
       :type="inferredType"
@@ -103,7 +106,9 @@ const raiseLabel = computed(
       <!-- <font-awesome-icon :icon="['fas', 'palette']" /> -->
     </label>
 
-    <small class="error">{{ validationResult }}</small>
+    <label class="error-message" :for="modelValue.name">
+      {{ validationResult }}
+    </label>
   </div>
 </template>
 
@@ -123,9 +128,9 @@ const raiseLabel = computed(
     width: 30rem;
   }
 
-  label {
+  .hint {
     margin-top: -0.5rem;
-    
+
     transition: all 200ms;
 
     transform: translate(1rem, 1.6rem);
@@ -136,10 +141,15 @@ const raiseLabel = computed(
     height: 1.3rem;
 
     opacity: 0.6;
+    cursor: pointer;
+
+    .high-contrast & {
+      opacity: 1;
+    }
   }
 
-  &:focus-within label,
-  label.raised {
+  &:focus-within .hint,
+  .hint.raised {
     transform: translateY(0);
     font-size: 0.8rem;
 
@@ -160,6 +170,10 @@ const raiseLabel = computed(
 
     &::placeholder {
       opacity: 0.4;
+
+      .high-contrast & {
+        opacity: 1;
+      }
     }
   }
 
@@ -192,9 +206,10 @@ const raiseLabel = computed(
     }
   }
 
-  small {
+  .error-message {
     font-weight: 500;
     opacity: 0;
+    cursor: pointer;
 
     text-transform: lowercase;
     text-align: center;
@@ -212,26 +227,41 @@ const raiseLabel = computed(
   }
 
   &.error {
-    label {
+    .hint {
       color: var(--theme-tx-error);
       opacity: 1;
     }
 
-    input {
+    input,
+    textarea,
+    .color-display {
       border-color: var(--theme-tx-error);
       box-shadow: 0 2px 0 4px var(--theme-error);
+      background-color: rgba(255, 0, 0, 0.2);
+
+      .high-contrast & {
+        background: none;
+      }
     }
 
-    small {
+    .error-message {
       opacity: 1;
-      // margin-top: 0.7rem;
       margin-bottom: 0;
+      font-size: 0.9rem;
     }
   }
 
   &.dark {
     --theme: var(--tx-white);
     // --theme-tx-error: var(--tx-error-darker);
+  }
+
+  &:hover {
+    input,
+    textarea,
+    .color-display {
+      background-color: var(--trans-3);
+    }
   }
 }
 </style>

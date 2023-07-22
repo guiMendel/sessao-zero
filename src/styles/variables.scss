@@ -1,3 +1,5 @@
+@import './mixins.scss';
+
 // Obs. pode usar variaveis de scss quando elas forem sempre constantes. As cores por exemplo nao podem ser, pois podem ser substituidas se o usuario ativar algumas opcoes de acessibilidade
 $border-radius: 20px;
 
@@ -60,6 +62,11 @@ $floating-icon-animation-duration: 400ms;
   --warning-dark: rgb(212, 188, 11);
 
   //=== CORES DE TX
+
+  --tx-trans-03: var(--trans-03);
+  --tx-trans-1: var(--trans-1);
+  --tx-trans-3: var(--trans-3);
+  --tx-trans-45: var(--trans-45);
 
   --tx-main-washed: var(--main-washed);
   --tx-main-lighter: var(--main-lighter);
