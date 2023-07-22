@@ -107,6 +107,9 @@ import { usePlayerFields } from '../utils'
 // Campos de login
 const { email, password, getErrorForCode } = usePlayerFields()
 
+// Nao valida formato da senha em login
+password.value.validate = () => true
+
 // ==============================
 // PASSO 1 — FORNECER EMAIL
 // ==============================
@@ -120,10 +123,12 @@ const emailConfirmed = ref(false)
 /** Envia um email para confirmacao
  * Se existir, passa para o passo 2. Se nao, vai para a tela de criar conta */
 const submitEmail = async () => {
+  console.log('submit email')
+
   // Query do email
   const emailQuery = query(
     collection(db, 'players'),
-    where('email', '==', email.value)
+    where('email', '==', email.value.value)
   )
 
   // Executa a query
@@ -148,6 +153,8 @@ const { login } = useCurrentPlayer()
 
 // Acao de login
 const tryLogin = () => {
+  console.log('login')
+
   const emailValue = email.value.value
 
   // Tentativa de login
@@ -163,14 +170,17 @@ const tryLogin = () => {
 }
 
 const submit = () => {
-  if (emailConfirmed) tryLogin()
+  if (emailConfirmed.value) tryLogin()
   else submitEmail()
 }
 </script>
 
 <template>
-  <main>
+  <main :class="{ confirmed: emailConfirmed }">
     <form class="login">
+      <!-- Back button -->
+      <p>seta pa volta</p>
+      
       <!-- Title -->
       <h1>Sessão Zero</h1>
 
@@ -186,12 +196,23 @@ const submit = () => {
       <!-- Senha -->
       <template v-else>
         <!-- Mostra o email fornecido -->
-        <label for="password">{{ email.value }}</label>
+        <label
+          class="email-display"
+          for="password"
+          @click="emailConfirmed = false"
+          >{{ email.value }}</label
+        >
 
-        <InputField id="password" name="password" v-model="password" />
+        <InputField
+          class="input"
+          id="password"
+          name="password"
+          variant="dark"
+          v-model="password"
+        />
 
         <!-- Esqueceu a senha -->
-        <p id="forgot-password">Forgot your password?</p>
+        <p id="forgot-password">Esqueceu a senha?</p>
       </template>
 
       <!-- Submit -->
@@ -242,18 +263,18 @@ main {
     align-items: center;
     gap: 1rem;
 
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: var(--bg-trans-1);
 
     border-radius: $border-radius;
     padding: 2rem 2rem 3rem;
-    // border: 5px solid rgba(0, 0, 0, 0.03);
-    box-shadow: 0 1px 2px 3px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 1px 2px 3px var(--bg-trans-03);
 
     z-index: 10;
 
     h1 {
       font-family: 'Titan One', cursive;
       font-size: 2rem;
+      transition: 800ms;
     }
 
     .input {
@@ -264,12 +285,31 @@ main {
       width: 50%;
       max-width: 100%;
 
-      background-color: rgba(0, 0, 0, 0.3);
+      background-color: var(--bg-trans-03);
       font-weight: 900;
       text-transform: lowercase;
 
-      box-shadow: 0 2px 0 1px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 2px 0 1px var(--trans-3);
     }
+
+    .email-display {
+      font-weight: 600;
+      padding: 0.4rem 1rem;
+      background-color: var(--bg-trans-1);
+      border-radius: $border-radius;
+    }
+  }
+
+  &.confirmed {
+    h1 {
+      transform: scale(0.7);
+    }
+  }
+}
+
+.high-contrast {
+  main::before {
+    background: var(--accessibility-background);
   }
 }
 </style>

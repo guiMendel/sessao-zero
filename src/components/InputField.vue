@@ -100,7 +100,7 @@ const raiseLabel = computed(
       :style="{ backgroundColor: modelValue.value }"
       class="color-display"
     >
-      <font-awesome-icon :icon="['fas', 'palette']" />
+      <!-- <font-awesome-icon :icon="['fas', 'palette']" /> -->
     </label>
 
     <small class="error">{{ validationResult }}</small>
@@ -115,7 +115,8 @@ const raiseLabel = computed(
   width: 12rem;
 
   --theme: var(--tx-main);
-  --error: var(--tx-error);
+  --theme-tx-error: var(--tx-error);
+  --theme-error: var(--error);
   --border: 2px solid var(--theme);
 
   @media (min-width: 768px) {
@@ -184,7 +185,7 @@ const raiseLabel = computed(
 
     border-radius: var(--border-radius);
 
-    box-shadow: 0 0 3px 2px rgba(68, 68, 68, 0.1);
+    // box-shadow: 0 0 3px 2px rgba(68, 68, 68, 0.1);
 
     > * {
       color: var(--tx-gray-dark);
@@ -192,7 +193,6 @@ const raiseLabel = computed(
   }
 
   small {
-    color: var(--error);
     font-weight: 500;
     opacity: 0;
 
@@ -201,7 +201,7 @@ const raiseLabel = computed(
 
     margin: 0 auto;
 
-    background-color: var(--error);
+    background-color: var(--theme-error);
     color: var(--theme);
     border-radius: 0 0 $border-radius $border-radius;
     padding: 0.2rem 1rem;
@@ -213,13 +213,13 @@ const raiseLabel = computed(
 
   &.error {
     label {
-      color: var(--error);
+      color: var(--theme-tx-error);
       opacity: 1;
     }
 
     input {
-      border-color: var(--error);
-      box-shadow: 0 2px 0 4px var(--error);
+      border-color: var(--theme-tx-error);
+      box-shadow: 0 2px 0 4px var(--theme-error);
     }
 
     small {
@@ -231,7 +231,7 @@ const raiseLabel = computed(
 
   &.dark {
     --theme: var(--tx-white);
-    // --error: var(--tx-error-darker);
+    // --theme-tx-error: var(--tx-error-darker);
   }
 }
 </style>

@@ -22,37 +22,78 @@ $floating-icon-animation-duration: 400ms;
 // Cores precedidas por bg sao utilizadas como plano de fundo
 
 :root {
-  //=== CORES DE TX
+  //=== CORES
 
   // As graduacoes de cor seguem a seuinte ordem, do mais claro ao mais escuro: washed -> lighter -> light -> dark -> darker -> blackish
-  --tx-main-washed: #ebfceb;
-  --tx-main-lighter: #c1f8c1;
-  --tx-main-light: #68e768;
-  --tx-main: #22c922;
-  --tx-main-dark: #2e932e;
-  --tx-main-darker: #2d792d;
 
-  --tx-white: white;
-  --tx-gray-washed: rgb(250, 250, 250);
-  --tx-gray-lighter: rgb(233, 233, 233);
-  --tx-gray-light: rgb(202, 202, 202);
-  --tx-gray: #bbbbbb;
-  --tx-gray-dark: rgb(143, 143, 143);
-  --tx-gray-darker: rgb(85, 85, 85);
+  --trans: rgba(0, 0, 0, 0);
+  --trans-03: rgba(0, 0, 0, 0.03);
+  --trans-1: rgba(0, 0, 0, 0.1);
+  --trans-3: rgba(0, 0, 0, 0.3);
+  --trans-45: rgba(0, 0, 0, 0.45);
 
-  --tx-error-washed: rgb(255, 218, 218);
-  --tx-error-lighter: rgb(255, 172, 172);
-  --tx-error-light: rgb(253, 107, 107);
-  --tx-error: rgb(255, 24, 24);
-  --tx-error-dark: rgb(210, 22, 22);
+  --main-washed: #ebfceb;
+  --main-lighter: #c1f8c1;
+  --main-light: #68e768;
+  --main: #22c922;
+  --main-dark: #2e932e;
+  --main-darker: #2d792d;
 
-  --tx-warning-washed: rgb(255, 254, 246);
-  --tx-warning-lighter: rgb(253, 247, 196);
-  --tx-warning-light: rgb(255, 240, 131);
-  --tx-warning: rgb(250, 222, 9);
-  --tx-warning-dark: rgb(212, 188, 11);
+  --white: white;
+  --gray-washed: rgb(250, 250, 250);
+  --gray-lighter: rgb(233, 233, 233);
+  --gray-light: rgb(202, 202, 202);
+  --gray: #bbbbbb;
+  --gray-dark: rgb(143, 143, 143);
+  --gray-darker: rgb(85, 85, 85);
+
+  --error-washed: rgb(255, 218, 218);
+  --error-lighter: rgb(255, 172, 172);
+  --error-light: rgb(253, 107, 107);
+  --error: rgb(255, 24, 24);
+  --error-dark: rgb(210, 22, 22);
+
+  --warning-washed: rgb(255, 254, 246);
+  --warning-lighter: rgb(253, 247, 196);
+  --warning-light: rgb(255, 240, 131);
+  --warning: rgb(250, 222, 9);
+  --warning-dark: rgb(212, 188, 11);
+
+  //=== CORES DE TX
+
+  --tx-main-washed: var(--main-washed);
+  --tx-main-lighter: var(--main-lighter);
+  --tx-main-light: var(--main-light);
+  --tx-main: var(--main);
+  --tx-main-dark: var(--main-dark);
+  --tx-main-darker: var(--main-darker);
+
+  --tx-white: var(--white);
+  --tx-gray-washed: var(--gray-washed);
+  --tx-gray-lighter: var(--gray-lighter);
+  --tx-gray-light: var(--gray-light);
+  --tx-gray: var(--gray);
+  --tx-gray-dark: var(--gray-dark);
+  --tx-gray-darker: var(--gray-darker);
+
+  --tx-error-washed: var(--error-washed);
+  --tx-error-lighter: var(--error-lighter);
+  --tx-error-light: var(--error-light);
+  --tx-error: var(--error);
+  --tx-error-dark: var(--error-dark);
+
+  --tx-warning-washed: var(--warning-washed);
+  --tx-warning-lighter: var(--warning-lighter);
+  --tx-warning-light: var(--warning-light);
+  --tx-warning: var(--warning);
+  --tx-warning-dark: var(--warning-dark);
 
   // === CORES DE BG
+
+  --bg-trans-03: var(--trans-03);
+  --bg-trans-1: var(--trans-1);
+  --bg-trans-3: var(--trans-3);
+  --bg-trans-45: var(--trans-45);
 
   --bg-main-washed: var(--tx-main-washed);
   --bg-main-lighter: var(--tx-main-lighter);

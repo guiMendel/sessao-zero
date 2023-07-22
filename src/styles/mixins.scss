@@ -116,15 +116,15 @@
 
   background: none;
 
-  box-shadow: 0 2px 0 4px var(--tx-gray-lighter);
+  box-shadow: 0 2px 0 4px var(--gray-lighter);
   border-radius: $border-radius;
 
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--bg-trans-1);
 
   transition: border-color 300ms;
 
   &.error {
-    box-shadow: 0 2px 0 4px var(--tx-error);
+    box-shadow: 0 2px 0 4px var(--error);
   }
 }
 

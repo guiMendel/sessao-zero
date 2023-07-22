@@ -12,6 +12,27 @@
   color: var(--tx-gray-dark);
 
   // Redefine as variaveis
+  --main-washed: var(--trans);
+  --main-lighter: var(--trans);
+  --main-light: var(--trans);
+  --main: var(--trans);
+  --main-dark: var(--trans);
+  --main-darker: var(--trans);
+
+  --white: var(--trans);
+  --gray-washed: var(--trans);
+  --gray-lighter: var(--trans);
+  --gray-light: var(--trans);
+  --gray: var(--trans);
+  --gray-dark: var(--trans);
+  --gray-darker: var(--trans);
+
+  --error-washed: var(--trans);
+  --error-lighter: var(--trans);
+  --error-light: var(--trans);
+  --error: var(--trans);
+  --error-dark: var(--trans);
+
   --tx-main-washed: var(--accessibility-text);
   --tx-main-lighter: var(--accessibility-text);
   --tx-main-light: var(--accessibility-text);
@@ -32,6 +53,11 @@
   --tx-error-light: var(--accessibility-text);
   --tx-error: var(--accessibility-text);
   --tx-error-dark: var(--accessibility-text);
+
+  --bg-trans-03: var(--accessibility-background);
+  --bg-trans-1: var(--accessibility-background);
+  --bg-trans-3: var(--accessibility-background);
+  --bg-trans-45: var(--accessibility-background);
 
   --bg-main-lighter: var(--accessibility-background);
   --bg-main-light: var(--accessibility-background);
