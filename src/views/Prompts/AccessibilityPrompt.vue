@@ -6,11 +6,11 @@ import { useAccessibility } from '../../stores/useAccessibility'
 
 const router = useRouter()
 
-const acessibility = useAccessibility()
+const accessibility = useAccessibility()
 
 const toggleHighContrastAndContinue = (value: boolean) => {
   // Guarda o valor
-  acessibility.highContrast = value
+  accessibility.highContrast = value
 
   // Continua
   router.push({ name: 'home' })

@@ -125,8 +125,6 @@ const emailConfirmed = ref(false)
 /** Envia um email para confirmacao
  * Se existir, passa para o passo 2. Se nao, vai para a tela de criar conta */
 const submitEmail = async () => {
-  console.log('submit email')
-
   // Query do email
   const emailQuery = query(
     collection(db, 'players'),
@@ -158,8 +156,6 @@ const { login } = useCurrentPlayer()
 
 // Acao de login
 const tryLogin = () => {
-  console.log('login')
-
   const emailValue = email.value.value
 
   // Tentativa de login

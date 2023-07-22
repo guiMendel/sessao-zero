@@ -10,15 +10,15 @@ import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import CreatePlayer from '../views/Players/CreatePlayer.vue'
 import Player from '../views/Players/Player.vue'
-import AcessibilityPrompt from '../views/Prompts/AcessibilityPrompt.vue'
+import AccessibilityPrompt from '../views/Prompts/AccessibilityPrompt.vue'
 import BetaWelcome from '../views/Prompts/BetaWelcome.vue'
 
 /** As rotas da aplicacao */
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/acessibility-prompt',
-    component: AcessibilityPrompt,
-    name: 'acessibility-prompt',
+    path: '/accessibility-prompt',
+    component: AccessibilityPrompt,
+    name: 'accessibility-prompt',
     meta: { firstVisitPrompt: true, noGoBackButton: true },
   },
   {

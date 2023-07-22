@@ -7,6 +7,7 @@ import {
 } from 'vue-router'
 import { localStorageKeys } from '../config/storageKeys'
 import routes from '../router/routes'
+import { computed } from 'vue'
 
 // Gets name from route and throws if not present
 const requireName = (route: RouteRecordRaw | RouteLocationNormalizedLoaded) => {
@@ -40,9 +41,11 @@ export const useNavigationData = defineStore('navigation-data', () => {
   }
 
   /** Quais prompts ainda nao foram visitados */
-  const unvisitedPrompts = useArrayDifference(allPrompts, [
-    ...visitedPrompts.value,
-  ])
+  const unvisitedPrompts = computed(() =>
+    allPrompts.filter(
+      (prompt) => visitedPrompts.value.has(prompt as string) == false
+    )
+  )
 
   return { visitedPrompts, isVisitingPrompt, unvisitedPrompts }
 })
