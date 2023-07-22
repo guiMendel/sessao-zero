@@ -33,11 +33,18 @@ export const usePlayerFields = () => {
     inexistent: [],
   })
 
-  // Set an email as invalid
+  /** Faz com que o campo de email fique invalido se tiver esse email */
   const invalidateEmail = (email: string, reason: keyof invalidEmailsType) => {
     invalidEmails.value[reason].push(email)
 
     return errorFor[reason]
+  }
+
+  /** Se o codigo indicar um email invalido, chama invalidateEmail com o email fornecido */
+  const maybeInvalidateEmail = (email: string, code: string) => {
+    if (code == 'auth/invalid-email') invalidateEmail(email, 'invalid')
+    if (code == 'auth/user-not-found') invalidateEmail(email, 'inexistent')
+    if (code == 'auth/email-already-in-use') invalidateEmail(email, 'inUse')
   }
 
   // Cria um campo com o nome e o validador fornecido
@@ -77,14 +84,13 @@ export const usePlayerFields = () => {
   })
 
   const matchesPassword = (value: string): string | true => {
-    if (value == '' || value !== password.value.value)
-      return "Doesn't match password"
+    if (value == '' || value !== password.value.value) return 'Não corresponde'
 
     return true
   }
 
   /** Campo de confirmacao de senha */
-  const passwordConfirmation = makeField('confirmação', matchesPassword)
+  const passwordConfirmation = makeField('confirmarSenha', matchesPassword)
 
   // Keep confirmation synced to password
   watch(
@@ -121,6 +127,7 @@ export const usePlayerFields = () => {
   return {
     email,
     invalidateEmail,
+    maybeInvalidateEmail,
     name,
     password,
     passwordConfirmation,

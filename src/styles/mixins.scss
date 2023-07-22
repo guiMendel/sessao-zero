@@ -111,26 +111,28 @@
     gap: 0.3rem;
   }
 
-  &:hover::after {
-    background-color: white;
+  &:not(.disabled):not(:disabled) {
+    &:hover::after {
+      background-color: white;
 
-    .high-contrast & {
-      background: none;
+      .high-contrast & {
+        background: none;
+      }
     }
-  }
 
-  &:active {
-    translate: 0 3px;
-    box-shadow: 0 0 0 0 var(--trans-3);
-  }
-
-  .high-contrast & {
-    @include high-contrast-border;
+    &:active {
+      translate: 0 3px;
+      box-shadow: 0 0 0 0 var(--trans-3);
+    }
   }
 
   &:disabled,
   &.disabled {
     @include disabled;
+  }
+
+  .high-contrast & {
+    @include high-contrast-border;
   }
 }
 

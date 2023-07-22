@@ -1,4 +1,5 @@
-import { RouteLocationNormalized, RouteMeta } from 'vue-router'
+import { RouteLocationNormalized } from 'vue-router'
+import { RouteMetas } from '..'
 
 /** Procura nesta rota e nas rotas pais pelo meta fornecido
  * @param route rota na qual procurar
@@ -7,7 +8,9 @@ import { RouteLocationNormalized, RouteMeta } from 'vue-router'
  */
 export function findMeta(
   { matched }: RouteLocationNormalized,
-  targetMeta: keyof RouteMeta
-): RouteMeta[string] {
-  return matched.find(({ meta }) => meta[targetMeta] != undefined)?.meta[targetMeta]
+  targetMeta: keyof RouteMetas
+) {
+  return matched.find(({ meta }) => meta[targetMeta] != undefined)?.meta[
+    targetMeta
+  ]
 }

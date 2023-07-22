@@ -17,7 +17,7 @@ withDefaults(
 @import '../styles/variables.scss';
 
 .button-icon {
-  font-size: 1.5rem;
+  font-size: 0.9em;
   filter: drop-shadow(0 2px 0 var(--trans-3));
   cursor: pointer;
 

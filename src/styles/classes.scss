@@ -1,0 +1,52 @@
+// Um gradiente de pagina completa
+.preset-gradient-background {
+  width: 100%;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+
+  padding: 3rem 0.5rem;
+
+  color: var(--tx-white);
+  background-color: var(--bg-main);
+
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+
+    width: 100%;
+    height: 100%;
+
+    top: 0;
+    left: 0;
+
+    background: linear-gradient(
+      127deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(255, 0, 60, 0.6) 100%
+    );
+
+    .high-contrast & {
+      background: none;
+    }
+  }
+}
+
+// Um destaque sutil do plano de fundo
+.preset-card {
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+
+  background-color: var(--bg-trans-1);
+
+  border-radius: $border-radius;
+  padding: 2rem 2rem 3rem;
+  box-shadow: 0 1px 2px 3px var(--bg-trans-03);
+
+  z-index: 10;
+
+  position: relative;
+}

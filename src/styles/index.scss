@@ -9,13 +9,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Titan+One&display=swap');
 
 // Subtitles
-@import url('https://fonts.googleapis.com/css2?family=Cherry+Swash:wght@400;700&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Patua+One&display=swap');
 //=== Local imports
 @import './variables.scss';
 @import './css-reset.scss';
 @import './mixins.scss';
 @import './accessibility.scss';
+@import './classes.scss';
 
 //=== Global style
 
@@ -74,8 +74,16 @@ button {
 }
 
 h1 {
-  font-size: 1.3rem;
-  font-weight: 500;
+  font-size: 2rem;
+  font-family: 'Patua One', cursive;
+  font-weight: bold;
+  letter-spacing: 0.11rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-family: 'Patua One', cursive;
+  font-weight: 400;
 }
 
 body {

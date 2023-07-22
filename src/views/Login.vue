@@ -3,10 +3,11 @@ import { collection, getDocs, query, where } from 'firebase/firestore'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useFirestore } from 'vuefire'
+import BackButton from '../components/BackButton.vue'
 import InputField from '../components/InputField.vue'
+import Logo from '../components/Logo.vue'
 import { useCurrentPlayer, useNotification } from '../stores'
 import { usePlayerFields } from '../utils'
-import IconButton from '../components/IconButton.vue'
 
 // =======================================================
 // PLAYER DATA
@@ -180,15 +181,16 @@ const submit = () => {
 </script>
 
 <template>
-  <main :class="{ confirmed: emailConfirmed }">
-    <form class="login">
+  <div
+    class="preset-gradient-background"
+    :class="{ confirmed: emailConfirmed }"
+  >
+    <form class="preset-card">
       <!-- Back button -->
-      <div class="back-button">
-        <IconButton @click="returnStep" icon="hand-point-left" />
-      </div>
+      <BackButton @click="returnStep" class="back-button" />
 
       <!-- Title -->
-      <h1>Sessão Zero</h1>
+      <Logo class="logo" />
 
       <!-- Email -->
       <InputField
@@ -212,7 +214,7 @@ const submit = () => {
         <InputField
           class="input"
           id="password"
-          name="password"
+          name="senha"
           variant="dark"
           v-model="password"
         />
@@ -237,123 +239,66 @@ const submit = () => {
         {{ emailConfirmed ? 'Entrar' : 'Enviar' }}
       </button>
     </form>
-  </main>
+  </div>
 </template>
 
 <style lang="scss" scoped>
 @import '../styles/variables.scss';
 
-main {
-  width: 100%;
-  min-height: 100vh;
-  align-items: center;
-  justify-content: center;
-
-  color: var(--tx-white);
-  background-color: var(--bg-main);
-
-  position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-
-    width: 100%;
-    height: 100%;
-
-    top: 0;
-    left: 0;
-
-    background: linear-gradient(
-      127deg,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(255, 0, 60, 0.6) 100%
-    );
-  }
-
-  .login {
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-
-    background-color: var(--bg-trans-1);
-
-    border-radius: $border-radius;
-    padding: 2rem 2rem 3rem;
-    box-shadow: 0 1px 2px 3px var(--bg-trans-03);
-
-    z-index: 10;
-
-    position: relative;
-
-    h1 {
-      font-family: 'Titan One', cursive;
-      font-size: 2rem;
-      transition: 500ms ease-out;
-
-      margin-bottom: 0.3rem;
-
-      text-shadow: 0 2px 0 var(--trans-3);
-    }
-
-    .input {
-      width: 100%;
-    }
-
-    button {
-      width: 50%;
-      max-width: 100%;
-    }
-
-    .email-display {
-      font-weight: 600;
-      padding: 0.4rem 1rem;
-      background-color: var(--bg-trans-1);
-      border-radius: $border-radius;
-      transition: 100ms;
-      cursor: pointer;
-
-      margin-bottom: -1rem;
-
-      &:hover {
-        background-color: var(--bg-trans-3);
-      }
-
-      @include high-contrast-border;
-    }
-
-    #forgot-password {
-      margin-block: 0.5rem -0.3rem;
-    }
-
-    .back-button {
-      position: absolute;
-      top: 0.5rem;
-      left: 1rem;
-
-      transition: all 300ms ease-out;
-    }
-  }
-
-  &.confirmed {
-    h1 {
-      font-size: 1.5rem;
-    }
-  }
-
-  &:not(.confirmed) {
-    .back-button {
-      opacity: 0;
-      left: -1rem;
-      pointer-events: none;
-      scale: 20%;
-    }
-  }
+.logo {
+  transition: 500ms ease-out;
+  margin-bottom: 0.3rem;
 }
 
-.high-contrast {
-  main::before {
-    background: var(--accessibility-background);
+.input {
+  width: 100%;
+}
+
+button {
+  width: 50%;
+  max-width: 100%;
+}
+
+.email-display {
+  font-weight: 600;
+  padding: 0.4rem 1rem;
+  background-color: var(--bg-trans-1);
+  border-radius: $border-radius;
+  transition: 100ms;
+  cursor: pointer;
+
+  margin-bottom: -1rem;
+
+  &:hover {
+    background-color: var(--bg-trans-3);
+  }
+
+  @include high-contrast-border;
+}
+
+#forgot-password {
+  margin-block: 0.5rem -0.3rem;
+}
+
+.back-button {
+  transition: all 300ms ease-out;
+
+  opacity: 0;
+  translate: -2rem 0;
+  pointer-events: none;
+  scale: 20%;
+}
+
+.confirmed {
+  .logo {
+    font-size: 1.5rem;
+  }
+
+  .back-button {
+    opacity: 1;
+    translate: 0 0;
+    pointer-events: initial;
+    scale: 100%;
   }
 }
 </style>

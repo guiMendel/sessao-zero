@@ -49,7 +49,7 @@ const routes: Array<RouteRecordRaw> = [
     component: CreatePlayer,
     name: 'create-player',
     props: true,
-    meta: { title: 'Criar Conta', requireAuth: 'unauthenticated' },
+    meta: { title: 'Criar Jogador', requireAuth: 'unauthenticated' },
   },
   {
     path: '/',

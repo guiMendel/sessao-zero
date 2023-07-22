@@ -6,23 +6,25 @@ import { setTitle } from './utils/setTitle'
 
 // === TIPAGEM DO META
 
+export interface RouteMetas {
+  /** Que tipo de autenticacao o jogador deve ter */
+  requireAuth?: 'authenticated' | 'unauthenticated'
+
+  /** Atualiza o titulo da pagina (aparece na aba do chrome) */
+  title?: string
+
+  /** Nao mostra o menu principal (info sobre usuario & logout) */
+  noMainMenu?: boolean
+
+  /** Se esta pagina deve ser apresentada ao usuario caso essa seja sua primeira visita. So eh valido em rotas raizes */
+  firstVisitPrompt?: boolean
+
+  /** Se esta pagina nao deve mostrar o botao de voltar de pagina */
+  noGoBackButton?: boolean
+}
+
 declare module 'vue-router' {
-  interface RouteMeta {
-    /** Que tipo de autenticacao o jogador deve ter */
-    requireAuth?: 'authenticated' | 'unauthenticated'
-
-    /** Atualiza o titulo da pagina (aparece na aba do chrome) */
-    title?: string
-
-    /** Nao mostra o menu principal (info sobre usuario & logout) */
-    noMainMenu?: boolean
-
-    /** Se esta pagina deve ser apresentada ao usuario caso essa seja sua primeira visita. So eh valido em rotas raizes */
-    firstVisitPrompt?: boolean
-
-    /** Se esta pagina nao deve mostrar o botao de voltar de pagina */
-    noGoBackButton?: boolean
-  }
+  interface RouteMeta extends RouteMetas {}
 }
 
 // === VERIFICACOES EXTRAS DE NAVEGACAO

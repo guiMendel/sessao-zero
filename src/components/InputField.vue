@@ -51,9 +51,16 @@ if (props.modelValue.valid != validationResult.value)
 
 // Infer type from name
 const inferredType = computed(() => {
-  if (props.modelValue.name.toLowerCase().includes('password'))
-    return 'password'
-  if (props.modelValue.name.toLowerCase().includes('color')) return 'color'
+  /** Retorna true se o modelValue inclui qualquer dessas palavras */
+  const includesAny = (...words: string[]) =>
+    words.reduce(
+      (value, word) =>
+        props.modelValue.name.toLowerCase().includes(word) || value,
+      false
+    )
+
+  if (includesAny('password', 'senha')) return 'password'
+  if (includesAny('color', 'cor')) return 'color'
   return 'text'
 })
 
@@ -107,7 +114,7 @@ const raiseLabel = computed(
     </label>
 
     <label class="error-message" :for="modelValue.name">
-      {{ validationResult }}
+      {{ validationResult == true ? 'valido' : validationResult }}
     </label>
   </div>
 </template>
