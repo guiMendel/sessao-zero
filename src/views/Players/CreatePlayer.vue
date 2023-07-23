@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import InputField from '../../components/InputField.vue'
 import Logo from '../../components/Logo.vue'
+import { localStorageKeys } from '../../config/storageKeys'
 import { useCurrentPlayer, useNotification } from '../../stores'
-import { usePlayerFields } from '../../utils'
-import { computed } from 'vue'
+import { eraseInStorage, usePlayerFields } from '../../utils'
 
 // Campos de login
 const {
@@ -15,7 +16,7 @@ const {
   passwordConfirmation,
   getErrorForCode,
   maybeInvalidateEmail,
-} = usePlayerFields()
+} = usePlayerFields(localStorageKeys.loginFields)
 
 const { notify } = useNotification()
 const { create } = useCurrentPlayer()
@@ -45,8 +46,13 @@ const tryCreate = () => {
     name: name.value.value,
     nickname: nickname.value.value,
   })
-    // Redirect to home
-    .then(() => router.push({ name: 'home' }))
+    .then(async () => {
+      // Redirect to home
+      await router.push({ name: 'home' })
+
+      // Limpa os campos armazenados localmente
+      eraseInStorage(new RegExp(localStorageKeys.loginFields))
+    })
     // Handle errors
     .catch(({ code, message }) => {
       console.log('Player creation failed! ' + message)

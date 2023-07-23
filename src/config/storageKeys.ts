@@ -11,4 +11,7 @@ export const localStorageKeys = {
 
   /** Mode de acessibilidade de alto contraste */
   highContrast: 'high-contrast',
+
+  /** Campos de login e criar jogador */
+  loginFields: 'login-fields',
 }

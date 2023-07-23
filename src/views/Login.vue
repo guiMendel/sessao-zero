@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { collection, getDocs, query, where } from 'firebase/firestore'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useFirestore } from 'vuefire'
 import BackButton from '../components/BackButton.vue'
 import InputField from '../components/InputField.vue'
 import Logo from '../components/Logo.vue'
+import { localStorageKeys } from '../config/storageKeys'
 import { useCurrentPlayer, useNotification } from '../stores'
 import { usePlayerFields } from '../utils'
 
@@ -107,7 +108,9 @@ import { usePlayerFields } from '../utils'
 //
 
 // Campos de login
-const { email, password, getErrorForCode } = usePlayerFields()
+const { email, password, getErrorForCode } = usePlayerFields(
+  localStorageKeys.loginFields
+)
 
 // Nao valida formato da senha em login
 password.value.validate = () => true
@@ -171,9 +174,14 @@ const tryLogin = () => {
 }
 
 const submit = () => {
+  if (formValid.value == false) return
+
   if (emailConfirmed.value) tryLogin()
   else submitEmail()
 }
+
+/** Se os campos estao validos */
+const formValid = computed(() => emailConfirmed.value || email.value.valid)
 </script>
 
 <template>
@@ -195,6 +203,7 @@ const submit = () => {
         variant="dark"
         name="email"
         v-model="email"
+        auto-focus
       />
 
       <!-- Senha -->
@@ -213,6 +222,7 @@ const submit = () => {
           name="senha"
           variant="dark"
           v-model="password"
+          auto-focus
         />
 
         <!-- Esqueceu a senha -->
@@ -222,7 +232,7 @@ const submit = () => {
       <!-- Submit -->
       <button
         @click.prevent="submit"
-        :class="email.valid || 'disabled'"
+        :class="formValid || 'disabled'"
         id="login"
       >
         <font-awesome-icon
@@ -263,7 +273,7 @@ button {
   transition: 100ms;
   cursor: pointer;
 
-  margin-bottom: -1rem;
+  margin-bottom: -0.4rem;
 
   &:hover {
     background-color: var(--bg-trans-3);
@@ -278,6 +288,7 @@ button {
 
 .back-button {
   transition: all 300ms ease-out;
+  font-size: 2rem;
 
   opacity: 0;
   translate: -2rem 0;

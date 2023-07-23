@@ -1,6 +1,7 @@
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signOut,
   updateEmail,
   updatePassword,
   updateProfile,
@@ -13,7 +14,7 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import { defineStore } from 'pinia'
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import {
   useCurrentUser,
   useDocument,
@@ -40,12 +41,16 @@ export const useCurrentPlayer = defineStore('current-player', () => {
   const player = useDocument(
     computed(() =>
       user.value ? doc(collection(db, 'players'), user.value?.uid) : undefined
-    )
+    ),
+    { reset: true }
   )
 
   /** Realiza login do jogador */
   const login = async (email: string, password: string) =>
     auth && signInWithEmailAndPassword(auth, email, password)
+
+  /** Realiza logout do jogador */
+  const logout = async () => auth && signOut(auth)
 
   /** Cria um novo jogador */
   const create = async ({
@@ -119,5 +124,5 @@ export const useCurrentPlayer = defineStore('current-player', () => {
     return auth.currentUser.delete()
   }
 
-  return { player, login, create, update, deleteForever }
+  return { player, login, logout, create, update, deleteForever }
 })

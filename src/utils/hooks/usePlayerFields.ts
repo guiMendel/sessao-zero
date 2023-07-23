@@ -1,7 +1,11 @@
 import { ref, type Ref, watch } from 'vue'
 import { Field } from '../../types/Field.interface'
+import { useLocalStorage } from '@vueuse/core'
 
-export const usePlayerFields = () => {
+/** Retorna uma colecao de campos uteis para coletar dados do jogador
+ * @param localStorageKey se fornecido, persiste os campos em localstorage
+ */
+export const usePlayerFields = (localStorageKey?: string) => {
   /** Categorias de email invalidos */
   type invalidEmailsType = {
     invalid: string[]
@@ -50,14 +54,28 @@ export const usePlayerFields = () => {
   // Cria um campo com o nome e o validador fornecido
   const makeField = (
     name: Field['name'],
-    validator: Field['validate']
-  ): Ref<Field> =>
-    ref({
+    validator: Field['validate'],
+    useLocalIfProvided = true
+  ): Ref<Field> => {
+    const defaults = {
       name,
       value: '',
       valid: false,
       validate: validator,
-    })
+    }
+
+    if (localStorageKey && useLocalIfProvided)
+      return useLocalStorage(`${localStorageKey}--field-${name}`, defaults, {
+        // listenToStorageChanges: true,
+        mergeDefaults: (storage, defaults) => ({
+          ...defaults,
+          value: storage.value,
+        }),
+        listenToStorageChanges: false,
+      })
+
+    return ref(defaults)
+  }
 
   /** Campo de email */
   const email = makeField('email', (newValue: string) => {
@@ -76,12 +94,16 @@ export const usePlayerFields = () => {
   })
 
   /** Campo de senha */
-  const password = makeField('senha', (newValue: string) => {
-    if (newValue.length < 6) return 'Mínimo de 6 caracteres'
-    if (newValue.length > 100) return 'Muito longa'
+  const password = makeField(
+    'senha',
+    (newValue: string) => {
+      if (newValue.length < 6) return 'Mínimo de 6 caracteres'
+      if (newValue.length > 100) return 'Muito longa'
 
-    return true
-  })
+      return true
+    },
+    false
+  )
 
   const matchesPassword = (value: string): string | true => {
     if (value == '' || value !== password.value.value) return 'Não corresponde'
@@ -90,7 +112,11 @@ export const usePlayerFields = () => {
   }
 
   /** Campo de confirmacao de senha */
-  const passwordConfirmation = makeField('confirmarSenha', matchesPassword)
+  const passwordConfirmation = makeField(
+    'confirmarSenha',
+    matchesPassword,
+    false
+  )
 
   // Keep confirmation synced to password
   watch(
