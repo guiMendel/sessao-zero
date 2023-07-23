@@ -35,28 +35,27 @@
 
   color: var(--tx-gray-darker);
   font-weight: 400;
-}
 
-button,
-a,
-input[type='submit'],
-input[type='button'] {
-  cursor: pointer;
-}
+  button,
+  a,
+  input[type='submit'],
+  input[type='button'] {
+    cursor: pointer;
+  }
 
-// Use flexbox always
-div,
-main,
-section,
-header,
-footer,
-form,
-button,
-p,
-span,
-label {
-  display: flex;
-  align-items: flex-start;
+  // Use flexbox always
+  div,
+  main,
+  section,
+  header,
+  footer,
+  form,
+  button,
+  p,
+  span,
+  label {
+    display: flex;
+  }
 }
 
 input,

@@ -14,7 +14,7 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import { defineStore } from 'pinia'
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import {
   useCurrentUser,
   useDocument,

@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import InputField from '../../components/InputField.vue'
-import Logo from '../../components/Logo.vue'
+import { InputField, Logo } from '../../components'
 import { localStorageKeys } from '../../config/storageKeys'
 import { useCurrentPlayer, useNotification } from '../../stores'
 import { eraseInStorage, usePlayerFields } from '../../utils'

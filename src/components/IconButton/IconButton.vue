@@ -1,8 +1,11 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
+    /** Icone para utilizar neste botao */
     icon: string
-    style?: string
+    /** Estilo do Font Awesome para aplicar */
+    style?: 'fas' | 'far'
+    /** Variante da aparencia do botao */
     variant?: 'plain'
   }>(),
   { style: 'fas' }
@@ -14,7 +17,7 @@ withDefaults(
 </template>
 
 <style scoped lang="scss">
-@import '../styles/variables.scss';
+@import '../../styles/variables.scss';
 
 .button-icon {
   font-size: 0.9em;

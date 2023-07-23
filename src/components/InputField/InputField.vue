@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { Field } from '../types/Field.interface'
-import { splitCamelCase } from '../utils'
-import IconButton from './IconButton.vue'
+import { IconButton } from '..'
+import { Field } from '../../types/Field.interface'
+import { splitCamelCase } from '../../utils'
 
 const props = defineProps<{
   modelValue: Field
@@ -131,6 +131,8 @@ const raiseLabel = computed(
     props.modelValue.value != '' ||
     inferredType.value == 'color'
 )
+
+console.log('props', props)
 </script>
 
 <template>
@@ -199,7 +201,7 @@ const raiseLabel = computed(
 </template>
 
 <style scoped lang="scss">
-@import '../styles/variables.scss';
+@import '../../styles/variables.scss';
 
 .input-field {
   flex-direction: column;
@@ -228,8 +230,8 @@ const raiseLabel = computed(
 
       transition: all 200ms;
 
-      color: var(--theme);
       font-weight: 600;
+      color: var(--theme);
 
       opacity: 0.6;
       cursor: pointer;
@@ -259,6 +261,9 @@ const raiseLabel = computed(
       padding-block: 0.3rem;
 
       transition: all 200ms;
+
+      background-color: var(--trans-03);
+      box-shadow: 0 2px 0 4px var(--theme);
 
       &::placeholder {
         opacity: 0.4;
@@ -324,7 +329,7 @@ const raiseLabel = computed(
     margin: 0 auto;
 
     background-color: var(--theme-error);
-    color: var(--theme);
+    color: var(--tx-white);
     border-radius: 0 0 $border-radius $border-radius;
     padding: 0.2rem 1rem;
 
@@ -360,7 +365,7 @@ const raiseLabel = computed(
 
   &.dark {
     --theme: var(--tx-white);
-    // --theme-tx-error: var(--tx-error-darker);
+    color: var(--tx-white);
   }
 
   &.password {
@@ -378,7 +383,7 @@ const raiseLabel = computed(
     input,
     textarea,
     .color-display {
-      background-color: var(--trans-3);
+      background-color: var(--trans-1);
     }
   }
 }
