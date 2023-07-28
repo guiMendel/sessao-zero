@@ -5,7 +5,6 @@ import { useNotification } from '../../stores'
 const meta = {
   title: 'Components/Notifications',
   component: Notifications,
-  tags: ['autodocs'],
 } satisfies Meta<typeof Notifications>
 
 export default meta

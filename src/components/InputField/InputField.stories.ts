@@ -6,7 +6,6 @@ import { ref } from 'vue'
 const meta = {
   title: 'Components/InputField',
   component: InputField,
-  tags: ['autodocs'],
 } satisfies Meta<typeof InputField>
 
 export default meta
