@@ -1,7 +1,5 @@
 import { Meta, StoryFn } from '@storybook/vue3'
 import { Notifications } from '.'
-import { Field } from '../../types/Field.interface'
-import { ref } from 'vue'
 import { useNotification } from '../../stores'
 
 const meta = {
