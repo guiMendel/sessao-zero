@@ -31,6 +31,7 @@ $floating-icon-animation-duration: 400ms;
   --trans: rgba(0, 0, 0, 0);
   --trans-03: rgba(0, 0, 0, 0.03);
   --trans-1: rgba(0, 0, 0, 0.1);
+  --trans-2: rgba(0, 0, 0, 0.2);
   --trans-3: rgba(0, 0, 0, 0.3);
   --trans-45: rgba(0, 0, 0, 0.45);
 
@@ -65,6 +66,7 @@ $floating-icon-animation-duration: 400ms;
 
   --tx-trans-03: var(--trans-03);
   --tx-trans-1: var(--trans-1);
+  --tx-trans-2: var(--trans-2);
   --tx-trans-3: var(--trans-3);
   --tx-trans-45: var(--trans-45);
 
@@ -99,6 +101,7 @@ $floating-icon-animation-duration: 400ms;
 
   --bg-trans-03: var(--trans-03);
   --bg-trans-1: var(--trans-1);
+  --bg-trans-2: var(--trans-2);
   --bg-trans-3: var(--trans-3);
   --bg-trans-45: var(--trans-45);
 

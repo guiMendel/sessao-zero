@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia'
 import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { BackButton } from './components'
+import { BackButton, Notifications } from './components'
 import { authenticationGuard } from './router/guard/authenticationGuard'
 import { findMeta } from './router/utils'
 import { useAccessibility } from './stores/useAccessibility'
@@ -51,6 +51,9 @@ const accessibilityClass = computed(() => ({
 
 <template>
   <div id="main-container" :class="accessibilityClass">
+    <!-- Lista flutuante de notificacoes -->
+    <Notifications />
+
     <!-- Botao de voltar de pagina -->
     <BackButton
       v-if="!hideBackButton"

@@ -69,6 +69,33 @@
   }
 }
 
+// Adiciona um overlay quando esta em hover
+@mixin hover-overlay {
+  &::after {
+    content: '';
+    position: absolute;
+    border-radius: inherit;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    pointer-events: none;
+
+    transition: all 100ms;
+  }
+
+  &:not(.disabled):not(:disabled) {
+    &:hover::after {
+      @content;
+
+      .high-contrast & {
+        background: none;
+      }
+    }
+  }
+}
+
 // Botoes
 @mixin button {
   @include clickable;
@@ -91,19 +118,8 @@
 
   transition: all 100ms;
 
-  &::after {
-    content: '';
-    position: absolute;
-    border-radius: inherit;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    opacity: 0.1;
-
-    pointer-events: none;
-
-    transition: all 100ms;
+  @include hover-overlay {
+    background-color: rgba(255, 255, 255, 0.1);
   }
 
   > span {
@@ -111,19 +127,9 @@
     gap: 0.3rem;
   }
 
-  &:not(.disabled):not(:disabled) {
-    &:hover::after {
-      background-color: white;
-
-      .high-contrast & {
-        background: none;
-      }
-    }
-
-    &:active {
-      translate: 0 3px;
-      box-shadow: 0 0 0 0 var(--trans-3);
-    }
+  &:not(.disabled):not(:disabled):active {
+    translate: 0 3px;
+    box-shadow: 0 0 0 0 var(--trans-3);
   }
 
   &:disabled,

@@ -1,10 +1,13 @@
 import type { Preview } from '@storybook/vue3'
 import { setup } from '@storybook/vue3'
+import { createPinia } from 'pinia'
 import '../src/styles/index.scss'
 import { initFontAwesome } from '../src/utils/functions/initFontAwesome'
 
-// Inclui o font awesome no storybook
-setup((app) => app.component(...initFontAwesome()))
+const pinia = createPinia()
+
+// Inclui o font awesome e o pinia no storybook
+setup((app) => app.component(...initFontAwesome()).use(pinia))
 
 const preview: Preview = {
   parameters: {
