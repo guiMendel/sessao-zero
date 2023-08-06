@@ -1,6 +1,6 @@
-import { ref, type Ref, watch } from 'vue'
-import { Field } from '../../types/Field.interface'
+import { Field } from '@/types/Field.interface'
 import { useLocalStorage } from '@vueuse/core'
+import { ref, watch, type Ref } from 'vue'
 
 /** Retorna uma colecao de campos uteis para coletar dados do jogador
  * @param localStorageKey se fornecido, persiste os campos em localstorage

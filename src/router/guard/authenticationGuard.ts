@@ -1,7 +1,7 @@
+import { useCurrentPlayer } from '@/stores/useCurrentPlayer'
+import { storeToRefs } from 'pinia'
 import { RouteLocationNormalized } from 'vue-router'
 import { findMeta } from '../utils/'
-import { storeToRefs } from 'pinia'
-import { useCurrentPlayer } from '../../stores/useCurrentPlayer'
 
 export const authenticationGuard = (to: RouteLocationNormalized) => {
   const { player } = storeToRefs(useCurrentPlayer())

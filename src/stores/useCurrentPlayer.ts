@@ -1,3 +1,5 @@
+import { Player, PlayerResource } from '@/types/Player.interface'
+import { Uploadable } from '@/types/Resource.interface'
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -6,13 +8,7 @@ import {
   updatePassword,
   updateProfile,
 } from 'firebase/auth'
-import {
-  collection,
-  deleteDoc,
-  doc,
-  setDoc,
-  updateDoc,
-} from 'firebase/firestore'
+import { deleteDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { computed } from 'vue'
 import {
@@ -21,8 +17,6 @@ import {
   useFirebaseAuth,
   useFirestore,
 } from 'vuefire'
-import { Player, PlayerResource } from '../types/Player.interface'
-import { Uploadable } from '../types/Resource.interface'
 
 export const useCurrentPlayer = defineStore('current-player', () => {
   // Pega o firebase user
@@ -37,13 +31,14 @@ export const useCurrentPlayer = defineStore('current-player', () => {
   // Pega uma referencia a um doc de jogador
   const getPlayerDocRef = (uid: string) => doc(db, 'players', uid)
 
-  /** O jogador atualmente logado */
-  const player = useDocument(
-    computed(() =>
-      user.value ? doc(collection(db, 'players'), user.value?.uid) : undefined
-    ),
+  // Pega o documento
+  const playerDoc = useDocument(
+    computed(() => (user.value ? getPlayerDocRef(user.value.uid) : undefined)),
     { reset: true }
   )
+
+  /** O jogador atualmente logado */
+  const player = computed(() => playerDoc.data.value as Player | undefined)
 
   /** Realiza login do jogador */
   const login = async (email: string, password: string) =>

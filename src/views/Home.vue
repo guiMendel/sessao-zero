@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCurrentPlayer } from '../stores'
+import { useCurrentPlayer } from '@/stores'
 
 const { logout } = useCurrentPlayer()
 </script>

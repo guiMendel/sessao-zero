@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { useAccessibility } from '@/stores/useAccessibility'
 import { useRouter } from 'vue-router'
-import { useAccessibility } from '../../stores/useAccessibility'
 
 // === HIGH CONTRAST TOGGLE
 

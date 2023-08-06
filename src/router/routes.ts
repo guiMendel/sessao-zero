@@ -1,31 +1,31 @@
+import { makeGuildInvitation } from '@/utils'
+import { CreatePlayer, Login } from '@/views'
+import Adventure from '@/views/Adventures/Adventure.vue'
+import AdventuresIndex from '@/views/Adventures/AdventuresIndex.vue'
+import CreateAdventure from '@/views/Adventures/CreateAdventure.vue'
+import Guild from '@/views/Guilds/Guild.vue'
+import GuildInvitation from '@/views/Guilds/GuildInvitation.vue'
+import GuildsIndex from '@/views/Guilds/GuildsIndex.vue'
+import Home from '@/views/Home.vue'
+import Player from '@/views/Players/Player.vue'
+import AccessibilityPrompt from '@/views/Prompts/AccessibilityPrompt.vue'
+import BetaWelcome from '@/views/Prompts/BetaWelcome.vue'
 import { RouteRecordRaw } from 'vue-router'
-import { makeGuildInvitation } from '../utils'
-import Adventure from '../views/Adventures/Adventure.vue'
-import AdventuresIndex from '../views/Adventures/AdventuresIndex.vue'
-import CreateAdventure from '../views/Adventures/CreateAdventure.vue'
-import Guild from '../views/Guilds/Guild.vue'
-import GuildInvitation from '../views/Guilds/GuildInvitation.vue'
-import GuildsIndex from '../views/Guilds/GuildsIndex.vue'
-import Home from '../views/Home.vue'
-import Login from '../views/Login.vue'
-import CreatePlayer from '../views/Players/CreatePlayer.vue'
-import Player from '../views/Players/Player.vue'
-import AccessibilityPrompt from '../views/Prompts/AccessibilityPrompt.vue'
-import BetaWelcome from '../views/Prompts/BetaWelcome.vue'
+import { addFirstVisitPrompts } from './firstVisitPrompts'
 
 /** As rotas da aplicacao */
-const routes: Array<RouteRecordRaw> = [
+const routes: Array<RouteRecordRaw> = addFirstVisitPrompts([
   {
     path: '/accessibility-prompt',
     component: AccessibilityPrompt,
     name: 'accessibility-prompt',
-    meta: { firstVisitPrompt: true, noGoBackButton: true },
+    meta: { noGoBackButton: true },
   },
   {
     path: '/beta-welcome',
     component: BetaWelcome,
     name: 'beta-welcome',
-    meta: { firstVisitPrompt: true, noGoBackButton: true },
+    meta: { noGoBackButton: true },
   },
   {
     // Nessa rota, adiciona as informacoes de convite na session storage e redireciona para home
@@ -107,6 +107,6 @@ const routes: Array<RouteRecordRaw> = [
       },
     ],
   },
-]
+])
 
 export default routes

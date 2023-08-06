@@ -1,6 +1,6 @@
+import { useNotification } from '@/stores'
 import { Meta, StoryFn } from '@storybook/vue3'
 import { Notifications } from '.'
-import { useNotification } from '../../stores'
 
 const meta = {
   title: 'Components/Notifications',

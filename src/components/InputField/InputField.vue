@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { IconButton } from '..'
-import { Field } from '../../types/Field.interface'
-import { splitCamelCase } from '../../utils'
+import { Field } from '@/types/Field.interface'
+import { splitCamelCase } from '@/utils'
 
 const props = defineProps<{
   modelValue: Field
@@ -131,8 +131,6 @@ const raiseLabel = computed(
     props.modelValue.value != '' ||
     inferredType.value == 'color'
 )
-
-console.log('props', props)
 </script>
 
 <template>

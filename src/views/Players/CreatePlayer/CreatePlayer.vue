@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { InputField, Logo } from '@/components'
+import { localStorageKeys } from '@/config/storageKeys'
+import { useCurrentPlayer, useNotification } from '@/stores'
+import { eraseInStorage, usePlayerFields } from '@/utils'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { InputField, Logo } from '../../components'
-import { localStorageKeys } from '../../config/storageKeys'
-import { useCurrentPlayer, useNotification } from '../../stores'
-import { eraseInStorage, usePlayerFields } from '../../utils'
 
 // Campos de login
 const {
@@ -100,7 +100,7 @@ const tryCreate = () => {
 </template>
 
 <style lang="scss" scoped>
-@import '../../styles/variables.scss';
+@import '@/styles/variables.scss';
 
 .logo {
   margin-block: -0.5rem 1rem;

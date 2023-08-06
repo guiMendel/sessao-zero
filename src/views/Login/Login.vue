@@ -1,109 +1,11 @@
 <script setup lang="ts">
-import { collection, getDocs, query, where } from 'firebase/firestore'
+import { BackButton, InputField, Logo } from '@/components'
+import { localStorageKeys } from '@/config/storageKeys'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useFirestore } from 'vuefire'
-import { BackButton, InputField, Logo } from '../components'
-import { localStorageKeys } from '../config/storageKeys'
-import { useCurrentPlayer, useNotification } from '../stores'
-import { usePlayerFields } from '../utils'
-
-// =======================================================
-// PLAYER DATA
-// =======================================================
-
-// // Referencia ao campo de senha
-// const passwordField = ref<InstanceType<typeof InputField> | null>(null)
-
-// //=== Api communication
-
-// const loading = ref(false)
-// const router = useRouter()
-
-// /** Mostra um erro no formulario */
-// const errorMessage = ref('')
-
-// function submit() {
-//   // Sempre reseta mensagem de erro
-//   errorMessage.value = ''
-
-//   // Pega os campos
-//   const { nickname, password } = playerFormFields.fields
-
-//   // If not valid, ignore
-//   if (nickname.value == undefined || !nickname.isValid) {
-//     errorMessage.value = 'Apelido inválido'
-//     return
-//   }
-//   if (
-//     isPasswordRequired.value &&
-//     (password?.value == undefined || !password.isValid)
-//   ) {
-//     errorMessage.value = 'Senha inválida'
-//     return
-//   }
-
-//   // Show loading sign
-//   loading.value = true
-
-//   playersApi
-//     .login({ nickname: nickname.value, password: password?.value ?? '' })
-//     // Se tiver sucesso, vai para pagina inicial
-//     .then(() => {
-//       loading.value = false
-//       router.push({ name: 'home' })
-//     })
-//     // Em erro, temos 2 casos
-//     .catch((error) => {
-//       if (error.response?.status != null) {
-//         const { status } = error.response
-
-//         // Ou o jogador nao foi encontrado, com status 404
-//         if (status == 404) {
-//           // Neste caso, vamos para pagina de criar jogador
-
-//           loading.value = false
-
-//           router.push({
-//             name: 'create-account',
-//             params: { defaultNickname: nickname.value },
-//           })
-
-//           return
-//         }
-
-//         // Ou a senha está errada
-//         if (status == 401) {
-//           loading.value = false
-
-//           // Se ele ainda não foi solicitado uma senha
-//           if (isPasswordRequired.value == false) {
-//             isPasswordRequired.value = true
-
-//             // Foca no campo
-//             setTimeout(() => passwordField.value?.focus(), 100)
-
-//             return
-//           }
-
-//           // Se já foi, avisa que está incorreta
-//           errorMessage.value = 'Senha incorreta'
-
-//           return
-//         }
-//       }
-
-//       throw new Error(
-//         `Metodo de log in retornou erro inesperado: ${JSON.stringify(error)}`
-//       )
-//     })
-// }
-
-//
-//
-//
-//
-//
+import { useCurrentPlayer, useNotification } from '@/stores'
+import { checkPlayerExists, usePlayerFields } from '@/utils'
 
 // Campos de login
 const { email, password, getErrorForCode } = usePlayerFields(
@@ -126,17 +28,8 @@ const emailConfirmed = ref(false)
 /** Envia um email para confirmacao
  * Se existir, passa para o passo 2. Se nao, vai para a tela de criar conta */
 const submitEmail = async () => {
-  // Query do email
-  const emailQuery = query(
-    collection(db, 'players'),
-    where('email', '==', email.value.value)
-  )
-
-  // Executa a query
-  const snapshot = await getDocs(emailQuery)
-
   // Se nao encontrar nada, nao esta registrado
-  if (snapshot.empty) {
+  if ((await checkPlayerExists(email.value.value, db)) == false) {
     router.push({ name: 'create-player' })
     return
   }
@@ -247,7 +140,7 @@ const formValid = computed(() => emailConfirmed.value || email.value.valid)
 </template>
 
 <style lang="scss" scoped>
-@import '../styles/variables.scss';
+@import '@/styles/variables.scss';
 
 .logo {
   transition: 500ms ease-out;

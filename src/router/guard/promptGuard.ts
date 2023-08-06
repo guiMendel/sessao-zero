@@ -1,5 +1,5 @@
 import type { RouteLocationNormalized } from 'vue-router'
-import { useNavigationData } from '../../stores/useNavigationData'
+import { useNavigationData } from '@/stores/useNavigationData'
 
 export const promptGuard = (to: RouteLocationNormalized) => {
   // Verifica se ha prompts ainda nao visitados
