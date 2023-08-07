@@ -1,0 +1,7 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`BackButton > should render properly 1`] = `
+"<div data-v-60e86206=\\"\\" class=\\"back-button\\">
+  <font-awesome-icon-stub data-v-520ca059=\\"\\" data-v-60e86206=\\"\\" class=\\"button-icon\\" icon=\\"fas,hand-point-left\\"></font-awesome-icon-stub>
+</div>"
+`;

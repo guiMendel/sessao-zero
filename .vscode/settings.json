@@ -1,3 +1,6 @@
 {
-  // "workbench.colorTheme": "Vue Theme"
+  "workbench.colorTheme": "Vue Theme",
+  "files.exclude": {
+    "**/__snapshots__": true
+  }
 }
