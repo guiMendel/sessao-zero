@@ -187,7 +187,7 @@ const raiseLabel = computed(
       <IconButton
         class="password-reveal"
         @click="togglePasswordReveal"
-        :icon="revealPassword ? 'eye-slash' : 'eye'"
+        :icon="revealPassword ? 'eye' : 'eye-slash'"
       />
     </div>
 

@@ -1,3 +1,9 @@
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+</script>
+
 <template>
   <div class="landing-page">
     <h1>Bem vindas e bem vindos ao Beta da plataforma Sessão Zero!</h1>
@@ -20,8 +26,8 @@
       <h2>Criar conta</h2>
 
       <p>
-        Basta inventar e inserir o apelido que voce utilizará para fazer logins
-        no futuro no campo de apelido.
+        Basta inserir seu email preferido e seguir os passos seguintes para
+        criar sua conta de jogador.
       </p>
     </section>
 
@@ -43,7 +49,7 @@
       </p>
     </section>
 
-    <button @click="$router.push({ name: 'home' })">
+    <button @click="router.push({ name: 'home' })">
       <span class="material-symbols-rounded"> send </span>
       Continuar
     </button>
@@ -51,50 +57,52 @@
 </template>
 
 <style lang="scss" scoped>
-.landing-page {
-  flex-direction: column;
-  gap: 2rem;
-
-  padding: 1.5rem;
-
-  white-space: pre-line;
-
-  text-align: justify;
-
-  b {
-    color: var(--tx-gray-darker);
-  }
-
-  h1 {
-    font-size: 1.6rem;
-    font-weight: 800;
-    color: var(--tx-gray-darker);
-    text-align: center;
-  }
-
-  h2 {
-    font-size: 1.2rem;
-    color: var(--tx-main);
-  }
-
-  section {
+#app {
+  .landing-page {
     flex-direction: column;
-    gap: 0.5rem;
-  }
+    gap: 2rem;
 
-  p {
-    display: inline;
-  }
+    padding: 1.5rem;
 
-  button {
-    align-self: center;
-  }
+    white-space: pre-line;
 
-  @media (min-width: 768px) {
-    padding-inline: 20%;
+    text-align: justify;
+
+    b {
+      color: var(--tx-gray-darker);
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--tx-gray-darker);
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 1.2rem;
+      color: var(--tx-main);
+    }
+
+    section {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    p {
+      display: inline;
+    }
 
     button {
-      align-self: unset;
+      align-self: center;
+    }
+
+    @media (min-width: 768px) {
+      padding-inline: 20%;
+
+      button {
+        align-self: unset;
+      }
     }
   }
 }

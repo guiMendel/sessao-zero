@@ -1,3 +1,3 @@
 export const makeMockUser = () => ({ uid: 'some-id' })
 
-export const makeMockSnapshot = () => ({})
+export const makeMockSnapshot = () => ({ empty: false })

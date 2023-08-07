@@ -56,6 +56,10 @@
   label {
     display: flex;
   }
+
+  button {
+    @include button;
+  }
 }
 
 input,
@@ -66,10 +70,6 @@ textarea {
 input::placeholder,
 textarea::placeholder {
   color: var(--tx-gray);
-}
-
-button {
-  @include button;
 }
 
 h1 {

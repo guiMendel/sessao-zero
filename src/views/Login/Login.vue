@@ -148,7 +148,8 @@ const formValid = computed(() => emailConfirmed.value || email.value.valid)
 }
 
 .input {
-  width: 100%;
+  max-width: 100%;
+  width: 20rem;
 }
 
 button {

@@ -8,5 +8,7 @@ h1 {
   font-size: 2rem;
 
   text-shadow: 0 2px 0 var(--trans-3);
+
+  user-select: none;
 }
 </style>

@@ -41,6 +41,7 @@ const toggleHighContrastAndContinue = (value: boolean) => {
   align-items: center;
   justify-content: center;
   gap: 2rem;
+  padding: 1rem;
 
   font-size: 1.3rem;
 
@@ -55,6 +56,8 @@ const toggleHighContrastAndContinue = (value: boolean) => {
 
   .control {
     gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }
 </style>

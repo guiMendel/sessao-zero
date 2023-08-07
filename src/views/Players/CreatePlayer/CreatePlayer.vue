@@ -112,7 +112,8 @@ const tryCreate = () => {
 }
 
 .input {
-  width: 100%;
+  width: 20rem;
+  max-width: 100%;
 }
 
 label {
