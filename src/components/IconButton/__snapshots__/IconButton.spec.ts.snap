@@ -1,0 +1,3 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`IconButton > should render properly 1`] = `"<font-awesome-icon-stub data-v-520ca059=\\"\\" class=\\"button-icon\\" icon=\\"fas,\\"></font-awesome-icon-stub>"`;
