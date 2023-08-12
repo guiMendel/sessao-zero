@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { IconButton } from '..'
 import { Field } from '@/types/Field.interface'
 import { splitCamelCase } from '@/utils'
+import { computed, ref, watch } from 'vue'
+import { IconButton } from '..'
+import { inferInputType } from './inferInputType'
 
 const props = defineProps<{
   modelValue: Field
@@ -81,19 +82,7 @@ watch(fieldRef, (fieldRef) => {
 // ================================
 
 /** Infere o tipo a partir do nome */
-const inferredType = computed(() => {
-  /** Retorna true se o modelValue inclui qualquer dessas palavras */
-  const includesAny = (...words: string[]) =>
-    words.reduce(
-      (value, word) =>
-        props.modelValue.name.toLowerCase().includes(word) || value,
-      false
-    )
-
-  if (includesAny('password', 'senha')) return 'password'
-  if (includesAny('color', 'cor')) return 'color'
-  return 'text'
-})
+const inferredType = computed(() => inferInputType(props.modelValue.name))
 
 /** Se deve revelar a senha */
 const revealPassword = ref(false)
@@ -154,7 +143,6 @@ const raiseLabel = computed(
 
       <textarea
         v-if="multiline && fieldType != 'color'"
-        :type="fieldType"
         :id="modelValue.name"
         v-bind="$attrs"
         :value="modelValue.value"
@@ -180,7 +168,7 @@ const raiseLabel = computed(
         :style="{ backgroundColor: modelValue.value }"
         class="color-display"
       >
-        <!-- <font-awesome-icon :icon="['fas', 'palette']" /> -->
+        <font-awesome-icon :icon="['fas', 'palette']" />
       </label>
 
       <!-- Opcao de revelar senha -->
