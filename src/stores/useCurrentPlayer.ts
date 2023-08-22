@@ -1,5 +1,5 @@
-import { Player, PlayerResource } from '@/types/Player.interface'
-import { Uploadable } from '@/types/Resource.interface'
+import { auth, usePlayerAPI } from '@/api'
+import { PartialUploadable, Player, Uploadable } from '@/types/'
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -8,44 +8,32 @@ import {
   updatePassword,
   updateProfile,
 } from 'firebase/auth'
-import { deleteDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
+import { deleteDoc, setDoc, updateDoc } from 'firebase/firestore'
 import { defineStore } from 'pinia'
-import { computed } from 'vue'
-import {
-  useCurrentUser,
-  useDocument,
-  useFirebaseAuth,
-  useFirestore,
-} from 'vuefire'
+import { ref } from 'vue'
 
 export const useCurrentPlayer = defineStore('current-player', () => {
-  // Pega o firebase user
-  const user = useCurrentUser()
+  /** Acessa a API do firestore do player */
+  const { syncPlayer, desyncPlayer, getPlayerDocRef } = usePlayerAPI()
 
-  // Pega a db
-  const db = useFirestore()
+  // A instancia de player atual
+  const player = ref<Player | null>(null)
 
-  // Pega o auth
-  const auth = useFirebaseAuth()
+  // Sync do player logado
+  auth.onAuthStateChanged(async (newUser) => {
+    // Reset user
+    if (newUser == null) {
+      desyncPlayer()
+      player.value = null
+    }
 
-  // Pega uma referencia a um doc de jogador
-  const getPlayerDocRef = (uid: string) => doc(db, 'players', uid)
-
-  // Pega o documento
-  const playerDoc = useDocument(
-    computed(() => (user.value ? getPlayerDocRef(user.value.uid) : undefined)),
-    { reset: true }
-  )
-
-  /** O jogador atualmente logado */
-  const player = computed(() => playerDoc.data.value as Player | undefined)
+    // Sync to new user
+    else syncPlayer(newUser.uid, player)
+  })
 
   /** Realiza login do jogador */
   const login = async (email: string, password: string) =>
-    auth && signInWithEmailAndPassword(auth, email, password)
-
-  /** Realiza logout do jogador */
-  const logout = async () => auth && signOut(auth)
+    signInWithEmailAndPassword(auth, email, password)
 
   /** Cria um novo jogador */
   const create = async ({
@@ -59,7 +47,6 @@ export const useCurrentPlayer = defineStore('current-player', () => {
     name: string
     nickname: string
   }) =>
-    auth &&
     createUserWithEmailAndPassword(auth, email, password).then(
       async ({ user }) => {
         // Set its name
@@ -67,14 +54,16 @@ export const useCurrentPlayer = defineStore('current-player', () => {
 
         const date = new Date().toJSON()
 
-        // Set its database entry
-        await setDoc(getPlayerDocRef(user.uid), {
+        const newPlayer: Uploadable<Player> = {
           name,
           email,
           nickname,
           createdAt: date,
           modifiedAt: date,
-        })
+        }
+
+        // Set its database entry
+        await setDoc(getPlayerDocRef(user.uid), newPlayer)
 
         return user
       }
@@ -82,7 +71,7 @@ export const useCurrentPlayer = defineStore('current-player', () => {
 
   /** Atualiza os dados do jogador logado */
   const update = async (newData: Partial<Player>) => {
-    if (auth?.currentUser == null) return
+    if (auth.currentUser == null) return
 
     // Handle email change
     if (newData.email != undefined)
@@ -97,7 +86,7 @@ export const useCurrentPlayer = defineStore('current-player', () => {
       await updateProfile(auth.currentUser, { displayName: newData.nickname })
 
     // Set database data
-    const databaseData: Uploadable<PlayerResource> = {
+    const databaseData: Omit<PartialUploadable<Player>, 'createdAt'> = {
       modifiedAt: new Date().toJSON(),
     }
 
@@ -110,14 +99,18 @@ export const useCurrentPlayer = defineStore('current-player', () => {
     return updateDoc(getPlayerDocRef(auth.currentUser.uid), databaseData)
   }
 
+  /** Deleta o jogador logado */
   const deleteForever = async () => {
-    if (auth?.currentUser == null) return
+    if (auth.currentUser == null) return
 
     // Delete database entry
     await deleteDoc(getPlayerDocRef(auth.currentUser.uid))
 
     return auth.currentUser.delete()
   }
+
+  /** Realiza logout do jogador */
+  const logout = async () => signOut(auth)
 
   return { player, login, logout, create, update, deleteForever }
 })

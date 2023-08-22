@@ -22,7 +22,6 @@ const config: StorybookConfig = {
     if (config.resolve == undefined) config.resolve = { alias: {} }
     if (config.resolve.alias == undefined) config.resolve.alias = {}
 
-    config.resolve.alias['vuefire'] = require.resolve('./__mocks__/vuefire.ts')
     config.resolve.alias['vue-router'] = require.resolve(
       './__mocks__/vue-router.ts'
     )

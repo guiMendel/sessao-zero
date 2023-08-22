@@ -3,8 +3,8 @@ import { Field } from '@/types/Field.interface'
 import { splitCamelCase } from '@/utils'
 import { VueWrapper, mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
+import { nextTick } from 'vue'
 import { InputField } from '.'
-import { nextTick, warn } from 'vue'
 
 const makeField = (overrides?: Partial<Field>): Field => ({
   name: 'testField',

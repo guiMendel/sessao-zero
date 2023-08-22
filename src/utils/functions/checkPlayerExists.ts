@@ -1,12 +1,7 @@
-import {
-  type Firestore,
-  collection,
-  getDocs,
-  query,
-  where,
-} from 'firebase/firestore'
+import { db } from '@/api'
+import { collection, getDocs, query, where } from 'firebase/firestore'
 
-export async function checkPlayerExists(email: string, db: Firestore) {
+export async function checkPlayerExists(email: string) {
   // Query do email
   const emailQuery = query(
     collection(db, 'players'),

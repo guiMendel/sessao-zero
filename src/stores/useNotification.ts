@@ -1,4 +1,4 @@
-import { Notification } from '@/types/Notification'
+import { Notification } from '@/types/Notification.interface'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 

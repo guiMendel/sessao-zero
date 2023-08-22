@@ -3,7 +3,6 @@ import { BackButton, InputField, Logo } from '@/components'
 import { localStorageKeys } from '@/config/storageKeys'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useFirestore } from 'vuefire'
 import { useCurrentPlayer, useNotification } from '@/stores'
 import { checkPlayerExists, usePlayerFields } from '@/utils'
 
@@ -20,7 +19,6 @@ password.value.validate = () => true
 // ==============================
 
 const router = useRouter()
-const db = useFirestore()
 
 /** Se o email foi fornecido e esta ligado a uma conta existente */
 const emailConfirmed = ref(false)
@@ -29,7 +27,7 @@ const emailConfirmed = ref(false)
  * Se existir, passa para o passo 2. Se nao, vai para a tela de criar conta */
 const submitEmail = async () => {
   // Se nao encontrar nada, nao esta registrado
-  if ((await checkPlayerExists(email.value.value, db)) == false) {
+  if ((await checkPlayerExists(email.value.value)) == false) {
     router.push({ name: 'create-player' })
     return
   }
