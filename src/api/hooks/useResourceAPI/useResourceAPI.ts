@@ -1,4 +1,4 @@
-import { db } from '@/api/firebase'
+import { db } from '@/api/'
 import {
   doc,
   onSnapshot,
@@ -36,7 +36,7 @@ export const useResourceAPI = <Resource>(
   }
 
   // Get reference to a resource's doc
-  const getResourceDocRef = (uid: string) => doc(db, resourceCollection, uid)
+  const getResourceDocRef = (uid: string) => doc(resourceCollectionInstance, uid)
 
   // Unsubscribe last synced resource
   const desyncResource = () => {
