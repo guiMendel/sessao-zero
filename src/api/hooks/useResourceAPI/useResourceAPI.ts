@@ -1,13 +1,13 @@
 import { db } from '@/api/'
 import {
+  QueryFieldFilterConstraint,
+  collection,
   doc,
   onSnapshot,
+  query,
   type DocumentData,
   type DocumentSnapshot,
   type QueryDocumentSnapshot,
-  collection,
-  query,
-  CollectionReference,
 } from 'firebase/firestore'
 import { onBeforeUnmount, ref, type Ref } from 'vue'
 
@@ -36,7 +36,8 @@ export const useResourceAPI = <Resource>(
   }
 
   // Get reference to a resource's doc
-  const getResourceDocRef = (uid: string) => doc(resourceCollectionInstance, uid)
+  const getResourceDocRef = (uid: string) =>
+    doc(resourceCollectionInstance, uid)
 
   // Unsubscribe last synced resource
   const desyncResource = () => {
@@ -65,28 +66,37 @@ export const useResourceAPI = <Resource>(
     return resource
   }
 
-  // Allows for setting a query builder for the syncListResources method
-  const listQueryBuilder = ref(
-    (collection: CollectionReference<DocumentData>) => query(collection)
-  )
+  /** A list de recursos sincronizada, filtrada por listQueryFilters  */
+  const syncedResourceList = ref<Resource[]>([]) as Ref<Resource[]>
 
-  // Get all resources
-  const syncListResources = (): Ref<Resource[]> => {
-    const resources = ref<Resource[]>([]) as Ref<Resource[]>
+  /** Filtra syncedResourceList com as clausulas fornecidas. Nao so retorna a lsita filtrada, mas tambem
+   * passa a filtrar syncedResourceList igualmente
+   * @param filters os filtros a serem aplicados
+   * @returns Uma promessa que resolve quando syncedResourceList eh atualizado, com os valores filtrados
+   */
+  const filterResourceList = async (
+    ...filters: QueryFieldFilterConstraint[]
+  ): Promise<Resource[]> =>
+    new Promise((resolve) => {
+      // Desabilita ultimo sync
+      unsubscribe.resources()
 
-    // Disable last call
-    unsubscribe.resources()
+      // Reinicia o sync
+      unsubscribe.resources = onSnapshot(
+        query(resourceCollectionInstance, ...filters),
+        // Map de cada resource
+        (snapshot) =>
+          // Resolve a promessa na primeira chamada
+          resolve(
+            (syncedResourceList.value = snapshot.docs.map(
+              snapshotToResource
+            ) as Resource[])
+          )
+      )
+    })
 
-    // Listen for changes to resources
-    unsubscribe.resources = onSnapshot(
-      listQueryBuilder.value(resourceCollectionInstance),
-      // Map in a resource fo each doc
-      (snapshot) =>
-        (resources.value = snapshot.docs.map(snapshotToResource) as Resource[])
-    )
-
-    return resources
-  }
+  // Inicializa sem filtros
+  filterResourceList()
 
   // ==================
   // === CLEAN UP
@@ -100,10 +110,10 @@ export const useResourceAPI = <Resource>(
 
   return {
     syncResource,
+    syncedResourceList,
+    filterResourceList,
     desyncResource,
-    syncListResources,
     getResourceDocRef,
-    listQueryBuilder,
     resourceCollection: resourceCollectionInstance,
   }
 }
