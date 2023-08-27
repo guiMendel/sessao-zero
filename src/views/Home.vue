@@ -5,7 +5,7 @@ const { logout } = useCurrentPlayer()
 </script>
 
 <template>
-  <div>
+  <div class="home">
     <p>In Home</p>
 
     <button @click="logout">Logout</button>
@@ -13,3 +13,11 @@ const { logout } = useCurrentPlayer()
     <RouterView />
   </div>
 </template>
+
+<style lang="scss" scoped>
+.home {
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+</style>

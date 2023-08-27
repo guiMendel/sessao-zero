@@ -52,19 +52,17 @@ const routes: Array<RouteRecordRaw> = addFirstVisitPrompts([
   {
     path: '/',
     component: Home,
-    name: 'home',
     meta: { requireAuth: 'authenticated' },
     children: [
       {
         path: '',
         component: GuildsIndex,
-        name: 'guilds',
+        name: 'home',
         meta: { noGoBackButton: true },
       },
       {
         path: 'guild/:guildId',
         component: Guild,
-        name: 'guild',
         children: [
           {
             path: '',

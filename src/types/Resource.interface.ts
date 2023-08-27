@@ -1,4 +1,8 @@
-export interface Resource {
+import { DocumentData } from 'firebase/firestore'
+
+export type ResourceType = 'players' | 'guilds'
+
+export interface Resource extends DocumentData {
   createdAt: Date
   modifiedAt: Date
   uid: string

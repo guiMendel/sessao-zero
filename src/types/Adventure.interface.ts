@@ -1,14 +1,15 @@
+import { Resource } from '.'
+
 /** Define os atributos de uma aventura */
-export interface Adventure {
-  id: number
+export interface Adventure extends Resource {
   name: string
 
   description: string
 
-  player_limit: number
+  playerLimit: number
 
   /** Link da imagem da aventura */
-  picture_url: string
+  pictureUrl: string
 
   /** Info da guilda */
   guild: { name: string; id: number }
@@ -22,6 +23,3 @@ export interface Adventure {
   /** Lista de jogadores da aventura */
   // players: Array<IndexPlayer>
 }
-
-/** Define a interface de aventura sem o id */
-export type AdventureWithoutId = Omit<Adventure, 'id'>

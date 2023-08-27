@@ -14,6 +14,7 @@ import {
   faPersonRays,
   faRightToBracket,
   faStreetView,
+  faXmark,
 } from '@fortawesome/free-solid-svg-icons'
 
 export const initFontAwesome = (): [
@@ -29,7 +30,8 @@ export const initFontAwesome = (): [
     faStreetView,
     faEye,
     faEyeSlash,
-    faPersonRays
+    faPersonRays,
+    faXmark
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]
