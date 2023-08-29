@@ -12,7 +12,7 @@ const fieldPropertyNameRelations: PropertyNameRelation[] = [
     matchNames: ['passwordConfirmation'],
     type: 'password',
     autocomplete: 'create-password',
-    display: 'senha',
+    display: 'confirmar senha',
   },
   {
     matchNames: ['password'],
