@@ -95,7 +95,7 @@ export const usePlayerFields = (localStorageKey?: string) => {
 
   /** Campo de senha */
   const password = makeField(
-    'senha',
+    'password',
     (newValue: string) => {
       if (newValue.length < 6) return 'Mínimo de 6 caracteres'
       if (newValue.length > 100) return 'Muito longa'
@@ -113,7 +113,7 @@ export const usePlayerFields = (localStorageKey?: string) => {
 
   /** Campo de confirmacao de senha */
   const passwordConfirmation = makeField(
-    'confirmarSenha',
+    'passwordConfirmation',
     matchesPassword,
     false
   )
@@ -127,7 +127,7 @@ export const usePlayerFields = (localStorageKey?: string) => {
   )
 
   /** Campo de apelido */
-  const nickname = makeField('apelido', (newValue: string) => {
+  const nickname = makeField('nickname', (newValue: string) => {
     if (newValue.length < 3) return 'Mínimo de 3 caracteres'
     if (newValue.length > 100) return 'Muito longo'
 
@@ -135,7 +135,7 @@ export const usePlayerFields = (localStorageKey?: string) => {
   })
 
   /** Campo de nome */
-  const name = makeField('nome', (newValue: string) => {
+  const name = makeField('name', (newValue: string) => {
     if (newValue.length < 3) return 'Mínimo de 3 caracteres'
     if (/.+ .+/.test(newValue) == false) return 'Forneça primeiro e último nome'
     if (newValue.length > 100) return 'Muito longo'
@@ -144,7 +144,7 @@ export const usePlayerFields = (localStorageKey?: string) => {
   })
 
   /** Campo de sobre */
-  const about = makeField('sobre', (newValue: string) => {
+  const about = makeField('about', (newValue: string) => {
     if (newValue.length > 400) return 'Muito longo'
 
     return true

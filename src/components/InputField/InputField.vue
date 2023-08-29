@@ -3,16 +3,24 @@ import { Field } from '@/types/Field.interface'
 import { splitCamelCase } from '@/utils'
 import { computed, ref, watch } from 'vue'
 import { IconButton } from '..'
-import { inferInputType } from './inferInputType'
+import { inferFieldProperties } from './inferFieldProperties'
 
 const props = defineProps<{
   modelValue: Field
   autoFocus?: boolean
   multiline?: boolean
   variant?: 'dark'
+  autocomplete?: HTMLInputElement['autocomplete']
 }>()
 
 const emit = defineEmits(['update:modelValue'])
+
+// ================================
+// FIELD PROPERTIES
+// ================================
+
+/** Infere o tipo e o autocomplete a partir do nome */
+const inferred = computed(() => inferFieldProperties(props.modelValue.name))
 
 // ================================
 // INPUT HANDLING
@@ -81,17 +89,14 @@ watch(fieldRef, (fieldRef) => {
 // PASSWORD REVEAL
 // ================================
 
-/** Infere o tipo a partir do nome */
-const inferredType = computed(() => inferInputType(props.modelValue.name))
-
 /** Se deve revelar a senha */
 const revealPassword = ref(false)
 
 /** Qual tipo deve ser utilizado no campo */
-const fieldType = computed((): (typeof inferredType)['value'] => {
-  if (inferredType.value === 'password' && revealPassword.value) return 'text'
+const fieldType = computed(() => {
+  if (inferred.value.type === 'password' && revealPassword.value) return 'text'
 
-  return inferredType.value
+  return inferred.value.type
 })
 
 /** Revela a senha e foca no input */
@@ -113,12 +118,17 @@ const togglePasswordReveal = () => {
 // OTHER
 // ================================
 
-// Should the label be raised
+/** Valor a ser utilizado de autocomplete */
+const autocompleteValue = computed(
+  () => props.autocomplete ?? inferred.value.autocomplete
+)
+
+/** Se a label deveria estar levantada */
 const raiseLabel = computed(
   () =>
     props.multiline ||
     props.modelValue.value != '' ||
-    inferredType.value == 'color'
+    inferred.value.type == 'color'
 )
 </script>
 
@@ -128,7 +138,7 @@ const raiseLabel = computed(
     :class="{
       error: errorMessage != '',
       dark: props.variant === 'dark',
-      password: inferredType === 'password',
+      password: inferred.type === 'password',
     }"
     @focusout="showErrors = true"
   >
@@ -138,27 +148,31 @@ const raiseLabel = computed(
         class="hint"
         :class="raiseLabel && 'raised'"
         :for="modelValue.name"
-        >{{ splitCamelCase(modelValue.name) }}</label
+        >{{ splitCamelCase(inferred.display ?? modelValue.name) }}</label
       >
 
       <textarea
         v-if="multiline && fieldType != 'color'"
         :id="modelValue.name"
+        :name="modelValue.name"
         v-bind="$attrs"
         :value="modelValue.value"
         @input="handleInput"
         ref="fieldRef"
+        :autocomplete="autocompleteValue"
       ></textarea>
 
       <input
         v-else
         :type="fieldType"
         :id="modelValue.name"
+        :name="modelValue.name"
         v-bind="$attrs"
         :value="modelValue.value"
         @input="handleInput"
         :style="fieldType == 'color' && 'display: none'"
         ref="fieldRef"
+        :autocomplete="autocompleteValue"
       />
 
       <!-- Input de Cor -->

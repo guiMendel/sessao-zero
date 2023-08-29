@@ -84,10 +84,20 @@ const tryCreate = () => {
       <InputField class="input" variant="dark" v-model="email" />
 
       <!-- Senha -->
-      <InputField class="input" variant="dark" v-model="password" />
+      <InputField
+        class="input"
+        variant="dark"
+        v-model="password"
+        isNewPassword
+      />
 
       <!-- Confirmacao de senha -->
-      <InputField class="input" variant="dark" v-model="passwordConfirmation" />
+      <InputField
+        class="input"
+        variant="dark"
+        v-model="passwordConfirmation"
+        isNewPassword
+      />
 
       <!-- Submit -->
       <button :class="formValid || 'disabled'" id="login">
