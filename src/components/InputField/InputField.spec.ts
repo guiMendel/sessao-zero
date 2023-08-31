@@ -92,8 +92,8 @@ describe.each([{ multiline: true }, { multiline: false }])(
 
     if (multiline == false)
       it.each([
-        [['password', 'senha'], 'password'],
-        [['color', 'cor'], 'color'],
+        [['password'], 'password'],
+        [['color'], 'color'],
       ])(
         `should assign field names %o to ${inputType} type %s`,
         (names, result) => {
@@ -114,7 +114,7 @@ describe.each([{ multiline: true }, { multiline: false }])(
       it('should assign type text to password field when toggling show password', async () => {
         const wrapper = mount(InputField, {
           ...mountOptions,
-          props: { modelValue: makeField({ name: 'senha' }), multiline },
+          props: { modelValue: makeField({ name: 'password' }), multiline },
         })
 
         const input = wrapper.get(inputType)

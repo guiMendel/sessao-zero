@@ -1,5 +1,5 @@
 /** Define como relacionar possiveis nomes de um campo com seu tipo e autocomplete */
-interface PropertyNameRelation {
+export interface PropertyNameRelation {
   matchNames: string[]
   type?: string
   autocomplete?: string
@@ -7,7 +7,7 @@ interface PropertyNameRelation {
 }
 
 /** Mapeia a relacao entre nomes possiveis para os campos e os seus tipos e autocompletes */
-const fieldPropertyNameRelations: PropertyNameRelation[] = [
+export const fieldPropertyNameRelations: PropertyNameRelation[] = [
   {
     matchNames: ['passwordConfirmation'],
     type: 'password',
