@@ -33,10 +33,10 @@ interface TestResource extends Resource {
 type Snapshot = { data: () => any; id: string }
 type Listener<T> = (newValue: T) => void
 
-const parseTestSnapshot = (uid: string, data: any) => ({
+const parseTestSnapshot = (id: string, data: any) => ({
   count: data.count,
   name: data.name,
-  uid,
+  id,
   createdAt: new Date(data.createdAt),
   modifiedAt: new Date(data.modifiedAt),
 })
@@ -53,14 +53,14 @@ const mockDatabase = (values: Record<string, Uploadable<TestResource>>) => {
   }[] = []
 
   // Inicializa a database
-  for (const uid in values)
-    mockSnapshotDatabase[uid] = {
-      data: () => values[uid],
-      id: uid,
+  for (const id in values)
+    mockSnapshotDatabase[id] = {
+      data: () => values[id],
+      id: id,
     }
 
   // Simplifica os docs
-  mockDoc.mockImplementation((_, uid) => uid)
+  mockDoc.mockImplementation((_, id) => id)
 
   mockWhere.mockImplementation(
     (property: string, _: '==', value: string | boolean | number) =>
@@ -117,33 +117,33 @@ const mockDatabase = (values: Record<string, Uploadable<TestResource>>) => {
     }
   )
 
-  const getDatabaseValue = (uid: string) =>
-    parseTestSnapshot(uid, mockSnapshotDatabase[uid].data())
+  const getDatabaseValue = (id: string) =>
+    parseTestSnapshot(id, mockSnapshotDatabase[id].data())
 
   const indexDatabaseValues = (): TestResource[] =>
-    Object.entries(mockSnapshotDatabase).map(([uid, value]) =>
-      parseTestSnapshot(uid, value.data())
+    Object.entries(mockSnapshotDatabase).map(([id, value]) =>
+      parseTestSnapshot(id, value.data())
     )
 
   const updateDatabaseValue = (
-    uid: string,
+    id: string,
     newValue: Partial<Uploadable<TestResource>>
   ) => {
-    values[uid] = {
-      ...values[uid],
+    values[id] = {
+      ...values[id],
       ...newValue,
       modifiedAt: new Date().toJSON(),
     }
 
     // Update all listeners
-    for (const [uid, listener] of Object.entries(docListeners))
-      listener(mockSnapshotDatabase[uid])
+    for (const [id, listener] of Object.entries(docListeners))
+      listener(mockSnapshotDatabase[id])
 
     for (const { listener, query } of databaseListeners) {
       const queriedSnapshots = query(Object.values(mockSnapshotDatabase))
 
       // If the updated snapshot is inthis query, trigger it
-      if (queriedSnapshots.some(({ id }) => id === uid))
+      if (queriedSnapshots.some(({ id }) => id === id))
         listener({ docs: queriedSnapshots })
     }
   }
@@ -161,7 +161,7 @@ describe('useResourceAPI', () => {
   beforeEach(() => {
     vitest.restoreAllMocks()
 
-    mockDoc.mockImplementation((collection, uid) => ({ collection, uid }))
+    mockDoc.mockImplementation((collection, id) => ({ collection, id }))
     mockOnSnapshot.mockReturnValue({})
     mockCollection.mockImplementation((db, name) => ({ name, db }))
     mockQuery.mockReturnValue(vitest.fn())
@@ -176,7 +176,7 @@ describe('useResourceAPI', () => {
         name: 'scooby',
         createdAt: new Date(),
         modifiedAt: new Date(),
-        uid: resourceId,
+        id: resourceId,
       })
 
       const { syncResource } = useTestResourceAPI()
@@ -322,11 +322,9 @@ describe('useResourceAPI', () => {
   it('should get the correct doc when getResourceDocRef is called', () => {
     const { getResourceDocRef, resourceCollection } = useTestResourceAPI()
 
-    const uid = 'scooby'
+    const id = 'scooby'
 
-    expect(getResourceDocRef(uid)).toStrictEqual(
-      mockDoc(resourceCollection, uid)
-    )
+    expect(getResourceDocRef(id)).toStrictEqual(mockDoc(resourceCollection, id))
   })
 
   it('should provide the correct collection with resourceCollection', () => {

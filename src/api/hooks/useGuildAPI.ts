@@ -9,14 +9,14 @@ export const useGuildAPI = () => {
   const {
     syncResource,
     desyncResource,
-    getResourceDocRef,
-    syncedResourceList,
-    filterResourceList,
+    getResourceDoc,
+    syncResourceList,
+    desyncResourceList,
     resourceCollection,
-  } = useResourceAPI<Guild>('guilds', (guildUid, guildData) => ({
+  } = useResourceAPI<Guild>('guilds', (guildId, guildData) => ({
     name: guildData.name,
     ownerUid: guildData.ownerUid,
-    uid: guildUid,
+    id: guildId,
     createdAt: new Date(guildData.createdAt),
     modifiedAt: new Date(guildData.modifiedAt),
   }))
@@ -25,8 +25,8 @@ export const useGuildAPI = () => {
   const { player } = storeToRefs(useCurrentPlayer())
 
   /** Sincroniza uma guilda e habilita edicao */
-  const syncGuild = (uid: string, useGuild?: Ref<Guild | null>) => {
-    const guild = syncResource(uid, useGuild)
+  const syncGuild = (id: string, useGuild?: Ref<Guild | null>) => {
+    const guild = syncResource(id, useGuild)
 
     return computed({
       get: () => guild.value,
@@ -50,7 +50,7 @@ export const useGuildAPI = () => {
           JSON.parse(JSON.stringify(securedData))
         )
 
-        updateDoc(getResourceDocRef(guild.value.uid), securedData)
+        updateDoc(getResourceDoc(guild.value.id), securedData)
       },
     })
   }
@@ -64,23 +64,23 @@ export const useGuildAPI = () => {
       createdAt: new Date().toJSON(),
       modifiedAt: new Date().toJSON(),
       name,
-      ownerUid: player.value.uid,
+      ownerUid: player.value.id,
     }
 
     return addDoc(resourceCollection, securedData)
   }
 
   // Delete database entry
-  const deleteGuild = async (uid: string) => deleteDoc(getResourceDocRef(uid))
+  const deleteGuild = async (id: string) => deleteDoc(getResourceDoc(id))
 
   return {
     syncGuild,
-    syncedGuildList: syncedResourceList,
-    filterGuildList: filterResourceList,
+    syncGuildList: syncResourceList,
+    desyncGuildList: desyncResourceList,
     desyncGuild: desyncResource,
     deleteGuild,
     createGuild,
-    getGuildDocRef: getResourceDocRef,
+    getGuildDocRef: getResourceDoc,
     guildCollection: resourceCollection,
   }
 }

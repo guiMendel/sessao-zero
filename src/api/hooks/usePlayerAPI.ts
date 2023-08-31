@@ -9,13 +9,13 @@ export const usePlayerAPI = () => {
     syncedResourceList,
     filterResourceList,
     resourceCollection,
-  } = useResourceAPI<Player>('players', (playerUid, playerData) => ({
+  } = useResourceAPI<Player>('players', (playerId, playerData) => ({
     about: playerData.about,
     email: playerData.email,
     name: playerData.name,
     nickname: playerData.nickname,
     admin: playerData.admin,
-    uid: playerUid,
+    id: playerId,
     createdAt: new Date(playerData.createdAt),
     modifiedAt: new Date(playerData.modifiedAt),
   }))

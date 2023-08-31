@@ -16,11 +16,11 @@ const newGuild = () => {
   <div class="guilds">
     <button @click="newGuild">New Guild</button>
 
-    <div class="guild" v-for="guild in guilds" :key="guild.uid">
+    <div class="guild" v-for="guild in guilds" :key="guild.id">
       <p>{{ guild.name }}</p>
       <font-awesome-icon
         :icon="['fas', 'xmark']"
-        @click="deleteGuild(guild.uid)"
+        @click="deleteGuild(guild.id)"
       />
     </div>
   </div>
