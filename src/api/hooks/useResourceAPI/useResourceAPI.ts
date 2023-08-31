@@ -1,16 +1,25 @@
 import { db } from '@/api/'
-import { Resource } from '@/types'
+import { PartialUploadable, Resource, Uploadable } from '@/types'
 import {
   QueryFieldFilterConstraint,
+  addDoc,
   collection,
+  deleteDoc,
   doc,
   onSnapshot,
   query,
+  updateDoc,
   type DocumentData,
   type DocumentSnapshot,
   type QueryDocumentSnapshot,
 } from 'firebase/firestore'
-import { onBeforeUnmount, ref, type Ref } from 'vue'
+import {
+  WritableComputedRef,
+  computed,
+  onBeforeUnmount,
+  ref,
+  type Ref,
+} from 'vue'
 
 /** Fornece uma interface para ler e escrever dados de um recurso no firestore, com sync
  * @param resourceName O nome do recurso a ser acessado (deve corresponder a um nome de recurso root no firestore)
@@ -39,7 +48,50 @@ export const useResourceAPI = <R extends Resource>(
   }
 
   /** Obtem a referencia de documento para o id fornecido */
-  const getResourceDoc = (id: string) => doc(resourceCollection, id)
+  const getDoc = (id: string) => doc(resourceCollection, id)
+
+  // ========================================
+  // CREATE & UPDATE
+  // ========================================
+
+  /** Remove dados sensiveis de um objecto */
+  const secureData = (
+    data: Record<string, any>,
+    ...removeFields: string[]
+  ): Omit<typeof data, 'password' | 'senha'> => {
+    const secureData = JSON.parse(JSON.stringify(data)) as Record<string, any>
+
+    for (const field of [...removeFields, 'password', 'senha'])
+      delete secureData[field]
+
+    return secureData
+  }
+
+  /** Cria um novo recurso */
+  const create = (
+    properties: Omit<Uploadable<R>, 'createdAt' | 'modifiedAt'>
+  ) => {
+    const securedData = {
+      ...secureData(properties, 'id'),
+      createdAt: new Date().toJSON(),
+      modifiedAt: new Date().toJSON(),
+    } as Uploadable<R>
+
+    return addDoc(resourceCollection, securedData)
+  }
+
+  /** Cria um novo recurso */
+  const update = (
+    id: string,
+    properties: Omit<PartialUploadable<R>, 'createdAt' | 'modifiedAt'>
+  ) => {
+    const securedData = {
+      ...secureData(properties, 'id'),
+      modifiedAt: new Date().toJSON(),
+    } as PartialUploadable<R>
+
+    return updateDoc(getDoc(id), securedData)
+  }
 
   // ========================================
   // READ & SYNC
@@ -69,10 +121,10 @@ export const useResourceAPI = <R extends Resource>(
    * @param id O id do recurso alvo
    * @param existingRef Um ref para utilizar na sincronizacao
    */
-  const syncResource = (
+  const sync = (
     id: string,
     existingRef?: Ref<R | null>
-  ): Ref<R | null> => {
+  ): WritableComputedRef<R | null> => {
     /** Reutiliza um ref sse for fornecido */
     const resource = existingRef ?? (ref<R | null>(null) as Ref<R | null>)
 
@@ -81,15 +133,37 @@ export const useResourceAPI = <R extends Resource>(
 
     // Inicia o sync
     unsubscribe.resource = onSnapshot(
-      getResourceDoc(id),
+      getDoc(id),
       (snapshot) => (resource.value = snapshotToResource(snapshot))
     )
 
-    return resource
+    return computed({
+      get: () => resource.value,
+      set: (newValue) => {
+        // Ignora se estiver desynced
+        if (resource.value == null) return
+
+        // Desync se receber null
+        if (newValue == null) {
+          desync('resource')
+          resource.value = newValue
+          return
+        }
+
+        // Atualiza os dados
+        update(
+          id,
+          newValue as unknown as Omit<
+            PartialUploadable<R>,
+            'modifiedAt' | 'createdAt'
+          >
+        )
+      },
+    })
   }
 
   /** Obtem uma lista dos recursos, filtrados */
-  const syncResourceList = (
+  const syncList = (
     filters: QueryFieldFilterConstraint[],
     existingRef?: Ref<R[]>
   ): Ref<R[]> => {
@@ -111,6 +185,13 @@ export const useResourceAPI = <R extends Resource>(
   }
 
   // ==================
+  // === DELETE
+  // ==================
+
+  // Deleta o recurso permanentemente
+  const deleteForever = async (id: string) => deleteDoc(getDoc(id))
+
+  // ==================
   // === CLEAN UP
   // ==================
 
@@ -120,12 +201,19 @@ export const useResourceAPI = <R extends Resource>(
   return {
     // Utilidades
     resourceCollection,
-    getResourceDoc,
+    getDoc,
+
+    // Create & Update
+    create,
+    update,
 
     // Read & Sync
-    syncResource,
-    syncResourceList,
-    desyncResource: () => desync('resource'),
-    desyncResourceList: () => desync('resourceList'),
+    sync,
+    syncList,
+    desync: () => desync('resource'),
+    desyncList: () => desync('resourceList'),
+
+    // Delete
+    deleteForever,
   }
 }
