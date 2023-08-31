@@ -164,7 +164,7 @@ export const useResourceAPI = <R extends Resource>(
 
   /** Obtem uma lista dos recursos, filtrados */
   const syncList = (
-    filters: QueryFieldFilterConstraint[],
+    filters: QueryFieldFilterConstraint[] = [],
     existingRef?: Ref<R[]>
   ): Ref<R[]> => {
     /** Reutiliza um ref sse for fornecido */

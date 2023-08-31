@@ -167,164 +167,175 @@ describe('useResourceAPI', () => {
     mockQuery.mockReturnValue(vitest.fn())
   })
 
-  describe('syncResource', () => {
-    it('should return the same ref that was provided as second argument', () => {
-      const resourceId = '1'
+  describe('creating', () => {
+    it.todo('should not upload password or id')
+    it.todo('should correctly add createdAt and modifiedAt properties')
+    it.todo('should add the doc with the provided properties')
+  })
 
-      const existingRef = ref<TestResource>({
-        count: 1,
-        name: 'scooby',
-        createdAt: new Date(),
-        modifiedAt: new Date(),
-        id: resourceId,
+  describe('updating', () => {
+    it.todo('should not upload password or id')
+    it.todo('should correctly update the modifiedAt property')
+    it.todo('should update the doc with the provided properties')
+  })
+
+  describe('syncing single', () => {
+    describe('syncing', () => {
+      it.todo('should also sync the provided ref')
+
+      it('should sync current call', () => {
+        const id = '1'
+
+        const { getDatabaseValue, updateDatabaseValue } = mockDatabase({
+          [id]: {
+            name: 'scooby',
+            count: 1,
+            createdAt: new Date().toJSON(),
+            modifiedAt: new Date().toJSON(),
+          },
+        })
+
+        const { sync } = useTestResourceAPI()
+
+        const instance = sync(id)
+
+        // Ensures it initializes properly
+        expect(instance.value).toStrictEqual(getDatabaseValue(id))
+
+        updateDatabaseValue(id, { count: 10 })
+
+        // Ensures it synced properly
+        expect(instance.value).toStrictEqual(getDatabaseValue(id))
       })
-
-      const { syncResource } = useTestResourceAPI()
-
-      expect(syncResource(resourceId, existingRef)).toBe(existingRef)
     })
 
-    it('should sync current call and desync any previous calls', () => {
-      const uid1 = '1'
-      const uid2 = '2'
+    describe('desyncing', () => {
+      it.todo('should call desync for previous calls')
 
-      const { getDatabaseValue, updateDatabaseValue } = mockDatabase({
-        [uid1]: {
-          name: 'scooby',
-          count: 1,
-          createdAt: new Date().toJSON(),
-          modifiedAt: new Date().toJSON(),
-        },
-        [uid2]: {
-          name: 'snacks',
-          count: 5,
-          createdAt: new Date().toJSON(),
-          modifiedAt: new Date().toJSON(),
-        },
+      it('should no longer update a call after desync is called', () => {
+        const testUid = '1'
+
+        const { getDatabaseValue, updateDatabaseValue } = mockDatabase({
+          [testUid]: {
+            name: 'scooby',
+            count: 1,
+            createdAt: new Date().toJSON(),
+            modifiedAt: new Date().toJSON(),
+          },
+        })
+
+        const { sync, desync } = useTestResourceAPI()
+
+        const instance = sync(testUid)
+
+        const oldValue = instance.value
+
+        // Ensures it initializes properly
+        expect(instance.value).toStrictEqual(getDatabaseValue(testUid))
+        expect(instance.value).not.toHaveProperty('count', 10)
+        expect(instance.value).toStrictEqual(oldValue)
+
+        desync()
+
+        updateDatabaseValue(testUid, { count: 10 })
+
+        // Ensures it synced properly
+        expect(instance.value).not.toHaveProperty('count', 10)
+        expect(instance.value).toStrictEqual(oldValue)
       })
-
-      const { syncResource } = useTestResourceAPI()
-
-      const instance1 = syncResource(uid1)
-      const instance2 = syncResource(uid2)
-
-      const oldValue = instance1.value
-
-      // Ensures it initializes properly
-      expect(instance1.value).toStrictEqual(getDatabaseValue(uid1))
-      expect(instance1.value).toStrictEqual(oldValue)
-      expect(instance2.value).toHaveProperty('count', 5)
-      expect(instance2.value).toStrictEqual(getDatabaseValue(uid2))
-
-      updateDatabaseValue(uid1, { count: 10 })
-      updateDatabaseValue(uid2, { count: 10 })
-
-      // Ensures it synced properly
-      expect(instance1.value).not.toStrictEqual(getDatabaseValue(uid1))
-      expect(instance1.value).toStrictEqual(oldValue)
-      expect(instance2.value).toHaveProperty('count', 10)
-      expect(instance2.value).toStrictEqual(getDatabaseValue(uid2))
     })
 
-    it('should no longer update a ref when desyncResource is called', () => {
-      const testUid = '1'
-
-      const { getDatabaseValue, updateDatabaseValue } = mockDatabase({
-        [testUid]: {
-          name: 'scooby',
-          count: 1,
-          createdAt: new Date().toJSON(),
-          modifiedAt: new Date().toJSON(),
-        },
-      })
-
-      const { syncResource, desyncResource } = useTestResourceAPI()
-
-      const instance = syncResource(testUid)
-
-      const oldValue = instance.value
-
-      // Ensures it initializes properly
-      expect(instance.value).toStrictEqual(getDatabaseValue(testUid))
-      expect(instance.value).not.toHaveProperty('count', 10)
-      expect(instance.value).toStrictEqual(oldValue)
-
-      desyncResource()
-
-      updateDatabaseValue(testUid, { count: 10 })
-
-      // Ensures it synced properly
-      expect(instance.value).not.toHaveProperty('count', 10)
-      expect(instance.value).toStrictEqual(oldValue)
+    describe('writing', () => {
+      it.todo('should ignore writes when desynced')
+      it.todo('should desync and set null to the ref when writing null')
+      it.todo('should call update with valid data')
     })
   })
 
-  describe('syncedResourceList', () => {
-    it('should sync to database content', () => {
-      const { indexDatabaseValues, updateDatabaseValue } = mockDatabase({
-        '1': {
-          name: 'scooby',
-          count: 1,
-          createdAt: new Date().toJSON(),
-          modifiedAt: new Date().toJSON(),
-        },
-        '2': {
-          name: 'snacks',
-          count: 5,
-          createdAt: new Date().toJSON(),
-          modifiedAt: new Date().toJSON(),
-        },
+  describe('syncing list', () => {
+    describe('syncing', () => {
+      it.todo('should use the provided ref and return it')
+
+      it('should sync to database content', () => {
+        const { indexDatabaseValues, updateDatabaseValue } = mockDatabase({
+          '1': {
+            name: 'scooby',
+            count: 1,
+            createdAt: new Date().toJSON(),
+            modifiedAt: new Date().toJSON(),
+          },
+          '2': {
+            name: 'snacks',
+            count: 5,
+            createdAt: new Date().toJSON(),
+            modifiedAt: new Date().toJSON(),
+          },
+        })
+
+        const { syncList } = useTestResourceAPI()
+
+        const list = syncList()
+
+        // Verifica se inicializa adequadamente
+        expect(list.value).toStrictEqual(indexDatabaseValues())
+
+        updateDatabaseValue('2', { count: 10 })
+
+        expect(list.value).toStrictEqual(indexDatabaseValues())
       })
 
-      const { syncedResourceList } = useTestResourceAPI()
+      it.todo(
+        'should filter list to match query and keep filter synced',
+        async () => {
+          const { indexDatabaseValues } = mockDatabase({
+            '1': {
+              name: 'scooby',
+              count: 1,
+              createdAt: new Date().toJSON(),
+              modifiedAt: new Date().toJSON(),
+            },
+            '2': {
+              name: 'snacks',
+              count: 5,
+              createdAt: new Date().toJSON(),
+              modifiedAt: new Date().toJSON(),
+            },
+          })
 
-      // Verifica se inicializa adequadamente
-      expect(syncedResourceList.value).toStrictEqual(indexDatabaseValues())
+          const { syncList } = useTestResourceAPI()
 
-      updateDatabaseValue('2', { count: 10 })
+          const expectedResult = indexDatabaseValues().filter(
+            ({ count }) => count === 5
+          )
 
-      expect(syncedResourceList.value).toStrictEqual(indexDatabaseValues())
-    })
+          const list = syncList([where('count', '==', 5)])
 
-    it('should update list to match new query when filterResourceList is called', async () => {
-      const { indexDatabaseValues } = mockDatabase({
-        '1': {
-          name: 'scooby',
-          count: 1,
-          createdAt: new Date().toJSON(),
-          modifiedAt: new Date().toJSON(),
-        },
-        '2': {
-          name: 'snacks',
-          count: 5,
-          createdAt: new Date().toJSON(),
-          modifiedAt: new Date().toJSON(),
-        },
-      })
-
-      const { syncedResourceList, filterResourceList } = useTestResourceAPI()
-
-      // Verifica se inicializa adequadamente
-      expect(syncedResourceList.value).toStrictEqual(indexDatabaseValues())
-
-      const expectedResult = indexDatabaseValues().filter(
-        ({ count }) => count === 5
+          expect(list.value).toStrictEqual(expectedResult)
+          expect(list.value).not.toStrictEqual(indexDatabaseValues())
+        }
       )
+    })
 
-      const result = await filterResourceList(where('count', '==', 5))
+    describe('desyncing', () => {
+      it.todo('should call desyncList for previous calls')
 
-      expect(result).toStrictEqual(expectedResult)
-      expect(syncedResourceList.value).toStrictEqual(result)
-      expect(syncedResourceList.value).not.toStrictEqual(indexDatabaseValues())
+      it.todo(
+        'should no longer update a call after desyncList is called',
+        () => {}
+      )
     })
   })
 
-  it('should get the correct doc when getResourceDocRef is called', () => {
-    const { getResourceDocRef, resourceCollection } = useTestResourceAPI()
+  describe('deleting', () => {
+    it.todo('should erase the resource')
+  })
+
+  it('should get the correct doc when getDoc is called', () => {
+    const { getDoc, resourceCollection } = useTestResourceAPI()
 
     const id = 'scooby'
 
-    expect(getResourceDocRef(id)).toStrictEqual(mockDoc(resourceCollection, id))
+    expect(getDoc(id)).toStrictEqual(mockDoc(resourceCollection, id))
   })
 
   it('should provide the correct collection with resourceCollection', () => {
@@ -358,17 +369,18 @@ describe('useResourceAPI', () => {
         },
       })
 
-    const { syncResource, syncedResourceList } = useTestResourceAPI()
+    const { sync, syncList } = useTestResourceAPI()
 
-    const instance = syncResource(instanceUid)
+    const instance = sync(instanceUid)
+    const list = syncList()
 
     const oldInstance = instance.value
-    const oldList = syncedResourceList.value
+    const oldList = list.value
 
     expect(instance.value).toStrictEqual(getDatabaseValue(instanceUid))
     expect(instance.value).toStrictEqual(oldInstance)
-    expect(syncedResourceList.value).toStrictEqual(indexDatabaseValues())
-    expect(syncedResourceList.value).toStrictEqual(oldList)
+    expect(list.value).toStrictEqual(indexDatabaseValues())
+    expect(list.value).toStrictEqual(oldList)
 
     unmount()
 
@@ -376,7 +388,7 @@ describe('useResourceAPI', () => {
 
     expect(instance.value).not.toStrictEqual(getDatabaseValue(instanceUid))
     expect(instance.value).toStrictEqual(oldInstance)
-    expect(syncedResourceList.value).not.toStrictEqual(indexDatabaseValues())
-    expect(syncedResourceList.value).toStrictEqual(oldList)
+    expect(list.value).not.toStrictEqual(indexDatabaseValues())
+    expect(list.value).toStrictEqual(oldList)
   })
 })
