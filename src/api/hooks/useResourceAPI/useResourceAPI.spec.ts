@@ -1,7 +1,16 @@
 import { Resource, Uploadable } from '@/types'
-import { collection, doc, onSnapshot, query, where } from 'firebase/firestore'
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  updateDoc,
+  where,
+} from 'firebase/firestore'
 import { Mock } from 'vitest'
-import { onBeforeUnmount, ref } from 'vue'
+import { onBeforeUnmount } from 'vue'
 import { useResourceAPI } from '.'
 
 vi.mock('@/api', () => ({ db: 'mockDb' }))
@@ -11,6 +20,9 @@ vi.mock('firebase/firestore', () => ({
   query: vi.fn(),
   onSnapshot: vi.fn(),
   where: vi.fn(),
+  addDoc: vi.fn(),
+  updateDoc: vi.fn(),
+  deleteDoc: vi.fn(),
 }))
 
 vi.mock('vue', async () => ({
@@ -18,6 +30,9 @@ vi.mock('vue', async () => ({
   onBeforeUnmount: vi.fn(),
 }))
 
+const mockDeleteDoc = deleteDoc as Mock
+const mockUpdateDoc = updateDoc as Mock
+const mockAddDoc = addDoc as Mock
 const mockDoc = doc as Mock
 const mockOnSnapshot = onSnapshot as Mock
 const mockCollection = collection as Mock
@@ -28,6 +43,8 @@ const mockOnBeforeUnmount = onBeforeUnmount as Mock
 interface TestResource extends Resource {
   name: string
   count: number
+  password?: string
+  id: string
 }
 
 type Snapshot = { data: () => any; id: string }
@@ -53,11 +70,13 @@ const mockDatabase = (values: Record<string, Uploadable<TestResource>>) => {
   }[] = []
 
   // Inicializa a database
-  for (const id in values)
-    mockSnapshotDatabase[id] = {
+  const addSnapshot = (id: string) =>
+    (mockSnapshotDatabase[id] = {
       data: () => values[id],
       id: id,
-    }
+    })
+
+  for (const id in values) addSnapshot(id)
 
   // Simplifica os docs
   mockDoc.mockImplementation((_, id) => id)
@@ -117,6 +136,17 @@ const mockDatabase = (values: Record<string, Uploadable<TestResource>>) => {
     }
   )
 
+  mockAddDoc.mockImplementation((_, properties: Uploadable<TestResource>) =>
+    addDatabaseValue(properties)
+  )
+
+  const addDatabaseValue = (value: Uploadable<TestResource>) => {
+    const id = Object.keys(values).length.toString()
+
+    addSnapshot(id)
+    updateDatabaseValue(id, value)
+  }
+
   const getDatabaseValue = (id: string) =>
     parseTestSnapshot(id, mockSnapshotDatabase[id].data())
 
@@ -136,13 +166,12 @@ const mockDatabase = (values: Record<string, Uploadable<TestResource>>) => {
     }
 
     // Update all listeners
-    for (const [id, listener] of Object.entries(docListeners))
-      listener(mockSnapshotDatabase[id])
+    if (id in docListeners) docListeners[id](mockSnapshotDatabase[id])
 
     for (const { listener, query } of databaseListeners) {
       const queriedSnapshots = query(Object.values(mockSnapshotDatabase))
 
-      // If the updated snapshot is inthis query, trigger it
+      // If the updated snapshot is in this query, trigger it
       if (queriedSnapshots.some(({ id }) => id === id))
         listener({ docs: queriedSnapshots })
     }
@@ -157,9 +186,16 @@ const mockDatabase = (values: Record<string, Uploadable<TestResource>>) => {
   }
 }
 
+const mockDate = '2019-04-22T10:20:30Z'
+const RealDate = Date
+
 describe('useResourceAPI', () => {
   beforeEach(() => {
     vitest.restoreAllMocks()
+
+    global.Date = vi
+      .fn()
+      .mockReturnValue(new Date(mockDate)) as unknown as DateConstructor
 
     mockDoc.mockImplementation((collection, id) => ({ collection, id }))
     mockOnSnapshot.mockReturnValue({})
@@ -167,10 +203,51 @@ describe('useResourceAPI', () => {
     mockQuery.mockReturnValue(vitest.fn())
   })
 
+  afterEach(() => {
+    global.Date = RealDate
+  })
+
   describe('creating', () => {
-    it.todo('should not upload password or id')
-    it.todo('should correctly add createdAt and modifiedAt properties')
-    it.todo('should add the doc with the provided properties')
+    it('should not upload password or id, and should override modifiedAt and createdAt', () => {
+      const properties: TestResource = {
+        count: 1,
+        id: '1',
+        name: 'scooby',
+        password: '123',
+        createdAt: new RealDate(1999, 6),
+        modifiedAt: new RealDate(1999, 6),
+      }
+
+      const { create } = useTestResourceAPI()
+
+      create(properties)
+
+      const [, uploadedProperties] = mockAddDoc.mock.calls[0]
+
+      expect(uploadedProperties).toStrictEqual({
+        count: properties.count,
+        name: properties.name,
+        createdAt: new Date().toJSON(),
+        modifiedAt: new Date().toJSON(),
+      })
+    })
+
+    it('should add the doc with the provided properties', () => {
+      const properties = {
+        count: 1,
+        name: 'scooby',
+      }
+
+      const { indexDatabaseValues } = mockDatabase({})
+
+      const { create } = useTestResourceAPI()
+
+      create(properties)
+
+      expect(indexDatabaseValues()[0]).toStrictEqual(
+        expect.objectContaining(properties)
+      )
+    })
   })
 
   describe('updating', () => {
