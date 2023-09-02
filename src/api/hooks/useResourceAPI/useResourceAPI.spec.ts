@@ -511,7 +511,7 @@ describe('useResourceAPI', () => {
         // Ensures it initializes properly
         expect(instance.value).toStrictEqual(getDatabaseValue(testId))
 
-        instance.value = { ...instance.value!, count: 10 }
+        instance.value!.count = 10
 
         expect(instance.value).toHaveProperty('count', 10)
         expect(instance.value).toStrictEqual(getDatabaseValue(testId))

@@ -19,7 +19,7 @@ import {
   computed,
   onBeforeUnmount,
   ref,
-  type Ref
+  type Ref,
 } from 'vue'
 
 export const desyncedReadErrorMessage =
@@ -162,6 +162,7 @@ export const useResourceAPI = <R extends Resource>(
       (snapshot) => (resource.value = snapshotToResource(snapshot))
     )
 
+    // Armazena um metodo para desinscrever
     unsubscribe.resource = () => {
       isDesynced = true
       unsubscribeFirestore()
@@ -171,35 +172,48 @@ export const useResourceAPI = <R extends Resource>(
       }
     }
 
+    /** O setter do sync */
+    const set = (newValue: R | null) => {
+      // Erro se estiver desynced
+      if (isDesynced) throw new Error(desyncedWriteErrorMessage)
+
+      // Ignora se for nulo
+      if (resource.value == null) return
+
+      // Desync se receber null
+      if (newValue == null) {
+        desync('resource')
+        return
+      }
+
+      // Atualiza os dados
+      update(
+        id,
+        newValue as unknown as Omit<
+          PartialUploadable<R>,
+          'modifiedAt' | 'createdAt'
+        >
+      )
+    }
+
     return computed({
+      // O get retorna um proxy para permitir escrever o valor das propriedades diretamente
       get: () => {
         if (isDesynced) throw new Error(desyncedReadErrorMessage)
 
-        return resource.value
+        if (resource.value == null) return resource.value
+
+        return new Proxy(resource.value, {
+          set: (resource, property, newValue) => {
+            resource[property as keyof R] = newValue
+            set(resource)
+
+            return true
+          },
+        })
       },
 
-      set: (newValue) => {
-        // Erro se estiver desynced
-        if (isDesynced) throw new Error(desyncedWriteErrorMessage)
-
-        // Ignora se for nulo
-        if (resource.value == null) return
-
-        // Desync se receber null
-        if (newValue == null) {
-          desync('resource')
-          return
-        }
-
-        // Atualiza os dados
-        update(
-          id,
-          newValue as unknown as Omit<
-            PartialUploadable<R>,
-            'modifiedAt' | 'createdAt'
-          >
-        )
-      },
+      set,
     })
   }
 
