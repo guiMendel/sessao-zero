@@ -1,7 +1,6 @@
-import { Resource } from '.'
 
 /** Define os atributos de uma aventura */
-export interface Adventure extends Resource {
+export interface Adventure {
   name: string
 
   description: string
@@ -12,7 +11,7 @@ export interface Adventure extends Resource {
   pictureUrl: string
 
   /** Info da guilda */
-  guild: { name: string; id: number }
+  // guild: { name: string; id: number }
 
   /** Arquivo do banner da aventura */
   picture?: File

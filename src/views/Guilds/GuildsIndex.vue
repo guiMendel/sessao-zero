@@ -1,15 +1,17 @@
 <script lang="ts" setup>
 import { useGuildAPI } from '@/api'
 
-const { syncedGuildList: guilds, createGuild, deleteGuild } = useGuildAPI()
+const { create, syncList, deleteForever } = useGuildAPI()
 
 const newGuild = () => {
   const name = prompt('Nome da guilda')
 
   if (name == undefined) return
 
-  createGuild(name)
+  create(name)
 }
+
+const guilds = syncList()
 </script>
 
 <template>
@@ -20,7 +22,7 @@ const newGuild = () => {
       <p>{{ guild.name }}</p>
       <font-awesome-icon
         :icon="['fas', 'xmark']"
-        @click="deleteGuild(guild.id)"
+        @click="deleteForever(guild.id)"
       />
     </div>
   </div>

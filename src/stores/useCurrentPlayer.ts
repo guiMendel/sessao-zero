@@ -8,7 +8,6 @@ import {
   updatePassword,
   updateProfile,
 } from 'firebase/auth'
-import { deleteDoc, setDoc, updateDoc } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
