@@ -6,11 +6,12 @@ import {
   doc,
   onSnapshot,
   query,
+  setDoc,
   updateDoc,
   where,
 } from 'firebase/firestore'
 import { Mock } from 'vitest'
-import { Ref, onBeforeUnmount, ref } from 'vue'
+import { onBeforeUnmount, ref } from 'vue'
 import {
   desyncedReadErrorMessage,
   desyncedWriteErrorMessage,
@@ -27,6 +28,7 @@ vi.mock('firebase/firestore', () => ({
   addDoc: vi.fn(),
   updateDoc: vi.fn(),
   deleteDoc: vi.fn(),
+  setDoc: vi.fn(),
 }))
 
 vi.mock('vue', async () => ({
@@ -34,6 +36,7 @@ vi.mock('vue', async () => ({
   onBeforeUnmount: vi.fn(),
 }))
 
+const mockSetDoc = setDoc as Mock
 const mockDeleteDoc = deleteDoc as Mock
 const mockUpdateDoc = updateDoc as Mock
 const mockAddDoc = addDoc as Mock
@@ -44,17 +47,16 @@ const mockQuery = query as Mock
 const mockWhere = where as Mock
 const mockOnBeforeUnmount = onBeforeUnmount as Mock
 
-interface TestResource extends Resource {
+interface TestProperties {
   name: string
   count: number
   password?: string
-  id: string
 }
 
 type Snapshot = { data: () => any; id: string }
 type Listener<T> = (newValue: T) => void
 
-const parseTestSnapshot = (id: string, data: any) =>
+const parseTestSnapshot = (id: string, data: any): Resource<TestProperties> =>
   data && {
     count: data.count,
     name: data.name,
@@ -64,9 +66,9 @@ const parseTestSnapshot = (id: string, data: any) =>
   }
 
 const useTestResourceAPI = () =>
-  useResourceAPI<TestResource>('test-resource', parseTestSnapshot)
+  useResourceAPI<TestProperties>('test-resource', parseTestSnapshot)
 
-const mockDatabase = (values: Record<string, Uploadable<TestResource>>) => {
+const mockDatabase = (values: Record<string, Uploadable<TestProperties>>) => {
   const mockSnapshotDatabase: Record<string, Snapshot> = {}
   const docListeners: Record<string, Listener<Snapshot>> = {}
   const databaseListeners: {
@@ -74,7 +76,21 @@ const mockDatabase = (values: Record<string, Uploadable<TestResource>>) => {
     query: (snapshots: Snapshot[]) => Snapshot[]
   }[] = []
 
-  const addDatabaseValue = (value: Uploadable<TestResource>) => {
+  const alertListeners = (modifiedId: string) => {
+    // Update all listeners
+    if (modifiedId in docListeners)
+      docListeners[modifiedId](mockSnapshotDatabase[modifiedId])
+
+    for (const { listener, query } of databaseListeners) {
+      const queriedSnapshots = query(Object.values(mockSnapshotDatabase))
+
+      // If the updated snapshot is in this query, trigger it
+      if (queriedSnapshots.some(({ id }) => id === modifiedId))
+        listener({ docs: queriedSnapshots })
+    }
+  }
+
+  const addDatabaseValue = (value: Uploadable<TestProperties>) => {
     const id = Object.keys(values).length.toString()
 
     addSnapshot(id)
@@ -84,30 +100,21 @@ const mockDatabase = (values: Record<string, Uploadable<TestResource>>) => {
   const getDatabaseValue = (id: string) =>
     parseTestSnapshot(id, mockSnapshotDatabase[id]?.data())
 
-  const indexDatabaseValues = (): TestResource[] =>
+  const indexDatabaseValues = (): Resource<TestProperties>[] =>
     Object.entries(mockSnapshotDatabase).map(([id, value]) =>
       parseTestSnapshot(id, value.data())
     )
 
   const updateDatabaseValue = (
     id: string,
-    newValue: Partial<Uploadable<TestResource>>
+    newValue: Partial<TestProperties>
   ) => {
     values[id] = {
       ...values[id],
       ...newValue,
     }
 
-    // Update all listeners
-    if (id in docListeners) docListeners[id](mockSnapshotDatabase[id])
-
-    for (const { listener, query } of databaseListeners) {
-      const queriedSnapshots = query(Object.values(mockSnapshotDatabase))
-
-      // If the updated snapshot is in this query, trigger it
-      if (queriedSnapshots.some(({ id }) => id === id))
-        listener({ docs: queriedSnapshots })
-    }
+    alertListeners(id)
   }
 
   const hasListener = (id: string) => id in docListeners
@@ -181,7 +188,7 @@ const mockDatabase = (values: Record<string, Uploadable<TestResource>>) => {
     }
   )
 
-  mockAddDoc.mockImplementation((_, properties: Uploadable<TestResource>) =>
+  mockAddDoc.mockImplementation((_, properties: Uploadable<TestProperties>) =>
     addDatabaseValue(properties)
   )
 
@@ -191,6 +198,20 @@ const mockDatabase = (values: Record<string, Uploadable<TestResource>>) => {
     delete mockSnapshotDatabase[id]
     delete values[id]
   })
+
+  mockSetDoc.mockImplementation(
+    (id: string, value: Uploadable<TestProperties>) => {
+      addSnapshot(id)
+
+      values[id] = {
+        ...value,
+        createdAt: values[id]?.createdAt ?? new Date().toJSON(),
+        modifiedAt: new Date().toJSON(),
+      }
+
+      alertListeners(id)
+    }
+  )
 
   return {
     getDatabaseValue,
@@ -225,7 +246,7 @@ describe('useResourceAPI', () => {
 
   describe('creating', () => {
     it('should not upload password or id, and should override modifiedAt and createdAt', () => {
-      const properties: TestResource = {
+      const properties = {
         count: 1,
         id: '1',
         name: 'scooby',
@@ -261,6 +282,25 @@ describe('useResourceAPI', () => {
       create(properties)
 
       expect(indexDatabaseValues()[0]).toStrictEqual(
+        expect.objectContaining(properties)
+      )
+    })
+
+    it('should use the id passed as second argument', () => {
+      const id = '1'
+
+      const properties = {
+        count: 1,
+        name: 'scooby',
+      }
+
+      const { getDatabaseValue } = mockDatabase({})
+
+      const { create } = useTestResourceAPI()
+
+      create(properties, id)
+
+      expect(getDatabaseValue(id)).toStrictEqual(
         expect.objectContaining(properties)
       )
     })
@@ -323,6 +363,37 @@ describe('useResourceAPI', () => {
         expect.objectContaining(newProperties)
       )
     })
+
+    it('should set the properties when overwrite is true', () => {
+      const originalProperties = {
+        count: 1,
+        name: 'scooby',
+      }
+
+      const newProperties = {
+        count: 10,
+      }
+
+      const id = '1'
+
+      const { getDatabaseValue } = mockDatabase({
+        [id]: {
+          ...originalProperties,
+          createdAt: new Date().toJSON(),
+          modifiedAt: new Date().toJSON(),
+        },
+      })
+
+      const { update } = useTestResourceAPI()
+
+      update(id, newProperties, { overwrite: true })
+
+      expect(getDatabaseValue(id)).toStrictEqual(
+        expect.objectContaining(newProperties)
+      )
+
+      expect(getDatabaseValue(id).name).not.toBeDefined()
+    })
   })
 
   describe('syncing single', () => {
@@ -366,7 +437,7 @@ describe('useResourceAPI', () => {
 
         const { sync } = useTestResourceAPI()
 
-        const instanceRef = ref<TestResource | null>(null)
+        const instanceRef = ref<Resource<TestProperties> | null>(null)
 
         sync(id, instanceRef)
 
@@ -432,6 +503,12 @@ describe('useResourceAPI', () => {
         expect(() => instance.value).toThrow(desyncedReadErrorMessage)
         expect(hasListener(testId)).toBeTruthy()
       })
+
+      it('should handle desync when no synced resources like a champ', () => {
+        const { desync } = useTestResourceAPI()
+
+        expect(desync).not.toThrow()
+      })
     })
 
     describe('writing', () => {
@@ -458,9 +535,9 @@ describe('useResourceAPI', () => {
 
         desync()
 
-        expect(() => (instance.value = { count: 10 } as TestResource)).toThrow(
-          desyncedWriteErrorMessage
-        )
+        expect(
+          () => (instance.value = { count: 10 } as Resource<TestProperties>)
+        ).toThrow(desyncedWriteErrorMessage)
 
         // Ensures nothing changed
         expect(getDatabaseValue(testId)).toStrictEqual(oldValue)
@@ -567,7 +644,7 @@ describe('useResourceAPI', () => {
 
         const { syncList } = useTestResourceAPI()
 
-        const listRef = ref<TestResource[]>([])
+        const listRef = ref<Resource<TestProperties>[]>([])
 
         syncList([], listRef)
 
@@ -668,6 +745,12 @@ describe('useResourceAPI', () => {
         expect(() => list.value).toThrow(desyncedReadErrorMessage)
         expect(hasListListener()).toBeTruthy()
       })
+
+      it('should handle desync when no synced lists like a champ', () => {
+        const { desyncList } = useTestResourceAPI()
+
+        expect(desyncList).not.toThrow()
+      })
     })
   })
 
@@ -751,5 +834,30 @@ describe('useResourceAPI', () => {
 
     expect(() => instance.value).toThrow(desyncedReadErrorMessage)
     expect(() => list.value).toThrow(desyncedReadErrorMessage)
+  })
+
+  it('should, by default, extract all properties from document data', () => {
+    const id = '1'
+
+    const { getDatabaseValue, updateDatabaseValue } = mockDatabase({
+      [id]: {
+        name: 'scooby',
+        count: 1,
+        createdAt: new Date().toJSON(),
+        modifiedAt: new Date().toJSON(),
+      },
+    })
+
+    const { sync } = useResourceAPI<TestProperties>('test-resource')
+
+    const instance = sync(id)
+
+    // Ensures it initializes properly
+    expect(instance.value).toStrictEqual(getDatabaseValue(id))
+
+    updateDatabaseValue(id, { count: 10 })
+
+    // Ensures it synced properly
+    expect(instance.value).toStrictEqual(getDatabaseValue(id))
   })
 })

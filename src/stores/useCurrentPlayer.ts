@@ -1,5 +1,5 @@
 import { auth, usePlayerAPI } from '@/api'
-import { PartialUploadable, Player, Uploadable } from '@/types/'
+import { Player, Resource, Uploadable } from '@/types/'
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -14,21 +14,21 @@ import { ref } from 'vue'
 
 export const useCurrentPlayer = defineStore('current-player', () => {
   /** Acessa a API do firestore do player */
-  const { syncPlayer, desyncPlayer, getPlayerDocRef } = usePlayerAPI()
+  const { sync, desync, create, update, deleteForever } = usePlayerAPI()
 
-  // A instancia de player atual
-  const player = ref<Player | null>(null)
+  /** A instancia de player atual */
+  const player = ref<Resource<Player> | null>(null)
 
   // Sync do player logado
   auth.onAuthStateChanged(async (newUser) => {
     // Reset user
     if (newUser == null) {
-      desyncPlayer()
+      desync()
       player.value = null
     }
 
     // Sync to new user
-    else syncPlayer(newUser.uid, player)
+    else sync(newUser.uid, player)
   })
 
   /** Realiza login do jogador */
@@ -36,17 +36,12 @@ export const useCurrentPlayer = defineStore('current-player', () => {
     signInWithEmailAndPassword(auth, email, password)
 
   /** Cria um novo jogador */
-  const create = async ({
+  const createPlayer = async ({
     email,
     password,
     name,
     nickname,
-  }: {
-    email: string
-    password: string
-    name: string
-    nickname: string
-  }) =>
+  }: Player & { password: string }) =>
     createUserWithEmailAndPassword(auth, email, password).then(
       async ({ user }) => {
         // Set its name
@@ -63,14 +58,14 @@ export const useCurrentPlayer = defineStore('current-player', () => {
         }
 
         // Set its database entry
-        await setDoc(getPlayerDocRef(user.uid), newPlayer)
+        create(newPlayer, user.uid)
 
         return user
       }
     )
 
   /** Atualiza os dados do jogador logado */
-  const update = async (newData: Partial<Player>) => {
+  const updatePlayer = async (newData: Partial<Player>) => {
     if (auth.currentUser == null) return
 
     // Handle email change
@@ -86,25 +81,15 @@ export const useCurrentPlayer = defineStore('current-player', () => {
       await updateProfile(auth.currentUser, { displayName: newData.nickname })
 
     // Set database data
-    const databaseData: Omit<PartialUploadable<Player>, 'createdAt'> = {
-      modifiedAt: new Date().toJSON(),
-    }
-
-    if (newData.name != undefined) databaseData.name = newData.name
-    if (newData.about != undefined) databaseData.about = newData.about
-    if (newData.admin != undefined) databaseData.admin = newData.admin
-    if (newData.email != undefined) databaseData.email = newData.email
-    if (newData.nickname != undefined) databaseData.nickname = newData.nickname
-
-    return updateDoc(getPlayerDocRef(auth.currentUser.uid), databaseData)
+    return update(auth.currentUser.uid, newData)
   }
 
   /** Deleta o jogador logado */
-  const deleteForever = async () => {
+  const deletePlayer = async () => {
     if (auth.currentUser == null) return
 
     // Delete database entry
-    await deleteDoc(getPlayerDocRef(auth.currentUser.uid))
+    await deleteForever(auth.currentUser.uid)
 
     return auth.currentUser.delete()
   }
@@ -112,5 +97,12 @@ export const useCurrentPlayer = defineStore('current-player', () => {
   /** Realiza logout do jogador */
   const logout = async () => signOut(auth)
 
-  return { player, login, logout, create, update, deleteForever }
+  return {
+    player,
+    login,
+    logout,
+    create: createPlayer,
+    update: updatePlayer,
+    deleteForever: deletePlayer,
+  }
 })

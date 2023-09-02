@@ -1,7 +1,5 @@
-import { Resource } from './Resource.interface'
-
 /** Atributos de um usuario padrao, denominado "jogador" */
-export interface Player extends Resource {
+export interface Player {
   /** Nome do jogador */
   name: string
 

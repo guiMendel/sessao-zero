@@ -1,5 +1,5 @@
 import { db } from '@/api/'
-import { PartialUploadable, Resource, Uploadable } from '@/types'
+import { Resource, Uploadable } from '@/types'
 import {
   QueryFieldFilterConstraint,
   addDoc,
@@ -12,6 +12,7 @@ import {
   type DocumentData,
   type DocumentSnapshot,
   type QueryDocumentSnapshot,
+  setDoc,
 } from 'firebase/firestore'
 import {
   ComputedRef,
@@ -28,13 +29,21 @@ export const desyncedReadErrorMessage =
 export const desyncedWriteErrorMessage =
   'Tentativa de escrever em um recurso dessincronizado'
 
+const defaultExtractor = <T>(_: string, properties: DocumentData) =>
+  ({
+    ...properties,
+  } as T)
+
 /** Fornece uma interface para ler e escrever dados de um recurso no firestore, com sync
  * @param resourceName O nome do recurso a ser acessado (deve corresponder a um nome de recurso root no firestore)
  * @param extractResource Um metodo para extrair os dados do recurso dos dados de um documento do firestore
  */
-export const useResourceAPI = <R extends Resource>(
+export const useResourceAPI = <P extends Record<string, any>>(
   resourceName: string,
-  extractResource: (resourceUid: string, resourceData: DocumentData) => R
+  extractResource: (
+    resourceUid: string,
+    resourceData: DocumentData
+  ) => P = defaultExtractor
 ) => {
   // ========================================
   // UTILIDADES
@@ -46,12 +55,17 @@ export const useResourceAPI = <R extends Resource>(
   /** Extrai o recurso de um snapshot */
   const snapshotToResource = (
     doc: DocumentSnapshot<DocumentData> | QueryDocumentSnapshot<DocumentData>
-  ): R | null => {
+  ): Resource<P> | null => {
     const resourceData = doc.data()
 
     if (resourceData == undefined) return null
 
-    return extractResource(doc.id, resourceData)
+    return {
+      ...extractResource(doc.id, resourceData),
+      id: doc.id,
+      createdAt: new Date(resourceData.createdAt),
+      modifiedAt: new Date(resourceData.modifiedAt),
+    }
   }
 
   /** Obtem a referencia de documento para o id fornecido */
@@ -81,14 +95,14 @@ export const useResourceAPI = <R extends Resource>(
   }
 
   /** Cria um novo recurso */
-  const create = (
-    properties: Omit<Uploadable<R>, 'createdAt' | 'modifiedAt'>
-  ) => {
+  const create = (properties: P, useId?: string) => {
     const securedData = {
       ...secureData(properties, 'id'),
       createdAt: new Date().toJSON(),
       modifiedAt: new Date().toJSON(),
-    } as Uploadable<R>
+    } as Uploadable<P>
+
+    if (useId != undefined) return setDoc(getDoc(useId), securedData)
 
     return addDoc(resourceCollection, securedData)
   }
@@ -96,12 +110,15 @@ export const useResourceAPI = <R extends Resource>(
   /** Cria um novo recurso */
   const update = (
     id: string,
-    properties: Omit<PartialUploadable<R>, 'createdAt' | 'modifiedAt'>
+    properties: Partial<P>,
+    { overwrite } = { overwrite: false }
   ) => {
     const securedData = {
       ...secureData(properties, 'id'),
       modifiedAt: new Date().toJSON(),
-    } as PartialUploadable<R>
+    }
+
+    if (overwrite) setDoc(getDoc(id), secureData)
 
     return updateDoc(getDoc(id), securedData)
   }
@@ -112,8 +129,8 @@ export const useResourceAPI = <R extends Resource>(
 
   /** Guarda as referencias syncadas */
   const synced = {
-    resourceList: null as null | Ref<R[]>,
-    resource: null as null | Ref<R | null>,
+    resourceList: null as null | Ref<Resource<P>[]>,
+    resource: null as null | Ref<Resource<P> | null>,
   }
 
   /** Metodos para desinscrever syncs */
@@ -142,13 +159,14 @@ export const useResourceAPI = <R extends Resource>(
    */
   const sync = (
     id: string,
-    existingRef?: Ref<R | null>
-  ): WritableComputedRef<R | null> => {
+    existingRef?: Ref<Resource<P> | null>
+  ): WritableComputedRef<Resource<P> | null> => {
     // Desinscreve a ultima chamada
     unsubscribe.resource()
 
     /** Reutiliza um ref sse for fornecido */
-    const resource = existingRef ?? (ref<R | null>(null) as Ref<R | null>)
+    const resource =
+      existingRef ?? (ref<Resource<P> | null>(null) as Ref<Resource<P> | null>)
 
     // Guarda esse ref
     synced.resource = resource
@@ -173,7 +191,7 @@ export const useResourceAPI = <R extends Resource>(
     }
 
     /** O setter do sync */
-    const set = (newValue: R | null) => {
+    const set = (newValue: P | null) => {
       // Erro se estiver desynced
       if (isDesynced) throw new Error(desyncedWriteErrorMessage)
 
@@ -187,13 +205,7 @@ export const useResourceAPI = <R extends Resource>(
       }
 
       // Atualiza os dados
-      update(
-        id,
-        newValue as unknown as Omit<
-          PartialUploadable<R>,
-          'modifiedAt' | 'createdAt'
-        >
-      )
+      update(id, newValue)
     }
 
     return computed({
@@ -205,7 +217,7 @@ export const useResourceAPI = <R extends Resource>(
 
         return new Proxy(resource.value, {
           set: (resource, property, newValue) => {
-            resource[property as keyof R] = newValue
+            resource[property as keyof P] = newValue
             set(resource)
 
             return true
@@ -220,13 +232,14 @@ export const useResourceAPI = <R extends Resource>(
   /** Obtem uma lista dos recursos, filtrados */
   const syncList = (
     filters: QueryFieldFilterConstraint[] = [],
-    existingRef?: Ref<R[]>
-  ): ComputedRef<R[]> => {
+    existingRef?: Ref<Resource<P>[]>
+  ): ComputedRef<Resource<P>[]> => {
     // Desabilita ultimo sync
     unsubscribe.resourceList()
 
     /** Reutiliza um ref sse for fornecido */
-    const resourceList = existingRef ?? (ref<R[]>([]) as Ref<R[]>)
+    const resourceList =
+      existingRef ?? (ref<Resource<P>[]>([]) as Ref<Resource<P>[]>)
 
     // Guarda o ref
     synced.resourceList = resourceList
@@ -239,7 +252,9 @@ export const useResourceAPI = <R extends Resource>(
       query(resourceCollection, ...filters),
       // Map de cada resource
       (snapshot) =>
-        (resourceList.value = snapshot.docs.map(snapshotToResource) as R[])
+        (resourceList.value = snapshot.docs.map(
+          snapshotToResource
+        ) as Resource<P>[])
     )
 
     unsubscribe.resourceList = () => {

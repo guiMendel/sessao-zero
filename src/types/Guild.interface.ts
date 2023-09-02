@@ -1,7 +1,6 @@
-import { Resource } from '.'
 
 /** Defines the attributes for a regular user. May or may not contain the auth fields */
-export interface Guild extends Resource {
+export interface Guild {
   name: string
   ownerUid: string
 
