@@ -4,6 +4,8 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
+  getDocs,
   onSnapshot,
   query,
   setDoc,
@@ -29,6 +31,8 @@ vi.mock('firebase/firestore', () => ({
   updateDoc: vi.fn(),
   deleteDoc: vi.fn(),
   setDoc: vi.fn(),
+  getDoc: vi.fn(),
+  getDocs: vi.fn(),
 }))
 
 vi.mock('vue', async () => ({
@@ -36,6 +40,8 @@ vi.mock('vue', async () => ({
   onBeforeUnmount: vi.fn(),
 }))
 
+const mockGetDocs = getDocs as Mock
+const mockGetDoc = getDoc as Mock
 const mockSetDoc = setDoc as Mock
 const mockDeleteDoc = deleteDoc as Mock
 const mockUpdateDoc = updateDoc as Mock
@@ -211,6 +217,16 @@ const mockDatabase = (values: Record<string, Uploadable<TestProperties>>) => {
 
       alertListeners(id)
     }
+  )
+
+  mockGetDoc.mockImplementation(async (id: string) => mockSnapshotDatabase[id])
+
+  mockGetDocs.mockImplementation(
+    async (query?: (snapshots: Snapshot[]) => Snapshot[]) => ({
+      docs: query
+        ? query(Object.values(mockSnapshotDatabase))
+        : Object.values(mockSnapshotDatabase),
+    })
   )
 
   return {
@@ -393,6 +409,74 @@ describe('useResourceAPI', () => {
       )
 
       expect(getDatabaseValue(id).name).not.toBeDefined()
+    })
+  })
+
+  describe('getting', () => {
+    it('with get should get the appropriate value', () => {
+      const id = '1'
+
+      const { getDatabaseValue } = mockDatabase({
+        [id]: {
+          name: 'scooby',
+          count: 1,
+          createdAt: new Date().toJSON(),
+          modifiedAt: new Date().toJSON(),
+        },
+      })
+
+      const { get } = useTestResourceAPI()
+
+      expect(get(id)).resolves.toStrictEqual(getDatabaseValue(id))
+    })
+
+    it('with getList and no filters should get all the docs', () => {
+      const { indexDatabaseValues } = mockDatabase({
+        '1': {
+          name: 'scooby',
+          count: 1,
+          createdAt: new Date().toJSON(),
+          modifiedAt: new Date().toJSON(),
+        },
+        '2': {
+          name: 'snacks',
+          count: 5,
+          createdAt: new Date().toJSON(),
+          modifiedAt: new Date().toJSON(),
+        },
+      })
+
+      const { getList } = useTestResourceAPI()
+
+      expect(getList()).resolves.toStrictEqual(indexDatabaseValues())
+    })
+
+    it('with getList should appropriately filter the docs', async () => {
+      const { indexDatabaseValues } = mockDatabase({
+        '1': {
+          name: 'scooby',
+          count: 1,
+          createdAt: new Date().toJSON(),
+          modifiedAt: new Date().toJSON(),
+        },
+        '2': {
+          name: 'snacks',
+          count: 5,
+          createdAt: new Date().toJSON(),
+          modifiedAt: new Date().toJSON(),
+        },
+      })
+
+      const { getList } = useTestResourceAPI()
+
+      const expectedResult = indexDatabaseValues().filter(
+        ({ count }) => count === 5
+      )
+
+      const list = await getList([where('count', '==', 5)])
+
+      expect(list).toStrictEqual(expectedResult)
+      expect(list).not.toStrictEqual(indexDatabaseValues())
     })
   })
 

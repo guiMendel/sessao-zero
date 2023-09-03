@@ -13,6 +13,8 @@ import {
   type DocumentSnapshot,
   type QueryDocumentSnapshot,
   setDoc,
+  getDoc as firestoreGetDoc,
+  getDocs as firestoreGetDocs,
 } from 'firebase/firestore'
 import {
   ComputedRef,
@@ -124,7 +126,21 @@ export const useResourceAPI = <P extends Record<string, any>>(
   }
 
   // ========================================
-  // READ & SYNC
+  // READ
+  // ========================================
+
+  /** Pega uma instancia do recurso */
+  const get = (id: string) =>
+    firestoreGetDoc(getDoc(id)).then(snapshotToResource)
+
+  /** Pega uma lsita filtrada do recurso */
+  const getList = (filters: QueryFieldFilterConstraint[] = []) =>
+    firestoreGetDocs(query(resourceCollection, ...filters)).then(
+      (snapshot) => snapshot.docs.map(snapshotToResource) as Resource<P>[]
+    )
+
+  // ========================================
+  // SYNC
   // ========================================
 
   /** Guarda as referencias syncadas */
@@ -297,6 +313,8 @@ export const useResourceAPI = <P extends Record<string, any>>(
     update,
 
     // Read & Sync
+    get,
+    getList,
     sync,
     syncList,
     desync: () => desync('resource'),

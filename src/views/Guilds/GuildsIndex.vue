@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { useGuildAPI } from '@/api'
+import { useGuildAPI, usePlayerAPI } from '@/api'
+import { Guild } from '@/types'
 
 const { create, syncList, deleteForever } = useGuildAPI()
 
@@ -11,6 +12,14 @@ const newGuild = () => {
   create(name)
 }
 
+const { get: getPlayer } = usePlayerAPI()
+
+const getGuildOwnerName = async (guild: Guild) => {
+  return getPlayer(guild.ownerUid).then((player) =>
+    player ? player.name : 'No Owner'
+  )
+}
+
 const guilds = syncList()
 </script>
 
@@ -19,6 +28,7 @@ const guilds = syncList()
     <button @click="newGuild">New Guild</button>
 
     <div class="guild" v-for="guild in guilds" :key="guild.id">
+      <b>{{ getGuildOwnerName(guild) }}</b> —
       <p>{{ guild.name }}</p>
       <font-awesome-icon
         :icon="['fas', 'xmark']"

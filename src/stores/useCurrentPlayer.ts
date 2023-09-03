@@ -1,4 +1,4 @@
-import { auth, usePlayerAPI } from '@/api'
+import { auth, useResourceAPI } from '@/api'
 import { Player, Resource, Uploadable } from '@/types/'
 import {
   createUserWithEmailAndPassword,
@@ -13,7 +13,8 @@ import { ref } from 'vue'
 
 export const useCurrentPlayer = defineStore('current-player', () => {
   /** Acessa a API do firestore do player */
-  const { sync, desync, create, update, deleteForever } = usePlayerAPI()
+  const { sync, desync, create, update, deleteForever } =
+    useResourceAPI<Player>('players')
 
   /** A instancia de player atual */
   const player = ref<Resource<Player> | null>(null)
