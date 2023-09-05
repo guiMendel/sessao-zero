@@ -1,13 +1,13 @@
 import { Resource } from '@/types'
 import {
+  CollectionReference,
+  DocumentReference,
   QueryFieldFilterConstraint,
   onSnapshot,
   query,
   type DocumentData,
   type DocumentSnapshot,
   type QueryDocumentSnapshot,
-  DocumentReference,
-  CollectionReference,
 } from 'firebase/firestore'
 import { ComputedRef, WritableComputedRef, computed, ref, type Ref } from 'vue'
 

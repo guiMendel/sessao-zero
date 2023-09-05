@@ -1,6 +1,6 @@
 import { Resource } from '@/types'
-import { RelationBuilder } from '..'
 import { Ref, ref } from 'vue'
+import { RelationBuilder } from '..'
 
 export type SmartRelation<T> = Ref<Resource<T> | undefined> & {
   triggerSync: () => void

@@ -14,21 +14,15 @@ import {
   doc,
   getDoc as firestoreGetDoc,
   getDocs as firestoreGetDocs,
-  onSnapshot,
   query,
   setDoc,
   updateDoc,
   type DocumentData,
   type DocumentSnapshot,
-  type QueryDocumentSnapshot,
+  type QueryDocumentSnapshot
 } from 'firebase/firestore'
 import {
-  ComputedRef,
-  WritableComputedRef,
-  computed,
-  onBeforeUnmount,
-  ref,
-  type Ref,
+  onBeforeUnmount
 } from 'vue'
 
 const defaultOptions = {
