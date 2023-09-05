@@ -4,15 +4,18 @@ import { SmartRelation } from '.'
 export type Relation<T> = SmartRelation<T>
 
 /** Constroi um objeto de relacoes a partir dos builders fornecidos */
-export const buildRelations = (
+export const buildRelations = <
+  P extends Record<string, any>,
+  R extends Record<string, RelationBuilder<P, unknown>>
+>(
   builders: Record<string, RelationBuilder<unknown, unknown>>
-): Record<string, Relation<unknown>> =>
+): { [relation in keyof R]: ReturnType<R[relation]['build']> } =>
   Object.entries(builders).reduce(
     (relations, [relationName, builder]) => ({
       ...relations,
       [relationName]: builder.build(),
     }),
-    {} as Record<string, Relation<unknown>>
+    {} as { [relation in keyof R]: ReturnType<R[relation]['build']> }
   )
 
 /** Um construtor generico de relacoes */
