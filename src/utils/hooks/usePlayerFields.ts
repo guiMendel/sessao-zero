@@ -1,4 +1,4 @@
-import { Field } from '@/types/Field.interface'
+import { Field } from '@/types/Field'
 import { useLocalStorage } from '@vueuse/core'
 import { ref, watch, type Ref } from 'vue'
 

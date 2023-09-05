@@ -1,4 +1,4 @@
-import { db } from '@/api/'
+import { RelationBuilder, buildRelations, db } from '@/api/'
 import { Resource, Uploadable } from '@/types'
 import {
   QueryFieldFilterConstraint,
@@ -6,15 +6,15 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc as firestoreGetDoc,
+  getDocs as firestoreGetDocs,
   onSnapshot,
   query,
+  setDoc,
   updateDoc,
   type DocumentData,
   type DocumentSnapshot,
   type QueryDocumentSnapshot,
-  setDoc,
-  getDoc as firestoreGetDoc,
-  getDocs as firestoreGetDocs,
 } from 'firebase/firestore'
 import {
   ComputedRef,
@@ -31,22 +31,37 @@ export const desyncedReadErrorMessage =
 export const desyncedWriteErrorMessage =
   'Tentativa de escrever em um recurso dessincronizado'
 
-const defaultExtractor = <T>(_: string, properties: DocumentData) =>
-  ({
-    ...properties,
-  } as T)
+const defaultOptions = {
+  propertiesExtractor: <T>(_: string, documentData: DocumentData): T =>
+    ({
+      ...documentData,
+    } as T),
+  relations: {},
+}
 
 /** Fornece uma interface para ler e escrever dados de um recurso no firestore, com sync
  * @param resourceName O nome do recurso a ser acessado (deve corresponder a um nome de recurso root no firestore)
- * @param extractResource Um metodo para extrair os dados do recurso dos dados de um documento do firestore
+ * @param extractProperties Um metodo para extrair os dados do recurso dos dados de um documento do firestore
  */
-export const useResourceAPI = <P extends Record<string, any>>(
+export const useResourceAPI = <
+  P extends Record<string, any>,
+  R extends Record<string, RelationBuilder<P, unknown>>
+>(
   resourceName: string,
-  extractResource: (
-    resourceUid: string,
-    resourceData: DocumentData
-  ) => P = defaultExtractor
+  options?: {
+    propertiesExtractor?: (id: string, documentData: DocumentData) => P
+    relations?: R
+  }
 ) => {
+  const extractProperties =
+    options?.propertiesExtractor ?? defaultOptions.propertiesExtractor
+
+  const relationBuilders = options?.relations ?? defaultOptions.relations
+
+  type PWithRelations = P & {
+    [relation in keyof R]: ReturnType<R[relation]['build']>
+  }
+
   // ========================================
   // UTILIDADES
   // ========================================
@@ -57,16 +72,19 @@ export const useResourceAPI = <P extends Record<string, any>>(
   /** Extrai o recurso de um snapshot */
   const snapshotToResource = (
     doc: DocumentSnapshot<DocumentData> | QueryDocumentSnapshot<DocumentData>
-  ): Resource<P> | null => {
-    const resourceData = doc.data()
+  ): Resource<PWithRelations> | null => {
+    const documentData = doc.data()
 
-    if (resourceData == undefined) return null
+    if (documentData == undefined) return null
 
     return {
-      ...extractResource(doc.id, resourceData),
+      // Adiciona as propriedades
+      ...extractProperties(doc.id, documentData),
+      // Adiciona as relacoes
+      ...buildRelations(relationBuilders),
       id: doc.id,
-      createdAt: new Date(resourceData.createdAt),
-      modifiedAt: new Date(resourceData.modifiedAt),
+      createdAt: new Date(documentData.createdAt),
+      modifiedAt: new Date(documentData.modifiedAt),
     }
   }
 
@@ -176,7 +194,7 @@ export const useResourceAPI = <P extends Record<string, any>>(
   const sync = (
     id: string,
     existingRef?: Ref<Resource<P> | null>
-  ): WritableComputedRef<Resource<P> | null> => {
+  ): WritableComputedRef<Resource<PWithRelations> | null> => {
     // Desinscreve a ultima chamada
     unsubscribe.resource()
 
@@ -249,7 +267,7 @@ export const useResourceAPI = <P extends Record<string, any>>(
   const syncList = (
     filters: QueryFieldFilterConstraint[] = [],
     existingRef?: Ref<Resource<P>[]>
-  ): ComputedRef<Resource<P>[]> => {
+  ): ComputedRef<Resource<PWithRelations>[]> => {
     // Desabilita ultimo sync
     unsubscribe.resourceList()
 

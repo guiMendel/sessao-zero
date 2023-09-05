@@ -1,10 +1,20 @@
 import { useCurrentPlayer } from '@/stores'
-import { Guild } from '@/types/'
+import { Guild, Player } from '@/types/'
 import { storeToRefs } from 'pinia'
+import { SmartRelationBuilder } from '..'
 import { useResourceAPI } from './useResourceAPI'
 
 export const useGuildAPI = () => {
-  const api = useResourceAPI<Guild>('guilds')
+  const api = useResourceAPI<
+    Guild,
+    { owner: SmartRelationBuilder<Guild, Player> }
+  >('guilds', {
+    relations: {
+      owner: new SmartRelationBuilder<Guild, Player>('players', {
+        foreignKey: 'ownerUid',
+      }),
+    },
+  })
 
   /** Consome o player atual */
   const { player } = storeToRefs(useCurrentPlayer())

@@ -1,6 +1,6 @@
 import { Meta, StoryFn } from '@storybook/vue3'
 import { InputField } from '.'
-import { Field } from '@/types/Field.interface'
+import { Field } from '@/types/Field'
 import { ref } from 'vue'
 
 const meta = {
