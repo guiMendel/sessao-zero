@@ -1,11 +1,12 @@
 import {
+  CleanupManager,
   RelationBuilder,
   buildRelations,
   db,
   getResourceSynchronizer,
   snapshotToResource as originalSnapshotToResource,
 } from '@/api/'
-import { Resource, Uploadable } from '@/types'
+import { Resource, ResourceProperties, Uploadable } from '@/types'
 import {
   QueryFieldFilterConstraint,
   addDoc,
@@ -19,11 +20,9 @@ import {
   updateDoc,
   type DocumentData,
   type DocumentSnapshot,
-  type QueryDocumentSnapshot
+  type QueryDocumentSnapshot,
 } from 'firebase/firestore'
-import {
-  onBeforeUnmount
-} from 'vue'
+import { onBeforeUnmount } from 'vue'
 
 const defaultOptions = {
   propertiesExtractor: <T>(_: string, documentData: DocumentData): T =>
@@ -33,15 +32,16 @@ const defaultOptions = {
   relations: {},
 }
 
-/** Fornece uma interface para ler e escrever dados de um recurso no firestore, com sync
- * @param resourceName O nome do recurso a ser acessado (deve corresponder a um nome de recurso root no firestore)
+/** Fornece uma interface para ler e escrever dados de um recurso no firestore, com sync.
+ * P para Properties, R para Relations
+ * @param resourcePath O caminho do recurso no firestore
  * @param extractProperties Um metodo para extrair os dados do recurso dos dados de um documento do firestore
  */
 export const useResourceAPI = <
-  P extends Record<string, any>,
-  R extends Record<string, RelationBuilder<P, unknown>>
+  P extends ResourceProperties,
+  R extends Record<string, RelationBuilder<P, ResourceProperties>>
 >(
-  resourceName: string,
+  resourcePath: string,
   options?: {
     propertiesExtractor?: (id: string, documentData: DocumentData) => P
     relations?: R
@@ -61,7 +61,10 @@ export const useResourceAPI = <
   // ========================================
 
   /** A collection deste recurso */
-  const resourceCollection = collection(db, resourceName)
+  const resourceCollection = collection(db, resourcePath)
+
+  /** Gerenciador de cleanups desta instancia */
+  const cleanupManger = new CleanupManager()
 
   /** Extrai o recurso de um snapshot */
   const snapshotToResource = (
@@ -69,7 +72,7 @@ export const useResourceAPI = <
   ): Resource<PWithRelations> | null =>
     originalSnapshotToResource(doc, {
       extractProperties,
-      inject: buildRelations<P, R>(relationBuilders),
+      inject: buildRelations<P, R>(relationBuilders, cleanupManger),
     })
 
   /** Obtem a referencia de documento para o id fornecido */
@@ -146,26 +149,26 @@ export const useResourceAPI = <
   // ========================================
 
   /** Pega os metodos de sync */
-  const { desync, sync, syncList } = getResourceSynchronizer({
-    getDoc,
-    resourceCollection,
+  const { desync, sync, syncList } = getResourceSynchronizer(resourcePath, {
     snapshotToResource,
     update,
   })
 
-  // ==================
-  // === DELETE
-  // ==================
+  // ========================================
+  // DELETE
+  // ========================================
 
   // Deleta o recurso permanentemente
   const deleteForever = async (id: string) => deleteDoc(getDoc(id))
 
-  // ==================
-  // === CLEAN UP
-  // ==================
+  // ========================================
+  // CLEAN UP
+  // ========================================
+
+  cleanupManger.add(() => desync('all'))
 
   // Desinscreve tudo
-  onBeforeUnmount(() => desync('all'))
+  onBeforeUnmount(() => cleanupManger.cleanup())
 
   return {
     // Utilidades

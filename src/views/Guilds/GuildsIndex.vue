@@ -29,7 +29,7 @@ const guilds = syncList()
 
     <div class="guild" v-for="guild in guilds" :key="guild.id">
       <b>{{ getGuildOwnerName(guild) }}</b> —
-      <p>{{ guild.owner. }}</p>
+      <!-- <p>{{ guild.owner.value. }}</p> -->
       <font-awesome-icon
         :icon="['fas', 'xmark']"
         @click="deleteForever(guild.id)"

@@ -1,35 +1,49 @@
-import { ResourceType } from '@/types'
+import { ResourcePaths, ResourceProperties } from '@/types'
 import { SmartRelation } from '.'
+import { CleanupManager } from '..'
+
+export interface RelationPrototype {
+  _cleanup: Array<() => void>
+}
 
 export type Relation<T> = SmartRelation<T>
 
 /** Constroi um objeto de relacoes a partir dos builders fornecidos */
 export const buildRelations = <
-  P extends Record<string, any>,
-  R extends Record<string, RelationBuilder<P, unknown>>
+  P extends ResourceProperties,
+  R extends Record<string, RelationBuilder<P, ResourceProperties>>
 >(
-  builders: Record<string, RelationBuilder<unknown, unknown>>
+  builders: Record<
+    string,
+    RelationBuilder<ResourceProperties, ResourceProperties>
+  >,
+  cleanupManager: CleanupManager
 ): { [relation in keyof R]: ReturnType<R[relation]['build']> } =>
   Object.entries(builders).reduce(
     (relations, [relationName, builder]) => ({
       ...relations,
-      [relationName]: builder.build(),
+      [relationName]: builder.build(cleanupManager),
     }),
     {} as { [relation in keyof R]: ReturnType<R[relation]['build']> }
   )
 
-/** Um construtor generico de relacoes */
-export abstract class RelationBuilder<S, T> {
-  resourcePath: ResourceType
+/** Um construtor generico de relacoes
+ * S para Source, T para Target
+ */
+export abstract class RelationBuilder<
+  S extends ResourceProperties,
+  T extends ResourceProperties
+> {
+  resourcePath: ResourcePaths
   relationDefinition: { foreignKey: keyof S }
 
   constructor(
-    resourcePath: ResourceType,
+    resourcePath: ResourcePaths,
     relationDefinition: { foreignKey: keyof S }
   ) {
     this.resourcePath = resourcePath
     this.relationDefinition = relationDefinition
   }
 
-  public abstract build(): Relation<T>
+  public abstract build(cleanupManager: CleanupManager): Relation<T>
 }

@@ -1,13 +1,14 @@
-import { Resource } from '@/types'
+import { db } from '@/api'
+import { Resource, ResourceProperties } from '@/types'
 import {
-  CollectionReference,
-  DocumentReference,
+  DocumentData,
+  DocumentSnapshot,
+  QueryDocumentSnapshot,
   QueryFieldFilterConstraint,
+  collection,
+  doc,
   onSnapshot,
   query,
-  type DocumentData,
-  type DocumentSnapshot,
-  type QueryDocumentSnapshot,
 } from 'firebase/firestore'
 import { ComputedRef, WritableComputedRef, computed, ref, type Ref } from 'vue'
 
@@ -23,7 +24,7 @@ export const desyncedWriteErrorMessage =
 
 type DesyncMethod = (target: 'resourceList' | 'resource' | 'all') => void
 
-type SyncListMethod<P extends Record<string, any>> = (
+type SyncListMethod<P extends ResourceProperties> = (
   filters?: QueryFieldFilterConstraint[],
   existingRef?: Ref<Resource<P>[]> | undefined
 ) => ComputedRef<Resource<P>[]>
@@ -32,7 +33,7 @@ type SyncListMethod<P extends Record<string, any>> = (
 // TIPOS DOS PARAMETROS
 // ====================================
 
-type UpdateMethod<P extends Record<string, any>> = (
+type UpdateMethod<P extends ResourceProperties> = (
   id: string,
   properties: Partial<P>,
   options?: {
@@ -40,19 +41,18 @@ type UpdateMethod<P extends Record<string, any>> = (
   }
 ) => Promise<void>
 
-type GetResourceSynchronizerParams<P extends Record<string, any>> = {
+type GetResourceSynchronizerParams<P extends ResourceProperties> = {
   snapshotToResource: (
     doc: DocumentSnapshot<DocumentData> | QueryDocumentSnapshot<DocumentData>
   ) => Resource<P> | null
-  getDoc: (id: string) => DocumentReference<DocumentData, DocumentData>
-  resourceCollection: CollectionReference<DocumentData, DocumentData>
 }
 
 // ====================================
 // OVERLOADS
 // ====================================
 
-function getResourceSynchronizer<P extends Record<string, any>>(
+function getResourceSynchronizer<P extends ResourceProperties>(
+  resourcePath: string,
   props: GetResourceSynchronizerParams<P>
 ): {
   sync: (
@@ -63,7 +63,8 @@ function getResourceSynchronizer<P extends Record<string, any>>(
   syncList: SyncListMethod<P>
 }
 
-function getResourceSynchronizer<P extends Record<string, any>>(
+function getResourceSynchronizer<P extends ResourceProperties>(
+  resourcePath: string,
   props: GetResourceSynchronizerParams<P> & { update: UpdateMethod<P> }
 ): {
   sync: (
@@ -78,12 +79,19 @@ function getResourceSynchronizer<P extends Record<string, any>>(
 // IMPLEMENTACAO
 // ====================================
 
-function getResourceSynchronizer<P extends Record<string, any>>({
-  getDoc,
-  snapshotToResource,
-  update,
-  resourceCollection,
-}: GetResourceSynchronizerParams<P> & { update?: UpdateMethod<P> }) {
+function getResourceSynchronizer<P extends ResourceProperties>(
+  resourcePath: string,
+  {
+    snapshotToResource,
+    update,
+  }: GetResourceSynchronizerParams<P> & { update?: UpdateMethod<P> }
+) {
+  /** A collection deste recurso */
+  const resourceCollection = collection(db, resourcePath)
+
+  /** Obtem a referencia de documento para o id fornecido */
+  const getDoc = (id: string) => doc(resourceCollection, id)
+
   /** Guarda as referencias syncadas */
   const synced = {
     resourceList: null as null | Ref<Resource<P>[]>,

@@ -1,36 +1,37 @@
-import { Resource } from '@/types'
+import { PropertyExtractor } from '@/api/constants/propertyExtractors'
+import { Resource, ResourceProperties } from '@/types'
 import {
   DocumentData,
   DocumentSnapshot,
   QueryDocumentSnapshot,
 } from 'firebase/firestore'
 
-function snapshotToResource<P extends Record<string, any>>(
+function snapshotToResource<P extends ResourceProperties>(
   doc: DocumentSnapshot<DocumentData> | QueryDocumentSnapshot<DocumentData>,
   options: {
-    extractProperties: (id: string, documentData: DocumentData) => P
+    extractProperties: PropertyExtractor<P>
   }
 ): Resource<P> | null
 
 function snapshotToResource<
-  P extends Record<string, any>,
+  P extends ResourceProperties,
   I extends Record<string, any>
 >(
   doc: DocumentSnapshot<DocumentData> | QueryDocumentSnapshot<DocumentData>,
   options: {
-    extractProperties: (id: string, documentData: DocumentData) => P
+    extractProperties: PropertyExtractor<P>
     inject: I
   }
 ): Resource<P & I> | null
 
 /** Extrai o recurso de um snapshot */
 function snapshotToResource<
-  P extends Record<string, any>,
+  P extends ResourceProperties,
   I extends Record<string, any>
 >(
   doc: DocumentSnapshot<DocumentData> | QueryDocumentSnapshot<DocumentData>,
   options: {
-    extractProperties: (id: string, documentData: DocumentData) => P
+    extractProperties: PropertyExtractor<P>
     inject?: I
   }
 ) {
