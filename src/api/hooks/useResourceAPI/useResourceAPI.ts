@@ -170,7 +170,7 @@ export const useResourceAPI = <
   cleanupManger.add(() => desync('all'))
 
   // Desinscreve tudo
-  onBeforeUnmount(() => cleanupManger.cleanup())
+  onBeforeUnmount(() => cleanupManger.dispose())
 
   return {
     // Utilidades

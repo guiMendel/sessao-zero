@@ -1,33 +1,29 @@
-import { db } from '@/api'
+import { CleanupManager, SyncableRef, db, syncableRef } from '@/api'
 import { Resource, ResourceProperties } from '@/types'
 import {
-  DocumentData,
+  DocumentReference,
   DocumentSnapshot,
-  QueryDocumentSnapshot,
+  Query,
   QueryFieldFilterConstraint,
+  QuerySnapshot,
   collection,
   doc,
-  onSnapshot,
   query,
 } from 'firebase/firestore'
-import { ComputedRef, WritableComputedRef, computed, ref, type Ref } from 'vue'
-
-export const desyncedReadErrorMessage =
-  'Tentativa de ler um recurso dessincronizado'
-
-export const desyncedWriteErrorMessage =
-  'Tentativa de escrever em um recurso dessincronizado'
 
 // ====================================
 // TIPOS DO RETURN
 // ====================================
 
-type DesyncMethod = (target: 'resourceList' | 'resource' | 'all') => void
-
 type SyncListMethod<P extends ResourceProperties> = (
   filters?: QueryFieldFilterConstraint[],
-  existingRef?: Ref<Resource<P>[]> | undefined
-) => ComputedRef<Resource<P>[]>
+  existingRef?: SyncableRef<P, Query>
+) => SyncableRef<P, Query>
+
+type SyncMethod<P extends ResourceProperties> = (
+  id: string,
+  existingRef?: SyncableRef<P, DocumentReference>
+) => SyncableRef<P, DocumentReference>
 
 // ====================================
 // TIPOS DOS PARAMETROS
@@ -42,9 +38,11 @@ type UpdateMethod<P extends ResourceProperties> = (
 ) => Promise<void>
 
 type GetResourceSynchronizerParams<P extends ResourceProperties> = {
-  snapshotToResource: (
-    doc: DocumentSnapshot<DocumentData> | QueryDocumentSnapshot<DocumentData>
-  ) => Resource<P> | null
+  snapshotToResources: (
+    content: DocumentSnapshot | QuerySnapshot,
+    previousValues: Resource<P>[]
+  ) => Resource<P>[]
+  cleanupManager: CleanupManager
 }
 
 // ====================================
@@ -55,11 +53,7 @@ function getResourceSynchronizer<P extends ResourceProperties>(
   resourcePath: string,
   props: GetResourceSynchronizerParams<P>
 ): {
-  sync: (
-    id: string,
-    existingRef?: Ref<Resource<P> | null> | undefined
-  ) => ComputedRef<Resource<P> | null>
-  desync: DesyncMethod
+  sync: SyncMethod<P>
   syncList: SyncListMethod<P>
 }
 
@@ -67,11 +61,7 @@ function getResourceSynchronizer<P extends ResourceProperties>(
   resourcePath: string,
   props: GetResourceSynchronizerParams<P> & { update: UpdateMethod<P> }
 ): {
-  sync: (
-    id: string,
-    existingRef?: Ref<Resource<P> | null> | undefined
-  ) => WritableComputedRef<Resource<P> | null>
-  desync: DesyncMethod
+  sync: SyncMethod<P>
   syncList: SyncListMethod<P>
 }
 
@@ -82,176 +72,87 @@ function getResourceSynchronizer<P extends ResourceProperties>(
 function getResourceSynchronizer<P extends ResourceProperties>(
   resourcePath: string,
   {
-    snapshotToResource,
-    update,
+    snapshotToResources,
+    // update,
+    cleanupManager,
   }: GetResourceSynchronizerParams<P> & { update?: UpdateMethod<P> }
-) {
+): { sync: SyncMethod<P>; syncList: SyncListMethod<P> } {
   /** A collection deste recurso */
   const resourceCollection = collection(db, resourcePath)
 
   /** Obtem a referencia de documento para o id fornecido */
   const getDoc = (id: string) => doc(resourceCollection, id)
 
-  /** Guarda as referencias syncadas */
-  const synced = {
-    resourceList: null as null | Ref<Resource<P>[]>,
-    resource: null as null | Ref<Resource<P> | null>,
-  }
+  /** Gera um sync em doc ou query */
+  const makeSync = <M extends DocumentReference | Query>(
+    target: M,
+    existingRef?: SyncableRef<P, M>
+  ) => {
+    // Se recebemos um ref, basta mudar seu target
+    if (existingRef != undefined) {
+      existingRef.updateTarget(target)
 
-  /** Metodos para desinscrever syncs */
-  const unsubscribe = {
-    /** Desinscreve o sync da lista dos recursos */
-    resourceList: () => {},
-    /** Desinscreve o sync de um recurso especifico */
-    resource: () => {},
-  }
-
-  /** Desinscreve um sync de recurso ou de lista de recursos */
-  const desync = (target: keyof typeof unsubscribe | 'all') => {
-    if (target === 'all') {
-      desync('resource')
-      desync('resourceList')
-      return
+      return existingRef
     }
 
-    unsubscribe[target]()
-    unsubscribe[target] = () => {}
+    // Cria um novo syncable
+    const newRef = syncableRef<P, M>(target, snapshotToResources)
+
+    // Adiciona ele ao cleanup to escopo atual
+    cleanupManager.add(() => newRef.dispose())
+
+    return newRef
   }
 
-  /** Obtem um recurso a partir de seu id
-   * @param id O id do recurso alvo
-   * @param existingRef Um ref para utilizar na sincronizacao
-   */
-  const sync = (
-    id: string,
-    existingRef?: Ref<Resource<P> | null>
-  ):
-    | WritableComputedRef<Resource<P> | null>
-    | ComputedRef<Resource<P> | null> => {
-    console.log('sync for', resourcePath, ' with id ', id)
+  return {
+    /** Obtem um recurso a partir de seu id
+     * @param id O id do recurso alvo
+     * @param existingRef Um ref para utilizar na sincronizacao
+     */
+    sync: (id, existingRef) => makeSync(getDoc(id), existingRef),
 
-    // Desinscreve a ultima chamada
-    unsubscribe.resource()
-
-    /** Reutiliza um ref sse for fornecido */
-    const resource =
-      existingRef ?? (ref<Resource<P> | null>(null) as Ref<Resource<P> | null>)
-
-    // Guarda esse ref
-    synced.resource = resource
-
-    /** Informa se esta chamada foi dessincronizada */
-    let isDesynced = false
-
-    // Inicia o sync
-    const unsubscribeFirestore = onSnapshot(
-      getDoc(id),
-      (snapshot) => (resource.value = snapshotToResource(snapshot))
-    )
-
-    // Armazena um metodo para desinscrever
-    unsubscribe.resource = () => {
-      isDesynced = true
-      unsubscribeFirestore()
-      if (synced.resource) {
-        synced.resource.value = null
-        synced.resource = null
-      }
-    }
-
-    // Se nao eh writable, retorna um mais simples
-    if (update == null) {
-      return computed(() => {
-        if (isDesynced) throw new Error(desyncedReadErrorMessage)
-
-        return resource.value
-      })
-    }
-
-    /** O setter do sync */
-    const set = (newValue: P | null) => {
-      // Erro se estiver desynced
-      if (isDesynced) throw new Error(desyncedWriteErrorMessage)
-
-      // Ignora se for nulo
-      if (resource.value == null) return
-
-      // Desync se receber null
-      if (newValue == null) {
-        desync('resource')
-        return
-      }
-
-      // Atualiza os dados
-      update(id, newValue)
-    }
-
-    return computed({
-      // O get retorna um proxy para permitir escrever o valor das propriedades diretamente
-      get: () => {
-        if (isDesynced) throw new Error(desyncedReadErrorMessage)
-
-        if (resource.value == null) return resource.value
-
-        return new Proxy(resource.value, {
-          set: (resource, property, newValue) => {
-            resource[property as keyof P] = newValue
-            set(resource)
-
-            return true
-          },
-        })
-      },
-
-      set,
-    })
+    /** Obtem uma lista dos recursos, filtrados */
+    syncList: (filters = [], existingRef) =>
+      makeSync(query(resourceCollection, ...filters), existingRef),
   }
-
-  /** Obtem uma lista dos recursos, filtrados */
-  const syncList = (
-    filters: QueryFieldFilterConstraint[] = [],
-    existingRef?: Ref<Resource<P>[]>
-  ): ComputedRef<Resource<P>[]> => {
-    // Desabilita ultimo sync
-    unsubscribe.resourceList()
-
-    /** Reutiliza um ref sse for fornecido */
-    const resourceList =
-      existingRef ?? (ref<Resource<P>[]>([]) as Ref<Resource<P>[]>)
-
-    // Guarda o ref
-    synced.resourceList = resourceList
-
-    /** Informa se esta chamada foi dessincronizada */
-    let isDesynced = false
-
-    // Reinicia o sync
-    const unsubscribeFirestore = onSnapshot(
-      query(resourceCollection, ...filters),
-      // Map de cada resource
-      (snapshot) =>
-        (resourceList.value = snapshot.docs.map(
-          snapshotToResource
-        ) as Resource<P>[])
-    )
-
-    unsubscribe.resourceList = () => {
-      isDesynced = true
-      unsubscribeFirestore()
-      if (synced.resourceList) {
-        synced.resourceList.value = []
-        synced.resourceList = null
-      }
-    }
-
-    return computed(() => {
-      if (isDesynced) throw new Error(desyncedReadErrorMessage)
-
-      return resourceList.value
-    })
-  }
-
-  return { sync, syncList, desync }
 }
 
 export { getResourceSynchronizer }
+
+/** O setter do sync */
+// const set = (newValue: P | null) => {
+//   // Erro se estiver desynced
+//   if (isDesynced) throw new Error(desyncedWriteErrorMessage)
+
+//   // Ignora se for nulo
+//   if (resource.value == null) return
+
+//   // Desync se receber null
+//   if (newValue == null) {
+//     desync('resource')
+//     return
+//   }
+
+//   // Atualiza os dados
+//   update(id, newValue)
+// }
+
+// return computed({
+//   // O get retorna um proxy para permitir escrever o valor das propriedades diretamente
+//   get: () => {
+//     if (isDesynced) throw new Error(desyncedReadErrorMessage)
+
+//     if (resource.value == null) return resource.value
+
+//     return new Proxy(resource.value, {
+//       set: (resource, property, newValue) => {
+//         resource[property as keyof P] = newValue
+//         set(resource)
+
+//         return true
+//       },
+//     })
+//   },
+
+//   set,
+// })
