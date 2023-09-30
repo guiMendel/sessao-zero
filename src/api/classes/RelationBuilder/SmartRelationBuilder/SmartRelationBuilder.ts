@@ -25,7 +25,7 @@ export class SmartRelationBuilder<
   S extends ResourceProperties,
   T extends ResourceProperties
 > extends RelationBuilder<S, T> {
-  public build(cleanupManager: CleanupManager): SmartRelation<T> {
+  public build(source: S, cleanupManager: CleanupManager): SmartRelation<T> {
     /** A referencia que sera sincronizada */
     const resource = ref<Resource<T> | null>(null) as Ref<Resource<T> | null>
 
@@ -57,7 +57,10 @@ export class SmartRelationBuilder<
 
       state = 'synced'
 
-      sync(this.relationDefinition.foreignKey as string, resource)
+      // Pega a foreign key
+      const targetId = source[this.relationDefinition.foreignKey] as string
+
+      sync(targetId, resource)
 
       // Guarda o desync
       unsubscribe = cleanupManager.add(() => {

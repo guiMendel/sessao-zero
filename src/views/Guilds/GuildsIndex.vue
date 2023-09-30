@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import { useGuildAPI, usePlayerAPI } from '@/api'
-import { Guild } from '@/types'
+import { useGuildAPI } from '@/api';
 
 const { create, syncList, deleteForever } = useGuildAPI()
 
@@ -12,15 +11,19 @@ const newGuild = () => {
   create(name)
 }
 
-const { get: getPlayer } = usePlayerAPI()
+// const { get: getPlayer } = usePlayerAPI()
 
-const getGuildOwnerName = async (guild: Guild) => {
-  return getPlayer(guild.ownerUid).then((player) =>
-    player ? player.name : 'No Owner'
-  )
-}
+// const getGuildOwnerName = async (guild: Guild) => {
+//   return getPlayer(guild.ownerUid).then((player) =>
+//     player ? player.name : 'No Owner'
+//   )
+// }
 
 const guilds = syncList()
+
+// setInterval(() => console.log(guilds.value), 1000)
+
+// watchEffect(() => console.log({ guilds: guilds.value }))
 </script>
 
 <template>
@@ -28,8 +31,8 @@ const guilds = syncList()
     <button @click="newGuild">New Guild</button>
 
     <div class="guild" v-for="guild in guilds" :key="guild.id">
-      <b>{{ getGuildOwnerName(guild) }}</b> —
-      <!-- <p>{{ guild.owner.value. }}</p> -->
+      <!-- <b>{{ getGuildOwnerName(guild) }}</b> — -->
+      <p>{{ guild.owner?.name ?? 'loading...' }}</p>
       <font-awesome-icon
         :icon="['fas', 'xmark']"
         @click="deleteForever(guild.id)"

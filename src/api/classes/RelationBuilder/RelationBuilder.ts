@@ -13,6 +13,7 @@ export const buildRelations = <
   P extends ResourceProperties,
   R extends Record<string, RelationBuilder<P, ResourceProperties>>
 >(
+  source: P,
   builders: Record<
     string,
     RelationBuilder<ResourceProperties, ResourceProperties>
@@ -22,7 +23,7 @@ export const buildRelations = <
   Object.entries(builders).reduce(
     (relations, [relationName, builder]) => ({
       ...relations,
-      [relationName]: builder.build(cleanupManager),
+      [relationName]: builder.build(source, cleanupManager),
     }),
     {} as { [relation in keyof R]: ReturnType<R[relation]['build']> }
   )
@@ -45,5 +46,5 @@ export abstract class RelationBuilder<
     this.relationDefinition = relationDefinition
   }
 
-  public abstract build(cleanupManager: CleanupManager): Relation<T>
+  public abstract build(source: S, cleanupManager: CleanupManager): Relation<T>
 }

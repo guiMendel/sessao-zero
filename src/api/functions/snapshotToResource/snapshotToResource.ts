@@ -20,7 +20,7 @@ function snapshotToResource<
   doc: DocumentSnapshot<DocumentData> | QueryDocumentSnapshot<DocumentData>,
   options: {
     extractProperties: PropertyExtractor<P>
-    inject: I
+    inject: (properties: P) => I
   }
 ): Resource<P & I> | null
 
@@ -32,21 +32,28 @@ function snapshotToResource<
   doc: DocumentSnapshot<DocumentData> | QueryDocumentSnapshot<DocumentData>,
   options: {
     extractProperties: PropertyExtractor<P>
-    inject?: I
+    inject?: (properties: P) => I
   }
 ) {
   const documentData = doc.data()
 
   if (documentData == undefined) return null
 
-  return {
-    ...options.inject,
+  const properties = {
     // Adiciona as propriedades
     ...options.extractProperties(doc.id, documentData),
     id: doc.id,
     createdAt: new Date(documentData.createdAt),
     modifiedAt: new Date(documentData.modifiedAt),
   }
+
+  if (options.inject)
+    return {
+      ...options.inject(properties),
+      ...properties,
+    }
+
+  return properties
 }
 
 export { snapshotToResource }

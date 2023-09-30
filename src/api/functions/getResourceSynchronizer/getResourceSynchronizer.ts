@@ -128,6 +128,8 @@ function getResourceSynchronizer<P extends ResourceProperties>(
   ):
     | WritableComputedRef<Resource<P> | null>
     | ComputedRef<Resource<P> | null> => {
+    console.log('sync for', resourcePath, ' with id ', id)
+
     // Desinscreve a ultima chamada
     unsubscribe.resource()
 

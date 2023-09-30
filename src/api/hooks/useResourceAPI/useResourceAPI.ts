@@ -72,7 +72,8 @@ export const useResourceAPI = <
   ): Resource<PWithRelations> | null =>
     originalSnapshotToResource(doc, {
       extractProperties,
-      inject: buildRelations<P, R>(relationBuilders, cleanupManger),
+      inject: (properties: P) =>
+        buildRelations<P, R>(properties, relationBuilders, cleanupManger),
     })
 
   /** Obtem a referencia de documento para o id fornecido */
