@@ -1,5 +1,5 @@
 import { Resource, ResourceProperties } from '@/types'
-import { Ref, ref } from 'vue'
+import { Ref, ref, watch } from 'vue'
 import { RelationBuilder, RelationPrototype } from '..'
 import {
   CleanupManager,
@@ -27,7 +27,7 @@ export class SmartRelationBuilder<
 > extends RelationBuilder<S, T> {
   public build(source: S, cleanupManager: CleanupManager): SmartRelation<T> {
     /** A referencia que sera sincronizada */
-    const resource = ref<Resource<T> | null>(null) as Ref<Resource<T> | null>
+    const resource = ref<Resource<T> | null>(null) as SmartRelation<T>
 
     /** Indica o estado da relacao */
     let state: 'empty' | 'synced' | 'disposed' = 'empty'
@@ -73,15 +73,15 @@ export class SmartRelationBuilder<
       })
     }
 
-    return new Proxy(
-      { ...resource, triggerSync, _cleanup: [unsubscribe] },
-      {
-        get: (currentState, property) => {
-          if (property === 'value') triggerSync()
+    resource.triggerSync = triggerSync
+    resource._cleanup = [unsubscribe]
 
-          return currentState[property as keyof typeof currentState]
-        },
-      }
-    )
+    return new Proxy(resource, {
+      get: (currentState, property) => {
+        if (property === 'value') triggerSync()
+
+        return currentState[property as keyof typeof currentState]
+      },
+    })
   }
 }

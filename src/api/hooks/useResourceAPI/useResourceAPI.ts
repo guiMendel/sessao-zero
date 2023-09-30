@@ -142,7 +142,8 @@ export const useResourceAPI = <
   /** Pega uma lsita filtrada do recurso */
   const getList = (filters: QueryFieldFilterConstraint[] = []) =>
     firestoreGetDocs(query(resourceCollection, ...filters)).then(
-      (snapshot) => snapshot.docs.map(snapshotToResource) as Resource<P>[]
+      (snapshot) =>
+        snapshot.docs.map(snapshotToResource) as Resource<PWithRelations>[]
     )
 
   // ========================================

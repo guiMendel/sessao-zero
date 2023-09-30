@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { useGuildAPI } from '@/api';
+import { toValue } from 'vue';
 
 const { create, syncList, deleteForever } = useGuildAPI()
 
@@ -11,19 +12,7 @@ const newGuild = () => {
   create(name)
 }
 
-// const { get: getPlayer } = usePlayerAPI()
-
-// const getGuildOwnerName = async (guild: Guild) => {
-//   return getPlayer(guild.ownerUid).then((player) =>
-//     player ? player.name : 'No Owner'
-//   )
-// }
-
 const guilds = syncList()
-
-// setInterval(() => console.log(guilds.value), 1000)
-
-// watchEffect(() => console.log({ guilds: guilds.value }))
 </script>
 
 <template>
@@ -32,7 +21,9 @@ const guilds = syncList()
 
     <div class="guild" v-for="guild in guilds" :key="guild.id">
       <!-- <b>{{ getGuildOwnerName(guild) }}</b> — -->
-      <p>{{ guild.owner?.name ?? 'loading...' }}</p>
+      <!-- <p>{{ inspect(guild.owner.value)?.name ?? 'loading...' }}</p> -->
+      <p>{{ toValue(guild.owner)?.name ?? 'loading...' }}</p>
+      <p>{{ guild.name }}</p>
       <font-awesome-icon
         :icon="['fas', 'xmark']"
         @click="deleteForever(guild.id)"
