@@ -9,22 +9,6 @@ import { Ref, ref } from 'vue'
 import { Syncable } from '.'
 
 // ===========================
-// HELPERS
-// ===========================
-
-// type GetTarget<T> = T extends Array<ResourceProperties>
-//   ? Query
-//   : DocumentReference
-
-// type GetResourceProperties<T> = T extends Array<ResourceProperties>
-//   ? T[number]
-//   : T
-
-// type GetRefType<T> = GetTarget<T> extends Query
-//   ? Ref<Resource<GetResourceProperties<T>>[]>
-//   : Ref<Resource<GetResourceProperties<T>> | null>
-
-// ===========================
 // IMPLEMENTATION
 // ===========================
 
@@ -37,33 +21,55 @@ export const syncableRef = <
   T extends ResourceProperties,
   M extends Query | DocumentReference
 >(
-  target: M,
+  target: M | undefined,
   snapshotToResources: (
     content: M extends Query ? QuerySnapshot : DocumentSnapshot,
     previousValues: Resource<T>[]
   ) => Resource<T>[]
 ): SyncableRef<T, M> => {
-  const valueRef = ref(
-    target.type === 'document' ? null : []
-  ) as M extends Query ? Ref<Resource<T>[]> : Ref<Resource<T> | null>
+  const emptyValue =
+    target == undefined || target.type === 'document' ? null : []
 
-  return Object.assign(
-    valueRef,
-    new Syncable<M>(target, (snapshot) => {
-      // Se forem varios docs
-      if ('docs' in snapshot) {
-        valueRef.value = snapshotToResources(
-          snapshot,
-          valueRef.value as Resource<T>[]
-        )
+  const valueRef = ref(emptyValue) as M extends Query
+    ? Ref<Resource<T>[]>
+    : Ref<Resource<T> | null>
 
-        return
-      }
+  /** O Syncable deste recurso */
+  const syncable = new Syncable<M>(target, (snapshot) => {
+    // Se forem varios docs
+    if ('docs' in snapshot) {
+      valueRef.value = snapshotToResources(
+        snapshot,
+        valueRef.value as Resource<T>[]
+      )
 
-      // Se for so um
-      valueRef.value = snapshotToResources(snapshot, [
-        valueRef.value as Resource<T>,
-      ])[0]
-    }) as SyncableRef<T, M>
-  )
+      return
+    }
+
+    // Se for so um
+    valueRef.value = snapshotToResources(snapshot, [
+      valueRef.value as Resource<T>,
+    ])[0]
+  }) as SyncableRef<T, M>
+
+  /** O SyncableRef deste recurso */
+  const syncedRef = Object.assign(valueRef, syncable)
+
+  // Pega os metodos
+  syncedRef.onReset = syncable.onReset
+  syncedRef.reset = syncable.reset
+  syncedRef.triggerSync = syncable.triggerSync
+  syncedRef.updateTarget = syncable.updateTarget
+
+  console.log({ syncable })
+
+  syncedRef.onReset(() => (valueRef.value = emptyValue))
+
+  return new Proxy(syncedRef, {
+    get: (currentState, property) => {
+      if (property === 'value') currentState.triggerSync()
+
+      return currentState[property as keyof typeof currentState]
+    },
+  })
 }

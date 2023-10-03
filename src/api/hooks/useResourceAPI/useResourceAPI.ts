@@ -6,9 +6,19 @@ import {
   getResourceSynchronizer,
   snapshotToResource as originalSnapshotToResource,
 } from '@/api/'
-import { Resource, ResourceProperties, Uploadable } from '@/types'
+import {
+  PropertyExtractor,
+  propertyExtractors,
+} from '@/api/constants/propertyExtractors'
+import {
+  Resource,
+  ResourcePaths,
+  ResourceProperties,
+  Uploadable,
+} from '@/types'
 import {
   QueryFieldFilterConstraint,
+  QuerySnapshot,
   addDoc,
   collection,
   deleteDoc,
@@ -20,7 +30,6 @@ import {
   updateDoc,
   type DocumentData,
   type DocumentSnapshot,
-  type QueryDocumentSnapshot,
 } from 'firebase/firestore'
 import { onBeforeUnmount } from 'vue'
 
@@ -39,22 +48,25 @@ const defaultOptions = {
  */
 export const useResourceAPI = <
   P extends ResourceProperties,
-  R extends Record<string, RelationBuilder<P, ResourceProperties>>
+  R extends Record<string, RelationBuilder<P, ResourceProperties>> = {}
 >(
-  resourcePath: string,
+  resourcePath: ResourcePaths,
   options?: {
-    propertiesExtractor?: (id: string, documentData: DocumentData) => P
+    propertiesExtractor?: PropertyExtractor<P>
     relations?: R
   }
 ) => {
-  const extractProperties =
-    options?.propertiesExtractor ?? defaultOptions.propertiesExtractor
+  const extractProperties = (options?.propertiesExtractor ??
+    propertyExtractors[resourcePath] ??
+    defaultOptions.propertiesExtractor) as PropertyExtractor<P>
 
-  const relationBuilders = options?.relations ?? defaultOptions.relations
+  const relationBuilders = options?.relations ?? (defaultOptions.relations as R)
 
-  type PWithRelations = P & {
+  type InjectedRelations = {
     [relation in keyof R]: ReturnType<R[relation]['build']>
   }
+
+  type PWithRelations = P & InjectedRelations
 
   // ========================================
   // UTILIDADES
@@ -64,17 +76,37 @@ export const useResourceAPI = <
   const resourceCollection = collection(db, resourcePath)
 
   /** Gerenciador de cleanups desta instancia */
-  const cleanupManger = new CleanupManager()
+  const cleanupManager = new CleanupManager()
 
   /** Extrai o recurso de um snapshot */
-  const snapshotToResource = (
-    doc: DocumentSnapshot<DocumentData> | QueryDocumentSnapshot<DocumentData>
-  ): Resource<PWithRelations> | null =>
-    originalSnapshotToResource(doc, {
-      extractProperties,
-      inject: (properties: P) =>
-        buildRelations<P, R>(properties, relationBuilders, cleanupManger),
-    })
+  const snapshotToResources = (
+    content: DocumentSnapshot | QuerySnapshot,
+    previousValues: Resource<PWithRelations>[] = []
+  ): Resource<PWithRelations>[] => {
+    const previousValuesMap = previousValues.reduce(
+      (map, properties) => ({ ...map, [properties.id]: properties }),
+      {} as Record<string, PWithRelations>
+    )
+
+    const resources = originalSnapshotToResource<P, InjectedRelations>(
+      content,
+      {
+        extractProperties,
+        inject: (properties, id) =>
+          buildRelations<P, R>(
+            properties,
+            id,
+            relationBuilders,
+            previousValuesMap,
+            cleanupManager
+          ),
+      }
+    )
+
+    // TODO: chamar dispose em todos os recursos de previouValues que nao foram reutilizados
+
+    return resources
+  }
 
   /** Obtem a referencia de documento para o id fornecido */
   const getDoc = (id: string) => doc(resourceCollection, id)
@@ -137,13 +169,12 @@ export const useResourceAPI = <
 
   /** Pega uma instancia do recurso */
   const get = (id: string) =>
-    firestoreGetDoc(getDoc(id)).then(snapshotToResource)
+    firestoreGetDoc(getDoc(id)).then((doc) => snapshotToResources(doc)[0])
 
-  /** Pega uma lsita filtrada do recurso */
+  /** Pega uma lista filtrada do recurso */
   const getList = (filters: QueryFieldFilterConstraint[] = []) =>
     firestoreGetDocs(query(resourceCollection, ...filters)).then(
-      (snapshot) =>
-        snapshot.docs.map(snapshotToResource) as Resource<PWithRelations>[]
+      snapshotToResources
     )
 
   // ========================================
@@ -151,9 +182,10 @@ export const useResourceAPI = <
   // ========================================
 
   /** Pega os metodos de sync */
-  const { desync, sync, syncList } = getResourceSynchronizer(resourcePath, {
-    snapshotToResource,
+  const { sync, syncList } = getResourceSynchronizer(resourcePath, {
+    snapshotToResources,
     update,
+    cleanupManager,
   })
 
   // ========================================
@@ -167,14 +199,13 @@ export const useResourceAPI = <
   // CLEAN UP
   // ========================================
 
-  cleanupManger.add(() => desync('all'))
-
   // Desinscreve tudo
-  onBeforeUnmount(() => cleanupManger.dispose())
+  onBeforeUnmount(() => cleanupManager.dispose())
 
   return {
     // Utilidades
     resourceCollection,
+    snapshotToResources,
     getDoc,
 
     // Create & Update
@@ -186,8 +217,6 @@ export const useResourceAPI = <
     getList,
     sync,
     syncList,
-    desync: () => desync('resource'),
-    desyncList: () => desync('resourceList'),
 
     // Delete
     deleteForever,
