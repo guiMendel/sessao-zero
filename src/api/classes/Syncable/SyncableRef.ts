@@ -47,9 +47,10 @@ export const syncableRef = <
     }
 
     // Se for so um
-    valueRef.value = snapshotToResources(snapshot, [
-      valueRef.value as Resource<T>,
-    ])[0]
+    valueRef.value = snapshotToResources(
+      snapshot,
+      valueRef.value == null ? [] : [valueRef.value as Resource<T>]
+    )[0]
   }) as SyncableRef<T, M>
 
   /** O SyncableRef deste recurso */
@@ -60,8 +61,7 @@ export const syncableRef = <
   syncedRef.reset = syncable.reset
   syncedRef.triggerSync = syncable.triggerSync
   syncedRef.updateTarget = syncable.updateTarget
-
-  console.log({ syncable })
+  syncedRef.getTarget = syncable.getTarget
 
   syncedRef.onReset(() => (valueRef.value = emptyValue))
 

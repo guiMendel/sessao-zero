@@ -90,8 +90,6 @@ function getResourceSynchronizer<P extends ResourceProperties>(
   ) => {
     // Se recebemos um ref, basta mudar seu target
     if (existingRef != undefined) {
-      console.log({ existingRef })
-
       existingRef.updateTarget(target)
 
       return existingRef

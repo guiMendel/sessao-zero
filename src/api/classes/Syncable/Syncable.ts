@@ -31,12 +31,12 @@ export class Syncable<T extends DocumentReference | Query> {
 
   public get syncState() {
     // Para o publico, utilizamos o estado empty para indicar que nao ha target
-    if (!this.target) return 'empty'
+    if (!this._target) return 'empty'
 
     return this.state
   }
 
-  public get target() {
+  public getTarget() {
     return this._target
   }
 
@@ -56,18 +56,20 @@ export class Syncable<T extends DocumentReference | Query> {
 
   /** Inicia o sync */
   triggerSync() {
-    if (this.state === 'synced' || this.target == undefined) return
+    if (this.state === 'synced' || this._target == undefined) return
 
     this.state = 'synced'
 
-    const cleanupListener = onSnapshot(this.target as any, this.onNext as any)
+    const cleanupListener = onSnapshot(this._target as any, this.onNext as any)
 
     this.cleanup.add(cleanupListener)
   }
 
   /** Atualiza o alvo de sync, e mantem o estado de sync */
   updateTarget(newTarget: T) {
-    if (compareTargets(this.target, newTarget)) return
+    if (compareTargets(this._target, newTarget)) return
+
+    this._target = newTarget
 
     // Vai manter este estado
     const previousState = this.state

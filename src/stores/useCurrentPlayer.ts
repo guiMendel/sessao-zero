@@ -1,5 +1,5 @@
 import { auth, syncableRef, useResourceAPI } from '@/api'
-import { Player, Resource, Uploadable } from '@/types/'
+import { Player, Uploadable } from '@/types/'
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -10,7 +10,6 @@ import {
 } from 'firebase/auth'
 import { DocumentReference } from 'firebase/firestore'
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
 
 export const useCurrentPlayer = defineStore('current-player', () => {
   /** Acessa a API do firestore do player */
@@ -28,7 +27,10 @@ export const useCurrentPlayer = defineStore('current-player', () => {
     // Reset user
     if (newUser == null) player.reset()
     // Atualiza para o novo usuario
-    else player.updateTarget(getDoc(newUser.uid))
+    else {
+      player.updateTarget(getDoc(newUser.uid))
+      player.triggerSync()
+    }
   })
 
   /** Realiza login do jogador */
