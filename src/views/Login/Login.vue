@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BackButton, InputField, Logo } from '@/components'
+import { BackButton, InputField, Logo, Typography } from '@/components'
 import { localStorageKeys } from '@/config/storageKeys'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -98,11 +98,17 @@ const formValid = computed(() => emailConfirmed.value || email.value.valid)
       <!-- Senha -->
       <template v-else>
         <!-- Mostra o email fornecido -->
-        <label
+        <!-- <label
           class="email-display"
           for="password"
           @click="emailConfirmed = false"
           >{{ email.value }}</label
+        > -->
+        <Typography
+          class="email-display"
+          color="white"
+          @click="emailConfirmed = false"
+          >{{ email.value }}</Typography
         >
 
         <InputField
@@ -115,7 +121,9 @@ const formValid = computed(() => emailConfirmed.value || email.value.valid)
         />
 
         <!-- Esqueceu a senha -->
-        <p id="forgot-password">Esqueceu a senha?</p>
+        <Typography color="white" id="forgot-password"
+          >Esqueceu a senha?</Typography
+        >
       </template>
 
       <!-- Submit -->

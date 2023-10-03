@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { InputField, Logo } from '@/components'
+import { InputField, Logo, Typography } from '@/components'
 import { localStorageKeys } from '@/config/storageKeys'
 import { useCurrentPlayer, useNotification } from '@/stores'
 import { eraseInStorage, usePlayerFields } from '@/utils'
@@ -70,15 +70,19 @@ const tryCreate = () => {
 
       <!-- Titulo -->
       <font-awesome-icon class="player-icon" :icon="['fas', 'street-view']" />
-      <h1>Criar Jogador</h1>
+      <Typography variant="title" color="white">Criar Jogador</Typography>
 
       <!-- Nome -->
       <InputField class="input" variant="dark" v-model="name" />
-      <label for="nome">Como você se chama</label>
+      <Typography labelFor="nome" variant="paragraph-secondary" color="white"
+        >Como você se chama</Typography
+      >
 
       <!-- Apelido -->
       <InputField class="input" variant="dark" v-model="nickname" />
-      <label for="nome">Como seu perfil aparecerá aos outros</label>
+      <Typography labelFor="nome" variant="paragraph-secondary" color="white"
+        >Como seu perfil aparecerá aos outros</Typography
+      >
 
       <!-- Email -->
       <InputField class="input" variant="dark" v-model="email" />
@@ -129,7 +133,6 @@ const tryCreate = () => {
 label {
   margin-top: -1rem;
   text-transform: lowercase;
-  font-size: 0.9rem;
   opacity: 0.7;
 
   .high-contrast & {
