@@ -96,10 +96,11 @@ function getResourceSynchronizer<P extends ResourceProperties>(
     }
 
     // Cria um novo syncable
-    const newRef = syncableRef<P, M>(target, snapshotToResources)
-
-    // Adiciona ele ao cleanup to escopo atual
-    cleanupManager.add(() => newRef.dispose())
+    const newRef = syncableRef<P, M>(
+      target,
+      snapshotToResources,
+      cleanupManager
+    )
 
     return newRef
   }

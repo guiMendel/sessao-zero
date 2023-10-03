@@ -7,6 +7,7 @@ import {
 } from 'firebase/firestore'
 import { Ref, ref } from 'vue'
 import { Syncable } from '.'
+import { CleanupManager } from '..'
 
 // ===========================
 // IMPLEMENTATION
@@ -17,6 +18,11 @@ export type SyncableRef<T, M extends Query | DocumentReference> = Ref<
 > &
   Syncable<M>
 
+/** Cria um ref que automaticamente faz sync com o target
+ * @param target O alvo com o qual realizar o sync
+ * @param snapshotToResources Como transformar o snapshot recebido pelo sync em um(varios) recurso(s)
+ * @param parentCleanupManager Um cleanup manager que, quando ativar o dispose, deve ativar o dispose desse ref tambem
+ */
 export const syncableRef = <
   T extends ResourceProperties,
   M extends Query | DocumentReference
@@ -25,7 +31,8 @@ export const syncableRef = <
   snapshotToResources: (
     content: M extends Query ? QuerySnapshot : DocumentSnapshot,
     previousValues: Resource<T>[]
-  ) => Resource<T>[]
+  ) => Resource<T>[],
+  parentCleanupManager?: CleanupManager
 ): SyncableRef<T, M> => {
   const emptyValue =
     target == undefined || target.type === 'document' ? null : []
@@ -62,8 +69,15 @@ export const syncableRef = <
   syncedRef.triggerSync = syncable.triggerSync
   syncedRef.updateTarget = syncable.updateTarget
   syncedRef.getTarget = syncable.getTarget
+  syncedRef.getCleanupManager = syncable.getCleanupManager
 
   syncedRef.onReset(() => (valueRef.value = emptyValue))
+
+  // Associa o cleanup manager
+  parentCleanupManager?.link(
+    syncedRef.getCleanupManager(),
+    'propagate-to-other'
+  )
 
   return new Proxy(syncedRef, {
     get: (currentState, property) => {

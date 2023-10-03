@@ -40,6 +40,10 @@ export class Syncable<T extends DocumentReference | Query> {
     return this._target
   }
 
+  public getCleanupManager() {
+    return this.cleanup
+  }
+
   public dispose = () => this.cleanup.dispose()
 
   constructor(

@@ -39,11 +39,9 @@ export class SmartRelationBuilder<
     /** A referencia que sera sincronizada */
     const resource = syncableRef<T, DocumentReference>(
       this.getDoc(targetId as string),
-      snapshotToResources
+      snapshotToResources,
+      cleanupManager
     )
-
-    // Associa essa relacao ao cleanup
-    cleanupManager.add(() => resource.dispose())
 
     return resource
   }
