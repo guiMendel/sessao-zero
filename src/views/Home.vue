@@ -1,15 +1,7 @@
-<script setup lang="ts">
-import { useCurrentPlayer } from '@/stores'
-
-const { logout } = useCurrentPlayer()
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div class="home">
-    <p>In Home</p>
-
-    <button @click="logout">Logout</button>
-
     <RouterView />
   </div>
 </template>
@@ -19,5 +11,6 @@ const { logout } = useCurrentPlayer()
   flex-direction: column;
   align-items: center;
   gap: 2rem;
+  max-width: 100%;
 }
 </style>

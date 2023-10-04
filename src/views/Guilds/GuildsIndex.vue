@@ -1,8 +1,13 @@
 <script lang="ts" setup>
-import { useGuildAPI } from '@/api';
-import { toValue } from 'vue';
+import { SmartRelation, useGuildAPI } from '@/api'
+import { LoadingSpinner, Typography } from '@/components'
+import { useCurrentPlayer } from '@/stores'
+import { Player } from '@/types'
+import { toValue } from 'vue'
 
 const { create, syncList, deleteForever } = useGuildAPI()
+
+const { player } = useCurrentPlayer()
 
 const newGuild = () => {
   const name = prompt('Nome da guilda')
@@ -12,42 +17,106 @@ const newGuild = () => {
   create(name)
 }
 
+const getOwnerLabel = (owner: SmartRelation<Player>) =>
+  player.id === toValue(owner).id ? 'Você' : toValue(owner).name
+
 const guilds = syncList()
 </script>
 
 <template>
-  <div class="guilds">
-    <button @click="newGuild">New Guild</button>
+  <div class="guilds-index">
+    <Typography variant="title">Suas guildas</Typography>
 
-    <div class="guild" v-for="guild in guilds" :key="guild.id">
-      <!-- <b>{{ getGuildOwnerName(guild) }}</b> — -->
-      <!-- <p>{{ inspect(guild.owner.value)?.name ?? 'loading...' }}</p> -->
-      <p>{{ toValue(guild.owner)?.name ?? 'loading...' }}</p>
-      <p>{{ guild.name }}</p>
-      <font-awesome-icon
-        :icon="['fas', 'xmark']"
-        @click="deleteForever(guild.id)"
-      />
+    <div class="guilds">
+      <div class="guild" v-for="guild in guilds" :key="guild.id">
+        <!-- Nome e dono -->
+        <div class="identification">
+          <Typography class="text">{{ guild.name }}</Typography>
+
+          <div class="owner" v-if="toValue(guild.owner)">
+            <font-awesome-icon :icon="['fas', 'crown']" />
+            <Typography variant="paragraph-secondary">{{
+              getOwnerLabel(guild.owner)
+            }}</Typography>
+          </div>
+
+          <LoadingSpinner v-else />
+        </div>
+      </div>
+
+      <div class="add-guild" @click="newGuild">
+        <font-awesome-icon :icon="['fas', 'plus']" />
+      </div>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.guilds {
+@import '@/styles/variables.scss';
+
+.text {
+  color: var(--tx-white);
+  font-weight: 600;
+}
+
+.guilds-index {
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   gap: 1rem;
+  max-width: 100%;
+  padding: 2rem 1.5rem;
 
-  border: 3px solid var(--gray-light);
-  border-radius: 10px;
-  padding: 2rem;
+  .guilds {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
 
-  .guild {
-    align-items: center;
-    gap: 0.5rem;
+    width: 50rem;
+    max-width: 100%;
 
-    svg {
-      cursor: pointer;
+    .guild {
+      align-items: center;
+      border-radius: $border-radius;
+      padding: 0.5rem 1rem;
+      background-color: var(--bg-main);
+      @include bevel(var(--main-light));
+
+      .identification {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+
+        .owner {
+          align-items: center;
+          gap: 0.3rem;
+          background-color: var(--bg-white);
+          padding: 0.2rem 0.5rem;
+          border-radius: $border-radius;
+          opacity: 0.8;
+
+          p {
+            color: var(--tx-main);
+            font-weight: 500;
+          }
+
+          svg {
+            color: var(--tx-main);
+            font-size: 0.8rem;
+          }
+        }
+      }
+    }
+
+    .add-guild {
+      @include button;
+      @include bevel(var(--bg-main-washed));
+
+      background-color: var(--bg-main-lighter);
+      padding: 0.7rem 1rem;
+      align-items: center;
+      justify-content: center;
+      color: var(--tx-main);
+      font-size: 1.4rem;
     }
   }
 }

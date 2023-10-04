@@ -6,14 +6,18 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 /* import specific icons */
 import {
+  faCompass,
+  faCrown,
   faEye,
   faEyeSlash,
   faHandPointLeft,
   faHandPointRight,
   faPaperPlane,
   faPersonRays,
+  faPlus,
   faRightToBracket,
   faStreetView,
+  faTrash,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons'
 
@@ -31,7 +35,11 @@ export const initFontAwesome = (): [
     faEye,
     faEyeSlash,
     faPersonRays,
-    faXmark
+    faXmark,
+    faCompass,
+    faCrown,
+    faTrash,
+    faPlus
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]

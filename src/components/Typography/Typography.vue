@@ -5,23 +5,17 @@ const props = withDefaults(
   defineProps<{
     /** Variante de texto, impacta sobretudo o tamanho */
     variant?: 'paragraph' | 'paragraph-secondary' | 'title' | 'subtitle'
-    color?: 'gray-darker' | 'white'
     /** Useful when setting as=label */
     labelFor?: string
   }>(),
   { color: 'gray-darker', variant: 'paragraph', as: 'p' }
 )
-
-const style: StyleValue = {
-  color: `var(--tx-${props.color})`,
-}
 </script>
 
 <template>
   <component
     :is="labelFor ? 'label' : 'p'"
-    :class="props.variant"
-    :style="style"
+    :class="`${props.variant} typography`"
     :for="labelFor"
     ><slot></slot
   ></component>

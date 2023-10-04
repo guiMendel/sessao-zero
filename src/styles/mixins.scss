@@ -97,18 +97,21 @@
   }
 }
 
+@mixin bevel($color, $size: 1px) {
+  box-shadow: 0 calc($size + 2px) 0 $size $color;
+  border-radius: $border-radius;
+}
+
 // Botoes
 @mixin button {
   @include clickable;
+  @include bevel(var(--trans-3));
   align-items: center;
   justify-content: center;
 
   background-color: var(--bg-trans-03);
   font-weight: 900;
   text-transform: lowercase;
-
-  box-shadow: 0 2px 0 1px var(--trans-3);
-  border-radius: $border-radius;
 
   min-width: 6rem;
   padding: 0.5rem 1rem;
