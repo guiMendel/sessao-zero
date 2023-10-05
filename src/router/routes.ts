@@ -68,7 +68,6 @@ const routes: Array<RouteRecordRaw> = addFirstVisitPrompts([
       {
         path: 'guild/:guildId',
         component: Guild,
-        name: 'guild',
         children: [
           {
             path: '',

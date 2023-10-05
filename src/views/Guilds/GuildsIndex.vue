@@ -25,7 +25,7 @@ const getOwnerLabel = (owner: SmartRelation<Player>) =>
 const guilds = syncList()
 
 const openGuildPage = (guild: Resource<Guild>) =>
-  router.push({ name: 'guild', params: { guildId: guild.id } })
+  router.push({ name: 'adventures', params: { guildId: guild.id } })
 </script>
 
 <template>
