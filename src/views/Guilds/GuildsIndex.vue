@@ -80,10 +80,10 @@ const guilds = syncList()
       align-items: center;
       border-radius: $border-radius;
       padding: 0.5rem 1rem;
-      background-color: var(--bg-main);
+      background-color: var(--bg-main-light);
       min-height: var(--min-height);
 
-      @include bevel(var(--main-light));
+      @include bevel(var(--main-lighter));
 
       .identification {
         flex-direction: column;

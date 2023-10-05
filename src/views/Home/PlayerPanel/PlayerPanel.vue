@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import {
+  Button,
+  Divisor,
   PlayerPreview,
   ProfilePicture,
-  Divisor,
   Typography,
 } from '@/components'
 import { useCurrentPlayer } from '@/stores'
@@ -21,22 +22,22 @@ const isOpen = ref(false)
   <Transition name="slide">
     <div class="shadow" v-if="isOpen" @click.self="isOpen = false">
       <div class="player-panel">
-        <PlayerPreview :player="player" />
+        <PlayerPreview :player="player" @click="isOpen = false" />
 
         <Divisor class="divisor" />
 
         <div class="menu">
           <!-- Configuracoes -->
-          <button class="option">
+          <Button variant="colored" class="option">
             <font-awesome-icon :icon="['fas', 'screwdriver-wrench']" />
             <Typography>configurações</Typography>
-          </button>
+          </Button>
 
           <!-- Logout -->
-          <button @click="logout" class="option">
+          <Button variant="colored" @click="logout" class="option">
             <font-awesome-icon :icon="['fas', 'door-open']" />
             <Typography>sair</Typography>
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -77,7 +78,7 @@ const isOpen = ref(false)
     gap: 1.5rem;
 
     .divisor {
-      color: var(--tx-main-dark);
+      color: var(--tx-main-light);
     }
 
     .menu {
@@ -135,6 +136,7 @@ const isOpen = ref(false)
   }
 
   50% {
+    opacity: 1;
     transform: translateY(0.8rem);
   }
 
