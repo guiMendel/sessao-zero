@@ -2,10 +2,12 @@
 import { SmartRelation, useGuildAPI } from '@/api'
 import { LoadingSpinner, Typography } from '@/components'
 import { useCurrentPlayer } from '@/stores'
-import { Player } from '@/types'
+import { Guild, Player, Resource } from '@/types'
 import { toValue } from 'vue'
+import { useRouter } from 'vue-router'
 
-const { create, syncList, deleteForever } = useGuildAPI()
+const { create, syncList } = useGuildAPI()
+const router = useRouter()
 
 const { player } = useCurrentPlayer()
 
@@ -21,6 +23,9 @@ const getOwnerLabel = (owner: SmartRelation<Player>) =>
   player.id === toValue(owner).id ? 'Você' : toValue(owner).name
 
 const guilds = syncList()
+
+const openGuildPage = (guild: Resource<Guild>) =>
+  router.push({ name: 'guild', params: { guildId: guild.id } })
 </script>
 
 <template>
@@ -28,7 +33,12 @@ const guilds = syncList()
     <Typography variant="title">Suas guildas</Typography>
 
     <div class="guilds">
-      <div class="guild" v-for="guild in guilds" :key="guild.id">
+      <div
+        class="guild"
+        v-for="guild in guilds"
+        :key="guild.id"
+        @click="openGuildPage(guild)"
+      >
         <!-- Nome e dono -->
         <div class="identification">
           <Typography class="text">{{ guild.name }}</Typography>
