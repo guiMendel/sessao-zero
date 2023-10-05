@@ -64,7 +64,7 @@ const guilds = syncList()
   align-items: stretch;
   gap: 1rem;
   max-width: 100%;
-  padding: 2rem 1.5rem;
+  padding: 0 1.5rem 2rem;
 
   .guilds {
     flex-direction: column;

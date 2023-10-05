@@ -1,5 +1,11 @@
 import { makeGuildInvitation } from '@/utils'
-import { AccessibilityPrompt, BetaWelcome, CreatePlayer, Home, Login } from '@/views'
+import {
+  AccessibilityPrompt,
+  BetaWelcome,
+  CreatePlayer,
+  Home,
+  Login,
+} from '@/views'
 import Adventure from '@/views/Adventures/Adventure.vue'
 import AdventuresIndex from '@/views/Adventures/AdventuresIndex.vue'
 import CreateAdventure from '@/views/Adventures/CreateAdventure.vue'
@@ -102,6 +108,7 @@ const routes: Array<RouteRecordRaw> = addFirstVisitPrompts([
       },
     ],
   },
+  { path: '/:pathMatch(.*)*', redirect: () => ({ path: '/' }) },
 ])
 
 export default routes

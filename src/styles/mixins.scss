@@ -1,6 +1,13 @@
+// Ativa se estiver em high contrast
+@mixin high-contrast {
+  .high-contrast & {
+    @content;
+  }
+}
+
 // Introduz uma borda de alto contraste
 @mixin high-contrast-border {
-  .high-contrast & {
+  @include high-contrast {
     border: 2px solid var(--accessibility-text);
   }
 }
@@ -22,7 +29,7 @@
     cursor: inherit;
   }
 
-  .high-contrast & {
+  @include high-contrast {
     text-decoration: line-through;
   }
 }
@@ -45,9 +52,7 @@
   align-items: center;
   gap: 1rem;
 
-  .high-contrast & {
-    @include high-contrast-border;
-  }
+  @include high-contrast-border;
 }
 
 // Coisas clicaveis: faz reagir ao hover e ao clique
@@ -65,9 +70,7 @@
     filter: brightness(0.95);
   }
 
-  .high-contrast & {
-    @include high-contrast-border;
-  }
+  @include high-contrast-border;
 }
 
 // Adiciona um overlay quando esta em hover
@@ -90,7 +93,7 @@
     &:hover::after {
       @content;
 
-      .high-contrast & {
+      @include high-contrast {
         background: none;
       }
     }
@@ -99,13 +102,14 @@
 
 @mixin bevel($color, $size: 1px) {
   box-shadow: 0 calc($size + 2px) 0 $size $color;
-  border-radius: $border-radius;
 }
 
 // Botoes
 @mixin button {
   @include clickable;
   @include bevel(var(--trans-3));
+
+  border-radius: $border-radius;
   align-items: center;
   justify-content: center;
 
@@ -141,9 +145,7 @@
     @include disabled;
   }
 
-  .high-contrast & {
-    @include high-contrast-border;
-  }
+  @include high-contrast-border;
 }
 
 // Inputs de texto

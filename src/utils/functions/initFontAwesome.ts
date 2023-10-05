@@ -6,8 +6,12 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 /* import specific icons */
 import {
+  faChevronRight,
+  faCircle,
+  faCircleUser,
   faCompass,
   faCrown,
+  faDoorOpen,
   faEye,
   faEyeSlash,
   faHandPointLeft,
@@ -16,6 +20,7 @@ import {
   faPersonRays,
   faPlus,
   faRightToBracket,
+  faScrewdriverWrench,
   faStreetView,
   faTrash,
   faXmark,
@@ -39,6 +44,11 @@ export const initFontAwesome = (): [
     faCompass,
     faCrown,
     faTrash,
+    faCircle,
+    faCircleUser,
+    faChevronRight,
+    faDoorOpen,
+    faScrewdriverWrench,
     faPlus
   )
 
