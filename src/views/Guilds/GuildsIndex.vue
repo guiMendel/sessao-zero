@@ -74,11 +74,15 @@ const guilds = syncList()
     width: 50rem;
     max-width: 100%;
 
+    --min-height: 4rem;
+
     .guild {
       align-items: center;
       border-radius: $border-radius;
       padding: 0.5rem 1rem;
       background-color: var(--bg-main);
+      min-height: var(--min-height);
+
       @include bevel(var(--main-light));
 
       .identification {
@@ -117,6 +121,7 @@ const guilds = syncList()
       justify-content: center;
       color: var(--tx-main);
       font-size: 1.4rem;
+      min-height: var(--min-height);
     }
   }
 }
