@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { StyleValue } from 'vue'
 
 const props = withDefaults(
   defineProps<{
@@ -8,7 +7,7 @@ const props = withDefaults(
     /** Useful when setting as=label */
     labelFor?: string
   }>(),
-  { color: 'gray-darker', variant: 'paragraph', as: 'p' }
+  { variant: 'paragraph', as: 'p' }
 )
 </script>
 
@@ -25,8 +24,6 @@ const props = withDefaults(
 @import '../../styles/variables.scss';
 
 p {
-  color: v-bind(color);
-
   &.paragraph {
     font-size: 1rem;
   }

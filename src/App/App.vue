@@ -1,12 +1,12 @@
 <script setup lang="ts">
+import { BackButton } from '@/components'
+import { authenticationGuard } from '@/router/guard/authenticationGuard'
+import { findMeta } from '@/router/utils'
+import { useAccessibility, useCurrentPlayer } from '@/stores/'
 import { storeToRefs } from 'pinia'
 import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { BackButton, Notifications } from './components'
-import { authenticationGuard } from './router/guard/authenticationGuard'
-import { findMeta } from './router/utils'
-import { useAccessibility } from './stores/useAccessibility'
-import { useCurrentPlayer } from './stores/useCurrentPlayer'
+import { Notifications } from './Notifications'
 
 const router = useRouter()
 
