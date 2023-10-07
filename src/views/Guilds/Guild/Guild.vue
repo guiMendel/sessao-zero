@@ -1,13 +1,9 @@
 <script lang="ts" setup>
-import { useGuildAPI } from '@/api'
 import { LoadingSpinner, Typography } from '@/components'
-import { useRoute } from 'vue-router'
+import { useCurrentGuild } from '@/utils'
 import { GuildPanel } from './GuildPanel'
 
-const { sync } = useGuildAPI()
-const route = useRoute()
-
-const guild = sync(route.params.guildId as string)
+const { guild } = useCurrentGuild()
 </script>
 
 <template>

@@ -14,6 +14,11 @@ const router = useRouter()
 const isOpen = ref(false)
 
 const switchGuild = () => router.push({ name: 'home' })
+
+const configureGuild = () => {
+  router.push({ name: 'guild-configurations' })
+  isOpen.value = false
+}
 </script>
 
 <template>
@@ -30,6 +35,11 @@ const switchGuild = () => router.push({ name: 'home' })
     <Divisor />
 
     <div class="menu">
+      <!-- Configurar -->
+      <Button variant="colored" @click="configureGuild"
+        ><font-awesome-icon :icon="['fas', 'hammer']" /> gerenciar</Button
+      >
+
       <!-- Trocar -->
       <Button variant="colored" @click="switchGuild"
         ><font-awesome-icon :icon="['fas', 'repeat']" /> trocar de

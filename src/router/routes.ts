@@ -5,6 +5,7 @@ import {
   Configurations,
   CreatePlayer,
   Guild,
+  GuildConfigurations,
   Home,
   Login,
 } from '@/views'
@@ -99,6 +100,12 @@ const routes: Array<RouteRecordRaw> = addFirstVisitPrompts([
             component: CreateAdventure,
             name: 'create-adventure',
             meta: { title: 'Criar Aventura' },
+          },
+          {
+            path: 'configurations',
+            name: 'guild-configurations',
+            component: GuildConfigurations,
+            meta: { mustOwnGuild: true },
           },
         ],
       },

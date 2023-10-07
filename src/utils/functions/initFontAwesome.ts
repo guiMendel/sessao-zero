@@ -22,6 +22,7 @@ import {
   faDoorOpen,
   faEye,
   faEyeSlash,
+  faHammer,
   faHandPointLeft,
   faHandPointRight,
   faHeart,
@@ -74,6 +75,7 @@ export const initFontAwesome = (): [
     faRepeat,
     faPersonRunning,
     faUsers,
+    faHammer,
     faPlus
   )
 

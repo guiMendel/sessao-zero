@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Field } from '@/types/Field.interface'
+import { Field } from '@/types/Field'
 import { splitCamelCase } from '@/utils'
 import { computed, ref, watch } from 'vue'
 import { IconButton } from '..'

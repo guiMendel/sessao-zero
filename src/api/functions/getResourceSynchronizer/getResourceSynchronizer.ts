@@ -81,11 +81,12 @@ function getResourceSynchronizer<P extends ResourceProperties>(
   const resourceCollection = collection(db, resourcePath)
 
   /** Obtem a referencia de documento para o id fornecido */
-  const getDoc = (id: string) => doc(resourceCollection, id)
+  const getDoc = (id?: string) =>
+    id != undefined ? doc(resourceCollection, id) : undefined
 
   /** Gera um sync em doc ou query */
   const makeSync = <M extends DocumentReference | Query>(
-    target: M,
+    target?: M,
     existingRef?: SyncableRef<P, M>
   ) => {
     // Se recebemos um ref, basta mudar seu target

@@ -13,14 +13,14 @@ export interface RouteMetas {
   /** Atualiza o titulo da pagina (aparece na aba do chrome) */
   title?: string
 
-  /** Nao mostra o menu principal (info sobre usuario & logout) */
-  noMainMenu?: boolean
-
   /** Se esta pagina deve ser apresentada ao usuario caso essa seja sua primeira visita. So eh valido em rotas raizes */
   firstVisitPrompt?: boolean
 
   /** Se esta pagina nao deve mostrar o botao de voltar de pagina */
   noGoBackButton?: boolean
+
+  /** Se o jogador deve ser dono da guilda atualmente selecionada */
+  mustOwnGuild?: boolean
 }
 
 declare module 'vue-router' {

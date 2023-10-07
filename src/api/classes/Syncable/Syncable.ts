@@ -70,7 +70,7 @@ export class Syncable<T extends DocumentReference | Query> {
   }
 
   /** Atualiza o alvo de sync, e mantem o estado de sync */
-  updateTarget(newTarget: T) {
+  updateTarget(newTarget?: T) {
     if (compareTargets(this._target, newTarget)) return
 
     this._target = newTarget
@@ -84,7 +84,7 @@ export class Syncable<T extends DocumentReference | Query> {
     if (previousState === 'ready-to-sync') {
       this.state = 'ready-to-sync'
       return
-    } else if (previousState === 'synced') {
+    } else if (previousState === 'synced' && newTarget != undefined) {
       this.triggerSync()
       return
     }
