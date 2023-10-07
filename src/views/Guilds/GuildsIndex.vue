@@ -94,6 +94,7 @@ const openGuildPage = (guild: Resource<Guild>) =>
       min-height: var(--min-height);
 
       @include bevel(var(--main-lighter));
+      @include high-contrast-border;
 
       .identification {
         flex-direction: column;
@@ -107,6 +108,7 @@ const openGuildPage = (guild: Resource<Guild>) =>
           padding: 0.2rem 0.5rem;
           border-radius: $border-radius;
           opacity: 0.8;
+          @include high-contrast-border;
 
           p {
             color: var(--tx-main);

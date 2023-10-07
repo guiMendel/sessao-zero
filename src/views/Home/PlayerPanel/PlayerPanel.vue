@@ -72,6 +72,10 @@ const goToConfigurations = () => {
   z-index: 100;
   flex-direction: column;
 
+  @include high-contrast {
+    background-color: black;
+  }
+
   .player-panel {
     background-color: var(--bg-main-washed);
     border-radius: 0 0 $border-radius $border-radius;
@@ -83,6 +87,7 @@ const goToConfigurations = () => {
     flex-direction: column;
     align-items: stretch;
     gap: 1.5rem;
+    @include high-contrast-border;
 
     .divisor {
       color: var(--tx-main-light);
