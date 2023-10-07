@@ -8,10 +8,17 @@ import {
 } from '@/components'
 import { useCurrentPlayer } from '@/stores'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const { player, logout } = useCurrentPlayer()
+const router = useRouter()
 
 const isOpen = ref(false)
+
+const goToConfigurations = () => {
+  router.push({ name: 'configurations' })
+  isOpen.value = false
+}
 </script>
 
 <template>
@@ -28,7 +35,7 @@ const isOpen = ref(false)
 
         <div class="menu">
           <!-- Configuracoes -->
-          <Button variant="colored" class="option">
+          <Button variant="colored" @click="goToConfigurations" class="option">
             <font-awesome-icon :icon="['fas', 'screwdriver-wrench']" />
             <Typography>configurações</Typography>
           </Button>

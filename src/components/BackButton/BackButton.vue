@@ -4,7 +4,7 @@ import { IconButton } from '@/components/IconButton'
 
 <template>
   <div class="back-button">
-    <IconButton icon="hand-point-left" />
+    <IconButton color="main-light" icon="hand-point-left" />
   </div>
 </template>
 

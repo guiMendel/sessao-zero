@@ -2,6 +2,7 @@ import { makeGuildInvitation } from '@/utils'
 import {
   AccessibilityPrompt,
   BetaWelcome,
+  Configurations,
   CreatePlayer,
   Home,
   Login,
@@ -105,6 +106,11 @@ const routes: Array<RouteRecordRaw> = addFirstVisitPrompts([
         component: Player,
         name: 'player',
         meta: { title: 'Jogador' },
+      },
+      {
+        path: 'configurations',
+        name: 'configurations',
+        component: Configurations,
       },
     ],
   },
