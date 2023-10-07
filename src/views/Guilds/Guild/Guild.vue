@@ -14,9 +14,9 @@ const guild = sync(route.params.guildId as string)
   <template v-if="guild == null"><LoadingSpinner class="loading" /></template>
 
   <template v-else>
-    <div class="guild">
-      <GuildPanel />
+    <GuildPanel :guild="guild" />
 
+    <div class="guild">
       <Typography class="color-light">guilda</Typography>
       <Typography class="title" variant="title">{{ guild.name }}</Typography>
 

@@ -27,11 +27,14 @@ import {
   faHeart,
   faPaperPlane,
   faPersonRays,
+  faPersonRunning,
   faPlus,
+  faRepeat,
   faRightToBracket,
   faScrewdriverWrench,
   faStreetView,
   faTrash,
+  faUsers,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons'
 
@@ -68,6 +71,9 @@ export const initFontAwesome = (): [
     faDiceFive,
     faDiceSix,
     faBars,
+    faRepeat,
+    faPersonRunning,
+    faUsers,
     faPlus
   )
 

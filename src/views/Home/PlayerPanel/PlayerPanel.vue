@@ -2,6 +2,7 @@
 import {
   Button,
   Divisor,
+  Drawer,
   PlayerPreview,
   ProfilePicture,
   Typography,
@@ -26,29 +27,25 @@ const goToConfigurations = () => {
     <ProfilePicture class="picture" :player="player" @click="isOpen = true" />
   </div>
 
-  <Transition name="slide">
-    <div class="shadow" v-if="isOpen" @click.self="isOpen = false">
-      <div class="player-panel">
-        <PlayerPreview :player="player" @click="isOpen = false" />
+  <Drawer v-model="isOpen" class="player-panel">
+    <PlayerPreview :player="player" @click="isOpen = false" />
 
-        <Divisor class="divisor" />
+    <Divisor class="divisor" />
 
-        <div class="menu">
-          <!-- Configuracoes -->
-          <Button variant="colored" @click="goToConfigurations" class="option">
-            <font-awesome-icon :icon="['fas', 'screwdriver-wrench']" />
-            <Typography>configurações</Typography>
-          </Button>
+    <div class="menu">
+      <!-- Configuracoes -->
+      <Button variant="colored" @click="goToConfigurations" class="option">
+        <font-awesome-icon :icon="['fas', 'screwdriver-wrench']" />
+        <Typography>configurações</Typography>
+      </Button>
 
-          <!-- Logout -->
-          <Button variant="colored" @click="logout" class="option">
-            <font-awesome-icon :icon="['fas', 'door-open']" />
-            <Typography>sair</Typography>
-          </Button>
-        </div>
-      </div>
+      <!-- Logout -->
+      <Button variant="colored" @click="logout" class="option">
+        <font-awesome-icon :icon="['fas', 'door-open']" />
+        <Typography>sair</Typography>
+      </Button>
     </div>
-  </Transition>
+  </Drawer>
 </template>
 
 <style lang="scss" scoped>
@@ -64,97 +61,23 @@ const goToConfigurations = () => {
   }
 }
 
-.shadow {
-  position: fixed;
-  width: 100%;
-  height: 100vh;
-  backdrop-filter: blur(3px);
-  z-index: 100;
-  flex-direction: column;
-
-  @include high-contrast {
-    background-color: black;
+.player-panel {
+  .divisor {
+    color: var(--tx-main-light);
   }
 
-  .player-panel {
-    background-color: var(--bg-main-washed);
-    border-radius: 0 0 $border-radius $border-radius;
-    padding: 4rem 1rem 2rem;
-    margin-top: -2rem;
-
-    box-shadow: 0 0 100px 0 var(--bg-main-dark);
-
+  .menu {
     flex-direction: column;
     align-items: stretch;
-    gap: 1.5rem;
-    @include high-contrast-border;
+    gap: 1rem;
+    min-width: max-content;
+    width: 80%;
+    align-self: center;
 
-    .divisor {
-      color: var(--tx-main-light);
+    .option {
+      align-items: center;
+      gap: 0.3rem;
     }
-
-    .menu {
-      flex-direction: column;
-      align-items: stretch;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-      min-width: max-content;
-      width: 80%;
-      align-self: center;
-
-      .option {
-        align-items: center;
-        gap: 0.3rem;
-      }
-    }
-  }
-}
-
-.slide-enter-active {
-  &.shadow {
-    animation: shadow-fade 300ms;
-
-    .player-panel {
-      animation: panel-slide 300ms;
-    }
-  }
-}
-
-.slide-leave-active {
-  &.shadow {
-    animation: shadow-fade 200ms reverse;
-
-    .player-panel {
-      animation: panel-slide 200ms reverse;
-    }
-  }
-}
-
-@keyframes shadow-fade {
-  from {
-    backdrop-filter: blur(0);
-  }
-
-  to {
-    backdrop-filter: blur(3px);
-  }
-}
-
-@keyframes panel-slide {
-  from {
-    opacity: 0;
-    transform: translateY(-5rem);
-  }
-
-  50% {
-    opacity: 1;
-    transform: translateY(0.8rem);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 </style>
