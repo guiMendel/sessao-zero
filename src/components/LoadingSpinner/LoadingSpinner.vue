@@ -1,6 +1,35 @@
+<script lang="ts" setup>
+import { computed, onBeforeUnmount, ref } from 'vue'
+
+/** Mapeia um indice ao dado correspondente */
+const diceMap = [
+  'fa-dice-one',
+  'fa-dice-two',
+  'fa-dice-three',
+  'fa-dice-four',
+  'fa-dice-five',
+  'fa-dice-six',
+] as const
+
+/** O indice atual */
+const index = ref(0)
+
+/** O dado atual */
+const dice = computed(() => diceMap[index.value])
+
+// Avanca o indice
+const intervalKey = setInterval(
+  () => (index.value = (index.value + 1) % diceMap.length),
+  500
+)
+
+// Cleanup
+onBeforeUnmount(() => clearInterval(intervalKey))
+</script>
+
 <template>
   <div class="spinner">
-    <font-awesome-icon class="loading-spinner" :icon="['fas', 'compass']" />
+    <font-awesome-icon class="loading-spinner" :icon="['fas', dice]" />
   </div>
 </template>
 
@@ -9,14 +38,14 @@
   animation: spin 1s ease-in-out infinite alternate,
     change-hue 1.5s linear infinite;
   color: hsl(118, 100%, 50%);
-  background-color: white;
+  background-color: var(--bg-main);
   display: flex;
   align-items: center;
   justify-content: center;
   width: min-content;
-  border-radius: 50%;
-  padding: 0.1rem;
-  font-size: 1.2rem;
+  padding: 0.01em 0.08em;
+  border-radius: 0.2em;
+  font-size: 1.2em;
 }
 
 @keyframes spin {

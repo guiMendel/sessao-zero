@@ -4,13 +4,13 @@ import {
   BetaWelcome,
   Configurations,
   CreatePlayer,
+  Guild,
   Home,
   Login,
 } from '@/views'
 import Adventure from '@/views/Adventures/Adventure.vue'
 import AdventuresIndex from '@/views/Adventures/AdventuresIndex.vue'
 import CreateAdventure from '@/views/Adventures/CreateAdventure.vue'
-import Guild from '@/views/Guilds/Guild.vue'
 import GuildInvitation from '@/views/Guilds/GuildInvitation.vue'
 import GuildsIndex from '@/views/Guilds/GuildsIndex.vue'
 import Player from '@/views/Players/Player.vue'
@@ -69,6 +69,7 @@ const routes: Array<RouteRecordRaw> = addFirstVisitPrompts([
       {
         path: 'guild/:guildId',
         component: Guild,
+        meta: { noGoBackButton: true },
         children: [
           {
             path: '',

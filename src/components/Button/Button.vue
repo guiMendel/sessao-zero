@@ -28,7 +28,7 @@ withDefaults(
   &.colored {
     background-color: var(--bg-main-light);
     @include bevel(var(--bg-main-lighter));
-    color: var(--tx-main-darker);
+    color: var(--tx-main-dark);
   }
 }
 </style>
