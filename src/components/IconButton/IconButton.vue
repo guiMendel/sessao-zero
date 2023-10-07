@@ -49,7 +49,7 @@ withDefaults(
 
     &--main-light {
       color: var(--tx-main-light);
-      --shadow-color: var(--tx-main-lighter);
+      --shadow-color: var(--main-lighter);
     }
   }
 }
