@@ -10,8 +10,11 @@ import {
 } from 'firebase/auth'
 import { DocumentReference } from 'firebase/firestore'
 import { defineStore } from 'pinia'
+import { useCurrentAuth } from '.'
 
 export const useCurrentPlayer = defineStore('current-player', () => {
+  const { listenToAuthChange } = useCurrentAuth()
+
   /** Acessa a API do firestore do player */
   const { snapshotToResources, getDoc, create, update, deleteForever } =
     useResourceAPI<Player>('players')
@@ -23,7 +26,7 @@ export const useCurrentPlayer = defineStore('current-player', () => {
   )
 
   // Sync do player logado
-  auth.onAuthStateChanged(async (newUser) => {
+  listenToAuthChange(async (newUser) => {
     // Reset user
     if (newUser == null) player.reset()
     // Atualiza para o novo usuario

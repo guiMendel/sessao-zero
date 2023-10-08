@@ -1,4 +1,5 @@
 export * from './useAccessibility'
+export * from './useCurrentAuth'
 export * from './useCurrentPlayer'
 export * from './useNavigationData'
 export * from './useNotification'

@@ -2,9 +2,8 @@
 import { BackButton } from '@/components'
 import { authenticationGuard } from '@/router/guard/authenticationGuard'
 import { findMeta } from '@/router/utils'
-import { useAccessibility, useCurrentPlayer } from '@/stores/'
-import { storeToRefs } from 'pinia'
-import { computed, watch } from 'vue'
+import { useAccessibility, useCurrentAuth } from '@/stores/'
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Notifications } from './Notifications'
 
@@ -26,11 +25,11 @@ const hideBackButton = computed(
 // === REAGIR A MUDANCAS DE AUTH
 // ===================================================
 
-const { player } = storeToRefs(useCurrentPlayer())
+const { listenToAuthChange } = useCurrentAuth()
 
-watch(player, () => {
+listenToAuthChange(async () => {
   // Check if re-route is necessary
-  const reroute = authenticationGuard(router.currentRoute.value)
+  const reroute = await authenticationGuard(router.currentRoute.value)
 
   if (reroute != undefined) router.push(reroute)
 

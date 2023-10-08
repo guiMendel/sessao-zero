@@ -8,10 +8,12 @@ import {
   Typography,
 } from '@/components'
 import { useCurrentPlayer } from '@/stores'
+import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-const { player, logout } = useCurrentPlayer()
+const playerStore = useCurrentPlayer()
+const { player } = storeToRefs(playerStore)
 const router = useRouter()
 
 const isOpen = ref(false)
@@ -23,29 +25,33 @@ const goToConfigurations = () => {
 </script>
 
 <template>
-  <div class="player-panel-toggle">
-    <ProfilePicture class="picture" :player="player" @click="isOpen = true" />
-  </div>
+  <template v-if="player == undefined" />
 
-  <Drawer v-model="isOpen" class="player-panel">
-    <PlayerPreview :player="player" @click="isOpen = false" />
-
-    <Divisor class="divisor" />
-
-    <div class="menu">
-      <!-- Configuracoes -->
-      <Button variant="colored" @click="goToConfigurations" class="option">
-        <font-awesome-icon :icon="['fas', 'screwdriver-wrench']" />
-        <Typography>configurações</Typography>
-      </Button>
-
-      <!-- Logout -->
-      <Button variant="colored" @click="logout" class="option">
-        <font-awesome-icon :icon="['fas', 'door-open']" />
-        <Typography>sair</Typography>
-      </Button>
+  <template v-else>
+    <div class="player-panel-toggle">
+      <ProfilePicture class="picture" :player="player" @click="isOpen = true" />
     </div>
-  </Drawer>
+
+    <Drawer v-model="isOpen" class="player-panel">
+      <PlayerPreview :player="player" @click="isOpen = false" />
+
+      <Divisor class="divisor" />
+
+      <div class="menu">
+        <!-- Configuracoes -->
+        <Button variant="colored" @click="goToConfigurations" class="option">
+          <font-awesome-icon :icon="['fas', 'screwdriver-wrench']" />
+          <Typography>configurações</Typography>
+        </Button>
+
+        <!-- Logout -->
+        <Button variant="colored" @click="playerStore.logout" class="option">
+          <font-awesome-icon :icon="['fas', 'door-open']" />
+          <Typography>sair</Typography>
+        </Button>
+      </div>
+    </Drawer>
+  </template>
 </template>
 
 <style lang="scss" scoped>

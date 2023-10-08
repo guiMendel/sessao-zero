@@ -33,7 +33,7 @@ export const syncableRef = <
     previousValues: Resource<T>[]
   ) => Resource<T>[],
   parentCleanupManager?: CleanupManager
-): SyncableRef<T, M> => {
+): SyncableRef<T | undefined, M> => {
   const emptyValue =
     target == undefined || target.type === 'document' ? null : []
 

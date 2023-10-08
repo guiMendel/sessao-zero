@@ -7,7 +7,8 @@ import { ownerGuard } from './ownerGuard'
  * @param route A rota a ser verificada
  * @param redirect Um metodo para realizar redirecionamento
  */
-export const navigationGuard: NavigationGuard = (to) => {
+export const navigationGuard: NavigationGuard = async (to) => {
   // Aplica todos os guardas
-  return authenticationGuard(to) ?? promptGuard(to) ?? ownerGuard(to)
+  return (await authenticationGuard(to)) ?? promptGuard(to)
+  // return (await authenticationGuard(to)) ?? promptGuard(to) ?? ownerGuard(to)
 }

@@ -3,13 +3,14 @@ import { SmartRelation, useGuildAPI } from '@/api'
 import { LoadingSpinner, Typography } from '@/components'
 import { useCurrentPlayer } from '@/stores'
 import { Guild, Player, Resource } from '@/types'
+import { storeToRefs } from 'pinia'
 import { toValue } from 'vue'
 import { useRouter } from 'vue-router'
 
 const { create, syncList } = useGuildAPI()
 const router = useRouter()
 
-const { player } = useCurrentPlayer()
+const { player } = storeToRefs(useCurrentPlayer())
 
 const newGuild = () => {
   const name = prompt('Nome da guilda')
@@ -20,7 +21,7 @@ const newGuild = () => {
 }
 
 const getOwnerLabel = (owner: SmartRelation<Player>) =>
-  player.id === toValue(owner).id ? 'Você' : toValue(owner).name
+  player.value?.id === toValue(owner).id ? 'Você' : toValue(owner).name
 
 const guilds = syncList()
 

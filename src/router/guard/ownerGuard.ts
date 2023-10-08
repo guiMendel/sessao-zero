@@ -1,17 +1,17 @@
-import { useCurrentPlayer } from '@/stores/useCurrentPlayer'
-import { storeToRefs } from 'pinia'
+import { useCurrentAuth } from '@/stores'
+import { useCurrentGuild } from '@/utils'
 import { RouteLocationNormalized } from 'vue-router'
 import { findMeta } from '../utils/'
-import { useCurrentGuild } from '@/utils'
 
 export const ownerGuard = async (to: RouteLocationNormalized) => {
-  const { player } = storeToRefs(useCurrentPlayer())
   const { getGuild } = useCurrentGuild()
 
+  // Nao ligamos para reatividade aqui
+  const user = await useCurrentAuth().user
   const guild = await getGuild()
 
   // Verifica autenticacao
-  if (findMeta(to, 'mustOwnGuild') && guild?.ownerUid != player.value?.id) {
+  if (findMeta(to, 'mustOwnGuild') && guild?.ownerUid != user.value?.uid) {
     return { name: 'home' }
   }
 }
