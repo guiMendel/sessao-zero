@@ -17,7 +17,7 @@ import { onBeforeUnmount, ref } from 'vue'
 import {
   desyncedReadErrorMessage,
   desyncedWriteErrorMessage,
-  useResourceAPI,
+  useResource,
 } from '.'
 
 vi.mock('@/api', () => ({ db: 'mockDb' }))
@@ -72,7 +72,7 @@ const parseTestSnapshot = (id: string, data: any): Resource<TestProperties> =>
   }
 
 const useTestResourceAPI = () =>
-  useResourceAPI<TestProperties>('test-resource', parseTestSnapshot)
+  useResource<TestProperties>('test-resource', parseTestSnapshot)
 
 const mockDatabase = (values: Record<string, Uploadable<TestProperties>>) => {
   const mockSnapshotDatabase: Record<string, Snapshot> = {}
@@ -242,7 +242,7 @@ const mockDatabase = (values: Record<string, Uploadable<TestProperties>>) => {
 const mockDate = '2019-04-22T10:20:30Z'
 const RealDate = Date
 
-describe('useResourceAPI', () => {
+describe('useResource', () => {
   beforeEach(() => {
     vitest.restoreAllMocks()
 
@@ -932,7 +932,7 @@ describe('useResourceAPI', () => {
       },
     })
 
-    const { sync } = useResourceAPI<TestProperties>('test-resource')
+    const { sync } = useResource<TestProperties>('test-resource')
 
     const instance = sync(id)
 

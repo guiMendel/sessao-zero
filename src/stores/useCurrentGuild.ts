@@ -1,10 +1,10 @@
-import { useGuildAPI } from '@/api'
+import { useGuild } from '@/api'
 import { defineStore } from 'pinia'
 import { watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 export const useCurrentGuild = defineStore('current-guild', () => {
-  const { sync, get } = useGuildAPI()
+  const { sync, get } = useGuild()
   const route = useRoute()
 
   const guild = sync(route?.params.guildId as string)

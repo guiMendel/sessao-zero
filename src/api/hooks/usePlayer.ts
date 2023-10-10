@@ -1,9 +1,8 @@
-import { Player } from '@/types/'
-import { useResourceAPI } from './useResourceAPI'
+import { useResource } from './useResource'
 
 /** API para os players. Note que somente fornece metodos de read. Para fazer operacoes de write, veja useCurrentPlayer */
-export const usePlayerAPI = () => {
-  const api = useResourceAPI<Player>('players')
+export const usePlayer = () => {
+  const api = useResource('players')
 
   // Filtra metods de escrita e delecao
   return {

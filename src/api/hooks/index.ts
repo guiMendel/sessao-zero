@@ -1,3 +1,3 @@
-export * from './useGuildAPI'
-export * from './usePlayerAPI'
-export * from './useResourceAPI'
+export * from './useGuild'
+export * from './usePlayer'
+export * from './useResource'

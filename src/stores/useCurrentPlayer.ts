@@ -1,4 +1,4 @@
-import { auth, syncableRef, useResourceAPI } from '@/api'
+import { auth, syncableRef, useResource } from '@/api'
 import { Player, Uploadable } from '@/types/'
 import {
   createUserWithEmailAndPassword,
@@ -17,7 +17,7 @@ export const useCurrentPlayer = defineStore('current-player', () => {
 
   /** Acessa a API do firestore do player */
   const { snapshotToResources, getDoc, create, update, deleteForever } =
-    useResourceAPI<Player>('players')
+    useResource<Player>('players')
 
   /** A instancia de player atual */
   const player = syncableRef<Player, DocumentReference>(

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { SmartRelation, useGuildAPI } from '@/api'
+import { SmartRelation, useGuild } from '@/api'
 import { LoadingSpinner, Typography } from '@/components'
 import { useCurrentPlayer } from '@/stores'
 import { Guild, Player, Resource } from '@/types'
@@ -7,7 +7,7 @@ import { storeToRefs } from 'pinia'
 import { toValue } from 'vue'
 import { useRouter } from 'vue-router'
 
-const { create, syncList } = useGuildAPI()
+const { create, syncList } = useGuild()
 const router = useRouter()
 
 const { player } = storeToRefs(useCurrentPlayer())

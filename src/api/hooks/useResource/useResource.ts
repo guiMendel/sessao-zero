@@ -1,61 +1,25 @@
 import {
   CleanupManager,
-  RelationBuilder,
-  buildRelations,
   db,
   getResourceGetter,
   getResourceSynchronizer,
-  snapshotToResources as originalSnapshotToResources,
 } from '@/api/'
-import { ResourcePath } from '@/api/constants/resources'
-import { Resource, ResourceProperties, Uploadable } from '@/types'
+import { Properties, ResourcePath } from '@/api/constants/resources'
+import { Uploadable } from '@/types'
 import {
-  QuerySnapshot,
   addDoc,
   collection,
   deleteDoc,
   doc,
   setDoc,
   updateDoc,
-  type DocumentData,
-  type DocumentSnapshot,
 } from 'firebase/firestore'
 import { onBeforeUnmount } from 'vue'
 
-const defaultOptions = {
-  propertiesExtractor: <T>(_: string, documentData: DocumentData): T =>
-    ({
-      ...documentData,
-    } as T),
-  relations: {},
-}
-
 /** Fornece uma interface para ler e escrever dados de um recurso no firestore, com sync.
- * P para Properties, R para Relations
  * @param resourcePath O caminho do recurso no firestore
- * @param extractProperties Um metodo para extrair os dados do recurso dos dados de um documento do firestore
  */
-export const useResourceAPI = <
-  P extends ResourcePath,
-  R extends Record<string, RelationBuilder<P, ResourceProperties>> = {}
->(
-  resourcePath: P,
-  options?: {
-    relations?: R
-  }
-) => {
-  const extractProperties = (options?.propertiesExtractor ??
-    propertyExtractors[resourcePath] ??
-    defaultOptions.propertiesExtractor) as PropertyExtractor<P>
-
-  const relationBuilders = options?.relations ?? (defaultOptions.relations as R)
-
-  type InjectedRelations = {
-    [relation in keyof R]: ReturnType<R[relation]['build']>
-  }
-
-  type PWithRelations = P & InjectedRelations
-
+export const useResource = <P extends ResourcePath>(resourcePath: P) => {
   // ========================================
   // UTILIDADES
   // ========================================
@@ -66,36 +30,6 @@ export const useResourceAPI = <
   /** Gerenciador de cleanups desta instancia */
   const cleanupManager = new CleanupManager()
 
-  /** Extrai o recurso de um snapshot */
-  const snapshotToResources = (
-    content: DocumentSnapshot | QuerySnapshot,
-    previousValues: Resource<PWithRelations>[] = []
-  ): Resource<PWithRelations>[] => {
-    const previousValuesMap = previousValues.reduce(
-      (map, properties) => ({ ...map, [properties.id]: properties }),
-      {} as Record<string, PWithRelations>
-    )
-
-    const resources = originalSnapshotToResources<P, InjectedRelations>(
-      content,
-      {
-        extractProperties,
-        inject: (resource) =>
-          buildRelations<P>(
-            properties,
-            id,
-            relationBuilders,
-            previousValuesMap,
-            cleanupManager
-          ),
-      }
-    )
-
-    // TODO: chamar dispose em todos os recursos de previouValues que nao foram reutilizados
-
-    return resources
-  }
-
   /** Obtem a referencia de documento para o id fornecido */
   const getDoc = (id: string) => doc(resourceCollection, id)
 
@@ -103,7 +37,7 @@ export const useResourceAPI = <
   // CREATE & UPDATE
   // ========================================
 
-  /** Remove dados sensiveis de um objecto */
+  /** Remove dados sensiveis de um objeto */
   const secureData = (
     data: Record<string, any>,
     ...removeFields: string[]
@@ -123,12 +57,12 @@ export const useResourceAPI = <
   }
 
   /** Cria um novo recurso */
-  const create = (properties: P, useId?: string) => {
+  const create = (properties: Properties[P], useId?: string) => {
     const securedData = {
       ...secureData(properties, 'id'),
       createdAt: new Date().toJSON(),
       modifiedAt: new Date().toJSON(),
-    } as Uploadable<P>
+    } as Uploadable<Properties[P]>
 
     if (useId != undefined) return setDoc(getDoc(useId), securedData)
 
@@ -138,7 +72,7 @@ export const useResourceAPI = <
   /** Cria um novo recurso */
   const update = (
     id: string,
-    properties: Partial<P>,
+    properties: Partial<Properties[P]>,
     { overwrite } = { overwrite: false }
   ) => {
     const securedData = {
@@ -156,20 +90,17 @@ export const useResourceAPI = <
   // ========================================
 
   /** Pega os getters */
-  const { get, getList } = getResourceGetter(resourcePath, {
-    snapshotToResources,
-  })
+  const { get, getList } = getResourceGetter(resourcePath, cleanupManager)
 
   // ========================================
   // SYNC
   // ========================================
 
   /** Pega os metodos de sync */
-  const { sync, syncList } = getResourceSynchronizer(resourcePath, {
-    snapshotToResources,
-    update,
-    cleanupManager,
-  })
+  const { sync, syncList } = getResourceSynchronizer(
+    resourcePath,
+    cleanupManager
+  )
 
   // ========================================
   // DELETE
@@ -188,7 +119,6 @@ export const useResourceAPI = <
   return {
     // Utilidades
     resourceCollection,
-    snapshotToResources,
     getDoc,
 
     // Create & Update
