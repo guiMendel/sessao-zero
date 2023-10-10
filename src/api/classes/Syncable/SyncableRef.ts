@@ -13,10 +13,10 @@ import { CleanupManager } from '..'
 // IMPLEMENTATION
 // ===========================
 
-export type SyncableRef<T, M extends Query | DocumentReference> = Ref<
-  M extends Query ? Resource<T>[] : Resource<T>
-> &
-  Syncable<M>
+export type SyncableRef<
+  T extends ResourceProperties | undefined,
+  M extends Query | DocumentReference
+> = Ref<M extends Query ? Resource<T>[] : Resource<T>> & Syncable<M>
 
 /** Cria um ref que automaticamente faz sync com o target
  * @param target O alvo com o qual realizar o sync

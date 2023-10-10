@@ -3,29 +3,18 @@ import {
   RelationBuilder,
   buildRelations,
   db,
+  getResourceGetter,
   getResourceSynchronizer,
-  snapshotToResource as originalSnapshotToResource,
+  snapshotToResources as originalSnapshotToResource,
 } from '@/api/'
+import { ResourcePath } from '@/api/constants/resources'
+import { Resource, ResourceProperties, Uploadable } from '@/types'
 import {
-  PropertyExtractor,
-  propertyExtractors,
-} from '@/api/constants/propertyExtractors'
-import {
-  Resource,
-  ResourcePaths,
-  ResourceProperties,
-  Uploadable,
-} from '@/types'
-import {
-  QueryFieldFilterConstraint,
   QuerySnapshot,
   addDoc,
   collection,
   deleteDoc,
   doc,
-  getDoc as firestoreGetDoc,
-  getDocs as firestoreGetDocs,
-  query,
   setDoc,
   updateDoc,
   type DocumentData,
@@ -47,12 +36,11 @@ const defaultOptions = {
  * @param extractProperties Um metodo para extrair os dados do recurso dos dados de um documento do firestore
  */
 export const useResourceAPI = <
-  P extends ResourceProperties,
+  P extends ResourcePath,
   R extends Record<string, RelationBuilder<P, ResourceProperties>> = {}
 >(
-  resourcePath: ResourcePaths,
+  resourcePath: P,
   options?: {
-    propertiesExtractor?: PropertyExtractor<P>
     relations?: R
   }
 ) => {
@@ -92,8 +80,8 @@ export const useResourceAPI = <
       content,
       {
         extractProperties,
-        inject: (properties, id) =>
-          buildRelations<P, R>(
+        inject: (resource) =>
+          buildRelations<P>(
             properties,
             id,
             relationBuilders,
@@ -167,15 +155,10 @@ export const useResourceAPI = <
   // READ
   // ========================================
 
-  /** Pega uma instancia do recurso */
-  const get = (id: string) =>
-    firestoreGetDoc(getDoc(id)).then((doc) => snapshotToResources(doc)[0])
-
-  /** Pega uma lista filtrada do recurso */
-  const getList = (filters: QueryFieldFilterConstraint[] = []) =>
-    firestoreGetDocs(query(resourceCollection, ...filters)).then(
-      snapshotToResources
-    )
+  /** Pega os getters */
+  const { get, getList } = getResourceGetter(resourcePath, {
+    snapshotToResources,
+  })
 
   // ========================================
   // SYNC

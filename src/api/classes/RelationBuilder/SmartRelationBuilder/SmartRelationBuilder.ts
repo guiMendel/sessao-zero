@@ -1,7 +1,7 @@
 import {
   CleanupManager,
   SyncableRef,
-  snapshotToResource as originalSnapshotToResource,
+  snapshotToResources as originalSnapshotToResource,
   syncableRef,
 } from '@/api'
 import {

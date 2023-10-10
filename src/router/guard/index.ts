@@ -9,6 +9,7 @@ import { ownerGuard } from './ownerGuard'
  */
 export const navigationGuard: NavigationGuard = async (to) => {
   // Aplica todos os guardas
-  return (await authenticationGuard(to)) ?? promptGuard(to)
-  // return (await authenticationGuard(to)) ?? promptGuard(to) ?? ownerGuard(to)
+  return (
+    (await authenticationGuard(to)) ?? promptGuard(to) ?? (await ownerGuard(to))
+  )
 }

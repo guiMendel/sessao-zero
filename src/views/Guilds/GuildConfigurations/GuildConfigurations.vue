@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Button, InputField, ToggleField, Typography } from '@/components'
+import { useCurrentGuild } from '@/stores'
 import { Field } from '@/types'
-import { useCurrentGuild } from '@/utils'
+import { storeToRefs } from 'pinia'
 import { ref, watch } from 'vue'
 
-const { guild } = useCurrentGuild()
+const { guild } = storeToRefs(useCurrentGuild())
 
 const name = ref<Field>({ name: 'nome', valid: true, value: '' })
 const description = ref<Field>({ name: 'descrição', valid: true, value: '' })

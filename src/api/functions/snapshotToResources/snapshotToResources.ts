@@ -1,5 +1,5 @@
-import { PropertyExtractor } from '@/api/constants/propertyExtractors'
-import { Resource, ResourceProperties } from '@/types'
+import { Properties, PropertyExtractor, ResourcePath } from '@/api'
+import { Resource } from '@/types'
 import {
   DocumentSnapshot,
   QueryDocumentSnapshot,
@@ -8,12 +8,12 @@ import {
 
 /** Transforma o DocumentData em ResourceProperties */
 const documentDataToResource = <
-  P extends ResourceProperties,
+  P extends ResourcePath,
   I extends Record<string, any>
 >(
   doc: DocumentSnapshot | QueryDocumentSnapshot,
   extractProperties: PropertyExtractor<P>,
-  inject?: (properties: P, id: string) => I
+  inject?: (properties: Resource<Properties[P]>) => I
 ) => {
   const data = doc.data()
 
@@ -29,7 +29,7 @@ const documentDataToResource = <
 
   if (inject)
     return {
-      ...inject(properties, doc.id),
+      ...inject(properties),
       ...properties,
     }
 
@@ -37,36 +37,36 @@ const documentDataToResource = <
 }
 
 /** Transfoma um snapshot em uma colecao de ResourceProperties */
-function snapshotToResources<P extends ResourceProperties>(
+function snapshotToResources<P extends ResourcePath>(
   content: DocumentSnapshot | QuerySnapshot,
   options: {
     extractProperties: PropertyExtractor<P>
   }
-): Resource<P>[]
+): Resource<Properties[P]>[]
 
 /** Transfoma um snapshot em uma colecao de ResourceProperties
  * Injeta o resultado da funcao inject
  */
 function snapshotToResources<
-  P extends ResourceProperties,
+  P extends ResourcePath,
   I extends Record<string, any> = {}
 >(
   content: DocumentSnapshot | QuerySnapshot,
   options: {
     extractProperties: PropertyExtractor<P>
-    inject: (properties: P, id: string) => I
+    inject: (properties: Resource<Properties[P]>) => I
   }
-): Resource<P & I>[]
+): Resource<Properties[P] & I>[]
 
 /** Extrai o recurso de um snapshot */
 function snapshotToResources<
-  P extends ResourceProperties,
+  P extends ResourcePath,
   I extends Record<string, any> = {}
 >(
   content: DocumentSnapshot | QuerySnapshot,
   options: {
     extractProperties: PropertyExtractor<P>
-    inject?: (properties: P, id: string) => I
+    inject?: (properties: Resource<Properties[P]>) => I
   }
 ) {
   // Lida com um query
@@ -81,4 +81,4 @@ function snapshotToResources<
   ]
 }
 
-export { snapshotToResources as snapshotToResource }
+export { snapshotToResources }

@@ -1,2 +1,3 @@
+export * from './getResourceGetter'
 export * from './getResourceSynchronizer'
-export * from './snapshotToResource'
+export * from './snapshotToResources'

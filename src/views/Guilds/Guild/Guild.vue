@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import { LoadingSpinner, Typography } from '@/components'
-import { useCurrentGuild } from '@/utils'
+import { useCurrentGuild } from '@/stores'
 import { GuildPanel } from './GuildPanel'
+import { storeToRefs } from 'pinia'
 
-const { guild } = useCurrentGuild()
+const { guild } = storeToRefs(useCurrentGuild())
 </script>
 
 <template>

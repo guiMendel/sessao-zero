@@ -1,22 +1,12 @@
-import { Guild, Player } from '.'
+import { ResourceProperties } from '@/api'
 
-export type ResourcePaths = 'players' | 'guilds'
-
-export type Resource<P> = P & {
+export type Resource<P extends ResourceProperties> = P & {
   createdAt: Date
   modifiedAt: Date
   id: string
 }
 
-export type Uploadable<P> = P & {
+export type Uploadable<P extends ResourceProperties> = P & {
   modifiedAt: string
   createdAt: string
-}
-
-export type ResourceProperties = Guild | Player
-
-/** Maps resource types to their proerty definitions */
-export interface ResourceTypeToProperties {
-  players: Player
-  guilds: Guild
 }

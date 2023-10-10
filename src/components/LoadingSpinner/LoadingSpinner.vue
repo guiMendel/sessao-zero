@@ -38,7 +38,7 @@ onBeforeUnmount(() => clearInterval(intervalKey))
   animation: spin 1s ease-in-out infinite alternate,
     change-hue 1.5s linear infinite;
   color: hsl(118, 100%, 50%);
-  background-color: var(--bg-main);
+  background-color: var(--bg-main-washed);
   display: flex;
   align-items: center;
   justify-content: center;
