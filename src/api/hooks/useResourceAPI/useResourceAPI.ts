@@ -5,7 +5,7 @@ import {
   db,
   getResourceGetter,
   getResourceSynchronizer,
-  snapshotToResources as originalSnapshotToResource,
+  snapshotToResources as originalSnapshotToResources,
 } from '@/api/'
 import { ResourcePath } from '@/api/constants/resources'
 import { Resource, ResourceProperties, Uploadable } from '@/types'
@@ -76,7 +76,7 @@ export const useResourceAPI = <
       {} as Record<string, PWithRelations>
     )
 
-    const resources = originalSnapshotToResource<P, InjectedRelations>(
+    const resources = originalSnapshotToResources<P, InjectedRelations>(
       content,
       {
         extractProperties,

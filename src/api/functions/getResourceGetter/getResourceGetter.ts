@@ -1,9 +1,12 @@
-import { db } from '@/api'
-import { Resource, ResourcePaths, ResourceProperties } from '@/types'
 import {
-  DocumentSnapshot,
+  CleanupManager,
+  FullInstance,
+  ResourcePath,
+  db,
+  getFullInstance
+} from '@/api'
+import {
   QueryFieldFilterConstraint,
-  QuerySnapshot,
   collection,
   doc,
   getDoc as firestoreGetDoc,
@@ -11,16 +14,27 @@ import {
   query,
 } from 'firebase/firestore'
 
-export const getResourceGetter = <P extends ResourceProperties>(
-  resourcePath: ResourcePaths,
-  {
-    snapshotToResources,
-  }: {
-    snapshotToResources: (
-      content: DocumentSnapshot | QuerySnapshot
-    ) => Resource<P>[]
-  }
-) => {
+// ====================================
+// TIPOS DO RETURN
+// ====================================
+
+type GetListMethod<P extends ResourcePath> = (
+  filters?: QueryFieldFilterConstraint[]
+) => Promise<FullInstance<P>[]>
+
+type GetMethod<P extends ResourcePath> = (
+  id: string
+) => Promise<FullInstance<P> | undefined>
+
+// ====================================
+// IMPLEMENTACAO
+// ====================================
+
+/** Permite acesso a um recurso */
+export const getResourceGetter = <P extends ResourcePath>(
+  resourcePath: P,
+  cleanupManager: CleanupManager
+): { get: GetMethod<P>; getList: GetListMethod<P> } => {
   /** A collection deste recurso */
   const resourceCollection = collection(db, resourcePath)
 
@@ -30,12 +44,20 @@ export const getResourceGetter = <P extends ResourceProperties>(
   return {
     /** Pega uma instancia do recurso */
     get: (id: string) =>
-      firestoreGetDoc(getDoc(id)).then((doc) => snapshotToResources(doc)[0]),
+      firestoreGetDoc(getDoc(id)).then(
+        (doc) => getFullInstance(doc, resourcePath, cleanupManager, [])[0]
+      ),
 
     /** Pega uma lista filtrada do recurso */
     getList: (filters: QueryFieldFilterConstraint[] = []) =>
       firestoreGetDocs(query(resourceCollection, ...filters)).then(
-        snapshotToResources
+        (docs) =>
+          getFullInstance(
+            docs,
+            resourcePath,
+            cleanupManager,
+            []
+          ) as FullInstance<P>[]
       ),
   }
 }

@@ -12,6 +12,11 @@ const compareTargets = (
   target2: DocumentReference | Query | undefined
 ) => JSON.stringify(target1) === JSON.stringify(target2)
 
+type OnNextCallback<T extends DocumentReference | Query> = (
+  snapshot: T extends Query ? QuerySnapshot : DocumentSnapshot,
+  cleanupManager: CleanupManager
+) => void
+
 export class Syncable<T extends DocumentReference | Query> {
   private resetListeners: Array<() => void> = []
 
@@ -25,9 +30,7 @@ export class Syncable<T extends DocumentReference | Query> {
   private state: 'ready-to-sync' | 'synced' | 'disposed' = 'ready-to-sync'
 
   /** Callback para executar sempre que houver um novo snapshot para este sync */
-  private onNext: (
-    snapshot: T extends Query ? QuerySnapshot : DocumentSnapshot
-  ) => void
+  private onNext: OnNextCallback<T>
 
   public get syncState() {
     // Para o publico, utilizamos o estado empty para indicar que nao ha target
@@ -46,12 +49,7 @@ export class Syncable<T extends DocumentReference | Query> {
 
   public dispose = () => this.cleanup.dispose()
 
-  constructor(
-    target: T | undefined,
-    onNext: (
-      snapshot: T extends Query ? QuerySnapshot : DocumentSnapshot
-    ) => void
-  ) {
+  constructor(target: T | undefined, onNext: OnNextCallback<T>) {
     this._target = target
     this.onNext = onNext
 
@@ -64,7 +62,14 @@ export class Syncable<T extends DocumentReference | Query> {
 
     this.state = 'synced'
 
-    const cleanupListener = onSnapshot(this._target as any, this.onNext as any)
+    const cleanupListener = onSnapshot(
+      this._target as any,
+      (snapshot: QuerySnapshot | DocumentSnapshot) =>
+        this.onNext(
+          snapshot as T extends Query ? QuerySnapshot : DocumentSnapshot,
+          this.cleanup
+        )
+    )
 
     this.cleanup.add(cleanupListener)
   }

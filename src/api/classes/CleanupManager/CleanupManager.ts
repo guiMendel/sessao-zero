@@ -1,7 +1,4 @@
-type LinkRelation =
-  | 'propagate-both'
-  | 'propagate-to-other'
-  | 'propagate-from-other'
+type LinkRelation = 'propagate-both' | 'propagate-to' | 'propagate-from'
 
 /** Permite armazenar callbacks para cleanup e fornece um meio de executar cleanups com antecedencia */
 export class CleanupManager {
@@ -55,10 +52,10 @@ export class CleanupManager {
     // Ativa o dispose dos linkados
     for (const { other, relation } of Object.values(this.linkedManagers)) {
       if (
-        relation != 'propagate-from-other' &&
+        relation != 'propagate-from' &&
         alreadyDisposedManagers.includes(other.ownId) == false
       )
-      other.internalDispose([...alreadyDisposedManagers, this.ownId])
+        other.internalDispose([...alreadyDisposedManagers, this.ownId])
     }
 
     for (const callback of this.disposeListeners) callback()
@@ -75,7 +72,7 @@ export class CleanupManager {
   /** Associa dois cleanup managers: quando um chamar dispose, o outro tambem chamara dispose.
    * Apos um desses disposes acontecer, o link eh quebrado
    */
-  link(otherManager: CleanupManager, relation: LinkRelation) {
+  link(relation: LinkRelation, otherManager: CleanupManager) {
     if (otherManager.ownId in this.linkedManagers) return
 
     this.linkedManagers[otherManager.ownId] = { other: otherManager, relation }
@@ -83,11 +80,11 @@ export class CleanupManager {
     // Traduz essa relacao para a relacao do outro ponto de vista
     const translateRelationPointOfView: Record<LinkRelation, LinkRelation> = {
       'propagate-both': 'propagate-both',
-      'propagate-from-other': 'propagate-to-other',
-      'propagate-to-other': 'propagate-from-other',
+      'propagate-from': 'propagate-to',
+      'propagate-to': 'propagate-from',
     }
 
-    otherManager.link(this, translateRelationPointOfView[relation])
+    otherManager.link(translateRelationPointOfView[relation], this)
   }
 
   /** Executa esse callback sempre que realizar um dispose */

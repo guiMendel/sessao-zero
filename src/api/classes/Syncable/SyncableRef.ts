@@ -1,10 +1,5 @@
-import { Resource, ResourceProperties } from '@/types'
-import {
-  DocumentReference,
-  DocumentSnapshot,
-  Query,
-  QuerySnapshot,
-} from 'firebase/firestore'
+import { FullInstance, ResourcePath, getFullInstance } from '@/api'
+import { DocumentReference, Query } from 'firebase/firestore'
 import { Ref, ref } from 'vue'
 import { Syncable } from '.'
 import { CleanupManager } from '..'
@@ -14,51 +9,60 @@ import { CleanupManager } from '..'
 // ===========================
 
 export type SyncableRef<
-  T extends ResourceProperties | undefined,
+  P extends ResourcePath,
   M extends Query | DocumentReference
-> = Ref<M extends Query ? Resource<T>[] : Resource<T>> & Syncable<M>
+> = Ref<M extends Query ? FullInstance<P>[] : FullInstance<P>> & Syncable<M>
 
 /** Cria um ref que automaticamente faz sync com o target
  * @param target O alvo com o qual realizar o sync
- * @param snapshotToResources Como transformar o snapshot recebido pelo sync em um(varios) recurso(s)
  * @param parentCleanupManager Um cleanup manager que, quando ativar o dispose, deve ativar o dispose desse ref tambem
  */
 export const syncableRef = <
-  T extends ResourceProperties,
+  P extends ResourcePath,
   M extends Query | DocumentReference
 >(
+  resourcePath: P,
   target: M | undefined,
-  snapshotToResources: (
-    content: M extends Query ? QuerySnapshot : DocumentSnapshot,
-    previousValues: Resource<T>[]
-  ) => Resource<T>[],
-  parentCleanupManager?: CleanupManager
-): SyncableRef<T | undefined, M> => {
+  parentCleanupManager: CleanupManager
+): SyncableRef<P, M> => {
   const emptyValue =
-    target == undefined || target.type === 'document' ? null : []
+    target == undefined || target.type === 'document' ? undefined : []
 
   const valueRef = ref(emptyValue) as M extends Query
-    ? Ref<Resource<T>[]>
-    : Ref<Resource<T> | null>
+    ? Ref<FullInstance<P>[]>
+    : Ref<FullInstance<P> | undefined>
 
   /** O Syncable deste recurso */
-  const syncable = new Syncable<M>(target, (snapshot) => {
+  const syncable = new Syncable<M>(target, (snapshot, ownCleanupManager) => {
+    let previousValues: FullInstance<P>[]
+
     // Se forem varios docs
     if ('docs' in snapshot) {
-      valueRef.value = snapshotToResources(
+      previousValues = valueRef.value as FullInstance<P>[]
+
+      valueRef.value = getFullInstance(
         snapshot,
-        valueRef.value as Resource<T>[]
-      )
+        resourcePath,
+        ownCleanupManager,
+        previousValues
+      ) as FullInstance<P>[]
 
       return
     }
 
     // Se for so um
-    valueRef.value = snapshotToResources(
+    previousValues =
+      valueRef.value == undefined ? [] : [valueRef.value as FullInstance<P>]
+
+    valueRef.value = getFullInstance(
       snapshot,
-      valueRef.value == null ? [] : [valueRef.value as Resource<T>]
+      resourcePath,
+      ownCleanupManager,
+      previousValues
     )[0]
-  }) as SyncableRef<T, M>
+
+    // TODO: chamar dispose em todos os valores de previouValues que nao foram reutilizados
+  }) as SyncableRef<P, M>
 
   /** O SyncableRef deste recurso */
   const syncedRef = Object.assign(valueRef, syncable)
@@ -74,10 +78,7 @@ export const syncableRef = <
   syncedRef.onReset(() => (valueRef.value = emptyValue))
 
   // Associa o cleanup manager
-  parentCleanupManager?.link(
-    syncedRef.getCleanupManager(),
-    'propagate-to-other'
-  )
+  parentCleanupManager.link('propagate-to', syncedRef.getCleanupManager())
 
   return new Proxy(syncedRef, {
     get: (currentState, property) => {

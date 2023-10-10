@@ -1,29 +1,21 @@
 import {
+  CleanupManager,
   FullInstance,
   Properties,
   RelationDefinition,
   Relations,
   ResourcePath,
+  db,
   relationSettings,
+  syncableRef,
 } from '@/api/'
-import { SmartRelation } from '.'
-import { CleanupManager } from '..'
 import { Resource } from '@/types'
-
-/** Define os tipos de relacao */
-export type Relation<T> = SmartRelation<T>
+import { collection, doc, query, where } from 'firebase/firestore'
 
 /** Adiciona a um objeto uma flag que indica se ele nao deve ser descartado */
 export type WithDisposeFlag<T> = T & {
-  ignoreDispose?: boolean
+  dontDispose?: boolean
 }
-
-// type InjectedRelations<
-//   P extends ResourceProperties,
-//   R extends Record<string, RelationBuilder<P, ResourceProperties>>
-// > = {
-//   [relation in keyof R]: ReturnType<R[relation]['build']>
-// }
 
 /** Constroi um objeto de relacoes para a instancia fornecida
  * @param source O item para o qual gerar as relacoes
@@ -46,7 +38,7 @@ export const buildRelations = <P extends ResourcePath>({
   // Se essa source estiver em previous values, reutiliza as relacoes do previous value
   if (source.id in previousValues) {
     // Marca para nao descartar esses valores
-    previousValues[source.id].ignoreDispose = true
+    previousValues[source.id].dontDispose = true
 
     return extractRelations(previousValues[source.id], sourcePath)
   }
@@ -55,7 +47,7 @@ export const buildRelations = <P extends ResourcePath>({
 }
 
 const createRelations = <P extends ResourcePath>(
-  source: Properties[P],
+  source: Resource<Properties[P]>,
   sourcePath: P,
   cleanupManager: CleanupManager
 ): Relations<P> =>
@@ -90,30 +82,42 @@ const extractRelations = <P extends ResourcePath>(
   )
 
 const createRelation = <P extends ResourcePath>(
-  source: Properties[P],
+  source: Resource<Properties[P]>,
   definition: RelationDefinition<P, ResourcePath>,
   cleanupManager: CleanupManager
-): Relations<P>[keyof Relations<P>] => ({})
+) => {
+  switch (definition.type) {
+    case 'has-many':
+      return createHasManyRelation(source, definition, cleanupManager)
 
-// /** Um construtor generico de relacoes
-//  * S para Source, T para Target
-//  */
-// export abstract class RelationBuilder<
-//   S extends ResourceProperties,
-//   T extends ResourceProperties
-// > {
-//   resourcePath: T
-//   relationDefinition: { foreignKey: keyof S }
+    case 'has-one':
+      return createHasOneRelation(source, definition, cleanupManager)
+  }
+}
 
-//   getDoc = (id: string) => doc(collection(db, this.resourcePath), id)
+/** Relation key refers to a property of source */
+const createHasOneRelation = <P extends ResourcePath>(
+  source: Resource<Properties[P]>,
+  definition: RelationDefinition<P, ResourcePath>,
+  cleanupManager: CleanupManager
+) => {
+  const targetId = source[definition.relationKey] as string
 
-//   constructor(
-//     resourcePath: T,
-//     relationDefinition: { foreignKey: keyof S }
-//   ) {
-//     this.resourcePath = resourcePath
-//     this.relationDefinition = relationDefinition
-//   }
+  const targetDoc = doc(collection(db, definition.resourcePath), targetId)
 
-//   public abstract build(source: S, cleanupManager: CleanupManager): Relation<T>
-// }
+  return syncableRef(definition.resourcePath, targetDoc, cleanupManager)
+}
+
+/** Relation key refers to a property of target */
+const createHasManyRelation = <P extends ResourcePath>(
+  source: Resource<Properties[P]>,
+  definition: RelationDefinition<P, ResourcePath>,
+  cleanupManager: CleanupManager
+) => {
+  const targetQuery = query(
+    collection(db, definition.resourcePath),
+    where(definition.relationKey as string, '==', source.id)
+  )
+
+  return syncableRef(definition.resourcePath, targetQuery, cleanupManager)
+}

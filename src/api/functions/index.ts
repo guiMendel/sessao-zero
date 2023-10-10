@@ -1,3 +1,5 @@
+export * from './buildRelations'
+export * from './getFullInstance'
 export * from './getResourceGetter'
 export * from './getResourceSynchronizer'
-export * from './snapshotToResources'
+export * from './getResource'

@@ -1,26 +1,29 @@
-import { CleanupManager, SyncableRef, db, syncableRef } from '@/api'
-import { Resource, ResourceProperties } from '@/types'
+import {
+  CleanupManager,
+  ResourcePath,
+  SyncableRef,
+  db,
+  syncableRef,
+} from '@/api'
 import {
   DocumentReference,
-  DocumentSnapshot,
   Query,
   QueryFieldFilterConstraint,
-  QuerySnapshot,
   collection,
   doc,
-  query,
+  query
 } from 'firebase/firestore'
 
 // ====================================
 // TIPOS DO RETURN
 // ====================================
 
-type SyncListMethod<P extends ResourceProperties> = (
+type SyncListMethod<P extends ResourcePath> = (
   filters?: QueryFieldFilterConstraint[],
   existingRef?: SyncableRef<P, Query>
 ) => SyncableRef<P, Query>
 
-type SyncMethod<P extends ResourceProperties> = (
+type SyncMethod<P extends ResourcePath> = (
   id: string,
   existingRef?: SyncableRef<P, DocumentReference>
 ) => SyncableRef<P, DocumentReference>
@@ -29,54 +32,22 @@ type SyncMethod<P extends ResourceProperties> = (
 // TIPOS DOS PARAMETROS
 // ====================================
 
-type UpdateMethod<P extends ResourceProperties> = (
-  id: string,
-  properties: Partial<P>,
-  options?: {
-    overwrite: boolean
-  }
-) => Promise<void>
-
-type GetResourceSynchronizerParams<P extends ResourceProperties> = {
-  snapshotToResources: (
-    content: DocumentSnapshot | QuerySnapshot,
-    previousValues: Resource<P>[]
-  ) => Resource<P>[]
-  cleanupManager: CleanupManager
-}
-
-// ====================================
-// OVERLOADS
-// ====================================
-
-function getResourceSynchronizer<P extends ResourceProperties>(
-  resourcePath: string,
-  props: GetResourceSynchronizerParams<P>
-): {
-  sync: SyncMethod<P>
-  syncList: SyncListMethod<P>
-}
-
-function getResourceSynchronizer<P extends ResourceProperties>(
-  resourcePath: string,
-  props: GetResourceSynchronizerParams<P> & { update: UpdateMethod<P> }
-): {
-  sync: SyncMethod<P>
-  syncList: SyncListMethod<P>
-}
+// type UpdateMethod<P extends ResourcePath> = (
+//   id: string,
+//   properties: Partial<Properties[P]>,
+//   options?: {
+//     overwrite: boolean
+//   }
+// ) => Promise<void>
 
 // ====================================
 // IMPLEMENTACAO
 // ====================================
 
-function getResourceSynchronizer<P extends ResourceProperties>(
-  resourcePath: string,
-  {
-    snapshotToResources,
-    // update,
-    cleanupManager,
-  }: GetResourceSynchronizerParams<P> & { update?: UpdateMethod<P> }
-): { sync: SyncMethod<P>; syncList: SyncListMethod<P> } {
+export const getResourceSynchronizer = <P extends ResourcePath>(
+  resourcePath: P,
+  cleanupManager: CleanupManager
+): { sync: SyncMethod<P>; syncList: SyncListMethod<P> } => {
   /** A collection deste recurso */
   const resourceCollection = collection(db, resourcePath)
 
@@ -97,13 +68,7 @@ function getResourceSynchronizer<P extends ResourceProperties>(
     }
 
     // Cria um novo syncable
-    const newRef = syncableRef<P, M>(
-      target,
-      snapshotToResources,
-      cleanupManager
-    )
-
-    return newRef
+    return syncableRef<P, M>(resourcePath, target, cleanupManager)
   }
 
   return {
@@ -118,8 +83,6 @@ function getResourceSynchronizer<P extends ResourceProperties>(
       makeSync(query(resourceCollection, ...filters), existingRef),
   }
 }
-
-export { getResourceSynchronizer }
 
 /** O setter do sync */
 // const set = (newValue: P | null) => {
