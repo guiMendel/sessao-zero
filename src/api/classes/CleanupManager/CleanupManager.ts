@@ -61,7 +61,6 @@ export class CleanupManager {
     for (const callback of this.disposeListeners) callback()
 
     this.managedCleanups = {}
-    this.linkedManagers = {}
   }
 
   /** Realiza o cleanup dos callbacks armazenados */
