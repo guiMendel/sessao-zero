@@ -1,4 +1,4 @@
-import { auth, syncableRef, useResource } from '@/api'
+import { CleanupManager, auth, syncableRef, useResource } from '@/api'
 import { Player, Uploadable } from '@/types/'
 import {
   createUserWithEmailAndPassword,
@@ -11,18 +11,22 @@ import {
 import { DocumentReference } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { useCurrentAuth } from '.'
+import { onBeforeUnmount } from 'vue'
 
 export const useCurrentPlayer = defineStore('current-player', () => {
   const { listenToAuthChange } = useCurrentAuth()
 
+  /** O cleanup manager deste hook */
+  const cleanupManager = new CleanupManager()
+
   /** Acessa a API do firestore do player */
-  const { snapshotToResources, getDoc, create, update, deleteForever } =
-    useResource<Player>('players')
+  const { getDoc, create, update, deleteForever } = useResource('players')
 
   /** A instancia de player atual */
-  const player = syncableRef<Player, DocumentReference>(
+  const player = syncableRef<'players', DocumentReference>(
+    'players',
     undefined,
-    snapshotToResources
+    cleanupManager
   )
 
   // Sync do player logado
@@ -101,6 +105,8 @@ export const useCurrentPlayer = defineStore('current-player', () => {
 
   /** Realiza logout do jogador */
   const logout = async () => signOut(auth)
+
+  onBeforeUnmount(() => cleanupManager.dispose())
 
   return {
     player,
