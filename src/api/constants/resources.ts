@@ -27,7 +27,10 @@ export const relationSettings = {
     ownedGuilds: isMany('guilds', { relationKey: 'ownerUid' }),
   },
 } satisfies Partial<{
-  [path in ResourcePath]: Record<string, RelationDefinition<path, any>>
+  [path in ResourcePath]: Record<
+    string,
+    RelationDefinition<path, any, RelationType>
+  >
 }>
 
 // =======================================================
@@ -76,19 +79,23 @@ export const getPropertyExtrator = <P extends ResourcePath>(
 
 // === RELACOES
 
+/** Tipos de relacao possiveis */
+type RelationType = 'has-one' | 'has-many'
+
 /** Define uma relacao entre um path S e um path T */
-export type RelationDefinition<S extends ResourcePath, T extends ResourcePath> = {
+export type RelationDefinition<
+  S extends ResourcePath,
+  T extends ResourcePath,
+  TY extends RelationType = RelationType
+> = {
   resourcePath: T
-} & (
-  | {
-      type: 'has-many'
-      relationKey: keyof Properties[T]
-    }
-  | {
-      type: 'has-one'
-      relationKey: keyof Properties[S]
-    }
-)
+  type: TY
+  relationKey: keyof Properties[TY extends 'has-one'
+    ? S
+    : TY extends 'has-many'
+    ? T
+    : S | T]
+}
 
 /** Dado um path P, retorna as relacoes mapeadas com suas configuracoes */
 export type RelationSettings<P extends ResourcePath> = {
@@ -99,7 +106,7 @@ export type RelationSettings<P extends ResourcePath> = {
 export type Relations<P extends ResourcePath> = {
   [relation in keyof RelationSettings<P>]: SyncableRef<
     // @ts-ignore
-    Properties[RelationSettings<P>[relation]['resourcePath']],
+    RelationSettings<P>[relation]['resourcePath'],
     // @ts-ignore
     RelationSettings<P>[relation]['type'] extends 'has-one'
       ? DocumentReference
@@ -107,15 +114,15 @@ export type Relations<P extends ResourcePath> = {
   >
 }
 
-// declare const test: Relations<'players'>
+// declare const test: FullInstance<'guilds'>
 
-// test.ownedGuilds.value.forEach(guild => )
+// test.owner
 
 /** Constroi uma definicao de relacao 1:n */
 function isMany<S extends ResourcePath, T extends ResourcePath>(
   resourcePath: T,
   { relationKey }: { relationKey: keyof Properties[T] }
-): RelationDefinition<S, T> {
+): RelationDefinition<S, T, 'has-many'> {
   return { relationKey, resourcePath, type: 'has-many' } as const
 }
 
@@ -123,6 +130,6 @@ function isMany<S extends ResourcePath, T extends ResourcePath>(
 function isOne<S extends ResourcePath, T extends ResourcePath>(
   resourcePath: T,
   { relationKey }: { relationKey: keyof Properties[S] }
-): RelationDefinition<S, T> {
+): RelationDefinition<S, T, 'has-one'> {
   return { relationKey, resourcePath, type: 'has-one' } as const
 }

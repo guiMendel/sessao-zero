@@ -88,17 +88,25 @@ const createRelation = <P extends ResourcePath>(
 ) => {
   switch (definition.type) {
     case 'has-many':
-      return createHasManyRelation(source, definition, cleanupManager)
+      return createHasManyRelation(
+        source,
+        definition as RelationDefinition<P, ResourcePath, 'has-many'>,
+        cleanupManager
+      )
 
     case 'has-one':
-      return createHasOneRelation(source, definition, cleanupManager)
+      return createHasOneRelation(
+        source,
+        definition as RelationDefinition<P, ResourcePath, 'has-one'>,
+        cleanupManager
+      )
   }
 }
 
 /** Relation key refers to a property of source */
 const createHasOneRelation = <P extends ResourcePath>(
   source: Resource<Properties[P]>,
-  definition: RelationDefinition<P, ResourcePath>,
+  definition: RelationDefinition<P, ResourcePath, 'has-one'>,
   cleanupManager: CleanupManager
 ) => {
   const targetId = source[definition.relationKey] as string
@@ -111,7 +119,7 @@ const createHasOneRelation = <P extends ResourcePath>(
 /** Relation key refers to a property of target */
 const createHasManyRelation = <P extends ResourcePath>(
   source: Resource<Properties[P]>,
-  definition: RelationDefinition<P, ResourcePath>,
+  definition: RelationDefinition<P, ResourcePath, 'has-many'>,
   cleanupManager: CleanupManager
 ) => {
   const targetQuery = query(

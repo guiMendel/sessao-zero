@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { SmartRelation, useGuild } from '@/api'
+import { FullInstance, useGuild } from '@/api'
 import { LoadingSpinner, Typography } from '@/components'
 import { useCurrentPlayer } from '@/stores'
-import { Guild, Player, Resource } from '@/types'
+import { Guild, Resource } from '@/types'
 import { storeToRefs } from 'pinia'
 import { toValue } from 'vue'
 import { useRouter } from 'vue-router'
@@ -20,7 +20,7 @@ const newGuild = () => {
   create(name)
 }
 
-const getOwnerLabel = (owner: SmartRelation<Player>) =>
+const getOwnerLabel = (owner: FullInstance<'players'>) =>
   player.value?.id === toValue(owner).id ? 'Você' : toValue(owner).name
 
 const guilds = syncList()
@@ -47,7 +47,7 @@ const openGuildPage = (guild: Resource<Guild>) =>
           <div class="owner" v-if="toValue(guild.owner)">
             <font-awesome-icon :icon="['fas', 'crown']" />
             <Typography variant="paragraph-secondary">{{
-              getOwnerLabel(guild.owner)
+              getOwnerLabel(toValue(guild.owner))
             }}</Typography>
           </div>
 
