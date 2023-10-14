@@ -11,7 +11,9 @@ import { CleanupManager } from '..'
 export type SyncableRef<
   P extends ResourcePath,
   M extends Query | DocumentReference
-> = Ref<M extends Query ? FullInstance<P>[] : FullInstance<P>> & Syncable<M>
+> = Ref<M extends Query ? FullInstance<P>[] : FullInstance<P>> & {
+  sync: Syncable<M>
+}
 
 /** Cria um ref que automaticamente faz sync com o target
  * @param target O alvo com o qual realizar o sync
@@ -62,27 +64,21 @@ export const syncableRef = <
     )[0]
 
     // TODO: chamar dispose em todos os valores de previouValues que nao foram reutilizados
-  }) as SyncableRef<P, M>
+  })
 
   /** O SyncableRef deste recurso */
-  const syncedRef = Object.assign(valueRef, syncable)
+  const syncedRef = Object.assign(valueRef, {
+    sync: syncable,
+  }) as unknown as SyncableRef<P, M>
 
-  // Pega os metodos
-  syncedRef.onReset = syncable.onReset
-  syncedRef.reset = syncable.reset
-  syncedRef.triggerSync = syncable.triggerSync
-  syncedRef.updateTarget = syncable.updateTarget
-  syncedRef.getTarget = syncable.getTarget
-  syncedRef.getCleanupManager = syncable.getCleanupManager
-
-  syncedRef.onReset(() => (valueRef.value = emptyValue))
+  syncedRef.sync.onReset(() => (valueRef.value = emptyValue))
 
   // Associa o cleanup manager
-  parentCleanupManager.link('propagate-to', syncedRef.getCleanupManager())
+  parentCleanupManager.link('propagate-to', syncedRef.sync.getCleanupManager())
 
   return new Proxy(syncedRef, {
     get: (currentState, property) => {
-      if (property === 'value') currentState.triggerSync()
+      if (property === 'value') currentState.sync.triggerSync()
 
       return currentState[property as keyof typeof currentState]
     },

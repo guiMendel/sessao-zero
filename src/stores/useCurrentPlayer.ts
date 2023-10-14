@@ -32,11 +32,11 @@ export const useCurrentPlayer = defineStore('current-player', () => {
   // Sync do player logado
   listenToAuthChange(async (newUser) => {
     // Reset user
-    if (newUser == null) player.reset()
+    if (newUser == null) player.sync.reset()
     // Atualiza para o novo usuario
     else {
-      player.updateTarget(getDoc(newUser.uid))
-      player.triggerSync()
+      player.sync.updateTarget(getDoc(newUser.uid))
+      player.sync.triggerSync()
     }
   })
 

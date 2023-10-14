@@ -11,7 +11,7 @@ import {
   QueryFieldFilterConstraint,
   collection,
   doc,
-  query
+  query,
 } from 'firebase/firestore'
 
 // ====================================
@@ -62,7 +62,7 @@ export const getResourceSynchronizer = <P extends ResourcePath>(
   ) => {
     // Se recebemos um ref, basta mudar seu target
     if (existingRef != undefined) {
-      existingRef.updateTarget(target)
+      existingRef.sync.updateTarget(target)
 
       return existingRef
     }
