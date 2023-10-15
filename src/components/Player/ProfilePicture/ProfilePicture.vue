@@ -44,3 +44,4 @@ const initials = computed(() =>
   aspect-ratio: 1/1;
 }
 </style>
+@/utils/types

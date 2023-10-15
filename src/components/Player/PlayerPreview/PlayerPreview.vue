@@ -74,3 +74,4 @@ const openProfilePage = () =>
   }
 }
 </style>
+@/utils/types

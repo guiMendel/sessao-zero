@@ -1,4 +1,4 @@
-import { localStorageKeys } from '@/config/storageKeys'
+import { localStorageKeys } from '@/utils/config/storageKeys'
 import { useLocalStorage } from '@vueuse/core'
 import { defineStore } from 'pinia'
 

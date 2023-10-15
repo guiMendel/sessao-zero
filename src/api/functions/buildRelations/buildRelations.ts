@@ -9,7 +9,7 @@ import {
   relationSettings,
   syncableRef,
 } from '@/api/'
-import { Resource } from '@/types'
+import { Resource } from '@/utils/types'
 import { collection, doc, query, where } from 'firebase/firestore'
 
 /** Adiciona a um objeto uma flag que indica se ele nao deve ser descartado */

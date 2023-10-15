@@ -1,4 +1,4 @@
-import { Field } from '@/types/Field'
+import { Field } from '@/utils/types/Field'
 import { useLocalStorage } from '@vueuse/core'
 import { ref, watch, type Ref } from 'vue'
 
@@ -13,7 +13,7 @@ export const usePlayerFields = (localStorageKey?: string) => {
     inexistent: string[]
   }
 
-  // Converts a login error code to a human readable message
+  /** Converte error do firebase para uma mensagem legivel */
   const getErrorForCode = (code: string) => {
     if (code == 'auth/invalid-email') return 'Email inválido'
     if (code == 'auth/user-disabled') return 'Esta conta está bloqueada'
@@ -23,14 +23,14 @@ export const usePlayerFields = (localStorageKey?: string) => {
     return 'Inválido'
   }
 
-  // Errors for invalid email types
-  const errorFor = {
+  /** Mensagens de error para email invalido */
+  const emailErrorFor = {
     invalid: getErrorForCode('auth/invalid-email'),
     inUse: getErrorForCode('auth/email-already-in-use'),
     inexistent: getErrorForCode('auth/user-not-found'),
   }
 
-  // Invalid emails
+  /** Emails que ja foram tentados e registrados como invalidos */
   const invalidEmails = ref<invalidEmailsType>({
     invalid: [],
     inUse: [],
@@ -41,7 +41,7 @@ export const usePlayerFields = (localStorageKey?: string) => {
   const invalidateEmail = (email: string, reason: keyof invalidEmailsType) => {
     invalidEmails.value[reason].push(email)
 
-    return errorFor[reason]
+    return emailErrorFor[reason]
   }
 
   /** Se o codigo indicar um email invalido, chama invalidateEmail com o email fornecido */
@@ -55,7 +55,7 @@ export const usePlayerFields = (localStorageKey?: string) => {
   const makeField = (
     name: Field['name'],
     validator: Field['validate'],
-    useLocalIfProvided = true
+    options: { useStorage: boolean } = { useStorage: true }
   ): Ref<Field> => {
     const defaults = {
       name,
@@ -64,9 +64,8 @@ export const usePlayerFields = (localStorageKey?: string) => {
       validate: validator,
     }
 
-    if (localStorageKey && useLocalIfProvided)
+    if (localStorageKey && options.useStorage)
       return useLocalStorage(`${localStorageKey}--field-${name}`, defaults, {
-        // listenToStorageChanges: true,
         mergeDefaults: (storage, defaults) => ({
           ...defaults,
           value: storage.value,
@@ -88,7 +87,7 @@ export const usePlayerFields = (localStorageKey?: string) => {
           newValue
         )
       )
-        return errorFor[reason as keyof invalidEmailsType]
+        return emailErrorFor[reason as keyof invalidEmailsType]
 
     return true
   })
@@ -102,7 +101,7 @@ export const usePlayerFields = (localStorageKey?: string) => {
 
       return true
     },
-    false
+    { useStorage: false }
   )
 
   const matchesPassword = (value: string): string | true => {
@@ -115,10 +114,10 @@ export const usePlayerFields = (localStorageKey?: string) => {
   const passwordConfirmation = makeField(
     'passwordConfirmation',
     matchesPassword,
-    false
+    { useStorage: false }
   )
 
-  // Keep confirmation synced to password
+  // Sincroniza confirmacao com o valor da senha
   watch(
     password,
     () =>

@@ -5,7 +5,7 @@ import {
   getResourceSynchronizer,
 } from '@/api/'
 import { Properties, ResourcePath } from '@/api/constants/resources'
-import { Uploadable } from '@/types'
+import { Uploadable } from '@/utils/types'
 import {
   addDoc,
   collection,

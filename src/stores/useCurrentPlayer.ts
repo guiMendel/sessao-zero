@@ -1,5 +1,5 @@
 import { CleanupManager, auth, syncableRef, useResource } from '@/api'
-import { Player, Uploadable } from '@/types/'
+import { Player, Uploadable } from '@/utils/types'
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,

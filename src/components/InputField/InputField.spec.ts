@@ -1,5 +1,5 @@
 import { mountOptions } from '@/tests'
-import { Field } from '@/types/Field'
+import { Field } from '@/utils/types/Field'
 import { splitCamelCase } from '@/utils'
 import { VueWrapper, mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
