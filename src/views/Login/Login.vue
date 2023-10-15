@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { BackButton, InputField, Logo, Typography } from '@/components'
-import { localStorageKeys } from '@/config/storageKeys'
+import { localStorageKeys } from '@/utils'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCurrentPlayer, useNotification } from '@/stores'
@@ -207,4 +207,3 @@ button {
   }
 }
 </style>
-@/utils/config/storageKeys

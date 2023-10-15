@@ -5,10 +5,7 @@ import { Ref, ref, watch } from 'vue'
  * @param value o valor fornecido.
  * @returns true se for um valor valido, uma mensagem de error se nao for.
  */
-export type FieldValidator = (value: string) => {
-  valid: boolean
-  message: string
-}
+export type FieldValidator = (value: string) => true | string
 
 type FieldOptions = {
   /** Permite validar o input */
@@ -35,11 +32,22 @@ export type FieldRef = Ref<string> & {
   validate: FieldValidator
 }
 
+/** Cria um field ref com um validator */
+export function fieldRef(name: string, validator: FieldValidator): FieldRef
+
+/** Permite passar opcoes especificas para o validator */
+export function fieldRef(name: string, options?: FieldOptions): FieldRef
+
 /** Gera um FieldRef */
-export const fieldRef = (
+export function fieldRef(
   name: string,
-  { initialValue, localStoragePrefix, validator }: FieldOptions = {}
-): FieldRef => {
+  options: FieldOptions | FieldValidator = {}
+): FieldRef {
+  const { initialValue, localStoragePrefix, validator } =
+    typeof options === 'object'
+      ? options
+      : { validator: options, localStoragePrefix: undefined, initialValue: '' }
+
   const valueRef: Ref<string> =
     localStoragePrefix != undefined
       ? useLocalStorage<string>(
@@ -49,23 +57,23 @@ export const fieldRef = (
       : ref<string>(initialValue ?? '')
 
   // Inicializa a validacao
-  const validate = validator ?? (() => ({ valid: true, message: '' }))
+  const validate = validator ?? (() => true)
 
-  const { message: validationMessage, valid } = validate(valueRef.value)
+  const isValid = validate(valueRef.value)
 
   const fieldRef = Object.assign(valueRef, {
     name,
     validate,
-    valid,
-    validationMessage,
+    valid: isValid === true,
+    validationMessage: isValid === true ? '' : isValid,
   })
 
   // Sincroniza o estado de valid
   if (validator != undefined)
     watch(valueRef, (newValue) => {
-      const { message, valid } = validate(newValue)
-      fieldRef.valid = valid
-      fieldRef.validationMessage = message
+      const isValid = validate(newValue)
+      fieldRef.valid = isValid === true
+      fieldRef.validationMessage = isValid === true ? '' : isValid
     })
 
   return fieldRef

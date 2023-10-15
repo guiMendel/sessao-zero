@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { InputField, Logo, Typography } from '@/components'
-import { localStorageKeys } from '@/config/storageKeys'
+import { localStorageKeys } from '@/utils'
 import { useCurrentPlayer, useNotification } from '@/stores'
 import { eraseInStorage, usePlayerFields } from '@/utils'
 import { computed } from 'vue'
@@ -147,4 +147,3 @@ button {
   max-width: 100%;
 }
 </style>
-@/utils/config/storageKeys

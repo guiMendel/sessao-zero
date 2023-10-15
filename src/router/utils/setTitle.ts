@@ -1,4 +1,4 @@
-import { mainTitle } from '@/utils/config'
+import { mainTitle } from '@/utils/config/config'
 import { nextTick } from 'vue'
 
 /** Permite alterar o titulo da pagina */

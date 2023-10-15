@@ -1,7 +1,7 @@
+import { fieldRef } from '@/utils'
 import { Meta, StoryFn } from '@storybook/vue3'
 import { InputField } from '.'
-import { Field } from '@/utils/types/Field'
-import { ref } from 'vue'
+import { watch } from 'vue'
 
 const meta = {
   title: 'Components/InputField',
@@ -10,39 +10,27 @@ const meta = {
 
 export default meta
 
+// @ts-ignore
 const Template: StoryFn<typeof InputField> = (args) => ({
   setup: () => {
-    const testEmail = ref<Field>({
-      name: 'email',
-      valid: true,
-      value: '',
-      validate: (newValue) => {
+    const fields = {
+      testEmail: fieldRef('email', (newValue) => {
         if (newValue.length < 3) return 'Mínimo de 3 caracteres'
         return true
-      },
-    })
+      }),
 
-    const testPassword = ref<Field>({
-      name: 'senha',
-      valid: true,
-      value: '',
-    })
+      testPassword: fieldRef('password'),
+    }
 
-    const updateEmail = ({ value }: { value: string }) =>
-      (testEmail.value.value = value)
-
-    const updatePassword = ({ value }: { value: string }) =>
-      (testPassword.value.value = value)
-
-    return { args, testEmail, updateEmail, testPassword, updatePassword }
+    return { args, fields }
   },
   components: { InputField },
   template: `
     <div :style="{
       flexDirection: 'column', gap: '1rem', backgroundColor: args.bg, padding: '1rem', borderRadius: '20px'
     }">
-      <InputField v-bind="args" :model-value="testEmail" @update:model-value="updateEmail" />
-      <InputField v-bind="args" :model-value="testPassword" @update:model-value="updatePassword" />
+      <InputField v-bind="args" :field="fields.testEmail" />
+      <InputField v-bind="args" :field="fields.testPassword" />
     </div>
   `,
 })

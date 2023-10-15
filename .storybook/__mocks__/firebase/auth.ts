@@ -1,5 +1,7 @@
 import { makeMockUser } from '../utils'
 
+export const getAuth = () => ({})
+
 export const createUserWithEmailAndPassword = () => ({ user: makeMockUser() })
 
 export const signInWithEmailAndPassword = () => ({ user: makeMockUser() })

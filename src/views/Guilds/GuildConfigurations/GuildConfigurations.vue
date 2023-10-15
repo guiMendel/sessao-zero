@@ -1,25 +1,28 @@
 <script setup lang="ts">
-import { Button, InputField, ToggleField, Typography } from '@/components'
-import { useCurrentGuild } from '@/stores'
-import { Field } from '@/types'
-import { storeToRefs } from 'pinia'
-import { ref, watch } from 'vue'
+import { Button, InputField, ToggleField, Typography } from '@/components';
+import { fieldRef } from '@/utils';
 
-const { guild } = storeToRefs(useCurrentGuild())
+// const { guild } = storeToRefs(useCurrentGuild())
 
-const name = ref<Field>({ name: 'nome', valid: true, value: '' })
-const description = ref<Field>({ name: 'descrição', valid: true, value: '' })
+// const name = ref<Field>({ name: 'nome', valid: true, value: '' })
+// const description = ref<Field>({ name: 'descrição', valid: true, value: '' })
 
-watch(guild, (guild) => {
-  name.value.value = guild.name
-})
+// watch(guild, (guild) => {
+//   name.value.value = guild.name
+// })
+
+const fields = {
+  name: fieldRef('name'),
+}
+
+// const name = fieldRef('name')
 </script>
 
 <template>
   <div class="guild-configurations">
-    <InputField v-model="name" />
+    <InputField :field="fields.name" />
 
-    <InputField v-model="description" multiline />
+    <!-- <InputField v-model="description" multiline /> -->
 
     <div class="visibility">
       <Typography>Visibilidade</Typography>

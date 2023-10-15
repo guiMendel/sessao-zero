@@ -3,15 +3,15 @@ import { RouteLocationNormalized } from 'vue-router'
 import { findMeta } from '../utils/'
 
 export const authenticationGuard = async (to: RouteLocationNormalized) => {
-  // Nao ligamos para reatividade aqui
-  const user = await useCurrentAuth().user
+  // // Nao ligamos para reatividade aqui
+  // const user = await useCurrentAuth().user
 
-  // Verifica autenticacao
-  if (findMeta(to, 'requireAuth') === 'authenticated' && user.value == null) {
-    return { name: 'login' }
-  }
+  // // Verifica autenticacao
+  // if (findMeta(to, 'requireAuth') === 'authenticated' && user.value == null) {
+  //   return { name: 'login' }
+  // }
 
-  if (findMeta(to, 'requireAuth') === 'unauthenticated' && user.value != null) {
-    return { name: 'home' }
-  }
+  // if (findMeta(to, 'requireAuth') === 'unauthenticated' && user.value != null) {
+  //   return { name: 'home' }
+  // }
 }

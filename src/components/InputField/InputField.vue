@@ -1,46 +1,33 @@
 <script setup lang="ts">
-import { Field } from '@/types/Field'
-import { splitCamelCase } from '@/utils'
+import { FieldRef, splitCamelCase } from '@/utils'
 import { computed, ref, watch } from 'vue'
 import { IconButton } from '..'
 import { inferFieldProperties } from './inferFieldProperties'
 
 const props = defineProps<{
-  modelValue: Field
+  field: FieldRef
   autoFocus?: boolean
   multiline?: boolean
   variant?: 'dark'
   autocomplete?: HTMLInputElement['autocomplete']
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+console.log({ props })
 
 // ================================
 // FIELD PROPERTIES
 // ================================
 
 /** Infere o tipo e o autocomplete a partir do nome */
-const inferred = computed(() => inferFieldProperties(props.modelValue.name))
+const inferred = computed(() => inferFieldProperties(props.field.name))
 
 // ================================
 // INPUT HANDLING
 // ================================
 
 /** Lida com cada input do usuario */
-const handleInput = (event: Event) => {
-  const newValue = (event.target as HTMLInputElement).value
-
-  const newValid =
-    props.modelValue.validate != undefined
-      ? props.modelValue.validate(newValue) === true
-      : true
-
-  emit('update:modelValue', {
-    ...props.modelValue,
-    value: newValue,
-    valid: newValid,
-  })
-}
+const handleInput = (event: Event) =>
+  (props.field.value = (event.target as HTMLInputElement).value)
 
 // ================================
 // ERROR HANDLING
@@ -49,40 +36,20 @@ const handleInput = (event: Event) => {
 // Whether to show errors
 const showErrors = ref(false)
 
-const validationResult = computed(() =>
-  props.modelValue.validate != undefined
-    ? props.modelValue.validate(props.modelValue.value)
-    : true
-)
-
-// Shows any error messages
-const errorMessage = computed(() =>
-  validationResult.value !== true && showErrors.value
-    ? validationResult.value
-    : ''
-)
-
-// Initialize valid field
-if (props.modelValue.valid != validationResult.value)
-  emit('update:modelValue', {
-    ...props.modelValue,
-    valid: validationResult.value === true,
-  })
-
 // ================================
 // AUTO FOCUS
 // ================================
 
 /** Tem a ref do campo que esta sendo utilizado */
-const fieldRef = ref<HTMLInputElement | HTMLTextAreaElement | null>(null)
+const fieldElement = ref<HTMLInputElement | HTMLTextAreaElement | null>(null)
 
 // Sempre que esse ref mudar
-watch(fieldRef, (fieldRef) => {
+watch(fieldElement, (fieldElement) => {
   // Se nao houver campo ignora
-  if (fieldRef == null) return
+  if (fieldElement == null) return
 
   // Se auto focus estiver ligado, foca
-  if (props.autoFocus) fieldRef.focus()
+  if (props.autoFocus) fieldElement.focus()
 })
 
 // ================================
@@ -103,14 +70,14 @@ const fieldType = computed(() => {
 const togglePasswordReveal = () => {
   revealPassword.value = !revealPassword.value
 
-  if (fieldRef.value == undefined) return
+  if (fieldElement.value == undefined) return
 
   // Foca no input e coloca o cursor no fim do texto
-  fieldRef.value.focus()
+  fieldElement.value.focus()
 
   setTimeout(() => {
-    if (fieldRef.value == undefined) return
-    fieldRef.value.selectionStart = 100000
+    if (fieldElement.value == undefined) return
+    fieldElement.value.selectionStart = 100000
   }, 0)
 }
 
@@ -126,9 +93,7 @@ const autocompleteValue = computed(
 /** Se a label deveria estar levantada */
 const raiseLabel = computed(
   () =>
-    props.multiline ||
-    props.modelValue.value != '' ||
-    inferred.value.type == 'color'
+    props.multiline || props.field.value != '' || inferred.value.type == 'color'
 )
 </script>
 
@@ -136,7 +101,7 @@ const raiseLabel = computed(
   <div
     class="input-field"
     :class="{
-      error: errorMessage != '',
+      error: field.valid == false,
       dark: props.variant === 'dark',
       password: inferred.type === 'password',
     }"
@@ -144,42 +109,39 @@ const raiseLabel = computed(
   >
     <div class="field">
       <!-- Nome do Campo -->
-      <label
-        class="hint"
-        :class="raiseLabel && 'raised'"
-        :for="modelValue.name"
-        >{{ splitCamelCase(inferred.display ?? modelValue.name) }}</label
-      >
+      <label class="hint" :class="raiseLabel && 'raised'" :for="field.name">{{
+        splitCamelCase(inferred.display ?? field.name)
+      }}</label>
 
       <textarea
         v-if="multiline && fieldType != 'color'"
-        :id="modelValue.name"
-        :name="modelValue.name"
+        :id="field.name"
+        :name="field.name"
         v-bind="$attrs"
-        :value="modelValue.value"
+        :value="field.value"
         @input="handleInput"
-        ref="fieldRef"
+        ref="fieldElement"
         :autocomplete="autocompleteValue"
       ></textarea>
 
       <input
         v-else
         :type="fieldType"
-        :id="modelValue.name"
-        :name="modelValue.name"
+        :id="field.name"
+        :name="field.name"
         v-bind="$attrs"
-        :value="modelValue.value"
+        :value="field.value"
         @input="handleInput"
         :style="fieldType == 'color' && 'display: none'"
-        ref="fieldRef"
+        ref="fieldElement"
         :autocomplete="autocompleteValue"
       />
 
       <!-- Input de Cor -->
       <label
         v-if="fieldType == 'color'"
-        :for="modelValue.name"
-        :style="{ backgroundColor: modelValue.value }"
+        :for="field.name"
+        :style="{ backgroundColor: field.value }"
         class="color-display"
       >
         <font-awesome-icon :icon="['fas', 'palette']" />
@@ -194,8 +156,8 @@ const raiseLabel = computed(
     </div>
 
     <!-- Mensagem de Erro -->
-    <label class="error-message" :for="modelValue.name">
-      {{ validationResult == true ? 'valido' : validationResult }}
+    <label class="error-message" :for="field.name">
+      {{ field.validationMessage }}
     </label>
   </div>
 </template>
