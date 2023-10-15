@@ -5,22 +5,22 @@ import { RouteLocationNormalized } from 'vue-router'
 import { findMeta } from '../utils/'
 
 export const ownerGuard = async (to: RouteLocationNormalized) => {
-  // // Nao ligamos para reatividade aqui
-  // const user = await useCurrentAuth().user
+  // Nao ligamos para reatividade aqui
+  const user = await useCurrentAuth().user
 
-  // const { guildId } = to.params
+  const { guildId } = to.params
 
-  // // Pega a guilda de id correspondente a rota
-  // const guildDoc =
-  //   guildId && typeof guildId === 'string'
-  //     ? doc(db, 'guilds', guildId)
-  //     : undefined
+  // Pega a guilda de id correspondente a rota
+  const guildDoc =
+    guildId && typeof guildId === 'string'
+      ? doc(db, 'guilds', guildId)
+      : undefined
 
-  // // Verifica autenticacao
-  // if (
-  //   findMeta(to, 'mustOwnGuild') &&
-  //   (!guildDoc || (await getDoc(guildDoc)).data()?.ownerUid != user.value?.uid)
-  // ) {
-  //   return { name: 'home' }
-  // }
+  // Verifica autenticacao
+  if (
+    findMeta(to, 'mustOwnGuild') &&
+    (!guildDoc || (await getDoc(guildDoc)).data()?.ownerUid != user.value?.uid)
+  ) {
+    return { name: 'home' }
+  }
 }
