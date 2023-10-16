@@ -13,7 +13,7 @@ const Template: StoryFn<typeof GuildConfigurations> = (args) => ({
     return { args }
   },
   components: { GuildConfigurations },
-  template: `<GuildConfigurations />`,
+  template: `<GuildConfigurations style="padding: 2rem" class="preset-grid-background" />`,
 })
 
 export const Default = Template.bind({})

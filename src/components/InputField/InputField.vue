@@ -1,18 +1,15 @@
 <script setup lang="ts">
 import { FieldRef, splitCamelCase } from '@/utils'
 import { computed, ref, watch } from 'vue'
-import { IconButton } from '..'
+import { IconButton, Typography } from '..'
 import { inferFieldProperties } from './inferFieldProperties'
 
 const props = defineProps<{
   field: FieldRef
   autoFocus?: boolean
   multiline?: boolean
-  variant?: 'dark'
   autocomplete?: HTMLInputElement['autocomplete']
 }>()
-
-console.log({ props })
 
 // ================================
 // FIELD PROPERTIES
@@ -102,16 +99,18 @@ const raiseLabel = computed(
     class="input-field"
     :class="{
       error: field.valid == false,
-      dark: props.variant === 'dark',
       password: inferred.type === 'password',
     }"
     @focusout="showErrors = true"
   >
     <div class="field">
       <!-- Nome do Campo -->
-      <label class="hint" :class="raiseLabel && 'raised'" :for="field.name">{{
-        splitCamelCase(inferred.display ?? field.name)
-      }}</label>
+      <Typography
+        class="label"
+        :class="raiseLabel && 'raised'"
+        :label-for="field.name"
+        >{{ splitCamelCase(inferred.display ?? field.name) }}</Typography
+      >
 
       <textarea
         v-if="multiline && fieldType != 'color'"
@@ -137,16 +136,6 @@ const raiseLabel = computed(
         :autocomplete="autocompleteValue"
       />
 
-      <!-- Input de Cor -->
-      <label
-        v-if="fieldType == 'color'"
-        :for="field.name"
-        :style="{ backgroundColor: field.value }"
-        class="color-display"
-      >
-        <font-awesome-icon :icon="['fas', 'palette']" />
-      </label>
-
       <!-- Opcao de revelar senha -->
       <IconButton
         class="password-reveal"
@@ -163,37 +152,32 @@ const raiseLabel = computed(
 </template>
 
 <style scoped lang="scss">
-@import '../../styles/variables.scss';
+@import '@/styles/variables.scss';
 
 .input-field {
   flex-direction: column;
-  width: 12rem;
-  padding-top: 0.6rem;
-
-  --theme: var(--tx-main);
-  --theme-tx-error: var(--tx-error);
-  --theme-error: var(--error);
-  --border: 2px solid var(--theme);
-
-  @media (min-width: 768px) {
-    width: 30rem;
-  }
+  align-items: stretch;
+  min-width: 8rem;
+  width: 100%;
+  margin-top: 1.3rem;
 
   .field {
     position: relative;
-    width: 100%;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
     justify-content: center;
 
-    .hint {
+    .label {
       position: absolute;
       left: 0.5rem;
+      top: 50%;
+
+      translate: 0 -50%;
 
       transition: all 200ms;
 
       font-weight: 600;
-      color: var(--theme);
 
       opacity: 0.6;
       cursor: pointer;
@@ -203,9 +187,10 @@ const raiseLabel = computed(
       }
     }
 
-    &:focus-within .hint,
-    .hint.raised {
-      translate: 0 -1.7rem;
+    &:focus-within .label,
+    .label.raised {
+      top: 0;
+      translate: -0.5rem calc(-100% - 0.3rem);
 
       font-size: 0.9rem;
 
@@ -213,14 +198,18 @@ const raiseLabel = computed(
     }
 
     input,
-    textarea,
-    .color-display {
+    textarea {
       font-weight: 600;
       cursor: pointer;
 
       width: 100%;
 
-      padding-block: 0.3rem;
+      padding: 0.5rem 1rem;
+      border-radius: $border-radius;
+      min-height: $field-height;
+
+      display: flex;
+      align-items: center;
 
       transition: all 200ms;
 
@@ -243,11 +232,9 @@ const raiseLabel = computed(
 
     textarea {
       height: 7rem;
-      resize: vertical;
+      resize: none;
 
       padding-inline: 0.5rem;
-
-      border-radius: var(--border-radius);
     }
 
     .color-display {
@@ -301,7 +288,7 @@ const raiseLabel = computed(
   }
 
   &.error {
-    .hint {
+    .label {
       color: var(--theme-tx-error);
       opacity: 1;
     }
@@ -323,11 +310,6 @@ const raiseLabel = computed(
       margin-bottom: 0;
       font-size: 0.9rem;
     }
-  }
-
-  &.dark {
-    --theme: var(--tx-white);
-    color: var(--tx-white);
   }
 
   &.password {

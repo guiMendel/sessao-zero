@@ -145,27 +145,6 @@
   @include high-contrast-border;
 }
 
-// Inputs de texto
-@mixin text-input {
-  width: 15rem;
-  height: 2rem;
-
-  padding: 0.5rem 1rem;
-
-  background: none;
-
-  box-shadow: 0 2px 0 4px var(--gray-lighter);
-  border-radius: $border-radius;
-
-  background-color: var(--bg-trans-1);
-
-  transition: border-color 300ms;
-
-  &.error {
-    box-shadow: 0 2px 0 4px var(--error);
-  }
-}
-
 // Transforma o elemento num circulo. Use a variavel --size para definir um tamanho
 @mixin circle {
   // Valor padrao
@@ -184,7 +163,7 @@
   min-height: unset;
 }
 
-// Coloca uma bordinha nos conteudos (expecialmente util para texto
+// Coloca uma bordinha nos conteudos (especialmente util para texto)
 @mixin text-outline {
   filter: drop-shadow(1px 0 0 var(--bg-white))
     drop-shadow(-1px 0 0 var(--bg-white)) drop-shadow(0 1px 0 var(--bg-white))

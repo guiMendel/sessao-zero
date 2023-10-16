@@ -19,7 +19,12 @@ withDefaults(
   @include button;
 
   min-width: 6rem;
+  min-height: $field-height;
   font-weight: 800;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &.default {
     background-color: var(--bg-trans-03);

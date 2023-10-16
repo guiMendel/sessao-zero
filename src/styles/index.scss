@@ -62,16 +62,6 @@
   }
 }
 
-input,
-textarea {
-  @include text-input;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: var(--tx-gray);
-}
-
 body {
   background-color: var(--bg-white);
 }

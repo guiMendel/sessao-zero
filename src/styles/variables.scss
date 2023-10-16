@@ -3,6 +3,9 @@
 // Obs. pode usar variaveis de scss quando elas forem sempre constantes. As cores por exemplo nao podem ser, pois podem ser substituidas se o usuario ativar algumas opcoes de acessibilidade
 $border-radius: 20px;
 
+// Altura padrao dos fields
+$field-height: 2.5rem;
+
 $box-shadow-intensity: 1px rgba(128, 128, 128, 0.157);
 
 // === FLOATING ICONS

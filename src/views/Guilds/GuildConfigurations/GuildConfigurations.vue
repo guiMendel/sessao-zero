@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Button, InputField, ToggleField, Typography } from '@/components';
-import { fieldRef } from '@/utils';
+import { Button, InputField, ToggleField, Typography } from '@/components'
+import { fieldRef } from '@/utils'
 
 // const { guild } = storeToRefs(useCurrentGuild())
 
@@ -13,6 +13,7 @@ import { fieldRef } from '@/utils';
 
 const fields = {
   name: fieldRef('name'),
+  description: fieldRef('descrição'),
 }
 
 // const name = fieldRef('name')
@@ -20,9 +21,13 @@ const fields = {
 
 <template>
   <div class="guild-configurations">
+    <Typography variant="subtitle">Dados</Typography>
+
     <InputField :field="fields.name" />
 
-    <!-- <InputField v-model="description" multiline /> -->
+    <InputField :field="fields.description" multiline />
+
+    <Typography variant="subtitle">Acesso</Typography>
 
     <div class="visibility">
       <Typography>Visibilidade</Typography>
@@ -53,7 +58,7 @@ const fields = {
       autorizacao</Typography
     >
 
-    <Typography>Zona de perigo</Typography>
+    <Typography variant="subtitle">Zona de perigo</Typography>
 
     <Button>transferir dono</Button>
 

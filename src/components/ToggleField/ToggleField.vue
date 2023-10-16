@@ -13,7 +13,7 @@ const toggle = () => emit('update:modelValue', !props.modelValue)
 </script>
 
 <template>
-  <div class="toggle-field prebaked-field-wrapper" @click="toggle">
+  <div class="toggle-field" @click="toggle">
     <Typography v-if="label != undefined">{{ label }}</Typography>
 
     <div class="field">
@@ -28,7 +28,22 @@ const toggle = () => emit('update:modelValue', !props.modelValue)
 @import '@/styles/variables.scss';
 
 .toggle-field {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+
   .field {
+    @include high-contrast-border;
+    @include bevel(var(--main-light));
+
+    border-radius: $border-radius;
+    background-color: var(--main-lighter);
+    padding: 0.5rem 1rem;
+    align-items: center;
+    justify-content: center;
+
+    min-height: $field-height;
+
     .toggle {
       margin-left: auto;
     }
