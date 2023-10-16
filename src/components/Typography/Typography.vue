@@ -23,7 +23,7 @@ const props = withDefaults(
 <style scoped lang="scss">
 @import '../../styles/variables.scss';
 
-p {
+p, label {
   &.paragraph {
     font-size: 1rem;
   }

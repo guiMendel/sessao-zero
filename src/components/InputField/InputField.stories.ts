@@ -27,7 +27,7 @@ const Template: StoryFn<typeof InputField> = (args) => ({
   components: { InputField },
   template: `
     <div :style="{
-      flexDirection: 'column', gap: '1rem', backgroundColor: args.bg, padding: '1rem', borderRadius: '20px'
+      flexDirection: 'column', gap: '1rem', padding: '1rem', borderRadius: '20px'
     }">
       <InputField v-bind="args" :field="fields.testEmail" />
       <InputField v-bind="args" :field="fields.testPassword" />
@@ -37,5 +37,5 @@ const Template: StoryFn<typeof InputField> = (args) => ({
 
 export const Default = Template.bind({})
 
-export const Dark = Template.bind({})
-Dark.args = { variant: 'dark', bg: 'var(--bg-main)' } as any
+export const Multiline = Template.bind({})
+Multiline.args = { multiline: true } as any

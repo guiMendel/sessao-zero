@@ -99,7 +99,7 @@ const raiseLabel = computed(
     class="input-field"
     :class="{
       error: field.valid == false,
-      password: inferred.type === 'password',
+      password: inferred.type === 'password' && !multiline,
     }"
     @focusout="showErrors = true"
   >
@@ -112,29 +112,31 @@ const raiseLabel = computed(
         >{{ splitCamelCase(inferred.display ?? field.name) }}</Typography
       >
 
-      <textarea
-        v-if="multiline && fieldType != 'color'"
-        :id="field.name"
-        :name="field.name"
-        v-bind="$attrs"
-        :value="field.value"
-        @input="handleInput"
-        ref="fieldElement"
-        :autocomplete="autocompleteValue"
-      ></textarea>
+      <div class="input-area">
+        <textarea
+          v-if="multiline && fieldType != 'color'"
+          :id="field.name"
+          :name="field.name"
+          v-bind="$attrs"
+          :value="field.value"
+          @input="handleInput"
+          ref="fieldElement"
+          :autocomplete="autocompleteValue"
+        ></textarea>
 
-      <input
-        v-else
-        :type="fieldType"
-        :id="field.name"
-        :name="field.name"
-        v-bind="$attrs"
-        :value="field.value"
-        @input="handleInput"
-        :style="fieldType == 'color' && 'display: none'"
-        ref="fieldElement"
-        :autocomplete="autocompleteValue"
-      />
+        <input
+          v-else
+          :type="fieldType"
+          :id="field.name"
+          :name="field.name"
+          v-bind="$attrs"
+          :value="field.value"
+          @input="handleInput"
+          :style="fieldType == 'color' && 'display: none'"
+          ref="fieldElement"
+          :autocomplete="autocompleteValue"
+        />
+      </div>
 
       <!-- Opcao de revelar senha -->
       <IconButton
@@ -145,9 +147,13 @@ const raiseLabel = computed(
     </div>
 
     <!-- Mensagem de Erro -->
-    <label class="error-message" :for="field.name">
+    <Typography
+      variant="paragraph-secondary"
+      class="error-message"
+      :label-for="field.name"
+    >
       {{ field.validationMessage }}
-    </label>
+    </Typography>
   </div>
 </template>
 
@@ -168,9 +174,33 @@ const raiseLabel = computed(
     align-items: stretch;
     justify-content: center;
 
+    @include high-contrast-border;
+    @include bevel(var(--main-light));
+
+    border-radius: $border-radius;
+    background-color: var(--main-lighter);
+
+    padding: 0.3rem;
+
+    .input-area {
+      width: 100%;
+      height: 100%;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background-color: rgba(255, 255, 255, 0.5);
+      left: var(--border);
+
+      border-radius: calc($border-radius / 1);
+
+      box-shadow: inset 0 1px 1px 1px var(--main-light);
+    }
+
     .label {
       position: absolute;
-      left: 0.5rem;
+      left: 1.3rem;
       top: 50%;
 
       translate: 0 -50%;
@@ -179,7 +209,8 @@ const raiseLabel = computed(
 
       font-weight: 600;
 
-      opacity: 0.6;
+      opacity: 0.7;
+      color: var(--tx-main-dark);
       cursor: pointer;
 
       .high-contrast & {
@@ -190,7 +221,9 @@ const raiseLabel = computed(
     &:focus-within .label,
     .label.raised {
       top: 0;
-      translate: -0.5rem calc(-100% - 0.3rem);
+      left: 0;
+      translate: 0 calc(-100% - 0.3rem);
+      color: var(--tx-primary);
 
       font-size: 0.9rem;
 
@@ -210,19 +243,9 @@ const raiseLabel = computed(
 
       display: flex;
       align-items: center;
+      background: none;
 
       transition: all 200ms;
-
-      background-color: var(--trans-03);
-      box-shadow: 0 2px 0 4px var(--theme);
-
-      &::placeholder {
-        opacity: 0.4;
-
-        .high-contrast & {
-          opacity: 1;
-        }
-      }
 
       &[type='password'] {
         font-size: 1.2rem;
@@ -233,34 +256,15 @@ const raiseLabel = computed(
     textarea {
       height: 7rem;
       resize: none;
-
-      padding-inline: 0.5rem;
-    }
-
-    .color-display {
-      margin-top: -1.5rem;
-      margin-bottom: 1.5rem;
-
-      padding: 0 0.5rem;
-      height: 2rem;
-
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-
-      border-radius: var(--border-radius);
-
-      // box-shadow: 0 0 3px 2px rgba(68, 68, 68, 0.1);
-
-      > * {
-        color: var(--tx-gray-dark);
-      }
     }
 
     .password-reveal {
       position: absolute;
       font-size: 1.2rem;
-      right: 0.5rem;
+      right: 1.2rem;
+      color: var(--tx-main);
+
+      --shadow-color: var(--trans-03);
 
       display: none;
     }
@@ -271,33 +275,41 @@ const raiseLabel = computed(
     opacity: 0;
     cursor: pointer;
     max-width: 90%;
+    max-height: 0;
 
     text-transform: lowercase;
     text-align: center;
 
-    margin: 0 auto;
-
-    background-color: var(--theme-error);
-    color: var(--tx-white);
     border-radius: 0 0 $border-radius $border-radius;
-    padding: 0.2rem 1rem;
+    background-color: var(--bg-error-washed);
+    color: var(--bg-error);
+    padding: 0 0.7rem 0.2rem;
+    @include bevel(var(--error-lighter));
 
-    margin-bottom: -1rem;
+    margin: 0 auto 0;
+
+    z-index: 10;
 
     transition: all 200ms;
   }
 
   &.error {
+    .field {
+      @include bevel(var(--error-lighter));
+      background-color: var(--error-washed);
+
+      .input-area {
+        box-shadow: inset 0 1px 1px 1px var(--error-lighter);
+      }
+    }
+
     .label {
-      color: var(--theme-tx-error);
       opacity: 1;
+      color: var(--tx-error);
     }
 
     input,
-    textarea,
-    .color-display {
-      border-color: var(--theme-tx-error);
-      box-shadow: 0 2px 0 4px var(--theme-error);
+    textarea {
       background-color: rgba(255, 0, 0, 0.2);
 
       .high-contrast & {
@@ -307,8 +319,7 @@ const raiseLabel = computed(
 
     .error-message {
       opacity: 1;
-      margin-bottom: 0;
-      font-size: 0.9rem;
+      max-height: 3rem;
     }
   }
 
@@ -324,12 +335,7 @@ const raiseLabel = computed(
   }
 
   &:hover {
-    input,
-    textarea,
-    .color-display {
-      background-color: var(--trans-1);
-    }
+    filter: brightness(0.96);
   }
 }
 </style>
-@/utils/types/Field
