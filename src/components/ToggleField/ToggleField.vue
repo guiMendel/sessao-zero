@@ -13,8 +13,8 @@ const toggle = () => emit('update:modelValue', !props.modelValue)
 </script>
 
 <template>
-  <div class="toggle-field" @click="toggle">
-    <Typography v-if="label != undefined">{{ label }}</Typography>
+  <div class="toggle-field" :class="modelValue && 'enabled'" @click="toggle">
+    <Typography class="label" v-if="label != undefined">{{ label }}</Typography>
 
     <div class="field">
       <slot></slot>
@@ -30,22 +30,42 @@ const toggle = () => emit('update:modelValue', !props.modelValue)
 .toggle-field {
   flex-direction: column;
   align-items: stretch;
-  gap: 1rem;
+  gap: 0.3rem;
+  cursor: pointer;
+
+  .label {
+    color: var(--tx-primary);
+
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
 
   .field {
     @include high-contrast-border;
-    @include bevel(var(--main-light));
+    @include bevel(var(--gray-light));
 
     border-radius: $border-radius;
-    background-color: var(--main-lighter);
+    background-color: var(--gray-lighter);
     padding: 0.5rem 1rem;
     align-items: center;
     justify-content: center;
 
     min-height: $field-height;
+    transition: all 200ms;
+
+    &:hover {
+      filter: brightness(0.96);
+    }
 
     .toggle {
       margin-left: auto;
+    }
+  }
+
+  &.enabled {
+    .field {
+      background-color: var(--main-lighter);
+      @include bevel(var(--main-light));
     }
   }
 }

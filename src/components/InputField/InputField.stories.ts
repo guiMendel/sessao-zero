@@ -1,7 +1,6 @@
 import { fieldRef } from '@/utils'
 import { Meta, StoryFn } from '@storybook/vue3'
 import { InputField } from '.'
-import { watch } from 'vue'
 
 const meta = {
   title: 'Components/InputField',
