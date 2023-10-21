@@ -5,6 +5,7 @@ import { Toggle } from '../Toggle'
 const props = defineProps<{
   modelValue: boolean
   label?: string
+  message?: string
 }>()
 
 const emit = defineEmits(['update:modelValue'])
@@ -13,14 +14,20 @@ const toggle = () => emit('update:modelValue', !props.modelValue)
 </script>
 
 <template>
-  <div class="toggle-field" :class="modelValue && 'enabled'" @click="toggle">
-    <Typography class="label" v-if="label != undefined">{{ label }}</Typography>
+  <div class="toggle-field" :class="modelValue && 'enabled'">
+    <Typography @click="toggle" class="label" v-if="label != undefined">{{
+      label
+    }}</Typography>
 
-    <div class="field">
+    <div class="field" @click="toggle">
       <slot></slot>
 
       <Toggle class="toggle" :model-value="modelValue" />
     </div>
+
+    <Typography class="message" v-if="message">
+      {{ message }}
+    </Typography>
   </div>
 </template>
 
@@ -31,13 +38,14 @@ const toggle = () => emit('update:modelValue', !props.modelValue)
   flex-direction: column;
   align-items: stretch;
   gap: 0.3rem;
-  cursor: pointer;
 
   .label {
-    color: var(--tx-primary);
+    @include field-label;
+  cursor: pointer;
+  }
 
-    font-weight: 600;
-    font-size: 0.9rem;
+  .message {
+    @include field-message;
   }
 
   .field {
@@ -52,6 +60,7 @@ const toggle = () => emit('update:modelValue', !props.modelValue)
 
     min-height: $field-height;
     transition: all 200ms;
+    cursor: pointer;
 
     &:hover {
       filter: brightness(0.96);

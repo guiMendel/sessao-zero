@@ -14,6 +14,7 @@ defineProps<{
   label?: string
   options: SelectOption<T>[]
   modelValue: T
+  message?: string
 }>()
 
 const emit = defineEmits(['update:modelValue'])
@@ -45,6 +46,10 @@ const setValue = ({ target }: Event) =>
         </option>
       </select>
     </div>
+
+    <Typography class="message" v-if="message">
+      {{ message }}
+    </Typography>
   </div>
 </template>
 
@@ -57,10 +62,11 @@ const setValue = ({ target }: Event) =>
   gap: 0.3rem;
 
   .label {
-    color: var(--tx-primary);
+    @include field-label;
+  }
 
-    font-weight: 600;
-    font-size: 0.9rem;
+  .message {
+    @include field-message;
   }
 
   .field {

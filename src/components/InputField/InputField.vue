@@ -223,9 +223,8 @@ const raiseLabel = computed(
       top: 0;
       left: 0;
       translate: 0 calc(-100% - 0.3rem);
-      color: var(--tx-primary);
 
-      font-size: 0.9rem;
+      @include field-label;
 
       opacity: 1;
     }

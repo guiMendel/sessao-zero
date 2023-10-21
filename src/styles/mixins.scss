@@ -169,3 +169,21 @@
     drop-shadow(-1px 0 0 var(--bg-white)) drop-shadow(0 1px 0 var(--bg-white))
     drop-shadow(0 -1px 0 var(--bg-white));
 }
+
+// Um label de um field
+@mixin field-label {
+  color: var(--tx-main-dark);
+
+  font-weight: 500;
+  font-size: 0.9rem;
+
+  opacity: 0.8;
+}
+
+// Uma message de um field
+@mixin field-message {
+  color: var(--tx-gray-dark);
+
+  font-weight: 500;
+  font-size: 0.8rem;
+}
