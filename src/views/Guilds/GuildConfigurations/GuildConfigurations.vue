@@ -31,7 +31,7 @@ const requireAccess = ref(false)
 <template>
   <div class="guild-configurations">
     <div class="section">
-      <Typography variant="subtitle">Dados</Typography>
+      <Typography variant="subtitle">Geral</Typography>
 
       <InputField :field="fields.name" />
 
@@ -39,7 +39,7 @@ const requireAccess = ref(false)
     </div>
 
     <div class="section">
-      <Typography variant="subtitle">Acesso</Typography>
+      <Typography variant="subtitle">Admissão</Typography>
 
       <SelectField
         label="visibilidade"
@@ -65,30 +65,48 @@ const requireAccess = ref(false)
       >
     </div>
 
-    <div class="section">
+    <div class="section danger">
       <Typography variant="subtitle">Zona de perigo</Typography>
 
-      <Button>transferir dono</Button>
+      <Button
+        message="abdicar da administração da guilda e a transferir para outro jogador"
+        >transferir dono</Button
+      >
 
-      <Button>arquivar</Button>
+      <Button
+        message="a guilda se torna imodificável e inacessível para todos os demais membros"
+        >arquivar</Button
+      >
 
-      <Button>destruir</Button>
+      <Button message="a guilda é destruída permanentemente, sem piedade"
+        >destruir</Button
+      >
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
+@import '@/styles/variables.scss';
+
 .guild-configurations {
   width: 100%;
   flex-direction: column;
   align-items: stretch;
-  gap: 2rem;
+  gap: 1rem;
   flex: 1;
   margin-top: 2rem;
 
   .section {
     flex-direction: column;
     gap: 0.8rem;
+
+    background-color: var(--bg-main-washed);
+    border-radius: $border-radius;
+    padding: 0.6rem 1rem;
+
+    &.danger {
+      background-color: var(--bg-error-washed);
+    }
   }
 }
 </style>
