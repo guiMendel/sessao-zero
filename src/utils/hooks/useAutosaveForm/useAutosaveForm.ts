@@ -1,4 +1,5 @@
-import { Ref, ref, watch } from 'vue'
+import { AutosaveStatus, useAutosaveStatus } from '@/stores'
+import { watch } from 'vue'
 import { FieldRef } from '../..'
 
 type AutosaveFormOptions = {
@@ -7,92 +8,41 @@ type AutosaveFormOptions = {
 
   /** Quantos ms esperar antes de tentar novamente um persist que falhou */
   retryDelay?: number
-
-  /** Quantos ms deve manter o estado de sucesos antes de voltar para idle */
-  successStatusDuration?: number
-}
-
-/** Representa os possiveis estados que o autosave pode assumir */
-export enum AutosaveStatus {
-  /** Nao esta fazendo nada */
-  Idle,
-  /** Ja chamou persist para 1 ou mais campos e esta esperando um resultado */
-  Persisting,
-  /** 1 ou mais campos falharam ao persistir, e o autosave esta tentando novamente */
-  Retrying,
-  /** Todos os campos foram persistidos com sucesso */
-  Success,
 }
 
 export const useAutosaveForm = <T extends Record<string, FieldRef>>(
   fields: T,
   options?: AutosaveFormOptions
-): { fields: T; status: Ref<AutosaveStatus>; cleanup: () => void } => {
-  const {
-    retryDelay = 10000,
-    throttleAmount = 1000,
-    successStatusDuration = 3000,
-  } = options ?? {}
+): { fields: T; cleanup: () => void } => {
+  const { retryDelay = 10000, throttleAmount = 1000 } = options ?? {}
 
-  /** Guarda o atual status do autosave */
-  const status = ref(AutosaveStatus.Idle)
+  const { getId, forgetPromise, trackPromise } = useAutosaveStatus()
+
+  /** O id deste hook */
+  const hookId = getId()
+
+  /** Gera um id para um campo */
+  const getFieldId = (fieldName: string) => `${hookId}_${fieldName}`
 
   /** Controla o throttle de cada field */
   const fieldThrottles: Partial<{ [fieldName in keyof T]: NodeJS.Timeout }> = {}
 
-  /** Registra todas as promessas de persist que estao sendo aguardadas */
-  let persistPromises: Record<
-    number,
-    { promise: Promise<void>; status: AutosaveStatus }
-  > = {}
-
-  /** Gera ids para o objeto persistPromises */
-  let nextId = 0
-
-  /** Atualiza o status com base no estado das promises */
-  const updateStatus = () => {
-    const promises = Object.values(persistPromises)
-
-    if (promises.length == 0) {
-      status.value = AutosaveStatus.Idle
-      return
-    }
-
-    if (promises.some(({ status }) => status == AutosaveStatus.Retrying)) {
-      status.value = AutosaveStatus.Retrying
-      return
-    }
-
-    if (promises.every(({ status }) => status == AutosaveStatus.Success)) {
-      status.value = AutosaveStatus.Success
-      return
-    }
-
-    status.value = AutosaveStatus.Persisting
-  }
-
   /** Tenta um persist do field fornecido */
   const persist = (
     field: FieldRef,
-    promiseId: number,
     fieldName: string,
-    fieldValue: string,
     status = AutosaveStatus.Persisting
   ) => {
     if (field.persist == undefined) return
 
+    /** Guarda o valor do campo neste momento */
+    const fieldValue = field.value
+
+    /** Guarda o id deste campo */
+    const fieldId = getFieldId(fieldName)
+
     const promise = field
       .persist()
-      // No sucesso, atualiza o status para sucesso pela duraçao configrada e entao remove essa promessa
-      .then(() => {
-        persistPromises[promiseId].status = AutosaveStatus.Success
-        updateStatus()
-
-        setTimeout(() => {
-          delete persistPromises[promiseId]
-          updateStatus()
-        }, successStatusDuration)
-      })
       // Na falha, atualiza o status para retrying e e tenta novamente
       .catch((error) => {
         console.error(
@@ -100,25 +50,14 @@ export const useAutosaveForm = <T extends Record<string, FieldRef>>(
           error
         )
 
-        persistPromises[promiseId].status = AutosaveStatus.Retrying
-        updateStatus()
-
         if (cleanedUp == false)
           setTimeout(
-            () =>
-              persist(
-                field,
-                promiseId,
-                fieldName,
-                fieldValue,
-                AutosaveStatus.Retrying
-              ),
+            () => persist(field, fieldName, AutosaveStatus.Retrying),
             retryDelay
           )
       })
 
-    persistPromises[promiseId] = { promise, status }
-    updateStatus()
+    trackPromise(promise, fieldId, status)
   }
 
   /** Se ja encerrou funcionamento */
@@ -128,11 +67,12 @@ export const useAutosaveForm = <T extends Record<string, FieldRef>>(
   for (const [fieldNameUntyped, field] of Object.entries(fields)) {
     const fieldName = fieldNameUntyped as keyof T
 
-    watch(field, (fieldValue) => {
-      if (cleanedUp || field.validate(fieldValue) != true) return
+    // Sempre que mudar, executamos o persist
+    watch(field, () => {
+      if (cleanedUp || field.validate(field.value) != true) return
 
       if (throttleAmount == 0) {
-        persist(field, nextId++, fieldName as string, fieldValue)
+        persist(field, fieldNameUntyped)
         return
       }
 
@@ -142,21 +82,21 @@ export const useAutosaveForm = <T extends Record<string, FieldRef>>(
       fieldThrottles[fieldName] = setTimeout(() => {
         fieldThrottles[fieldName] = undefined
 
-        // Sempre que mudar, executamos o persist
-        persist(field, nextId++, fieldName as string, fieldValue)
+        persist(field, fieldNameUntyped)
       }, throttleAmount)
     })
   }
 
   return {
     fields,
-    status,
+
     cleanup: () => {
       cleanedUp = true
 
-      persistPromises = {}
-      updateStatus()
+      // Esquece todas as promessas
+      for (const fieldName in fields) forgetPromise(getFieldId(fieldName))
 
+      // Cancela todas as atualizaçoes agendadas
       for (const throttled of Object.values(fieldThrottles))
         if (throttled != undefined) clearTimeout(throttled)
     },

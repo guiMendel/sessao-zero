@@ -1,8 +1,31 @@
-import { AutosaveStatus, fieldRef, sleep } from '@/utils'
+import { fieldRef, sleep } from '@/utils'
 import { useAutosaveForm } from '.'
 import { nextTick } from 'vue'
+import { useAutosaveStatus } from '@/stores'
+import { Mock } from 'vitest'
+
+vi.mock('@/stores', async () => ({
+  ...(await vi.importActual<{}>('@/stores')),
+  useAutosaveStatus: vi.fn(),
+}))
+
+const mockUseAutosaveStatus = useAutosaveStatus as unknown as Mock
+
+const mockGetId = vi.fn()
+const mockForgetPromise = vi.fn()
+const mockTrackPromise = vi.fn()
 
 describe('useAutosaveForm', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+
+    mockUseAutosaveStatus.mockReturnValue({
+      getId: mockGetId.mockReturnValue('test-id'),
+      forgetPromise: mockForgetPromise,
+      trackPromise: mockTrackPromise,
+    })
+  })
+
   it('should throttle calls to persist when a field changes', async () => {
     const persist = vi.fn().mockResolvedValue(undefined)
 
@@ -32,6 +55,7 @@ describe('useAutosaveForm', () => {
     expect(persist).toHaveBeenCalledOnce()
     expect(persist).toHaveBeenCalledWith(newValue2)
   })
+
 
   it('should not call persist if the change is invalid', async () => {
     const persist = vi.fn().mockResolvedValue(undefined)
@@ -82,80 +106,4 @@ describe('useAutosaveForm', () => {
     cleanup()
   })
 
-  describe('should set status accordingly', () => {
-    it('idle', () => {
-      const { status } = useAutosaveForm({
-        test: fieldRef('test', { initialValue: 'booya' }),
-      })
-
-      expect(status.value).toBe(AutosaveStatus.Idle)
-    })
-
-    it('persisting', async () => {
-      const persist = vi.fn().mockImplementation(async () => {
-        await sleep(100)
-      })
-
-      const { status, fields } = useAutosaveForm(
-        {
-          test: fieldRef('test', { initialValue: 'booya', persist }),
-        },
-        { throttleAmount: 0 }
-      )
-
-      expect(status.value).toBe(AutosaveStatus.Idle)
-
-      fields.test.value = 'bambam'
-
-      await nextTick()
-
-      expect(status.value).toBe(AutosaveStatus.Persisting)
-    })
-
-    it('retrying', async () => {
-      const persist = vi.fn().mockRejectedValue(undefined)
-
-      const { status, fields, cleanup } = useAutosaveForm(
-        {
-          test: fieldRef('test', { initialValue: 'booya', persist }),
-        },
-        { throttleAmount: 0 }
-      )
-
-      expect(status.value).toBe(AutosaveStatus.Idle)
-
-      fields.test.value = 'bambam'
-
-      await sleep(10)
-
-      expect(status.value).toBe(AutosaveStatus.Retrying)
-
-      cleanup()
-    })
-
-    it('success', async () => {
-      const persist = vi.fn().mockResolvedValue(undefined)
-
-      const successStatusDuration = 20
-
-      const { status, fields } = useAutosaveForm(
-        {
-          test: fieldRef('test', { initialValue: 'booya', persist }),
-        },
-        { throttleAmount: 0, successStatusDuration }
-      )
-
-      expect(status.value).toBe(AutosaveStatus.Idle)
-
-      fields.test.value = 'bambam'
-
-      await sleep(10)
-
-      expect(status.value).toBe(AutosaveStatus.Success)
-
-      await sleep(2 * successStatusDuration)
-
-      expect(status.value).toBe(AutosaveStatus.Idle)
-    })
-  })
 })
