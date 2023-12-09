@@ -1,6 +1,14 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref } from 'vue'
 
+withDefaults(
+  defineProps<{
+    /** Variante da cor */
+    color?: 'colourful' | 'current-color'
+  }>(),
+  { color: 'colourful' }
+)
+
 /** Mapeia um indice ao dado correspondente */
 const diceMap = [
   'fa-dice-one',
@@ -28,24 +36,33 @@ onBeforeUnmount(() => clearInterval(intervalKey))
 </script>
 
 <template>
-  <div class="spinner">
+  <div class="spinner" :class="color">
     <font-awesome-icon class="loading-spinner" :icon="['fas', dice]" />
   </div>
 </template>
 
 <style lang="scss" scoped>
 .spinner {
-  animation: spin 1s ease-in-out infinite alternate,
-    change-hue 1.5s linear infinite;
-  color: hsl(118, 100%, 50%);
-  background-color: var(--bg-main-washed);
   display: flex;
   align-items: center;
   justify-content: center;
+
   width: min-content;
+
   padding: 0.01em 0.08em;
   border-radius: 0.2em;
   font-size: 1.2em;
+
+  &.colourful {
+    animation: spin 1s ease-in-out infinite alternate,
+      change-hue 1.5s linear infinite;
+    color: hsl(118, 100%, 50%);
+    background-color: var(--bg-main-washed);
+  }
+
+  &.current-color {
+    animation: spin 1s ease-in-out infinite alternate;
+  }
 }
 
 @keyframes spin {

@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 /* import specific icons */
 import {
   faBars,
+  faChampagneGlasses,
   faCheck,
   faChevronDown,
   faChevronRight,
@@ -78,7 +79,8 @@ export const initFontAwesome = (): [
     faUsers,
     faHammer,
     faPlus,
-    faChevronDown
+    faChevronDown,
+    faChampagneGlasses
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]

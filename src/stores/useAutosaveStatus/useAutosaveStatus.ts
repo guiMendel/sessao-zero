@@ -23,7 +23,7 @@ export const useAutosaveStatus = defineStore('autosave-status', () => {
   /** Registra todas as promessas de persist que estao sendo aguardadas */
   let persistPromises: Record<
     string,
-    { promise: Promise<unknown>; status: AutosaveStatus }
+    { promise: Promise<unknown>; status: AutosaveStatus; callId: string }
   > = {}
 
   /** Gera ids para o objeto persistPromises */
@@ -51,12 +51,14 @@ export const useAutosaveStatus = defineStore('autosave-status', () => {
     status.value = AutosaveStatus.Persisting
   }
 
+  const getId = () => (nextId++).toString()
+
   return {
     /** O status atual do autosave */
     status,
 
     /** Retorna numa nova string sempre que for chamado */
-    getId: () => (nextId++).toString(),
+    getId,
 
     /** Remove a promessa registrada com o id fornecido */
     forgetPromise: (promiseId: string) => {
@@ -72,28 +74,34 @@ export const useAutosaveStatus = defineStore('autosave-status', () => {
       promiseId: string,
       status = AutosaveStatus.Persisting
     ) => {
+      const callId = getId()
+
       persistPromises[promiseId] = {
         promise,
         status,
+        callId,
       }
       updateStatus()
+
+      const updatePromiseStatus = (status: AutosaveStatus | null) => {
+        if (persistPromises[promiseId].callId != callId) return
+        if (status) persistPromises[promiseId].status = status
+        else delete persistPromises[promiseId]
+        updateStatus()
+      }
 
       promise
         // No sucesso, atualiza o status para sucesso pela duraçao configrada e entao remove essa promessa
         .then(() => {
-          persistPromises[promiseId].status = AutosaveStatus.Success
-          updateStatus()
+          updatePromiseStatus(AutosaveStatus.Success)
 
-          setTimeout(() => {
-            delete persistPromises[promiseId]
-            updateStatus()
-          }, successStatusDuration.value)
+          setTimeout(
+            () => updatePromiseStatus(null),
+            successStatusDuration.value
+          )
         })
         // Na falha, atualiza o status para retrying
-        .catch(() => {
-          persistPromises[promiseId].status = AutosaveStatus.Retrying
-          updateStatus()
-        })
+        .catch(() => updatePromiseStatus(AutosaveStatus.Retrying))
     },
   }
 })

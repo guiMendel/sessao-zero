@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 const props = withDefaults(
   defineProps<{
     /** Variante de texto, impacta sobretudo o tamanho */
@@ -7,7 +6,7 @@ const props = withDefaults(
     /** Useful when setting as=label */
     labelFor?: string
   }>(),
-  { variant: 'paragraph', as: 'p' }
+  { variant: 'paragraph' }
 )
 </script>
 
@@ -23,7 +22,8 @@ const props = withDefaults(
 <style scoped lang="scss">
 @import '../../styles/variables.scss';
 
-p, label {
+p,
+label {
   &.paragraph {
     font-size: 1rem;
   }

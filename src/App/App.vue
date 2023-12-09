@@ -5,6 +5,7 @@ import { findMeta } from '@/router/utils'
 import { useAccessibility, useCurrentAuth } from '@/stores/'
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { AutosaveNotification } from './AutosaveNotification'
 import { Notifications } from './Notifications'
 
 const router = useRouter()
@@ -52,6 +53,9 @@ const accessibilityClass = computed(() => ({
   <div id="main-container" :class="accessibilityClass">
     <!-- Lista flutuante de notificacoes -->
     <Notifications />
+
+    <!-- Mostra resultado do autosave -->
+    <AutosaveNotification />
 
     <!-- Botao de voltar de pagina -->
     <BackButton
