@@ -16,6 +16,9 @@ type FieldOptions = {
 
   /** Se fornecido, utiliza a chave de LS `${localStoragePrefix}_${name}` para armazenar o valor */
   localStoragePrefix?: string
+
+  /** Uma funçao que salva o valor atual deste ref no backend e retorna uma promessa do resultado */
+  persist?: (value: string) => Promise<void>
 }
 
 export type FieldRef = Ref<string> & {
@@ -30,6 +33,9 @@ export type FieldRef = Ref<string> & {
 
   /** Define como validar o campo */
   validate: FieldValidator
+
+  /** Uma funçao que salva o valor atual deste ref no backend e retorna uma promessa do resultado */
+  persist?: () => Promise<void>
 }
 
 /** Cria um field ref com um validator */
@@ -43,10 +49,15 @@ export function fieldRef(
   name: string,
   options: FieldOptions | FieldValidator = {}
 ): FieldRef {
-  const { initialValue, localStoragePrefix, validator } =
+  const { initialValue, localStoragePrefix, validator, persist } =
     typeof options === 'object'
       ? options
-      : { validator: options, localStoragePrefix: undefined, initialValue: '' }
+      : {
+          validator: options,
+          localStoragePrefix: undefined,
+          initialValue: '',
+          persist: undefined,
+        }
 
   const valueRef: Ref<string> =
     localStoragePrefix != undefined
@@ -66,6 +77,7 @@ export function fieldRef(
     validate,
     valid: isValid === true,
     validationMessage: isValid === true ? '' : isValid,
+    persist: persist ? () => persist(valueRef.value) : undefined,
   })
 
   // Sincroniza o estado de valid
