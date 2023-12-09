@@ -29,7 +29,7 @@ defineEmits(['update:modelValue'])
   border-radius: $border-radius;
 
   position: relative;
-  background-color: var(--bg-gray-light);
+  background-color: var(--bg-gray-lighter);
   align-items: center;
   transition: all 200ms;
 
@@ -40,7 +40,7 @@ defineEmits(['update:modelValue'])
     width: var(--size);
     height: var(--size);
     border-radius: 50%;
-    background-color: var(--tx-gray-lighter);
+    background-color: var(--tx-gray-washed);
     transition: all 200ms;
     z-index: 10;
 
@@ -62,7 +62,7 @@ defineEmits(['update:modelValue'])
     position: absolute;
     right: calc(var(--padding) + (var(--track-proportion) - 2) * var(--size) / 2);
 
-    color: var(--tx-gray-dark);
+    color: var(--tx-gray);
     transition: all 200ms;
   }
 

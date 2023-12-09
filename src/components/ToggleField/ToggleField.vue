@@ -50,10 +50,10 @@ const toggle = () => emit('update:modelValue', !props.modelValue)
 
   .field {
     @include high-contrast-border;
-    @include bevel(var(--gray-light));
+    @include bevel(var(--gray-lighter));
 
     border-radius: $border-radius;
-    background-color: var(--gray-lighter);
+    background-color: var(--gray-washed);
     padding: 0.5rem 1rem;
     align-items: center;
     justify-content: center;

@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { LoadingSpinner, Typography } from '@/components'
+import { LoadingSpinner } from '@/components'
 import { useCurrentGuild } from '@/stores'
-import { GuildPanel } from './GuildPanel'
 import { storeToRefs } from 'pinia'
+import { GuildPanel } from './GuildPanel'
 
 const { guild } = storeToRefs(useCurrentGuild())
 </script>
@@ -14,9 +14,6 @@ const { guild } = storeToRefs(useCurrentGuild())
     <GuildPanel :guild="guild" />
 
     <div class="guild">
-      <Typography class="color-light">guilda</Typography>
-      <Typography class="title" variant="title">{{ guild.name }}</Typography>
-
       <RouterView />
     </div>
   </template>
@@ -32,16 +29,6 @@ const { guild } = storeToRefs(useCurrentGuild())
   flex-direction: column;
   width: 100%;
   flex: 1;
-  padding: 1.5rem 1.5rem 2rem;
-
-  .color-light {
-    color: var(--tx-main-light);
-    font-weight: 500;
-  }
-
-  .title {
-    color: var(--tx-main-darker);
-    text-align: left;
-  }
+  padding: 0 1.5rem 2rem;
 }
 </style>

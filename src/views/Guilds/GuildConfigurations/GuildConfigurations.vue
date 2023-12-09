@@ -15,14 +15,7 @@ const currentGuild = useCurrentGuild()
 const { guild } = storeToRefs(currentGuild)
 const { update } = currentGuild
 
-// watch(guild, (guild) => {
-//   name.value.value = guild.name
-// })
-
-// Proximo passo: popular os dados dessa pagina com os reais dados da guilda atual.
-// Em seguida, trazer funcionalidade real para a UI para permitir editar e excluir a guilda
-
-const { fields, status } = useAutosaveForm({
+const { fields } = useAutosaveForm({
   name: fieldRef('nome', {
     validator: (name) => (name.length > 2 ? true : 'Minimo de 3 caracteres'),
     initialValue: guild.value.name,
@@ -30,6 +23,9 @@ const { fields, status } = useAutosaveForm({
   }),
   description: fieldRef('descrição'),
 })
+
+// Aventuras
+const lockAdventureSubscription = ref(true)
 
 // Visibilidade
 type VisibilityOptions = 'publica' | 'não listada'
@@ -41,21 +37,30 @@ const requireAccess = ref(false)
 
 <template>
   <div class="guild-configurations">
-    <Typography>Status: {{ status }}</Typography>
-
     <div class="section">
-      <Typography variant="subtitle">Geral</Typography>
+      <Typography class="title" variant="subtitle">Geral</Typography>
 
       <InputField :field="fields.name" />
-
-      <InputField :field="fields.description" multiline />
     </div>
 
     <div class="section">
-      <Typography variant="subtitle">Admissão</Typography>
+      <Typography class="title" variant="subtitle">Aventuras</Typography>
+
+      <ToggleField
+        v-model="lockAdventureSubscription"
+        :message="
+          lockAdventureSubscription
+            ? 'jogadores podem se inscrever nas aventuras normalmente'
+            : 'as aventuras não aceitarão novas inscrições'
+        "
+        >inscrições abertas</ToggleField
+      >
+    </div>
+
+    <div class="section">
+      <Typography class="title" variant="subtitle">Admissão</Typography>
 
       <SelectField
-        label="visibilidade"
         v-model="visibility"
         :options="['não listada', 'publica']"
         :message="
@@ -68,7 +73,6 @@ const requireAccess = ref(false)
       <!-- Somente se visibilidade for publica -->
       <ToggleField
         v-model="requireAccess"
-        label="acesso"
         :message="
           requireAccess
             ? 'quando um jogador solicitar acesso, ele somente será admitido após sua autorização'
@@ -79,19 +83,19 @@ const requireAccess = ref(false)
     </div>
 
     <div class="section danger">
-      <Typography variant="subtitle">Zona de perigo</Typography>
+      <Typography class="title" variant="subtitle">Zona de perigo</Typography>
 
       <Button
-        message="abdicar da administração da guilda e a transferir para outro jogador"
-        >transferir dono</Button
-      >
-
-      <Button
+        variant="dark"
+        message-class="guild-danger-message"
         message="a guilda se torna imodificável e inacessível para todos os demais membros"
         >arquivar</Button
       >
 
-      <Button message="a guilda é destruída permanentemente, sem piedade"
+      <Button
+        variant="dark"
+        message-class="guild-danger-message"
+        message="a guilda é destruída permanentemente, sem piedade"
         >destruir</Button
       >
     </div>
@@ -105,7 +109,7 @@ const requireAccess = ref(false)
   width: 100%;
   flex-direction: column;
   align-items: stretch;
-  gap: 1rem;
+  gap: 3rem;
   flex: 1;
   margin-top: 2rem;
 
@@ -113,14 +117,32 @@ const requireAccess = ref(false)
     flex-direction: column;
     gap: 0.8rem;
 
-    background-color: var(--bg-main-washed);
+    // background-color: var(--bg-main-washed);
     border-radius: $border-radius;
-    padding: 0.6rem 1rem;
 
     &.danger {
+      border: 5px solid var(--bg-trans-2);
       background-color: var(--bg-error-washed);
+      padding: 0.6rem 1rem;
+      color: var(--tx-white);
+
+      @include high-contrast-border;
+
+      .title {
+        color: var(--tx-trans-3);
+      }
+    }
+
+    .title {
+      color: var(--tx-main-dark);
     }
   }
 }
 </style>
-@/utils/types
+
+<style lang="scss">
+.guild-configurations .section .guild-danger-message {
+  color: var(--tx-trans-3);
+  font-weight: 600;
+}
+</style>

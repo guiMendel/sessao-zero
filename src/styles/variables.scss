@@ -38,6 +38,13 @@ $floating-icon-animation-duration: 400ms;
   --trans-3: rgba(0, 0, 0, 0.3);
   --trans-45: rgba(0, 0, 0, 0.45);
 
+  --light-trans: rgba(255, 255, 255, 0);
+  --light-trans-03: rgba(255, 255, 255, 0.03);
+  --light-trans-1: rgba(255, 255, 255, 0.1);
+  --light-trans-2: rgba(255, 255, 255, 0.2);
+  --light-trans-3: rgba(255, 255, 255, 0.3);
+  --light-trans-45: rgba(255, 255, 255, 0.45);
+
   --main-washed: #eefcee;
   --main-lighter: #c1f8c1;
   --main-light: #68e768;
@@ -53,8 +60,8 @@ $floating-icon-animation-duration: 400ms;
   --gray-dark: rgb(143, 143, 143);
   --gray-darker: rgb(108, 108, 108);
 
-  --error-washed: rgb(255, 239, 239);
-  --error-lighter: rgb(251, 160, 160);
+  --error-washed: rgb(249, 198, 198);
+  --error-lighter: rgb(245, 144, 144);
   --error-light: rgb(255, 77, 77);
   --error: rgb(255, 24, 24);
   --error-dark: rgb(210, 22, 22);
@@ -72,6 +79,12 @@ $floating-icon-animation-duration: 400ms;
   --tx-trans-2: var(--trans-2);
   --tx-trans-3: var(--trans-3);
   --tx-trans-45: var(--trans-45);
+
+  --tx-light-trans-03: var(--light-trans-03);
+  --tx-light-trans-1: var(--light-trans-1);
+  --tx-light-trans-2: var(--light-trans-2);
+  --tx-light-trans-3: var(--light-trans-3);
+  --tx-light-trans-45: var(--light-trans-45);
 
   --tx-main-washed: var(--main-washed);
   --tx-main-lighter: var(--main-lighter);
@@ -107,6 +120,12 @@ $floating-icon-animation-duration: 400ms;
   --bg-trans-2: var(--trans-2);
   --bg-trans-3: var(--trans-3);
   --bg-trans-45: var(--trans-45);
+
+  --bg-light-trans-03: var(--light-trans-03);
+  --bg-light-trans-1: var(--light-trans-1);
+  --bg-light-trans-2: var(--light-trans-2);
+  --bg-light-trans-3: var(--light-trans-3);
+  --bg-light-trans-45: var(--light-trans-45);
 
   --bg-main-washed: var(--tx-main-washed);
   --bg-main-lighter: var(--tx-main-lighter);

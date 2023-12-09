@@ -193,10 +193,10 @@ const raiseLabel = computed(
       align-items: center;
       justify-content: center;
 
-      background-color: rgba(255, 255, 255, 0.5);
+      background-color: var(--light-trans-45);
       left: var(--border);
 
-      border-radius: calc($border-radius / 1);
+      border-radius: calc($border-radius / 1.3);
 
       box-shadow: inset 0 1px 1px 1px var(--main-light);
     }
@@ -240,7 +240,7 @@ const raiseLabel = computed(
       width: 100%;
 
       padding: 0.5rem 1rem;
-      border-radius: $border-radius;
+      border-radius: inherit;
       min-height: $field-height;
 
       display: flex;
@@ -284,7 +284,7 @@ const raiseLabel = computed(
 
     border-radius: 0 0 $border-radius $border-radius;
     background-color: var(--bg-error-washed);
-    color: var(--bg-error);
+    color: var(--tx-error);
     padding: 0 0.7rem 0.2rem;
     @include bevel(var(--error-lighter));
 

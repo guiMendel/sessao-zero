@@ -4,8 +4,9 @@ import { Typography } from '..'
 withDefaults(
   defineProps<{
     /** Variante da aparencia do botao */
-    variant?: 'default' | 'colored'
+    variant?: 'default' | 'dark' | 'colored'
     message?: string
+    messageClass?: string
   }>(),
   { variant: 'default' }
 )
@@ -15,7 +16,7 @@ withDefaults(
   <div class="button-wrapper">
     <button class="button" :class="variant"><slot></slot></button>
 
-    <Typography class="message" v-if="message">
+    <Typography class="message" :class="messageClass" v-if="message">
       {{ message }}
     </Typography>
   </div>
@@ -41,6 +42,10 @@ withDefaults(
 
     &.default {
       background-color: var(--bg-trans-03);
+    }
+
+    &.dark {
+      background-color: var(--bg-trans-2);
     }
 
     &.colored {
