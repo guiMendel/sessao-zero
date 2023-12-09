@@ -56,7 +56,6 @@ describe('useAutosaveForm', () => {
     expect(persist).toHaveBeenCalledWith(newValue2)
   })
 
-
   it('should not call persist if the change is invalid', async () => {
     const persist = vi.fn().mockResolvedValue(undefined)
 
@@ -99,11 +98,63 @@ describe('useAutosaveForm', () => {
 
     await nextTick()
 
-    await sleep(retryDelay * 2)
+    await sleep(retryDelay * 1.2)
 
     expect(persist).toHaveBeenCalledTimes(2)
+
+    await nextTick()
+
+    await sleep(retryDelay * 1.2)
+
+    expect(persist).toHaveBeenCalledTimes(3)
 
     cleanup()
   })
 
+  it('should not retry old attempts for the same field', async () => {
+    const persist = vi.fn().mockRejectedValue(undefined)
+
+    const retryDelay = 20
+
+    const { fields, cleanup } = useAutosaveForm(
+      {
+        test: fieldRef('test', { persist, initialValue: 'booya' }),
+      },
+      { retryDelay, throttleAmount: 0 }
+    )
+
+    const oldValue = 'bambam'
+    const newValue = 'shwaz'
+
+    fields.test.value = oldValue
+
+    await nextTick()
+    
+
+    expect(persist).toHaveBeenCalledOnce()
+    expect(persist).toHaveBeenCalledWith(oldValue)
+
+    fields.test.value = newValue
+
+    await nextTick()
+    
+
+    expect(persist).toHaveBeenCalledTimes(2)
+    expect(persist).toHaveBeenCalledWith(newValue)
+
+    await sleep(retryDelay)
+
+    expect(persist).toHaveBeenCalledTimes(3)
+
+    await sleep(retryDelay * 0.5)
+
+    expect(persist).toHaveBeenCalledTimes(4)
+
+    cleanup()
+
+    expect(persist).toHaveBeenNthCalledWith(1, oldValue)
+    expect(persist).toHaveBeenNthCalledWith(2, newValue)
+    expect(persist).toHaveBeenNthCalledWith(3, newValue)
+    expect(persist).toHaveBeenNthCalledWith(4, newValue)
+  })
 })

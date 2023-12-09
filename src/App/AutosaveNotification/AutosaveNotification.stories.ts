@@ -47,7 +47,7 @@ export const Default: Story = () => ({
     const promisedId = 'scooby'
 
     const showSuccess = () => {
-      store.trackPromise(sleep(200), promisedId)
+      store.trackPromise(sleep(100), promisedId)
     }
 
     const showSuccessDelayed = () => {

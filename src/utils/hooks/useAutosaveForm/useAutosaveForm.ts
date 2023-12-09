@@ -25,7 +25,9 @@ export const useAutosaveForm = <T extends Record<string, FieldRef>>(
   const getFieldId = (fieldName: string) => `${hookId}_${fieldName}`
 
   /** Controla o throttle de cada field */
-  const fieldThrottles: Partial<{ [fieldName in keyof T]: NodeJS.Timeout }> = {}
+  const fieldMap: Partial<{
+    [fieldName in keyof T]: { timeout?: NodeJS.Timeout; persistId?: string }
+  }> = {}
 
   /** Tenta um persist do field fornecido */
   const persist = (
@@ -34,6 +36,10 @@ export const useAutosaveForm = <T extends Record<string, FieldRef>>(
     status = AutosaveStatus.Persisting
   ) => {
     if (field.persist == undefined) return
+
+    const persistId = getId()
+
+    fieldMap[fieldName]!.persistId = persistId
 
     /** Guarda o valor do campo neste momento */
     const fieldValue = field.value
@@ -50,11 +56,10 @@ export const useAutosaveForm = <T extends Record<string, FieldRef>>(
           error
         )
 
-        if (cleanedUp == false)
-          setTimeout(
-            () => persist(field, fieldName, AutosaveStatus.Retrying),
-            retryDelay
-          )
+        setTimeout(() => {
+          if (cleanedUp == false && fieldMap[fieldName]!.persistId == persistId)
+            persist(field, fieldName, AutosaveStatus.Retrying)
+        }, retryDelay)
       })
 
     trackPromise(promise, fieldId, status)
@@ -67,6 +72,8 @@ export const useAutosaveForm = <T extends Record<string, FieldRef>>(
   for (const [fieldNameUntyped, field] of Object.entries(fields)) {
     const fieldName = fieldNameUntyped as keyof T
 
+    fieldMap[fieldName] = {}
+
     // Sempre que mudar, executamos o persist
     watch(field, () => {
       if (cleanedUp || field.validate(field.value) != true) return
@@ -76,11 +83,11 @@ export const useAutosaveForm = <T extends Record<string, FieldRef>>(
         return
       }
 
-      if (fieldThrottles[fieldName] != undefined)
-        clearTimeout(fieldThrottles[fieldName])
+      if (fieldMap[fieldName]!.timeout)
+        clearTimeout(fieldMap[fieldName]!.timeout)
 
-      fieldThrottles[fieldName] = setTimeout(() => {
-        fieldThrottles[fieldName] = undefined
+      fieldMap[fieldName]!.timeout = setTimeout(() => {
+        delete fieldMap[fieldName]!.timeout
 
         persist(field, fieldNameUntyped)
       }, throttleAmount)
@@ -97,8 +104,8 @@ export const useAutosaveForm = <T extends Record<string, FieldRef>>(
       for (const fieldName in fields) forgetPromise(getFieldId(fieldName))
 
       // Cancela todas as atualizaçoes agendadas
-      for (const throttled of Object.values(fieldThrottles))
-        if (throttled != undefined) clearTimeout(throttled)
+      for (const props of Object.values(fieldMap))
+        if (props?.timeout != undefined) clearTimeout(props.timeout)
     },
   }
 }
