@@ -6,19 +6,30 @@ import {
   ToggleField,
   Typography,
 } from '@/components'
-import { fieldRef } from '@/utils'
+import { useCurrentGuild } from '@/stores'
+import { fieldRef, useAutosaveForm } from '@/utils'
+import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 
-// const { guild } = storeToRefs(useCurrentGuild())
+const currentGuild = useCurrentGuild()
+const { guild } = storeToRefs(currentGuild)
+const { update } = currentGuild
 
 // watch(guild, (guild) => {
 //   name.value.value = guild.name
 // })
 
-const fields = {
-  name: fieldRef('name'),
+// Proximo passo: popular os dados dessa pagina com os reais dados da guilda atual.
+// Em seguida, trazer funcionalidade real para a UI para permitir editar e excluir a guilda
+
+const { fields, status } = useAutosaveForm({
+  name: fieldRef('nome', {
+    validator: (name) => (name.length > 2 ? true : 'Minimo de 3 caracteres'),
+    initialValue: guild.value.name,
+    persist: (name) => update({ name }),
+  }),
   description: fieldRef('descrição'),
-}
+})
 
 // Visibilidade
 type VisibilityOptions = 'publica' | 'não listada'
@@ -30,6 +41,8 @@ const requireAccess = ref(false)
 
 <template>
   <div class="guild-configurations">
+    <Typography>Status: {{ status }}</Typography>
+
     <div class="section">
       <Typography variant="subtitle">Geral</Typography>
 

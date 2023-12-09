@@ -31,7 +31,7 @@ withDefaults(
   .button {
     @include button;
 
-    min-width: 6rem;
+    min-width: 15rem;
     min-height: $field-height;
     font-weight: 800;
 

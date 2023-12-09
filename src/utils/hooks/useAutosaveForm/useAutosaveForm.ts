@@ -129,7 +129,7 @@ export const useAutosaveForm = <T extends Record<string, FieldRef>>(
     const fieldName = fieldNameUntyped as keyof T
 
     watch(field, (fieldValue) => {
-      if (cleanedUp) return
+      if (cleanedUp || field.validate(fieldValue) != true) return
 
       if (throttleAmount == 0) {
         persist(field, nextId++, fieldName as string, fieldValue)

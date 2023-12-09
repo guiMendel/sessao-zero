@@ -56,7 +56,7 @@ const tryLogin = () => {
     .then(() => router.push({ name: 'home' }))
     // Handle errors
     .catch(({ code, message }) => {
-      console.log('Login failed! ' + message)
+      console.error('Login failed!', message)
 
       notify('error', getErrorForCode(code))
     })

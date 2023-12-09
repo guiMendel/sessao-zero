@@ -33,6 +33,28 @@ describe('useAutosaveForm', () => {
     expect(persist).toHaveBeenCalledWith(newValue2)
   })
 
+  it('should not call persist if the change is invalid', async () => {
+    const persist = vi.fn().mockResolvedValue(undefined)
+
+    const { fields } = useAutosaveForm(
+      {
+        test: fieldRef('test', {
+          persist,
+          validator: () => 'nooo',
+          initialValue: 'booya',
+        }),
+      },
+      { throttleAmount: 0 }
+    )
+
+    const newValue1 = 'bambam'
+    fields.test.value = newValue1
+
+    await sleep(20)
+
+    expect(persist).not.toHaveBeenCalled()
+  })
+
   it('should retry if the persist fails', async () => {
     const persist = vi.fn().mockRejectedValue(undefined)
 

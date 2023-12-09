@@ -33,6 +33,9 @@ const handleInput = (event: Event) =>
 // Whether to show errors
 const showErrors = ref(false)
 
+/** Mensagem de erro */
+const errorMessage = computed(() => props.field.validate(props.field.value))
+
 // ================================
 // AUTO FOCUS
 // ================================
@@ -152,7 +155,7 @@ const raiseLabel = computed(
       class="error-message"
       :label-for="field.name"
     >
-      {{ field.validationMessage }}
+      {{ errorMessage }}
     </Typography>
   </div>
 </template>

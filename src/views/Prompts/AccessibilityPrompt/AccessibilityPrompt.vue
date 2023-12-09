@@ -15,8 +15,6 @@ const toggleHighContrastAndContinue = (value: boolean) => {
   // Continua
   router.push({ name: 'home' })
 }
-
-console.log('good')
 </script>
 
 <template>

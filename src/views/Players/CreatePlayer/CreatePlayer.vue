@@ -54,7 +54,7 @@ const tryCreate = () => {
     })
     // Handle errors
     .catch(({ code, message }) => {
-      console.log('Player creation failed! ' + message)
+      console.error('Player creation failed!', message)
 
       notify('error', getErrorForCode(code))
 
