@@ -5,7 +5,7 @@ import { IconButton, Typography } from '..'
 import { inferFieldProperties } from './inferFieldProperties'
 
 const props = defineProps<{
-  field: FieldRef
+  field: FieldRef<string>
   autoFocus?: boolean
   multiline?: boolean
   autocomplete?: HTMLInputElement['autocomplete']

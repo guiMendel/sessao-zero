@@ -1,6 +1,6 @@
 import { AutosaveStatus, useAutosaveStatus } from '@/stores'
 import { watch } from 'vue'
-import { FieldRef } from '../..'
+import { AllowedFieldTypes, FieldRef } from '../..'
 
 type AutosaveFormOptions = {
   /** Quantos ms deve fazer throttle nas chamadas de fieldRef.persist */
@@ -10,7 +10,7 @@ type AutosaveFormOptions = {
   retryDelay?: number
 }
 
-export const useAutosaveForm = <T extends Record<string, FieldRef>>(
+export const useAutosaveForm = <T extends Record<string, FieldRef<any>>>(
   fields: T,
   options?: AutosaveFormOptions
 ): { fields: T; cleanup: () => void } => {
@@ -31,7 +31,7 @@ export const useAutosaveForm = <T extends Record<string, FieldRef>>(
 
   /** Tenta um persist do field fornecido */
   const persist = (
-    field: FieldRef,
+    field: FieldRef<any>,
     fieldName: string,
     status = AutosaveStatus.Persisting
   ) => {

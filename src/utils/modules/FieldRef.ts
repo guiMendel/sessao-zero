@@ -1,92 +1,65 @@
 import { useLocalStorage } from '@vueuse/core'
-import { Ref, ref, watch } from 'vue'
+import { Ref, ref } from 'vue'
+
+/** Tipos aceitos pelo field */
+export type AllowedFieldTypes = string | boolean | number
 
 /** Uma funcao que valida um input fornecido por um usuario.
  * @param value o valor fornecido.
  * @returns true se for um valor valido, uma mensagem de error se nao for.
  */
-export type FieldValidator = (value: string) => true | string
+export type FieldValidator<T extends AllowedFieldTypes> = (
+  value: T
+) => true | string
 
-type FieldOptions = {
-  /** Permite validar o input */
-  validator?: FieldValidator
-
+type FieldOptions<T extends AllowedFieldTypes> = {
   /** O valor inicial */
-  initialValue?: string
+  initialValue: T
+
+  /** Permite validar o input */
+  validator?: FieldValidator<T>
 
   /** Se fornecido, utiliza a chave de LS `${localStoragePrefix}_${name}` para armazenar o valor */
   localStoragePrefix?: string
 
   /** Uma funçao que salva o valor atual deste ref no backend e retorna uma promessa do resultado */
-  persist?: (value: string) => Promise<void>
+  persist?: (value: T) => Promise<void>
 }
 
-export type FieldRef = Ref<string> & {
+export type FieldRef<T extends AllowedFieldTypes> = Ref<T> & {
   /** O nome deste campo */
   readonly name: string
 
-  /** Se o campo tem um valor valido */
-  valid: boolean
-
-  /** Uma mensagem que explica o atual estado de valid */
-  validationMessage: string
-
   /** Define como validar o campo */
-  validate: FieldValidator
+  validate: FieldValidator<T>
 
   /** Uma funçao que salva o valor atual deste ref no backend e retorna uma promessa do resultado */
   persist?: () => Promise<void>
 }
 
-/** Cria um field ref com um validator */
-export function fieldRef(name: string, validator: FieldValidator): FieldRef
-
-/** Permite passar opcoes especificas para o validator */
-export function fieldRef(name: string, options?: FieldOptions): FieldRef
-
 /** Gera um FieldRef */
-export function fieldRef(
+export function fieldRef<T extends AllowedFieldTypes>(
   name: string,
-  options: FieldOptions | FieldValidator = {}
-): FieldRef {
-  const { initialValue, localStoragePrefix, validator, persist } =
-    typeof options === 'object'
-      ? options
-      : {
-          validator: options,
-          localStoragePrefix: undefined,
-          initialValue: '',
-          persist: undefined,
-        }
+  options: FieldOptions<T>
+): FieldRef<T> {
+  const { initialValue, localStoragePrefix, validator, persist } = {
+    validator: () => true as const,
+    localStoragePrefix: undefined,
+    persist: undefined,
+    ...options,
+  }
 
-  const valueRef: Ref<string> =
+  const valueRef = (
     localStoragePrefix != undefined
-      ? useLocalStorage<string>(
-          `${localStoragePrefix}_${name}`,
-          initialValue ?? ''
-        )
-      : ref<string>(initialValue ?? '')
+      ? useLocalStorage<T>(`${localStoragePrefix}_${name}`, initialValue)
+      : ref<T>(initialValue)
+  ) as Ref<T>
 
-  // Inicializa a validacao
-  const validate = validator ?? (() => true)
-
-  const isValid = validate(valueRef.value)
-
-  const fieldRef = Object.assign(valueRef, {
+  const fieldRef: FieldRef<T> = Object.assign(valueRef, {
     name,
-    validate,
-    valid: isValid === true,
-    validationMessage: isValid === true ? '' : isValid,
+    validate: validator,
     persist: persist ? () => persist(valueRef.value) : undefined,
   })
-
-  // Sincroniza o estado de valid
-  if (validator != undefined)
-    watch(valueRef, (newValue) => {
-      const isValid = validate(newValue)
-      fieldRef.valid = isValid === true
-      fieldRef.validationMessage = isValid === true ? '' : isValid
-    })
 
   return fieldRef
 }

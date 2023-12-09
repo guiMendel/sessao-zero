@@ -13,12 +13,15 @@ export default meta
 const Template: StoryFn<typeof InputField> = (args) => ({
   setup: () => {
     const fields = {
-      testEmail: fieldRef('email', (newValue) => {
-        if (newValue.length < 3) return 'Mínimo de 3 caracteres'
-        return true
+      testEmail: fieldRef('email', {
+        initialValue: '',
+        validator: (newValue) => {
+          if (newValue.length < 3) return 'Mínimo de 3 caracteres'
+          return true
+        },
       }),
 
-      testPassword: fieldRef('password'),
+      testPassword: fieldRef('password', { initialValue: '' }),
     }
 
     return { args, fields }

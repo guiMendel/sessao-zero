@@ -1,7 +1,6 @@
-import { fieldRef } from '@/utils'
 import { Meta, StoryFn } from '@storybook/vue3'
-import { ToggleField } from '.'
 import { ref } from 'vue'
+import { ToggleField } from '.'
 
 const meta = {
   title: 'Components/ToggleField',

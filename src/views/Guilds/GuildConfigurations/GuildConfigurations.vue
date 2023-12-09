@@ -9,7 +9,6 @@ import {
 import { useCurrentGuild } from '@/stores'
 import { fieldRef, useAutosaveForm } from '@/utils'
 import { storeToRefs } from 'pinia'
-import { ref } from 'vue'
 
 const currentGuild = useCurrentGuild()
 const { guild } = storeToRefs(currentGuild)
@@ -21,18 +20,23 @@ const { fields } = useAutosaveForm({
     initialValue: guild.value.name,
     persist: (name) => update({ name }),
   }),
-  description: fieldRef('descrição'),
+
+  allowAdventureSubscription: fieldRef('inscrições', {
+    initialValue: guild.value.allowAdventureSubscription,
+    persist: (allowAdventureSubscription) =>
+      update({ allowAdventureSubscription }),
+  }),
+
+  visibility: fieldRef('visibilidade', {
+    initialValue: guild.value.visibility,
+    persist: (visibility) => update({ visibility }),
+  }),
+
+  requireAdmission: fieldRef('admissão', {
+    initialValue: guild.value.requireAdmission,
+    persist: (requireAdmission) => update({ requireAdmission }),
+  }),
 })
-
-// Aventuras
-const lockAdventureSubscription = ref(true)
-
-// Visibilidade
-type VisibilityOptions = 'publica' | 'não listada'
-const visibility = ref<VisibilityOptions>('publica')
-
-// Acesso
-const requireAccess = ref(false)
 </script>
 
 <template>
@@ -47,9 +51,9 @@ const requireAccess = ref(false)
       <Typography class="title" variant="subtitle">Aventuras</Typography>
 
       <ToggleField
-        v-model="lockAdventureSubscription"
+        v-model="fields.allowAdventureSubscription.value"
         :message="
-          lockAdventureSubscription
+          fields.allowAdventureSubscription
             ? 'jogadores podem se inscrever nas aventuras normalmente'
             : 'as aventuras não aceitarão novas inscrições'
         "
@@ -61,10 +65,10 @@ const requireAccess = ref(false)
       <Typography class="title" variant="subtitle">Admissão</Typography>
 
       <SelectField
-        v-model="visibility"
+        v-model="fields.visibility.value"
         :options="['não listada', 'publica']"
         :message="
-          visibility === 'publica'
+          fields.visibility.value === 'public'
             ? 'sua guilda será listada publicamente e qualquer um pode solicitar acesso'
             : 'sua guilda não será listada publicamente, o acesso somente se dará por convites'
         "
@@ -72,13 +76,13 @@ const requireAccess = ref(false)
 
       <!-- Somente se visibilidade for publica -->
       <ToggleField
-        v-model="requireAccess"
+        v-model="fields.requireAdmission.value"
         :message="
-          requireAccess
+          fields.requireAdmission.value
             ? 'quando um jogador solicitar acesso, ele somente será admitido após sua autorização'
             : 'ao solicitar acesso, jogadores serão admitidos automaticamente'
         "
-        >requer autorização</ToggleField
+        >requer admissão</ToggleField
       >
     </div>
 

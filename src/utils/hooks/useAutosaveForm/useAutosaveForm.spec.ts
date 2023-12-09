@@ -129,7 +129,6 @@ describe('useAutosaveForm', () => {
     fields.test.value = oldValue
 
     await nextTick()
-    
 
     expect(persist).toHaveBeenCalledOnce()
     expect(persist).toHaveBeenCalledWith(oldValue)
@@ -137,7 +136,6 @@ describe('useAutosaveForm', () => {
     fields.test.value = newValue
 
     await nextTick()
-    
 
     expect(persist).toHaveBeenCalledTimes(2)
     expect(persist).toHaveBeenCalledWith(newValue)

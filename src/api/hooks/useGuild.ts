@@ -13,7 +13,13 @@ export const useGuild = () => {
     if (player.value == null)
       throw new Error('Impossivel criar guilda sem estar logado')
 
-    return api.create({ ownerUid: player.value.id, name })
+    return api.create({
+      ownerUid: player.value.id,
+      name,
+      allowAdventureSubscription: true,
+      requireAdmission: false,
+      visibility: 'unlisted',
+    })
   }
 
   return { ...api, create: createGuild }
