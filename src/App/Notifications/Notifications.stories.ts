@@ -3,7 +3,7 @@ import { Meta, StoryFn } from '@storybook/vue3'
 import { Notifications } from '.'
 
 const meta = {
-  title: 'Components/Notifications',
+  title: 'App/Notifications',
   component: Notifications,
 } satisfies Meta<typeof Notifications>
 

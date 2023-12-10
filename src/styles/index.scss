@@ -4,6 +4,7 @@
 
 //=== Fonts
 @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 // Logo
 @import url('https://fonts.googleapis.com/css2?family=Titan+One&display=swap');
@@ -37,7 +38,7 @@
 
   min-height: 100vh;
 
-  color: var(--tx-gray-darker);
+  color: var(--tx-main-darker);
   font-weight: 400;
 
   button,
@@ -65,4 +66,8 @@
 
 body {
   background-color: var(--bg-white);
+}
+
+code {
+  font-family: 'Courier Prime', monospace;
 }

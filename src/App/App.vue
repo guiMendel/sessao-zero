@@ -7,6 +7,7 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { AutosaveNotification } from './AutosaveNotification'
 import { Notifications } from './Notifications'
+import { InputGetter } from './InputGetter'
 
 const router = useRouter()
 
@@ -56,6 +57,9 @@ const accessibilityClass = computed(() => ({
 
     <!-- Mostra resultado do autosave -->
     <AutosaveNotification />
+
+    <!-- Captura solicitaçoes de input -->
+    <InputGetter />
 
     <!-- Botao de voltar de pagina -->
     <BackButton

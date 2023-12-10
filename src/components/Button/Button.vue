@@ -1,20 +1,22 @@
 <script setup lang="ts">
 import { Typography } from '..'
 
-withDefaults(
-  defineProps<{
-    /** Variante da aparencia do botao */
-    variant?: 'default' | 'dark' | 'colored'
-    message?: string
-    messageClass?: string
-  }>(),
-  { variant: 'default' }
-)
+export type ButtonProps = {
+  /** Variante da aparencia do botao */
+  variant?: 'default' | 'dark' | 'colored'
+  message?: string
+  messageClass?: string
+  disabled?: boolean
+}
+
+withDefaults(defineProps<ButtonProps>(), { variant: 'default' })
 </script>
 
 <template>
   <div class="button-wrapper">
-    <button class="button" :class="variant"><slot></slot></button>
+    <button class="button" :class="{ [variant]: true, disabled }">
+      <slot></slot>
+    </button>
 
     <Typography class="message" :class="messageClass" v-if="message">
       {{ message }}
@@ -42,16 +44,22 @@ withDefaults(
 
     &.default {
       background-color: var(--bg-trans-03);
+      color: var(--tx-gray-darker);
     }
 
     &.dark {
       background-color: var(--bg-trans-2);
+      color: var(--tx-gray-darker);
     }
 
     &.colored {
       background-color: var(--bg-main-light);
       @include bevel(var(--bg-main));
       color: var(--tx-main-dark);
+    }
+
+    &.disabled {
+      @include disabled;
     }
   }
 

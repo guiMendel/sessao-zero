@@ -1,10 +1,10 @@
+import { useAutosaveStatus } from '@/stores'
+import { sleep } from '@/utils'
 import { Meta, StoryFn } from '@storybook/vue3'
 import { AutosaveNotification } from '.'
-import { AutosaveStatus, useAutosaveStatus } from '@/stores'
-import { sleep } from '@/utils'
 
 const meta = {
-  title: 'Components/AutosaveNotification',
+  title: 'App/AutosaveNotification',
   component: AutosaveNotification,
 } satisfies Meta<typeof AutosaveNotification>
 

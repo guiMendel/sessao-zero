@@ -28,7 +28,7 @@ type FieldOptions<T extends AllowedFieldTypes> = {
 
 export type FieldRef<T extends AllowedFieldTypes> = Ref<T> & {
   /** O nome deste campo */
-  readonly name: string
+  name: string
 
   /** Define como validar o campo */
   validate: FieldValidator<T>

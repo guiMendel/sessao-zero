@@ -12,7 +12,7 @@
   }
 }
 
-// Indicacao visual de que esta desabilitado. Pode se rusado em botoes, input, etc
+// Indicacao visual de que esta desabilitado. Pode ser usado em botoes, input, etc
 @mixin disabled {
   background-color: var(--bg-trans-1);
   color: var(--tx-trans-3);
@@ -146,21 +146,17 @@
 }
 
 // Transforma o elemento num circulo. Use a variavel --size para definir um tamanho
-@mixin circle {
+@mixin circle($size: 2rem) {
   // Valor padrao
   padding: 0.3rem;
-
-  aspect-ratio: 1 / 1;
 
   align-items: center;
   justify-content: center;
 
   border-radius: 50%;
 
-  width: unset;
-  height: unset;
-  min-width: unset;
-  min-height: unset;
+  width: $size;
+  height: $size;
 }
 
 // Coloca uma bordinha nos conteudos (especialmente util para texto)

@@ -6,13 +6,14 @@ import {
   ToggleField,
   Typography,
 } from '@/components'
-import { useCurrentGuild } from '@/stores'
+import { useCurrentGuild, useInput, useNotification } from '@/stores'
 import { fieldRef, useAutosaveForm } from '@/utils'
 import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
 
 const currentGuild = useCurrentGuild()
 const { guild } = storeToRefs(currentGuild)
-const { update } = currentGuild
+const { update, deleteForever } = currentGuild
 
 const { fields } = useAutosaveForm({
   name: fieldRef('nome', {
@@ -37,6 +38,37 @@ const { fields } = useAutosaveForm({
     persist: (requireAdmission) => update({ requireAdmission }),
   }),
 })
+
+const router = useRouter()
+
+const { notify } = useNotification()
+
+const { getStringInput } = useInput()
+
+const deleteGuild = () =>
+  // Precisa de uma confirmaçao para excluir a guilda
+  getStringInput({
+    cancellable: true,
+    inputFieldName: 'nome da guilda',
+    validator: (value) =>
+      value == guild.value.name ? true : 'nomes nao batem',
+    submitButton: { label: 'destruir' },
+    messageClass: 'guild-configurations__delete-confirmation',
+    messageHtml: `\
+Tem certeza de que deseja deletar a guilda permanentemente?\
+<br />\
+Digite <code>${guild.value.name}</code> para confirmar.`,
+  })
+    .then(() =>
+      deleteForever()
+        .then(() => router.push({ name: 'home' }))
+        .catch((error) => {
+          console.error('Failed to delete guild', error)
+
+          notify('error', 'Algo deu errado, tente novamente mais tarde')
+        })
+    )
+    .catch(() => {})
 </script>
 
 <template>
@@ -89,17 +121,18 @@ const { fields } = useAutosaveForm({
     <div class="section danger">
       <Typography class="title" variant="subtitle">Zona de perigo</Typography>
 
-      <Button
+      <!-- <Button
         variant="dark"
         message-class="guild-danger-message"
         message="a guilda se torna imodificável e inacessível para todos os demais membros"
         >arquivar</Button
-      >
+      > -->
 
       <Button
         variant="dark"
         message-class="guild-danger-message"
         message="a guilda é destruída permanentemente, sem piedade"
+        @click="deleteGuild"
         >destruir</Button
       >
     </div>
@@ -148,5 +181,18 @@ const { fields } = useAutosaveForm({
 .guild-configurations .section .guild-danger-message {
   color: var(--tx-trans-3);
   font-weight: 600;
+}
+
+#app .guild-configurations__delete-confirmation {
+  display: inline;
+
+  code {
+    background-color: var(--light-trans-45);
+    padding: 0.2rem 0.4rem;
+    line-height: 2rem;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1.05rem;
+  }
 }
 </style>
