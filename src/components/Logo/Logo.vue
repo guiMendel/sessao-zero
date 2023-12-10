@@ -7,7 +7,6 @@ h1 {
   font-family: 'Titan One', cursive;
   font-size: 2rem;
 
-  text-shadow: 0 2px 0 var(--trans-3);
   letter-spacing: -0.5px;
 
   user-select: none;

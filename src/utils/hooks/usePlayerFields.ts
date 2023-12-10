@@ -1,6 +1,5 @@
-import { Field } from '@/utils/types/Field'
-import { useLocalStorage } from '@vueuse/core'
-import { ref, watch, type Ref } from 'vue'
+import { ref } from 'vue'
+import { fieldRef } from '..'
 
 /** Retorna uma colecao de campos uteis para coletar dados do jogador
  * @param localStorageKey se fornecido, persiste os campos em localstorage
@@ -51,102 +50,80 @@ export const usePlayerFields = (localStorageKey?: string) => {
     if (code == 'auth/email-already-in-use') invalidateEmail(email, 'inUse')
   }
 
-  // Cria um campo com o nome e o validador fornecido
-  const makeField = (
-    name: Field['name'],
-    validator: Field['validate'],
-    options: { useStorage: boolean } = { useStorage: true }
-  ): Ref<Field> => {
-    const defaults = {
-      name,
-      value: '',
-      valid: false,
-      validate: validator,
-    }
-
-    if (localStorageKey && options.useStorage)
-      return useLocalStorage(`${localStorageKey}--field-${name}`, defaults, {
-        mergeDefaults: (storage, defaults) => ({
-          ...defaults,
-          value: storage.value,
-        }),
-        listenToStorageChanges: false,
-      })
-
-    return ref(defaults)
-  }
-
   /** Campo de email */
-  const email = makeField('email', (newValue: string) => {
-    if (/.+@.+\..+/.test(newValue) == false) return 'Email inválido'
-    if (newValue.length > 100) return 'Muito longo'
+  const email = fieldRef<string>('email', {
+    initialValue: '',
+    localStoragePrefix: localStorageKey
+      ? `${localStorageKey}__email`
+      : undefined,
+    validator: (newValue: string) => {
+      if (/.+@.+\..+/.test(newValue) == false) return 'Email inválido'
+      if (newValue.length > 100) return 'Muito longo'
 
-    for (const reason in invalidEmails.value)
-      if (
-        invalidEmails.value[reason as keyof invalidEmailsType].includes(
-          newValue
+      for (const reason in invalidEmails.value)
+        if (
+          invalidEmails.value[reason as keyof invalidEmailsType].includes(
+            newValue
+          )
         )
-      )
-        return emailErrorFor[reason as keyof invalidEmailsType]
+          return emailErrorFor[reason as keyof invalidEmailsType]
 
-    return true
+      return true
+    },
   })
 
   /** Campo de senha */
-  const password = makeField(
-    'password',
-    (newValue: string) => {
+  const password = fieldRef<string>('password', {
+    initialValue: '',
+    validator: (newValue: string) => {
       if (newValue.length < 6) return 'Mínimo de 6 caracteres'
       if (newValue.length > 100) return 'Muito longa'
 
       return true
     },
-    { useStorage: false }
-  )
+  })
 
   const matchesPassword = (value: string): string | true => {
-    if (value == '' || value !== password.value.value) return 'Não corresponde'
+    if (value == '' || value !== password.value) return 'Não corresponde'
 
     return true
   }
 
   /** Campo de confirmacao de senha */
-  const passwordConfirmation = makeField(
-    'passwordConfirmation',
-    matchesPassword,
-    { useStorage: false }
-  )
-
-  // Sincroniza confirmacao com o valor da senha
-  watch(
-    password,
-    () =>
-      (passwordConfirmation.value.valid =
-        matchesPassword(passwordConfirmation.value.value) === true)
-  )
+  const passwordConfirmation = fieldRef<string>('passwordConfirmation', {
+    initialValue: '',
+    validator: matchesPassword,
+  })
 
   /** Campo de apelido */
-  const nickname = makeField('nickname', (newValue: string) => {
-    if (newValue.length < 3) return 'Mínimo de 3 caracteres'
-    if (newValue.length > 100) return 'Muito longo'
+  const nickname = fieldRef<string>('apelido', {
+    initialValue: '',
+    validator: (newValue: string) => {
+      if (newValue.length < 3) return 'Mínimo de 3 caracteres'
+      if (newValue.length > 100) return 'Muito longo'
 
-    return true
+      return true
+    },
   })
 
   /** Campo de nome */
-  const name = makeField('name', (newValue: string) => {
-    if (newValue.length < 3) return 'Mínimo de 3 caracteres'
-    if (/.+ .+/.test(newValue) == false) return 'Forneça primeiro e último nome'
-    if (newValue.length > 100) return 'Muito longo'
+  const name = fieldRef<string>('name', {
+    initialValue: '',
+    validator: (newValue: string) => {
+      if (newValue.length < 3) return 'Mínimo de 3 caracteres'
+      if (/.+ .+/.test(newValue) == false)
+        return 'Forneça primeiro e último nome'
+      if (newValue.length > 100) return 'Muito longo'
 
-    return true
+      return true
+    },
   })
 
   /** Campo de sobre */
-  const about = makeField('about', (newValue: string) => {
-    if (newValue.length > 400) return 'Muito longo'
-
-    return true
+  const about = fieldRef<string>('sobre', {
+    initialValue: '',
+    validator: (newValue: string) =>
+      newValue.length > 400 ? 'Muito longo' : true,
   })
 
   return {

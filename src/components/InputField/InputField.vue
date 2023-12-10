@@ -9,6 +9,7 @@ const props = defineProps<{
   autoFocus?: boolean
   multiline?: boolean
   autocomplete?: HTMLInputElement['autocomplete']
+  message?: string
 }>()
 
 // ================================
@@ -101,7 +102,7 @@ const raiseLabel = computed(
   <div
     class="input-field"
     :class="{
-      error: field.valid == false,
+      error: showErrors && field.validate(field.value) != true,
       password: inferred.type === 'password' && !multiline,
     }"
     @focusout="showErrors = true"
@@ -151,11 +152,16 @@ const raiseLabel = computed(
 
     <!-- Mensagem de Erro -->
     <Typography
+      v-if="showErrors"
       variant="paragraph-secondary"
       class="error-message"
       :label-for="field.name"
     >
       {{ errorMessage }}
+    </Typography>
+
+    <Typography class="message" v-if="message">
+      {{ message }}
     </Typography>
   </div>
 </template>
@@ -293,6 +299,11 @@ const raiseLabel = computed(
     z-index: 10;
 
     transition: all 200ms;
+  }
+
+  .message {
+    margin-top: 0.5rem;
+    @include field-message;
   }
 
   &.error {

@@ -63,3 +63,6 @@ export function fieldRef<T extends AllowedFieldTypes>(
 
   return fieldRef
 }
+
+export const isFieldValid = (...fields: FieldRef<any>[]) =>
+  fields.every((field) => field.validate(field.value) === true)

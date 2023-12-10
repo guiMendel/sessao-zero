@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { InputField, Logo, Typography } from '@/components'
-import { localStorageKeys } from '@/utils'
+import { Button, InputField, Typography } from '@/components'
+import { isFieldValid, localStorageKeys } from '@/utils'
 import { useCurrentPlayer, useNotification } from '@/stores'
 import { eraseInStorage, usePlayerFields } from '@/utils'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import newPlayerArt from '../../../assets/new-player.png'
 
 // Campos de login
+const fields = usePlayerFields(localStorageKeys.loginFields)
+
 const {
   email,
   password,
@@ -15,20 +18,15 @@ const {
   passwordConfirmation,
   getErrorForCode,
   maybeInvalidateEmail,
-} = usePlayerFields(localStorageKeys.loginFields)
+} = fields
 
 const { notify } = useNotification()
 const { create } = useCurrentPlayer()
 const router = useRouter()
 
 /** Se os campos estao validos */
-const formValid = computed(
-  () =>
-    name.value.valid &&
-    nickname.value.valid &&
-    email.value.valid &&
-    password.value.valid &&
-    passwordConfirmation.value.valid
+const formValid = computed(() =>
+  isFieldValid(name, nickname, email, password, passwordConfirmation)
 )
 
 // Acao de criar jogador
@@ -36,14 +34,14 @@ const tryCreate = () => {
   // Valida os campos
   if (formValid.value == false) return
 
-  const emailValue = email.value.value
+  const emailValue = email.value
 
   // Tentativa
   create({
     email: emailValue,
-    password: password.value.value,
-    name: name.value.value,
-    nickname: nickname.value.value,
+    password: password.value,
+    name: name.value,
+    nickname: nickname.value,
   })
     .then(async () => {
       // Redirect to home
@@ -64,86 +62,76 @@ const tryCreate = () => {
 </script>
 
 <template>
-  <div class="preset-gradient-background">
-    <form class="preset-card" @submit.prevent="tryCreate">
-      <Logo class="logo" />
+  <form @submit.prevent="tryCreate">
+    <img :src="newPlayerArt" class="illustration" />
 
-      <!-- Titulo -->
-      <font-awesome-icon class="player-icon" :icon="['fas', 'street-view']" />
-      <Typography variant="title" color="white">Criar Jogador</Typography>
+    <!-- Titulo -->
+    <Typography variant="title" color="white">Criar Jogador</Typography>
 
-      <!-- Nome -->
-      <InputField class="input" variant="dark" v-model="name" />
-      <Typography labelFor="nome" variant="paragraph-secondary" color="white"
-        >Como você se chama</Typography
-      >
+    <!-- Nome -->
+    <InputField
+      class="input"
+      :field="fields.name"
+      message="Como você se chama"
+    />
 
-      <!-- Apelido -->
-      <InputField class="input" variant="dark" v-model="nickname" />
-      <Typography labelFor="nome" variant="paragraph-secondary" color="white"
-        >Como seu perfil aparecerá aos outros</Typography
-      >
+    <!-- Apelido -->
+    <InputField
+      class="input"
+      :field="fields.nickname"
+      message="Como seu perfil aparecerá aos outros"
+    />
 
-      <!-- Email -->
-      <InputField class="input" variant="dark" v-model="email" />
+    <!-- Email -->
+    <InputField class="input" :field="fields.email" />
 
-      <!-- Senha -->
-      <InputField
-        class="input"
-        variant="dark"
-        v-model="password"
-        isNewPassword
-      />
+    <!-- Senha -->
+    <InputField class="input" :field="fields.password" isNewPassword />
 
-      <!-- Confirmacao de senha -->
-      <InputField
-        class="input"
-        variant="dark"
-        v-model="passwordConfirmation"
-        isNewPassword
-      />
+    <!-- Confirmacao de senha -->
+    <InputField
+      class="input"
+      :field="fields.passwordConfirmation"
+      isNewPassword
+    />
 
-      <!-- Submit -->
-      <button :class="formValid || 'disabled'" id="login">
-        <font-awesome-icon :icon="['fas', 'person-rays']" />
+    <!-- Submit -->
+    <Button :disabled="!formValid" id="login" class="submit" variant="colored">
+      <font-awesome-icon :icon="['fas', 'person-rays']" />
 
-        Criar
-      </button>
-    </form>
-  </div>
+      criar
+    </Button>
+  </form>
 </template>
 
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
 
-.logo {
-  margin-block: -0.5rem 1rem;
-  font-size: 1.5rem;
-}
+form {
+  width: 100%;
+  min-height: 100vh;
 
-.player-icon {
-  font-size: 4rem;
-}
+  background-color: var(--bg-main-washed);
 
-.input {
-  width: 20rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 1rem;
+
   max-width: 100%;
-}
 
-label {
-  margin-top: -1rem;
-  text-transform: lowercase;
-  opacity: 0.7;
-
-  .high-contrast & {
-    opacity: 1;
+  .illustration {
+    width: 10rem;
   }
-}
 
-button {
-  margin-top: 1rem;
+  .submit {
+    width: 100%;
+    margin-top: 1rem;
+  }
 
-  width: 50%;
-  max-width: 100%;
+  .player-icon {
+    font-size: 4rem;
+  }
 }
 </style>
