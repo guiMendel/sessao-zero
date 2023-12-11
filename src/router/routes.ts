@@ -6,6 +6,7 @@ import {
   CreatePlayer,
   Guild,
   GuildConfigurations,
+  GuildsIndex,
   Home,
   Login,
 } from '@/views'
@@ -13,7 +14,6 @@ import Adventure from '@/views/Adventures/Adventure.vue'
 import AdventuresIndex from '@/views/Adventures/AdventuresIndex.vue'
 import CreateAdventure from '@/views/Adventures/CreateAdventure.vue'
 import GuildInvitation from '@/views/Guilds/GuildInvitation.vue'
-import GuildsIndex from '@/views/Guilds/GuildsIndex.vue'
 import Player from '@/views/Players/Player.vue'
 import { RouteRecordRaw } from 'vue-router'
 import { addFirstVisitPrompts } from './firstVisitPrompts'
