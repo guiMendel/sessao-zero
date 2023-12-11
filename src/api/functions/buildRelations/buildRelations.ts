@@ -5,36 +5,38 @@ import {
   RelationDefinition,
   Relations,
   ResourcePath,
+  Syncable,
   db,
   relationSettings,
   syncableRef,
 } from '@/api/'
 import { Resource } from '@/utils/types'
-import { collection, doc, query, where } from 'firebase/firestore'
+import { Query, collection, doc, query, where } from 'firebase/firestore'
 
 /** Adiciona a um objeto uma flag que indica se ele nao deve ser descartado */
 export type WithDisposeFlag<T> = T & {
   dontDispose?: boolean
 }
 
-/** Constroi um objeto de relacoes para a instancia fornecida
- * @param source O item para o qual gerar as relacoes
- * @param sourceId O id do item para o qual gerar as relacoes
- * @param previousValues Um mapa dos ids para os antigos valores de itens do mesmo tipo de source.
- * Utilizado para evitar reconstruir syncs desnecessarios.
- * @param cleanupManager Permite associar qualquer sync criado a um cleanup
- */
+type BuildRelationsParams<P extends ResourcePath> = {
+  /** O item para o qual gerar as relacoes */
+  source: Resource<Properties[P]>
+  /** O path do recurso para o qual gerar as relacoes */
+  sourcePath: P
+  /** Um mapa dos ids para os antigos valores de itens do mesmo tipo de source.
+   * Utilizado para evitar reconstruir syncs desnecessarios */
+  previousValues: Record<string, WithDisposeFlag<FullInstance<P>>>
+  /** Permite associar qualquer sync criado a um cleanup */
+  cleanupManager: CleanupManager
+}
+
+/** Constroi um objeto de relacoes para a instancia fornecida */
 export const buildRelations = <P extends ResourcePath>({
   cleanupManager,
   previousValues,
   source,
   sourcePath,
-}: {
-  source: Resource<Properties[P]>
-  sourcePath: P
-  previousValues: Record<string, WithDisposeFlag<FullInstance<P>>>
-  cleanupManager: CleanupManager
-}): Relations<P> => {
+}: BuildRelationsParams<P>): Relations<P> => {
   // Se essa source estiver em previous values, reutiliza as relacoes do previous value
   if (source.id in previousValues) {
     // Marca para nao descartar esses valores
@@ -57,7 +59,12 @@ const createRelations = <P extends ResourcePath>(
       [relationName, relation]: [string, RelationDefinition<P, ResourcePath>]
     ) => ({
       ...otherRelations,
-      [relationName]: createRelation(source, relation, cleanupManager),
+      [relationName]: createRelation(
+        source,
+        sourcePath,
+        relation,
+        cleanupManager
+      ),
     }),
     {} as Relations<P>
   )
@@ -83,6 +90,7 @@ const extractRelations = <P extends ResourcePath>(
 
 const createRelation = <P extends ResourcePath>(
   source: Resource<Properties[P]>,
+  sourcePath: P,
   definition: RelationDefinition<P, ResourcePath>,
   cleanupManager: CleanupManager
 ) => {
@@ -100,6 +108,14 @@ const createRelation = <P extends ResourcePath>(
         definition as RelationDefinition<P, ResourcePath, 'has-one'>,
         cleanupManager
       )
+
+    case 'many-to-many':
+      return createManyToManyRelation(
+        source,
+        sourcePath,
+        definition as RelationDefinition<P, ResourcePath, 'many-to-many'>,
+        cleanupManager
+      )
   }
 }
 
@@ -111,9 +127,9 @@ const createHasOneRelation = <P extends ResourcePath>(
 ) => {
   const targetId = source[definition.relationKey] as string
 
-  const targetDoc = doc(collection(db, definition.resourcePath), targetId)
+  const targetDoc = doc(collection(db, definition.targetResourcePath), targetId)
 
-  return syncableRef(definition.resourcePath, targetDoc, cleanupManager)
+  return syncableRef(definition.targetResourcePath, targetDoc, cleanupManager)
 }
 
 /** Relation key refers to a property of target */
@@ -123,9 +139,53 @@ const createHasManyRelation = <P extends ResourcePath>(
   cleanupManager: CleanupManager
 ) => {
   const targetQuery = query(
-    collection(db, definition.resourcePath),
+    collection(db, definition.targetResourcePath),
     where(definition.relationKey as string, '==', source.id)
   )
 
-  return syncableRef(definition.resourcePath, targetQuery, cleanupManager)
+  return syncableRef(definition.targetResourcePath, targetQuery, cleanupManager)
+}
+
+/** Relation key refers to a property of target */
+const createManyToManyRelation = <P extends ResourcePath>(
+  source: Resource<Properties[P]>,
+  sourcePath: P,
+  definition: RelationDefinition<P, ResourcePath, 'many-to-many'>,
+  cleanupManager: CleanupManager
+) => {
+  // Essa query encontra os ids dos alvos mapeados a esse source
+  const bridgeQuery = query(
+    collection(db, definition.manyToManyTable),
+    where(sourcePath, '==', source.id)
+  )
+
+  // Syncamos a essa query
+  const bridgeSync = new Syncable(bridgeQuery, (snapshot) => {
+    const targetIds = snapshot.docs.map(
+      (doc) => doc.data()[definition.targetResourcePath]
+    )
+
+    // A query que retorna os alvos de fato
+    const targetsQuery = query(
+      collection(db, definition.targetResourcePath),
+      where('id', 'in', targetIds)
+    )
+
+    // Atualiza o query dos targets
+    targets.sync.updateTarget(targetsQuery)
+  })
+
+  // Criamos o syncable ref com a query dos alvos
+  const targets = syncableRef<typeof definition.targetResourcePath, Query>(
+    definition.targetResourcePath,
+    [],
+    cleanupManager
+  )
+
+  // Associamos o cleanup do syncableRef ao bridgeSync
+  targets.sync
+    .getCleanupManager()
+    .link('propagate-both', bridgeSync.getCleanupManager())
+
+  return targets
 }

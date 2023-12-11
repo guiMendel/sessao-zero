@@ -24,47 +24,51 @@ export const syncableRef = <
   M extends Query | DocumentReference
 >(
   resourcePath: P,
-  target: M | undefined,
+  // [] significa que eh uma query vazia
+  target: M | undefined | [],
   parentCleanupManager: CleanupManager
 ): SyncableRef<P, M> => {
   const emptyValue =
-    target == undefined || target.type === 'document' ? undefined : []
+    Array.isArray(target) || target?.type === 'query' ? [] : undefined
 
   const valueRef = ref(emptyValue) as M extends Query
     ? Ref<FullInstance<P>[]>
     : Ref<FullInstance<P> | undefined>
 
   /** O Syncable deste recurso */
-  const syncable = new Syncable<M>(target, (snapshot, ownCleanupManager) => {
-    let previousValues: FullInstance<P>[]
+  const syncable = new Syncable<M>(
+    Array.isArray(target) ? undefined : target,
+    (snapshot, ownCleanupManager) => {
+      let previousValues: FullInstance<P>[]
 
-    // Se forem varios docs
-    if ('docs' in snapshot) {
-      previousValues = valueRef.value as FullInstance<P>[]
+      // Se forem varios docs
+      if ('docs' in snapshot) {
+        previousValues = valueRef.value as FullInstance<P>[]
+
+        valueRef.value = getFullInstance(
+          snapshot,
+          resourcePath,
+          ownCleanupManager,
+          previousValues
+        ) as FullInstance<P>[]
+
+        return
+      }
+
+      // Se for so um
+      previousValues =
+        valueRef.value == undefined ? [] : [valueRef.value as FullInstance<P>]
 
       valueRef.value = getFullInstance(
         snapshot,
         resourcePath,
         ownCleanupManager,
         previousValues
-      ) as FullInstance<P>[]
+      )[0]
 
-      return
+      // TODO: chamar dispose em todos os valores de previouValues que nao foram reutilizados
     }
-
-    // Se for so um
-    previousValues =
-      valueRef.value == undefined ? [] : [valueRef.value as FullInstance<P>]
-
-    valueRef.value = getFullInstance(
-      snapshot,
-      resourcePath,
-      ownCleanupManager,
-      previousValues
-    )[0]
-
-    // TODO: chamar dispose em todos os valores de previouValues que nao foram reutilizados
-  })
+  )
 
   /** O SyncableRef deste recurso */
   const syncedRef = Object.assign(valueRef, {

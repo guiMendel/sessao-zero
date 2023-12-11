@@ -18,13 +18,18 @@ export interface Properties {
 /** Permite definir extratores especificos para os paths */
 const customPropertyExtractors: CustomPropertyExtractor = {}
 
+/** Permite definir nomes para tabelas de many-to-many */
+export type ManyToManyTable = 'players-guilds'
+
 /** Define os nomes das relacoes que serao injetadas em cada recurso */
 export const relationSettings = {
   guilds: {
     owner: isOne('players', { relationKey: 'ownerUid' }),
+    players: isMany('players', { manyToManyTable: 'players-guilds' }),
   },
   players: {
     ownedGuilds: isMany('guilds', { relationKey: 'ownerUid' }),
+    guilds: isMany('guilds', { manyToManyTable: 'players-guilds' }),
   },
 } satisfies Partial<{
   [path in ResourcePath]: Record<
@@ -80,7 +85,7 @@ export const getPropertyExtrator = <P extends ResourcePath>(
 // === RELACOES
 
 /** Tipos de relacao possiveis */
-type RelationType = 'has-one' | 'has-many'
+type RelationType = 'has-one' | 'has-many' | 'many-to-many'
 
 /** Define uma relacao entre um path S e um path T */
 export type RelationDefinition<
@@ -88,14 +93,17 @@ export type RelationDefinition<
   T extends ResourcePath,
   TY extends RelationType = RelationType
 > = {
-  resourcePath: T
+  targetResourcePath: T
   type: TY
-  relationKey: keyof Properties[TY extends 'has-one'
-    ? S
-    : TY extends 'has-many'
-    ? T
-    : S | T]
-}
+} & (TY extends 'many-to-many'
+  ? { manyToManyTable: ManyToManyTable }
+  : {
+      relationKey: keyof Properties[TY extends 'has-one'
+        ? S
+        : TY extends 'has-many'
+        ? T
+        : S | T]
+    })
 
 /** Dado um path P, retorna as relacoes mapeadas com suas configuracoes */
 export type RelationSettings<P extends ResourcePath> = {
@@ -106,7 +114,7 @@ export type RelationSettings<P extends ResourcePath> = {
 export type Relations<P extends ResourcePath> = {
   [relation in keyof RelationSettings<P>]: SyncableRef<
     // @ts-ignore
-    RelationSettings<P>[relation]['resourcePath'],
+    RelationSettings<P>[relation]['targetResourcePath'],
     // @ts-ignore
     RelationSettings<P>[relation]['type'] extends 'has-one'
       ? DocumentReference
@@ -114,22 +122,45 @@ export type Relations<P extends ResourcePath> = {
   >
 }
 
+// declare const test: FullInstance<'players'>
+
+// test.guilds.value
+
 // declare const test: FullInstance<'guilds'>
 
-// test.owner
+// test.owner.value
 
 /** Constroi uma definicao de relacao 1:n */
 function isMany<S extends ResourcePath, T extends ResourcePath>(
-  resourcePath: T,
+  targetResourcePath: T,
   { relationKey }: { relationKey: keyof Properties[T] }
-): RelationDefinition<S, T, 'has-many'> {
-  return { relationKey, resourcePath, type: 'has-many' } as const
+): RelationDefinition<S, T, 'has-many'>
+
+/** Constroi uma definicao de relacao n:n */
+function isMany<S extends ResourcePath, T extends ResourcePath>(
+  targetResourcePath: T,
+  { manyToManyTable }: { manyToManyTable: ManyToManyTable }
+): RelationDefinition<S, T, 'many-to-many'>
+
+function isMany<S extends ResourcePath, T extends ResourcePath>(
+  targetResourcePath: T,
+  key:
+    | { manyToManyTable: ManyToManyTable }
+    | { relationKey: keyof Properties[T] }
+): RelationDefinition<S, T, 'many-to-many' | 'has-many'> {
+  return 'relationKey' in key
+    ? { relationKey: key.relationKey, targetResourcePath, type: 'many-to-many' }
+    : {
+        manyToManyTable: key.manyToManyTable,
+        targetResourcePath,
+        type: 'many-to-many',
+      }
 }
 
 /** Constroi uma definicao de relacao n:1 */
 function isOne<S extends ResourcePath, T extends ResourcePath>(
-  resourcePath: T,
+  targetResourcePath: T,
   { relationKey }: { relationKey: keyof Properties[S] }
 ): RelationDefinition<S, T, 'has-one'> {
-  return { relationKey, resourcePath, type: 'has-one' } as const
+  return { relationKey, targetResourcePath, type: 'has-one' }
 }
