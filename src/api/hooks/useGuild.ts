@@ -1,6 +1,8 @@
 import { useCurrentPlayer } from '@/stores'
 import { storeToRefs } from 'pinia'
 import { useResource } from './useResource'
+import { GetListMethod, SyncListMethod } from '..'
+import { where } from 'firebase/firestore'
 
 export const useGuild = () => {
   const api = useResource('guilds')
@@ -22,5 +24,14 @@ export const useGuild = () => {
     })
   }
 
-  return { ...api, create: createGuild }
+  const getList: GetListMethod<'guilds'> = (filters) =>
+    api.getList([...(filters ?? []), where('visibility', '==', 'public')])
+
+  const syncList: SyncListMethod<'guilds'> = (filters, existingRef) =>
+    api.syncList(
+      [...(filters ?? []), where('visibility', '==', 'public')],
+      existingRef
+    )
+
+  return { ...api, create: createGuild, getList, syncList }
 }

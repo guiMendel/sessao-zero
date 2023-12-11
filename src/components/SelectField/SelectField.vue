@@ -23,6 +23,8 @@ const id = getCurrentInstance()?.uid.toString()
 
 const setValue = ({ target }: Event) =>
   emit('update:modelValue', (target as HTMLInputElement).value)
+
+  // ISSO AQUI PRECISA GARANTIR QUE O OPTIONS OBEDECE T. ATUALMENTE NAO OBEDECE, SO OLHAR GUILDCONFIGURATIONS EM QUE AS OPCOES TAO EM PORTUGUES ENQUANTO Q O TIPO TA EM INGLES
 </script>
 
 <template>

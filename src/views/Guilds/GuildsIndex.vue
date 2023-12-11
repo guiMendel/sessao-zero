@@ -2,7 +2,6 @@
 import { FullInstance, useGuild } from '@/api'
 import { LoadingSpinner, Typography } from '@/components'
 import { useCurrentPlayer } from '@/stores'
-import { Guild, Resource } from '@/types'
 import { storeToRefs } from 'pinia'
 import { toValue } from 'vue'
 import { useRouter } from 'vue-router'
@@ -25,13 +24,13 @@ const getOwnerLabel = (owner: FullInstance<'players'>) =>
 
 const guilds = syncList()
 
-const openGuildPage = (guild: Resource<Guild>) =>
+const openGuildPage = (guild: FullInstance<'guilds'>) =>
   router.push({ name: 'adventures', params: { guildId: guild.id } })
 </script>
 
 <template>
   <div class="guilds-index">
-    <Typography variant="title">Suas guildas</Typography>
+    <Typography variant="subtitle">Guildas disponíveis</Typography>
 
     <div class="guilds">
       <div
@@ -55,7 +54,7 @@ const openGuildPage = (guild: Resource<Guild>) =>
         </div>
       </div>
 
-      <div class="add-guild" @click="newGuild">
+      <div v-if="player.admin" class="add-guild" @click="newGuild">
         <font-awesome-icon :icon="['fas', 'plus']" />
       </div>
     </div>

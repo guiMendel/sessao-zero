@@ -4,9 +4,9 @@ import { computed, onBeforeUnmount, ref } from 'vue'
 withDefaults(
   defineProps<{
     /** Variante da cor */
-    color?: 'colourful' | 'current-color'
+    color?: 'main' | 'current-color'
   }>(),
-  { color: 'colourful' }
+  { color: 'main' }
 )
 
 /** Mapeia um indice ao dado correspondente */
@@ -53,10 +53,9 @@ onBeforeUnmount(() => clearInterval(intervalKey))
   border-radius: 0.2em;
   font-size: 1.2em;
 
-  &.colourful {
-    animation: spin 1s ease-in-out infinite alternate,
-      change-hue 1.5s linear infinite;
-    color: hsl(118, 100%, 50%);
+  &.main {
+    animation: spin 1s ease-in-out infinite alternate;
+    color: var(--tx-main-light);
     background-color: var(--bg-main-washed);
   }
 
@@ -72,16 +71,6 @@ onBeforeUnmount(() => clearInterval(intervalKey))
 
   to {
     transform: rotate(450deg);
-  }
-}
-
-@keyframes change-hue {
-  from {
-    filter: hue-rotate(0deg);
-  }
-
-  to {
-    filter: hue-rotate(360deg);
   }
 }
 </style>

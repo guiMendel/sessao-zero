@@ -98,7 +98,10 @@ Digite <code>${guild.value.name}</code> para confirmar.`,
 
       <SelectField
         v-model="fields.visibility.value"
-        :options="['não listada', 'publica']"
+        :options="[
+          { label: 'não listada', value: 'unlisted' },
+          { label: 'publica', value: 'public' },
+        ]"
         :message="
           fields.visibility.value === 'public'
             ? 'sua guilda será listada publicamente e qualquer um pode solicitar acesso'

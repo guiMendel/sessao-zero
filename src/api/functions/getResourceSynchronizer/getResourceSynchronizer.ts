@@ -18,12 +18,12 @@ import {
 // TIPOS DO RETURN
 // ====================================
 
-type SyncListMethod<P extends ResourcePath> = (
+export type SyncListMethod<P extends ResourcePath> = (
   filters?: QueryFieldFilterConstraint[],
   existingRef?: SyncableRef<P, Query>
 ) => SyncableRef<P, Query>
 
-type SyncMethod<P extends ResourcePath> = (
+export type SyncMethod<P extends ResourcePath> = (
   id: string,
   existingRef?: SyncableRef<P, DocumentReference>
 ) => SyncableRef<P, DocumentReference>

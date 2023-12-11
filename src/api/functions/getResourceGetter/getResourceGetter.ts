@@ -18,11 +18,11 @@ import {
 // TIPOS DO RETURN
 // ====================================
 
-type GetListMethod<P extends ResourcePath> = (
+export type GetListMethod<P extends ResourcePath> = (
   filters?: QueryFieldFilterConstraint[]
 ) => Promise<FullInstance<P>[]>
 
-type GetMethod<P extends ResourcePath> = (
+export type GetMethod<P extends ResourcePath> = (
   id: string
 ) => Promise<FullInstance<P> | undefined>
 
