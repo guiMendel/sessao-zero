@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { Player, Resource } from '@/types'
-import { useRouter } from 'vue-router'
-import { ProfilePicture } from '..'
-import { Typography } from '@/components'
+import { FullInstance } from '@/api';
+import { Typography } from '@/components';
+import { useRouter } from 'vue-router';
+import { ProfilePicture } from '..';
 
 const props = defineProps<{
-  player: Resource<Player>
+  player: FullInstance<'players'>
 }>()
 
 const router = useRouter()

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Player } from '@/types';
-import { computed } from 'vue';
+import { Player } from '@/utils'
+import { computed } from 'vue'
 
 const props = defineProps<{ player: Player }>()
 

@@ -1,12 +1,12 @@
 <script setup lang="ts">
+import { FullInstance } from '@/api'
 import { Button, Divisor, Drawer, Typography } from '@/components'
 import { IconButton } from '@/components/IconButton'
-import { Guild, Resource } from '@/types'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 defineProps<{
-  guild: Resource<Guild>
+  guild: FullInstance<'guilds'>
 }>()
 
 const router = useRouter()

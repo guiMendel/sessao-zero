@@ -1,7 +1,7 @@
-import { Meta, StoryFn } from '@storybook/vue3'
-import { InputGetter } from '.'
 import { useInput } from '@/stores'
+import { Meta, StoryFn } from '@storybook/vue3'
 import { ref } from 'vue'
+import { InputGetter } from '.'
 
 export default {
   title: 'App/InputGetter',
@@ -12,7 +12,7 @@ export default {
   },
 } satisfies Meta<{ cancellable: boolean }>
 
-type Story = StoryFn<typeof InputGetter>
+type Story = StoryFn<{ cancellable: boolean }>
 
 const defaultSettings = {
   components: { InputGetter },
@@ -71,13 +71,14 @@ export const String: Story = (args) => ({
   setup: () => {
     const { getStringInput } = useInput()
 
-    const initialize = () =>
+    const initialize = () => {
       getStringInput({
         cancellable: args.cancellable,
         messageHtml: 'Escreva algo aqui',
       })
         .then(initialize)
         .catch(initialize)
+    }
 
     initialize()
   },
@@ -88,13 +89,14 @@ export const Boolean: Story = (args) => ({
   setup: () => {
     const { getBooleanInput } = useInput()
 
-    const initialize = () =>
+    const initialize = () => {
       getBooleanInput({
         cancellable: args.cancellable,
         messageHtml: 'Vai dizer?',
       })
         .then(initialize)
         .catch(initialize)
+    }
 
     initialize()
   },

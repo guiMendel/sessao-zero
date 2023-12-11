@@ -56,6 +56,7 @@ const otherAvailableGuilds = computed(() =>
 @import '@/styles/variables.scss';
 
 .guilds-index {
+  flex: 1;
   flex-direction: column;
   align-items: stretch;
   gap: 1rem;
@@ -63,8 +64,10 @@ const otherAvailableGuilds = computed(() =>
   padding: 0 1.5rem 2rem;
 
   .no-guilds {
+    flex: 1;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 1rem;
     text-align: justify;
 
