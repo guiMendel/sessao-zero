@@ -1,4 +1,4 @@
-import { Guild, Player, Resource } from '@/utils/types'
+import { Guild, Player, Resource } from '@/api/types'
 import { DocumentData, DocumentReference, Query } from 'firebase/firestore'
 import { SyncableRef } from '..'
 

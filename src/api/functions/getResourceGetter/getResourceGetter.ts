@@ -1,10 +1,5 @@
-import {
-  CleanupManager,
-  FullInstance,
-  ResourcePath,
-  db,
-  getFullInstance
-} from '@/api'
+import { FullInstance, ResourcePath, db, getFullInstance } from '@/api'
+import { CleanupManager } from '@/utils'
 import {
   QueryFieldFilterConstraint,
   collection,

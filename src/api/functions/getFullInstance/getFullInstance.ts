@@ -1,10 +1,5 @@
-import {
-  CleanupManager,
-  FullInstance,
-  ResourcePath,
-  buildRelations,
-  getResource,
-} from '@/api'
+import { FullInstance, ResourcePath, buildRelations, getResource } from '@/api'
+import { CleanupManager } from '@/utils'
 import { DocumentSnapshot, QuerySnapshot } from 'firebase/firestore'
 
 /** Gera um (ou varios) FullInstance dos dados recebidos como documento ou query

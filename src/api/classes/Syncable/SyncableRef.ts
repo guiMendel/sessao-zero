@@ -1,8 +1,8 @@
 import { FullInstance, ResourcePath, getFullInstance } from '@/api'
+import { CleanupManager } from '@/utils'
 import { DocumentReference, Query } from 'firebase/firestore'
 import { Ref, ref } from 'vue'
 import { Syncable } from '.'
-import { CleanupManager } from '..'
 
 // ===========================
 // IMPLEMENTATION

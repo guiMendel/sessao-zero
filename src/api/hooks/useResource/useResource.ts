@@ -1,11 +1,12 @@
 import {
-  CleanupManager,
+  Properties,
+  ResourcePath,
   db,
   getResourceGetter,
   getResourceSynchronizer,
 } from '@/api/'
-import { Properties, ResourcePath } from '@/api/constants/resources'
-import { Uploadable } from '@/utils/types'
+import { Uploadable } from '@/api/types'
+import { CleanupManager } from '@/utils'
 import {
   addDoc,
   collection,

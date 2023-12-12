@@ -1,5 +1,4 @@
 import {
-  CleanupManager,
   FullInstance,
   Properties,
   RelationDefinition,
@@ -10,7 +9,8 @@ import {
   relationSettings,
   syncableRef,
 } from '@/api/'
-import { Resource } from '@/utils/types'
+import { Resource } from '@/api/types'
+import { CleanupManager } from '@/utils'
 import { Query, collection, doc, query, where } from 'firebase/firestore'
 
 /** Adiciona a um objeto uma flag que indica se ele nao deve ser descartado */

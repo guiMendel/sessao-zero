@@ -1,10 +1,5 @@
-import {
-  CleanupManager,
-  ResourcePath,
-  SyncableRef,
-  db,
-  syncableRef,
-} from '@/api'
+import { ResourcePath, SyncableRef, db, syncableRef } from '@/api'
+import { CleanupManager } from '@/utils'
 import {
   DocumentReference,
   Query,
@@ -68,7 +63,11 @@ export const getResourceSynchronizer = <P extends ResourcePath>(
     }
 
     // Cria um novo syncable
-    return syncableRef<P, M>(resourcePath, target, cleanupManager)
+    return syncableRef<P, M>(
+      resourcePath,
+      target ?? 'empty-document',
+      cleanupManager
+    )
   }
 
   return {

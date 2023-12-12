@@ -3,7 +3,7 @@ import {
   ResourcePath,
   getPropertyExtrator
 } from '@/api'
-import { Resource } from '@/utils/types'
+import { Resource } from '@/api/types'
 import {
   DocumentSnapshot,
   QueryDocumentSnapshot,
