@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { useNotification } from '@/stores/useNotification';
-import { storeToRefs } from 'pinia';
-import { onBeforeUnmount, ref } from 'vue';
-import type { Notification } from './types';
+import { Notification, useNotification } from '@/stores'
+import { storeToRefs } from 'pinia'
+import { onBeforeUnmount, ref } from 'vue'
 
 const notificationStore = useNotification()
 const { notifications, timeout } = storeToRefs(notificationStore)
