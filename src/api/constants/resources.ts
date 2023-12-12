@@ -149,7 +149,7 @@ function isMany<S extends ResourcePath, T extends ResourcePath>(
     | { relationKey: keyof Properties[T] }
 ): RelationDefinition<S, T, 'many-to-many' | 'has-many'> {
   return 'relationKey' in key
-    ? { relationKey: key.relationKey, targetResourcePath, type: 'many-to-many' }
+    ? { relationKey: key.relationKey, targetResourcePath, type: 'has-many' }
     : {
         manyToManyTable: key.manyToManyTable,
         targetResourcePath,
