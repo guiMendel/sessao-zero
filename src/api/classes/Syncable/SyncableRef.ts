@@ -15,6 +15,12 @@ export type SyncableRef<
   sync: Syncable<M>
 }
 
+export const isQueryTarget = (
+  target: Query | DocumentReference | 'empty-document' | 'empty-query'
+): target is Query | 'empty-query' =>
+  target === 'empty-query' ||
+  (typeof target === 'object' && target.type === 'query')
+
 /** Cria um ref que automaticamente faz sync com o target
  * @param target O alvo com o qual realizar o sync
  * @param parentCleanupManager Um cleanup manager que, quando ativar o dispose, deve ativar o dispose desse ref tambem
@@ -24,20 +30,22 @@ export const syncableRef = <
   M extends Query | DocumentReference
 >(
   resourcePath: P,
-  // [] significa que eh uma query vazia
-  target: M | undefined | [],
+  target: M | 'empty-document' | 'empty-query',
   parentCleanupManager: CleanupManager
 ): SyncableRef<P, M> => {
-  const emptyValue =
-    Array.isArray(target) || target?.type === 'query' ? [] : undefined
+  const emptyValue = isQueryTarget(target)
+    ? ([] as FullInstance<P>[])
+    : undefined
 
   const valueRef = ref(emptyValue) as M extends Query
     ? Ref<FullInstance<P>[]>
     : Ref<FullInstance<P> | undefined>
 
+  const initialTarget = typeof target === 'string' ? undefined : target
+
   /** O Syncable deste recurso */
   const syncable = new Syncable<M>(
-    Array.isArray(target) ? undefined : target,
+    initialTarget,
     (snapshot, ownCleanupManager) => {
       let previousValues: FullInstance<P>[]
 

@@ -165,6 +165,11 @@ const createManyToManyRelation = <P extends ResourcePath>(
       (doc) => doc.data()[definition.targetResourcePath]
     )
 
+    if (targetIds.length == 0) {
+      // Remove o target
+      targets.sync.updateTarget(undefined)
+    }
+
     // A query que retorna os alvos de fato
     const targetsQuery = query(
       collection(db, definition.targetResourcePath),
@@ -178,7 +183,7 @@ const createManyToManyRelation = <P extends ResourcePath>(
   // Criamos o syncable ref com a query dos alvos
   const targets = syncableRef<typeof definition.targetResourcePath, Query>(
     definition.targetResourcePath,
-    [],
+    'empty-query',
     cleanupManager
   )
 
