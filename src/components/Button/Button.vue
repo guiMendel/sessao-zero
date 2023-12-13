@@ -1,13 +1,5 @@
 <script setup lang="ts">
-import { Typography } from '..'
-
-export type ButtonProps = {
-  /** Variante da aparencia do botao */
-  variant?: 'default' | 'dark' | 'colored'
-  message?: string
-  messageClass?: string
-  disabled?: boolean
-}
+import { ButtonProps, Typography } from '..'
 
 withDefaults(defineProps<ButtonProps>(), { variant: 'default' })
 </script>

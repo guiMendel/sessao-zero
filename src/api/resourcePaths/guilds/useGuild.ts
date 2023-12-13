@@ -20,6 +20,7 @@ export const useGuild = () => {
       allowAdventureSubscription: true,
       requireAdmission: false,
       listingBehavior: 'unlisted',
+      open: true,
     })
   }
 

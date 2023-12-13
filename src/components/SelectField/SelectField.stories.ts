@@ -1,5 +1,5 @@
 import { Meta, StoryFn } from '@storybook/vue3'
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { SelectField } from '.'
 
 const options = ['banana', 'laranja', 'abacate'] as const

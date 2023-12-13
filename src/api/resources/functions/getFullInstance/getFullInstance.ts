@@ -32,7 +32,6 @@ export const getFullInstance = <P extends ResourcePath>(
           previousValues: previousValuesMap,
           cleanupManager,
           source: extractedResource,
-          sourcePath: resourcePath,
         }),
       }
   )
