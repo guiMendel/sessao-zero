@@ -1,3 +1,2 @@
-export const mountOptions = {
-  global: { stubs: ['font-awesome-icon'] },
-}
+export * from './helpers'
+export * from './tests'

@@ -56,7 +56,7 @@ const newGuild = async () => {
           </div>
 
           <!-- Carregando -->
-          <LoadingSpinner v-else />
+          <LoadingSpinner v-else  class="spinner"/>
 
           <!-- Numero de membros -->
           <div class="count">
@@ -122,6 +122,10 @@ const newGuild = async () => {
         align-items: center;
         gap: 1rem;
 
+        .spinner {
+          margin-right: auto;
+        }
+        
         .owner {
           align-items: center;
           margin-right: auto;

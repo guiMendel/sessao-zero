@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 
 type BackButtonBehavior = 'router-back' | (() => void)
 
-const props = withDefaults(defineProps<{ behavior: BackButtonBehavior }>(), {
+const props = withDefaults(defineProps<{ behavior?: BackButtonBehavior }>(), {
   behavior: 'router-back',
 })
 
