@@ -23,6 +23,11 @@ const { fields } = useAutosaveForm({
     persist: (name) => update({ name }),
   }),
 
+  open: fieldRef('aberta', {
+    initialValue: guild.value.open,
+    persist: (open) => update({ open }),
+  }),
+
   allowAdventureSubscription: fieldRef('inscrições', {
     initialValue: guild.value.allowAdventureSubscription,
     persist: (allowAdventureSubscription) =>
@@ -86,7 +91,7 @@ Digite <code>${guild.value.name}</code> para confirmar.`,
       <ToggleField
         v-model="fields.allowAdventureSubscription.value"
         :message="
-          fields.allowAdventureSubscription
+          fields.allowAdventureSubscription.value
             ? 'jogadores podem se inscrever nas aventuras normalmente'
             : 'as aventuras não aceitarão novas inscrições'
         "
@@ -96,6 +101,16 @@ Digite <code>${guild.value.name}</code> para confirmar.`,
 
     <div class="section">
       <Typography class="title" variant="subtitle">Admissão</Typography>
+
+      <ToggleField
+        v-model="fields.open.value"
+        :message="
+          fields.open.value
+            ? 'jogadores podem entrar'
+            : 'nenhum novo jogador pode entrar'
+        "
+        >aberta</ToggleField
+      >
 
       <SelectField
         v-model="fields.listingBehavior.value"

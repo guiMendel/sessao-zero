@@ -3,6 +3,9 @@ export interface Guild {
   name: string
   ownerUid: string
 
+  /** Permite a entrada de novos jogadores na guilda */
+  open: boolean
+
   /** Permite jogadores se inscreverem nas aventuras desta guilda */
   allowAdventureSubscription: boolean
 

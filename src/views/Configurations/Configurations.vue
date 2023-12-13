@@ -29,7 +29,7 @@ const { highContrast } = storeToRefs(useAccessibility())
   flex: 1;
 
   .heading {
-    color: var(--tx-gray-darker);
+    color: var(--tx-main-dark);
   }
 
   .credit {
