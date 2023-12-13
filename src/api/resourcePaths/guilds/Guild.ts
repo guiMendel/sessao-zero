@@ -7,7 +7,7 @@ export interface Guild {
   allowAdventureSubscription: boolean
 
   /** Controla se jogadores poderao ver essa guilda listada no indice */
-  visibility: 'unlisted' | 'public'
+  listingBehavior: 'unlisted' | 'public'
 
   /** Quando ativado, jogadores nao podem entrar diretamente — eles enviam uma solicitaçao de admissão */
   requireAdmission: boolean

@@ -1,11 +1,10 @@
 <script lang="ts" setup>
-import { useGuild } from '@/api'
+import { useCurrentPlayer, useGuild } from '@/api'
 import { Typography } from '@/components'
-import { useCurrentPlayer } from '@/stores'
 import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 import sadDragonIllustration from '../../../assets/sad-dragon.png'
 import { GuildList } from './GuildList'
-import { computed } from 'vue'
 
 const { syncList } = useGuild()
 

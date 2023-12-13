@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { checkPlayerExists, useCurrentPlayer, usePlayerFields } from '@/api'
 import { BackButton, Button, InputField, Logo, Typography } from '@/components'
+import { useNotification } from '@/stores'
 import { localStorageKeys } from '@/utils'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useCurrentPlayer, useNotification } from '@/stores'
-import { checkPlayerExists, usePlayerFields } from '@/utils'
 
 import illustration from '../../assets/illustration.png'
 
@@ -139,7 +139,7 @@ const submit = () => {
 
 .login {
   box-shadow: inset 0 0 100px 0 var(--trans-1);
-  
+
   align-items: center;
   justify-content: center;
   flex-direction: column;

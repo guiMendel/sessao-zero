@@ -5,7 +5,7 @@ import {
   getResourceGetter,
   getResourceSynchronizer,
 } from '@/api/'
-import { Uploadable } from '@/api/types'
+import { Uploadable } from '@/api/resources/types'
 import { CleanupManager } from '@/utils'
 import {
   addDoc,

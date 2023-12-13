@@ -1,5 +1,4 @@
-import { auth, syncableRef, useResource } from '@/api'
-import { Player, Uploadable } from '@/api/types'
+import { Player, Uploadable, auth, syncableRef, useResource } from '@/api'
 import { CleanupManager } from '@/utils'
 import {
   createUserWithEmailAndPassword,
@@ -12,7 +11,7 @@ import {
 import { DocumentReference } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { onBeforeUnmount } from 'vue'
-import { useCurrentAuth } from '.'
+import { useCurrentAuth } from '../../../stores'
 
 export const useCurrentPlayer = defineStore('current-player', () => {
   const { listenToAuthChange } = useCurrentAuth()

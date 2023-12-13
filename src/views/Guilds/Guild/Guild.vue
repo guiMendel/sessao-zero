@@ -1,6 +1,6 @@
 <script lang="ts" setup>
+import { useCurrentGuild } from '@/api'
 import { LoadingSpinner } from '@/components'
-import { useCurrentGuild } from '@/stores'
 import { storeToRefs } from 'pinia'
 import { GuildPanel } from './GuildPanel'
 

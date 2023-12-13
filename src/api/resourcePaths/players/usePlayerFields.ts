@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { fieldRef } from '..'
+import { fieldRef } from '../../../utils'
 
 /** Retorna uma colecao de campos uteis para coletar dados do jogador
  * @param localStorageKey se fornecido, persiste os campos em localstorage

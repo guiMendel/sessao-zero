@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { FullInstance, useGuild } from '@/api'
+import { FullInstance, useCurrentPlayer, useGuild } from '@/api'
 import { LoadingSpinner, Typography } from '@/components'
-import { useCurrentPlayer, useInput } from '@/stores'
+import { useInput } from '@/stores'
 import { storeToRefs } from 'pinia'
 import { toValue } from 'vue'
 import { useRouter } from 'vue-router'

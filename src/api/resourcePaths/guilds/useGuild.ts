@@ -1,8 +1,7 @@
-import { useCurrentPlayer } from '@/stores'
-import { storeToRefs } from 'pinia'
-import { useResource } from './useResource'
-import { GetListMethod, SyncListMethod } from '..'
 import { where } from 'firebase/firestore'
+import { storeToRefs } from 'pinia'
+import { GetListMethod, SyncListMethod, useCurrentPlayer } from '../..'
+import { useResource } from '../../resources/hooks/useResource'
 
 export const useGuild = () => {
   const api = useResource('guilds')
@@ -20,16 +19,16 @@ export const useGuild = () => {
       name,
       allowAdventureSubscription: true,
       requireAdmission: false,
-      visibility: 'unlisted',
+      listingBehavior: 'unlisted',
     })
   }
 
   const getList: GetListMethod<'guilds'> = (filters) =>
-    api.getList([...(filters ?? []), where('visibility', '==', 'public')])
+    api.getList([...(filters ?? []), where('listingBehavior', '==', 'public')])
 
   const syncList: SyncListMethod<'guilds'> = (filters, existingRef) =>
     api.syncList(
-      [...(filters ?? []), where('visibility', '==', 'public')],
+      [...(filters ?? []), where('listingBehavior', '==', 'public')],
       existingRef
     )
 

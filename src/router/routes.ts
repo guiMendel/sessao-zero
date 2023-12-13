@@ -1,4 +1,4 @@
-import { makeGuildInvitation } from '@/utils'
+import { makeGuildInvitation } from '@/api'
 import {
   AccessibilityPrompt,
   BetaWelcome,

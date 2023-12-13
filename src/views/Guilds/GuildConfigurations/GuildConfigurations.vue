@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useCurrentGuild } from '@/api'
 import {
   Button,
   InputField,
@@ -6,7 +7,7 @@ import {
   ToggleField,
   Typography,
 } from '@/components'
-import { useCurrentGuild, useInput, useNotification } from '@/stores'
+import { useInput, useNotification } from '@/stores'
 import { fieldRef, useAutosaveForm } from '@/utils'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
@@ -28,9 +29,9 @@ const { fields } = useAutosaveForm({
       update({ allowAdventureSubscription }),
   }),
 
-  visibility: fieldRef('visibilidade', {
-    initialValue: guild.value.visibility,
-    persist: (visibility) => update({ visibility }),
+  listingBehavior: fieldRef('listagem', {
+    initialValue: guild.value.listingBehavior,
+    persist: (listingBehavior) => update({ listingBehavior }),
   }),
 
   requireAdmission: fieldRef('admissão', {
@@ -97,13 +98,13 @@ Digite <code>${guild.value.name}</code> para confirmar.`,
       <Typography class="title" variant="subtitle">Admissão</Typography>
 
       <SelectField
-        v-model="fields.visibility.value"
+        v-model="fields.listingBehavior.value"
         :options="[
           { label: 'não listada', value: 'unlisted' },
           { label: 'publica', value: 'public' },
         ]"
         :message="
-          fields.visibility.value === 'public'
+          fields.listingBehavior.value === 'public'
             ? 'sua guilda será listada publicamente e qualquer um pode solicitar acesso'
             : 'sua guilda não será listada publicamente, o acesso somente se dará por convites'
         "

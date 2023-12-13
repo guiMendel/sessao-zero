@@ -9,7 +9,7 @@ import {
   relationSettings,
   syncableRef,
 } from '@/api/'
-import { Resource } from '@/api/types'
+import { Resource } from '@/api/resources/types'
 import { CleanupManager } from '@/utils'
 import { Query, collection, doc, query, where } from 'firebase/firestore'
 
@@ -161,14 +161,15 @@ const createManyToManyRelation = <P extends ResourcePath>(
 
   // Syncamos a essa query
   const bridgeSync = new Syncable(bridgeQuery, (snapshot) => {
+    if (snapshot.empty) {
+      // Remove o target
+      targets.sync.updateTarget(undefined)
+      return
+    }
+
     const targetIds = snapshot.docs.map(
       (doc) => doc.data()[definition.targetResourcePath]
     )
-
-    if (targetIds.length == 0) {
-      // Remove o target
-      targets.sync.updateTarget(undefined)
-    }
 
     // A query que retorna os alvos de fato
     const targetsQuery = query(

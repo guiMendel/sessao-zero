@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import { useCurrentPlayer, usePlayerFields } from '@/api'
 import { Button, InputField, Typography } from '@/components'
-import { isFieldValid, localStorageKeys } from '@/utils'
-import { useCurrentPlayer, useNotification } from '@/stores'
-import { eraseInStorage, usePlayerFields } from '@/utils'
+import { useNotification } from '@/stores'
+import { eraseInStorage, isFieldValid, localStorageKeys } from '@/utils'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import newPlayerArt from '../../../assets/new-player.png'

@@ -1,4 +1,4 @@
-import { useResource } from './useResource'
+import { useResource } from '../../resources/hooks/useResource'
 
 /** API para os players. Note que somente fornece metodos de read. Para fazer operacoes de write, veja useCurrentPlayer */
 export const usePlayer = () => {

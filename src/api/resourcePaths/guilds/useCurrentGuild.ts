@@ -1,5 +1,4 @@
-import { useGuild } from '@/api'
-import { Guild } from '@/utils'
+import { Guild, useGuild } from '@/api'
 import { defineStore } from 'pinia'
 import { watch } from 'vue'
 import { useRoute } from 'vue-router'

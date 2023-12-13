@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useCurrentPlayer } from '@/api'
 import {
   Button,
   Divisor,
@@ -7,7 +8,6 @@ import {
   ProfilePicture,
   Typography,
 } from '@/components'
-import { useCurrentPlayer } from '@/stores'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
