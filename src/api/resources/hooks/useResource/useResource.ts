@@ -63,7 +63,7 @@ export const useResource = <P extends ResourcePath>(resourcePath: P) => {
       ...secureData(properties, 'id'),
       createdAt: new Date().toJSON(),
       modifiedAt: new Date().toJSON(),
-    } as Uploadable<Properties[P]>
+    } as Uploadable<P>
 
     if (useId != undefined) return setDoc(getDoc(useId), securedData)
 

@@ -58,7 +58,7 @@ export const useCurrentPlayer = defineStore('current-player', () => {
 
         const date = new Date().toJSON()
 
-        const newPlayer: Uploadable<Player> = {
+        const newPlayer: Uploadable<'players'> = {
           name,
           email,
           nickname,

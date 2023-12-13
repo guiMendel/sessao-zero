@@ -1,8 +1,4 @@
-import {
-  Properties,
-  ResourcePath,
-  getPropertyExtrator
-} from '@/api'
+import { ResourcePath, getPropertyExtrator } from '@/api'
 import { Resource } from '@/api/resources/types'
 import {
   DocumentSnapshot,
@@ -16,7 +12,7 @@ import {
 export const getResource = <P extends ResourcePath>(
   snapshot: DocumentSnapshot | QuerySnapshot,
   resourcePath: P
-): Array<Resource<Properties[P]> | undefined> => {
+): Array<Resource<P> | undefined> => {
   // Lida com um query
   if ('docs' in snapshot) {
     return snapshot.docs.map((doc) => documentToResource(doc, resourcePath))
@@ -29,7 +25,7 @@ export const getResource = <P extends ResourcePath>(
 const documentToResource = <P extends ResourcePath>(
   doc: DocumentSnapshot | QueryDocumentSnapshot,
   resourcePath: P
-): Resource<Properties[P]> | undefined => {
+): Resource<P> | undefined => {
   const data = doc.data()
 
   if (data == undefined) return undefined
@@ -43,5 +39,6 @@ const documentToResource = <P extends ResourcePath>(
     id: doc.id,
     createdAt: new Date(data.createdAt),
     modifiedAt: new Date(data.modifiedAt),
+    resourcePath,
   }
 }

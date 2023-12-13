@@ -1,6 +1,5 @@
 import {
   FullInstance,
-  Properties,
   RelationDefinition,
   Relations,
   ResourcePath,
@@ -20,9 +19,7 @@ export type WithDisposeFlag<T> = T & {
 
 type BuildRelationsParams<P extends ResourcePath> = {
   /** O item para o qual gerar as relacoes */
-  source: Resource<Properties[P]>
-  /** O path do recurso para o qual gerar as relacoes */
-  sourcePath: P
+  source: Resource<P>
   /** Um mapa dos ids para os antigos valores de itens do mesmo tipo de source.
    * Utilizado para evitar reconstruir syncs desnecessarios */
   previousValues: Record<string, WithDisposeFlag<FullInstance<P>>>
@@ -35,62 +32,53 @@ export const buildRelations = <P extends ResourcePath>({
   cleanupManager,
   previousValues,
   source,
-  sourcePath,
 }: BuildRelationsParams<P>): Relations<P> => {
   // Se essa source estiver em previous values, reutiliza as relacoes do previous value
   if (source.id in previousValues) {
     // Marca para nao descartar esses valores
     previousValues[source.id].dontDispose = true
 
-    return extractRelations(previousValues[source.id], sourcePath)
+    return extractRelations(previousValues[source.id])
   }
 
-  return createRelations(source, sourcePath, cleanupManager)
+  return createRelations(source, cleanupManager)
 }
 
 const createRelations = <P extends ResourcePath>(
-  source: Resource<Properties[P]>,
-  sourcePath: P,
+  source: Resource<P>,
   cleanupManager: CleanupManager
 ): Relations<P> =>
-  Object.entries(relationSettings[sourcePath]).reduce(
+  Object.entries(relationSettings[source.resourcePath]).reduce(
     (
       otherRelations,
       [relationName, relation]: [string, RelationDefinition<P, ResourcePath>]
     ) => ({
       ...otherRelations,
-      [relationName]: createRelation(
-        source,
-        sourcePath,
-        relation,
-        cleanupManager
-      ),
+      [relationName]: createRelation(source, relation, cleanupManager),
     }),
     {} as Relations<P>
   )
 
 const extractRelations = <P extends ResourcePath>(
-  properties: FullInstance<P>,
-  sourcePath: P
+  instance: FullInstance<P>
 ): Relations<P> =>
-  Object.keys(relationSettings[sourcePath]).reduce(
+  Object.keys(relationSettings[instance.resourcePath]).reduce(
     (relations, relationName) => {
-      if (relationName in properties == false)
+      if (relationName in instance == false)
         throw new Error(
-          `Falha ao extrair a relacao "${relationName}" de um objeto de path "${sourcePath}"`
+          `Falha ao extrair a relacao "${relationName}" de um objeto de path "${instance.resourcePath}"`
         )
 
       return {
         ...relations,
-        [relationName]: properties[relationName as keyof FullInstance<P>],
+        [relationName]: instance[relationName as keyof FullInstance<P>],
       }
     },
     {} as Relations<P>
   )
 
 const createRelation = <P extends ResourcePath>(
-  source: Resource<Properties[P]>,
-  sourcePath: P,
+  source: Resource<P>,
   definition: RelationDefinition<P, ResourcePath>,
   cleanupManager: CleanupManager
 ) => {
@@ -112,7 +100,6 @@ const createRelation = <P extends ResourcePath>(
     case 'many-to-many':
       return createManyToManyRelation(
         source,
-        sourcePath,
         definition as RelationDefinition<P, ResourcePath, 'many-to-many'>,
         cleanupManager
       )
@@ -121,7 +108,7 @@ const createRelation = <P extends ResourcePath>(
 
 /** Relation key refers to a property of source */
 const createHasOneRelation = <P extends ResourcePath>(
-  source: Resource<Properties[P]>,
+  source: Resource<P>,
   definition: RelationDefinition<P, ResourcePath, 'has-one'>,
   cleanupManager: CleanupManager
 ) => {
@@ -134,7 +121,7 @@ const createHasOneRelation = <P extends ResourcePath>(
 
 /** Relation key refers to a property of target */
 const createHasManyRelation = <P extends ResourcePath>(
-  source: Resource<Properties[P]>,
+  source: Resource<P>,
   definition: RelationDefinition<P, ResourcePath, 'has-many'>,
   cleanupManager: CleanupManager
 ) => {
@@ -148,15 +135,14 @@ const createHasManyRelation = <P extends ResourcePath>(
 
 /** Relation key refers to a property of target */
 const createManyToManyRelation = <P extends ResourcePath>(
-  source: Resource<Properties[P]>,
-  sourcePath: P,
+  source: Resource<P>,
   definition: RelationDefinition<P, ResourcePath, 'many-to-many'>,
   cleanupManager: CleanupManager
 ) => {
   // Essa query encontra os ids dos alvos mapeados a esse source
   const bridgeQuery = query(
     collection(db, definition.manyToManyTable),
-    where(sourcePath, '==', source.id)
+    where(source.resourcePath, '==', source.id)
   )
 
   // Syncamos a essa query

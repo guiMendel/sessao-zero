@@ -51,8 +51,7 @@ export type ResourcePath = (typeof resourcePaths)[number]
 export type ResourceProperties = Properties[ResourcePath]
 
 /** Facilita a referencia do recurso das propriedades do path + suas relacoes */
-export type FullInstance<P extends ResourcePath> = Resource<Properties[P]> &
-  Relations<P>
+export type FullInstance<P extends ResourcePath> = Resource<P> & Relations<P>
 
 // === EXTRATORES
 
