@@ -42,21 +42,38 @@ const newGuild = async () => {
       :key="guild.id"
       @click="openGuildPage(guild)"
     >
-      <!-- Nome e dono -->
-      <div class="identification">
+      <div class="data">
+        <!-- Nome -->
         <Typography class="text">{{ guild.name }}</Typography>
 
-        <div class="owner" v-if="toValue(guild.owner)">
-          <font-awesome-icon :icon="['fas', 'crown']" />
-          <Typography variant="paragraph-secondary">{{
-            getOwnerLabel(toValue(guild.owner))
-          }}</Typography>
-        </div>
+        <div class="row">
+          <!-- Dono -->
+          <div class="owner" v-if="toValue(guild.owner)">
+            <font-awesome-icon :icon="['fas', 'crown']" />
+            <Typography variant="paragraph-secondary">{{
+              getOwnerLabel(toValue(guild.owner))
+            }}</Typography>
+          </div>
 
-        <LoadingSpinner v-else />
+          <!-- Carregando -->
+          <LoadingSpinner v-else />
+
+          <!-- Numero de membros -->
+          <div class="count">
+            {{ toValue(guild.players).length }}
+            <font-awesome-icon :icon="['fas', 'user-group']" />
+          </div>
+
+          <!-- Numero de aventuras -->
+          <div class="count">
+            {{ 0 }}
+            <font-awesome-icon :icon="['fas', 'scroll']" />
+          </div>
+        </div>
       </div>
     </div>
 
+    <!-- Criar guilda -->
     <div
       v-if="!hideNewButton && player?.admin"
       class="add-guild"
@@ -90,9 +107,10 @@ const newGuild = async () => {
     @include bevel(var(--main-lighter));
     @include high-contrast-border;
 
-    .identification {
+    .data {
+      flex: 1;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: stretch;
       gap: 0.3rem;
 
       .text {
@@ -100,23 +118,38 @@ const newGuild = async () => {
         font-weight: 600;
       }
 
-      .owner {
+      .row {
         align-items: center;
-        gap: 0.3rem;
-        background-color: var(--bg-white);
-        padding: 0.2rem 0.5rem;
-        border-radius: $border-radius;
-        opacity: 0.8;
-        @include high-contrast-border;
+        gap: 1rem;
 
-        p {
-          color: var(--tx-main);
-          font-weight: 500;
+        .owner {
+          align-items: center;
+          margin-right: auto;
+          gap: 0.3rem;
+          background-color: var(--bg-white);
+          padding: 0.2rem 0.5rem;
+          border-radius: $border-radius;
+          opacity: 0.8;
+          @include high-contrast-border;
+
+          p {
+            color: var(--tx-main);
+            font-weight: 500;
+          }
+
+          svg {
+            color: var(--tx-main);
+            font-size: 0.8rem;
+          }
         }
 
-        svg {
-          color: var(--tx-main);
-          font-size: 0.8rem;
+        .count {
+          align-items: center;
+          gap: 0.2rem;
+
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: var(--tx-trans-3)
         }
       }
     }

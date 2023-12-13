@@ -35,8 +35,10 @@ import {
   faRepeat,
   faRightToBracket,
   faScrewdriverWrench,
+  faScroll,
   faStreetView,
   faTrash,
+  faUserGroup,
   faUsers,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons'
@@ -80,7 +82,9 @@ export const initFontAwesome = (): [
     faHammer,
     faPlus,
     faChevronDown,
-    faChampagneGlasses
+    faChampagneGlasses,
+    faUserGroup,
+    faScroll
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]

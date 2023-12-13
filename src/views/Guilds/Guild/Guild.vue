@@ -1,17 +1,28 @@
 <script lang="ts" setup>
-import { useCurrentGuild } from '@/api'
-import { LoadingSpinner } from '@/components'
+import { useCurrentGuild, useCurrentPlayer } from '@/api'
+import { BackButton, LoadingSpinner } from '@/components'
 import { storeToRefs } from 'pinia'
 import { GuildPanel } from './GuildPanel'
+import { computed } from 'vue'
 
 const { guild } = storeToRefs(useCurrentGuild())
+const { player } = storeToRefs(useCurrentPlayer())
+
+/** Quando o jogador nao eh membro nem dono da guilda */
+const isVisitor = computed(
+  () =>
+    guild.value.ownerUid !== player.value.id &&
+    guild.value.players.every((member) => member.id !== player.value.id)
+)
 </script>
 
 <template>
   <template v-if="guild == null"><LoadingSpinner class="loading" /></template>
 
   <template v-else>
-    <GuildPanel :guild="guild" />
+    <BackButton v-if="isVisitor" />
+
+    <GuildPanel v-else :guild="guild" />
 
     <div class="guild">
       <RouterView />

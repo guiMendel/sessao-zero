@@ -62,11 +62,7 @@ const accessibilityClass = computed(() => ({
     <InputGetter />
 
     <!-- Botao de voltar de pagina -->
-    <BackButton
-      v-if="!hideBackButton"
-      @click="router.back"
-      class="back-button"
-    />
+    <BackButton v-if="!hideBackButton" class="back-button" />
 
     <!-- Pagina carregada -->
     <RouterView />

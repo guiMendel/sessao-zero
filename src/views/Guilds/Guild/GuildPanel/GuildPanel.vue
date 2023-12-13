@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { FullInstance } from '@/api'
+import { FullInstance, useCurrentPlayer } from '@/api'
 import { Button, Divisor, Drawer, Typography } from '@/components'
 import { IconButton } from '@/components/IconButton'
+import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -19,6 +20,8 @@ const configureGuild = () => {
   router.push({ name: 'guild-configurations' })
   isOpen.value = false
 }
+
+const { player } = storeToRefs(useCurrentPlayer())
 </script>
 
 <template>
@@ -36,7 +39,10 @@ const configureGuild = () => {
 
     <div class="menu">
       <!-- Configurar -->
-      <Button variant="colored" @click="configureGuild"
+      <Button
+        v-if="player.id === guild.ownerUid"
+        variant="colored"
+        @click="configureGuild"
         ><font-awesome-icon :icon="['fas', 'hammer']" /> gerenciar</Button
       >
 

@@ -80,7 +80,7 @@ const submit = () => {
 <template>
   <div class="login" :class="{ confirmed: emailConfirmed }">
     <!-- Back button -->
-    <BackButton @click="returnStep" class="back-button" />
+    <BackButton :behavior="returnStep" class="back-button" />
 
     <img class="illustration" :src="illustration" />
 
@@ -200,7 +200,6 @@ const submit = () => {
 
   .back-button {
     transition: all 300ms ease-out;
-    font-size: 2rem;
 
     opacity: 0;
     translate: -2rem 0;
