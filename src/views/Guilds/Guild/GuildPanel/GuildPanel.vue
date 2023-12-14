@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCurrentPlayer } from '@/api/resourcePaths/players'
-import { FullInstance } from '@/api/resources'
+import { UnrefedFullInstance } from '@/api/resources'
 import { Button, Divisor, Drawer, Typography } from '@/components'
 import { IconButton } from '@/components/IconButton'
 import { storeToRefs } from 'pinia'
@@ -8,7 +8,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 defineProps<{
-  guild: FullInstance<'guilds'>
+  guild: UnrefedFullInstance<'guilds'>
 }>()
 
 const router = useRouter()

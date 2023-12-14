@@ -55,6 +55,10 @@ export type ResourceProperties = Properties[ResourcePath]
 /** Facilita a referencia do recurso das propriedades do path + suas relacoes */
 export type FullInstance<P extends ResourcePath> = Resource<P> & Relations<P>
 
+/** Facilita a referencia do recurso das propriedades do path + suas relacoes (sem um ref) */
+export type UnrefedFullInstance<P extends ResourcePath> = Resource<P> &
+  UnrefedRelations<P>
+
 // === EXTRATORES
 
 /** Descreve como trasnformar os dados de um Document nas propriedades do resource */
@@ -123,13 +127,23 @@ export type Relations<P extends ResourcePath> = {
   >
 }
 
+/** Dado um path P, retorna suas relacoes (sem um ref) */
+export type UnrefedRelations<P extends ResourcePath> = {
+  // @ts-ignore
+  [relation in keyof RelationSettings<P>]: RelationSettings<P>[relation]['type'] extends 'has-one'
+    ? // @ts-ignore
+      FullInstance<RelationSettings<P>[relation]['targetResourcePath']>
+    : // @ts-ignore
+      FullInstance<RelationSettings<P>[relation]['targetResourcePath']>[]
+}
+
 // declare const test: FullInstance<'players'>
 
-// test.guilds.value
+// test.ownedGuilds.value
 
 // declare const test: FullInstance<'guilds'>
 
-// test.owner.value
+// test.players.value
 
 /** Constroi uma definicao de relacao 1:n */
 function isMany<S extends ResourcePath, T extends ResourcePath>(
