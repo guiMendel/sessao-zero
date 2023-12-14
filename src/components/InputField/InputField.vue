@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FieldRef, splitCamelCase } from '@/utils'
+import { FieldRef, splitCamelCase } from '@/utils/functions'
 import { computed, ref, watch } from 'vue'
 import { IconButton, Typography } from '..'
 import { inferFieldProperties } from './inferFieldProperties'

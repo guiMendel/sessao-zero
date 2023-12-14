@@ -1,5 +1,5 @@
 import { useAutosaveStatus } from '@/stores'
-import { sleep } from '@/utils'
+import { sleep } from '@/utils/functions'
 import { Meta, StoryFn } from '@storybook/vue3'
 import { AutosaveNotification } from '.'
 

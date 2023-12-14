@@ -1,10 +1,10 @@
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import { App } from './App'
-import router from './router'
 import './styles/index.scss'
-import { validateEnvironment } from './utils'
+import { validateEnvironment } from './utils/functions'
 import { initFontAwesome } from './utils/functions/initFontAwesome'
+import { router } from './router'
 
 createApp(App)
   .use(createPinia())

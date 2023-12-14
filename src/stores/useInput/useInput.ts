@@ -1,5 +1,5 @@
 import type { ButtonProps } from '@/components'
-import { FieldValidator } from '@/utils'
+import { FieldValidator } from '@/utils/functions'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 

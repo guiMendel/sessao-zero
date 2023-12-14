@@ -1,6 +1,8 @@
-import { Guild, Player, Resource } from '@/api'
 import { DocumentData, DocumentReference, Query } from 'firebase/firestore'
-import { SyncableRef } from '..'
+import { Resource } from '.'
+import { SyncableRef } from '../classes'
+import { Guild } from '../resourcePaths/guilds'
+import { Player } from '../resourcePaths/players'
 
 // =======================================================
 // DEFINICAO

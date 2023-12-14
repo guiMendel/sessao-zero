@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { useCurrentPlayer, useGuild } from '@/api'
+import { useGuild } from '@/api/resourcePaths/guilds'
+import { useCurrentPlayer } from '@/api/resourcePaths/players'
 import { Typography } from '@/components'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'

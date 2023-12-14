@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { FullInstance, useCurrentPlayer } from '@/api'
+import { useCurrentPlayer } from '@/api/resourcePaths/players'
+import { FullInstance } from '@/api/resources'
 import { Button, Divisor, Drawer, Typography } from '@/components'
 import { IconButton } from '@/components/IconButton'
 import { storeToRefs } from 'pinia'

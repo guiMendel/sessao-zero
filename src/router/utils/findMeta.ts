@@ -1,5 +1,5 @@
 import { RouteLocationNormalized } from 'vue-router'
-import { RouteMetas } from '..'
+import type { RouteMetas } from '..'
 
 /** Procura nesta rota e nas rotas pais pelo meta fornecido
  * @param route rota na qual procurar

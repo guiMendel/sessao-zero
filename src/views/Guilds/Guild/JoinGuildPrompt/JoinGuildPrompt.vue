@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { FullInstance, isMember, useCurrentPlayer } from '@/api'
+import { isMember } from '@/api/resourcePaths/guilds'
+import { useCurrentPlayer } from '@/api/resourcePaths/players'
+import { FullInstance } from '@/api/resources'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 

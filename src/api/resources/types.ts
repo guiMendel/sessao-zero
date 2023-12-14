@@ -1,4 +1,4 @@
-import { Properties, ResourcePath } from '@/api'
+import { Properties, ResourcePath } from '@/api/resources'
 
 export type Resource<P extends ResourcePath> = Properties[P] & {
   /** Quando esta instancia foi criada */

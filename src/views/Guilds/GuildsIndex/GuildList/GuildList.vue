@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { FullInstance, useCurrentPlayer, useGuild } from '@/api'
+import { useGuild } from '@/api/resourcePaths/guilds'
+import { useCurrentPlayer } from '@/api/resourcePaths/players'
+import { FullInstance } from '@/api/resources'
 import { LoadingSpinner, Typography } from '@/components'
 import { useInput } from '@/stores'
 import { storeToRefs } from 'pinia'
@@ -56,7 +58,7 @@ const newGuild = async () => {
           </div>
 
           <!-- Carregando -->
-          <LoadingSpinner v-else  class="spinner"/>
+          <LoadingSpinner v-else class="spinner" />
 
           <!-- Numero de membros -->
           <div class="count">
@@ -125,7 +127,7 @@ const newGuild = async () => {
         .spinner {
           margin-right: auto;
         }
-        
+
         .owner {
           align-items: center;
           margin-right: auto;
@@ -153,7 +155,7 @@ const newGuild = async () => {
 
           font-size: 0.9rem;
           font-weight: 500;
-          color: var(--tx-trans-3)
+          color: var(--tx-trans-3);
         }
       }
     }

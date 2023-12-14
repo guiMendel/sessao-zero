@@ -1,4 +1,4 @@
-import { FullInstance, Resource } from '@/api'
+import { FullInstance, Resource } from '@/api/resources'
 import { toValue } from 'vue'
 
 export const isMember = (

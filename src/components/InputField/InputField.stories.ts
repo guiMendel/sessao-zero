@@ -1,4 +1,4 @@
-import { fieldRef } from '@/utils'
+import { fieldRef } from '@/utils/functions'
 import { Meta, StoryFn } from '@storybook/vue3'
 import { InputField } from '.'
 

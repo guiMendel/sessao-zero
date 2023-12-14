@@ -6,7 +6,7 @@ import {
   getSelectOptionValue,
   isSelectOptionDisabled,
   isSelectOptionHidden,
-} from '@/utils'
+} from '@/utils/functions'
 import { getCurrentInstance } from 'vue'
 import { Typography } from '..'
 

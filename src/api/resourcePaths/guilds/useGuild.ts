@@ -1,7 +1,8 @@
+import { GetListMethod, SyncListMethod } from '@/api/resources'
 import { where } from 'firebase/firestore'
 import { storeToRefs } from 'pinia'
-import { GetListMethod, SyncListMethod, useCurrentPlayer } from '../..'
 import { useResource } from '../../resources/hooks/useResource'
+import { useCurrentPlayer } from '../players'
 
 export const useGuild = () => {
   const api = useResource('guilds')

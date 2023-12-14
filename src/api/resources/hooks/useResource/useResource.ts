@@ -1,12 +1,11 @@
+import { db } from '@/api/firebase'
 import {
-  Properties,
-  ResourcePath,
-  db,
   getResourceGetter,
   getResourceSynchronizer,
-} from '@/api/'
+} from '@/api/resources/functions'
+import { Properties, ResourcePath } from '@/api/resources/resources'
 import { Uploadable } from '@/api/resources/types'
-import { CleanupManager } from '@/utils'
+import { CleanupManager } from '@/utils/classes'
 import {
   addDoc,
   collection,

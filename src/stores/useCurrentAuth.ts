@@ -1,4 +1,4 @@
-import { auth } from '@/api'
+import { auth } from '@/api/firebase'
 import { User } from 'firebase/auth'
 import { defineStore } from 'pinia'
 import { Ref, onBeforeUnmount, ref } from 'vue'

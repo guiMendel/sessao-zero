@@ -1,4 +1,4 @@
-import { ResourcePath, getPropertyExtrator } from '@/api'
+import { ResourcePath, getPropertyExtrator } from '@/api/resources/resources'
 import { Resource } from '@/api/resources/types'
 import {
   DocumentSnapshot,

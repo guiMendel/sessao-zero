@@ -1,8 +1,8 @@
-import { fieldRef, sleep } from '@/utils'
-import { useAutosaveForm } from '.'
-import { nextTick } from 'vue'
 import { useAutosaveStatus } from '@/stores'
+import { fieldRef, sleep } from '@/utils/functions'
 import { Mock } from 'vitest'
+import { nextTick } from 'vue'
+import { useAutosaveForm } from '.'
 
 vi.mock('@/stores', async () => ({
   ...(await vi.importActual<{}>('@/stores')),
@@ -17,6 +17,8 @@ const mockTrackPromise = vi.fn()
 
 describe('useAutosaveForm', () => {
   beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(vi.fn() as any)
+
     vi.resetAllMocks()
 
     mockUseAutosaveStatus.mockReturnValue({
@@ -33,7 +35,7 @@ describe('useAutosaveForm', () => {
 
     const { fields } = useAutosaveForm(
       {
-        test: fieldRef('test', { persist, initialValue: 'booya' }),
+        test: fieldRef<string>('test', { persist, initialValue: 'booya' }),
       },
       { throttleAmount }
     )
@@ -61,7 +63,7 @@ describe('useAutosaveForm', () => {
 
     const { fields } = useAutosaveForm(
       {
-        test: fieldRef('test', {
+        test: fieldRef<string>('test', {
           persist,
           validator: () => 'nooo',
           initialValue: 'booya',
@@ -85,7 +87,7 @@ describe('useAutosaveForm', () => {
 
     const { fields, cleanup } = useAutosaveForm(
       {
-        test: fieldRef('test', { persist, initialValue: 'booya' }),
+        test: fieldRef<string>('test', { persist, initialValue: 'booya' }),
       },
       { retryDelay, throttleAmount: 0 }
     )
@@ -118,7 +120,7 @@ describe('useAutosaveForm', () => {
 
     const { fields, cleanup } = useAutosaveForm(
       {
-        test: fieldRef('test', { persist, initialValue: 'booya' }),
+        test: fieldRef<string>('test', { persist, initialValue: 'booya' }),
       },
       { retryDelay, throttleAmount: 0 }
     )

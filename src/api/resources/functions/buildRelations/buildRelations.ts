@@ -1,16 +1,16 @@
+import { Syncable } from '@/api/classes/Syncable/Syncable'
+import { syncableRef } from '@/api/classes/Syncable/SyncableRef'
+import { db } from '@/api/firebase'
+import type { Resource } from '@/api/resources/types'
+import { CleanupManager } from '@/utils/classes'
+import { Query, collection, doc, query, where } from 'firebase/firestore'
 import {
   FullInstance,
   RelationDefinition,
   Relations,
   ResourcePath,
-  Syncable,
-  db,
   relationSettings,
-  syncableRef,
-} from '@/api/'
-import { Resource } from '@/api/resources/types'
-import { CleanupManager } from '@/utils'
-import { Query, collection, doc, query, where } from 'firebase/firestore'
+} from '../../resources'
 
 /** Adiciona a um objeto uma flag que indica se ele nao deve ser descartado */
 export type WithDisposeFlag<T> = T & {

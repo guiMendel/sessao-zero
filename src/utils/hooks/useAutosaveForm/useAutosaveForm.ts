@@ -1,6 +1,6 @@
 import { AutosaveStatus, useAutosaveStatus } from '@/stores'
+import { FieldRef } from '@/utils/functions'
 import { watch } from 'vue'
-import { FieldRef } from '../..'
 
 type AutosaveFormOptions = {
   /** Quantos ms deve fazer throttle nas chamadas de fieldRef.persist */

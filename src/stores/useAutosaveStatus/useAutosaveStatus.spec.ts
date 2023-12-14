@@ -1,4 +1,4 @@
-import { sleep } from '@/utils'
+import { sleep } from '@/utils/functions'
 import { createPinia, setActivePinia } from 'pinia'
 import { AutosaveStatus, useAutosaveStatus } from '.'
 

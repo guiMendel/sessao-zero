@@ -1,5 +1,6 @@
-import { FullInstance, syncableRef } from '@/api'
-import { CleanupManager } from '@/utils'
+import { syncableRef } from '@/api/classes'
+import { FullInstance } from '@/api/resources'
+import { CleanupManager } from '@/utils/classes'
 import { DocumentReference, Query } from 'firebase/firestore'
 
 export const mockGuild = (

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCurrentGuild } from '@/api'
+import { useCurrentGuild } from '@/api/resourcePaths/guilds'
 import {
   Button,
   InputField,
@@ -8,7 +8,8 @@ import {
   Typography,
 } from '@/components'
 import { useInput, useNotification } from '@/stores'
-import { fieldRef, useAutosaveForm } from '@/utils'
+import { fieldRef } from '@/utils/functions'
+import { useAutosaveForm } from '@/utils/hooks'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 

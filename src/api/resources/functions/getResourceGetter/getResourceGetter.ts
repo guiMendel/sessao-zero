@@ -1,5 +1,6 @@
-import { FullInstance, ResourcePath, db, getFullInstance } from '@/api'
-import { CleanupManager } from '@/utils'
+import { db } from '@/api/firebase'
+import { FullInstance, ResourcePath } from '@/api/resources/resources'
+import { CleanupManager } from '@/utils/classes'
 import {
   QueryFieldFilterConstraint,
   collection,
@@ -8,6 +9,7 @@ import {
   getDocs as firestoreGetDocs,
   query,
 } from 'firebase/firestore'
+import { getFullInstance } from '../getFullInstance'
 
 // ====================================
 // TIPOS DO RETURN

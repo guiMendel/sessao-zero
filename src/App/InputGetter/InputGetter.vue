@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button, InputField } from '@/components'
 import { useInput } from '@/stores'
-import { fieldRef } from '@/utils'
+import { fieldRef } from '@/utils/functions'
 import { storeToRefs } from 'pinia'
 import { onBeforeUnmount, watch } from 'vue'
 

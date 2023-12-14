@@ -1,7 +1,8 @@
-import { Guild, useGuild } from '@/api'
 import { defineStore } from 'pinia'
 import { watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { Guild } from '.'
+import { useGuild } from './useGuild'
 
 export const useCurrentGuild = defineStore('current-guild', () => {
   const { sync, get, deleteForever, update } = useGuild()

@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import { useCurrentGuild, useCurrentPlayer } from '@/api'
+import { useCurrentGuild } from '@/api/resourcePaths/guilds'
+import { useCurrentPlayer } from '@/api/resourcePaths/players'
 import { BackButton, LoadingSpinner } from '@/components'
 import { storeToRefs } from 'pinia'
-import { GuildPanel } from './GuildPanel'
 import { computed } from 'vue'
+import { GuildPanel } from './GuildPanel'
 
 const { guild } = storeToRefs(useCurrentGuild())
 const { player } = storeToRefs(useCurrentPlayer())

@@ -9,7 +9,9 @@
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "find-circular": "dpdm -T --no-warning --no-tree 'src/**/*.*'",
+    "tsc": "tsc"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.0",

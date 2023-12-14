@@ -1,5 +1,5 @@
 import { mountOptions } from '@/tests'
-import { splitCamelCase } from '@/utils'
+import { splitCamelCase } from '@/utils/functions'
 import { VueWrapper, mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import { nextTick } from 'vue'

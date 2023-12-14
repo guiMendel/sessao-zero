@@ -20,7 +20,7 @@ import {
   useResource,
 } from '.'
 
-vi.mock('@/api', () => ({ db: 'mockDb' }))
+vi.mock('@/api/firebase', () => ({ db: 'mockDb' }))
 vi.mock('firebase/firestore', () => ({
   doc: vi.fn(),
   collection: vi.fn(),

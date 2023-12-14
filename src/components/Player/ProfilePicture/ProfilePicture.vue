@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Player } from '@/utils'
+import { Player } from '@/api/resourcePaths/players'
 import { computed } from 'vue'
 
 const props = defineProps<{ player: Player }>()

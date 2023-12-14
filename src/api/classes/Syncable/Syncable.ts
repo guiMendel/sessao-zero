@@ -1,4 +1,4 @@
-import { CleanupManager } from '@/utils'
+import { CleanupManager } from '@/utils/classes'
 import {
   DocumentReference,
   DocumentSnapshot,

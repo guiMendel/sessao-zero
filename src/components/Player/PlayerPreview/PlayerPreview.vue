@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { FullInstance } from '@/api';
-import { Typography } from '@/components';
-import { useRouter } from 'vue-router';
-import { ProfilePicture } from '..';
+import { FullInstance } from '@/api/resources'
+import { Typography } from '@/components'
+import { useRouter } from 'vue-router'
+import { ProfilePicture } from '..'
 
 const props = defineProps<{
   player: FullInstance<'players'>

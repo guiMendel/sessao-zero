@@ -1,20 +1,15 @@
-import { makeGuildInvitation } from '@/api'
-import {
-  AccessibilityPrompt,
-  BetaWelcome,
-  Configurations,
-  CreatePlayer,
-  Guild,
-  GuildConfigurations,
-  GuildsIndex,
-  Home,
-  Login,
-} from '@/views'
+import { makeGuildInvitation } from '@/api/resourcePaths/guilds'
 import Adventure from '@/views/Adventures/Adventure.vue'
 import AdventuresIndex from '@/views/Adventures/AdventuresIndex.vue'
 import CreateAdventure from '@/views/Adventures/CreateAdventure.vue'
+import { Configurations } from '@/views/Configurations'
+import { Guild, GuildConfigurations, GuildsIndex } from '@/views/Guilds'
 import GuildInvitation from '@/views/Guilds/GuildInvitation.vue'
+import { Home } from '@/views/Home'
+import { Login } from '@/views/Login'
+import { CreatePlayer } from '@/views/Players'
 import Player from '@/views/Players/Player.vue'
+import { AccessibilityPrompt, BetaWelcome } from '@/views/Prompts'
 import { RouteRecordRaw } from 'vue-router'
 import { addFirstVisitPrompts } from './firstVisitPrompts'
 

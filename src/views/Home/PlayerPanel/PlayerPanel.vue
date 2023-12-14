@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useCurrentPlayer } from '@/api'
+import { useCurrentPlayer } from '@/api/resourcePaths/players'
 import {
   Button,
   Divisor,

@@ -1,5 +1,7 @@
-import { ResourcePath, SyncableRef, db, syncableRef } from '@/api'
-import { CleanupManager } from '@/utils'
+import { SyncableRef, syncableRef } from '@/api/classes'
+import { db } from '@/api/firebase'
+import { ResourcePath } from '@/api/resources'
+import { CleanupManager } from '@/utils/classes'
 import {
   DocumentReference,
   Query,

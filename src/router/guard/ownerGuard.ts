@@ -1,4 +1,4 @@
-import { db } from '@/api'
+import { db } from '@/api/firebase'
 import { useCurrentAuth } from '@/stores'
 import { doc, getDoc } from 'firebase/firestore'
 import { RouteLocationNormalized } from 'vue-router'
