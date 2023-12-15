@@ -3,6 +3,7 @@ import { setup } from '@storybook/vue3'
 import { createPinia } from 'pinia'
 import '../src/styles/index.scss'
 import { initFontAwesome } from '../src/utils/functions/initFontAwesome'
+import { authDecorator } from './__mocks__/firebase/auth'
 
 const pinia = createPinia()
 
@@ -23,6 +24,7 @@ const preview: Preview = {
     () => ({
       template: `<div id="app"><story /></div>`,
     }),
+    authDecorator,
   ],
 }
 

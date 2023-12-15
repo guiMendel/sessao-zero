@@ -4,7 +4,7 @@ import { CleanupManager } from '@/utils/classes'
 import { DocumentReference, Query } from 'firebase/firestore'
 
 export const mockGuild = (
-  overrides: Partial<FullInstance<'guilds'>>
+  overrides?: Partial<FullInstance<'guilds'>>
 ): FullInstance<'guilds'> => ({
   createdAt: new Date(),
   players: syncableRef<'players', Query>(

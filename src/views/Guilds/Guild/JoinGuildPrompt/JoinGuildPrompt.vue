@@ -11,6 +11,8 @@ const props = defineProps<{
 
 const { player } = storeToRefs(useCurrentPlayer())
 
+console.log({ player })
+
 const playerIsMember = computed(() => isMember(player.value, props.guild))
 </script>
 

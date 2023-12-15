@@ -62,6 +62,8 @@ export class Syncable<T extends DocumentReference | Query> {
 
     this.state = 'synced'
 
+    console.log({ target: this._target, onSnapshot })
+
     const cleanupListener = onSnapshot(
       this._target as any,
       (snapshot: QuerySnapshot | DocumentSnapshot) =>
@@ -70,6 +72,8 @@ export class Syncable<T extends DocumentReference | Query> {
           this.cleanup
         )
     )
+
+    console.log('after')
 
     this.cleanup.add(cleanupListener)
   }

@@ -4,7 +4,7 @@ import { CleanupManager } from '@/utils/classes'
 import { Query } from 'firebase/firestore'
 
 export const mockPlayer = (
-  overrides: Partial<FullInstance<'players'>>
+  overrides?: Partial<FullInstance<'players'>>
 ): FullInstance<'players'> => ({
   about: 'about',
   createdAt: new Date(),
