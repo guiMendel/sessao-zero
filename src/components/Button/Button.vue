@@ -1,12 +1,18 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { ButtonProps, Typography } from '..'
 
-withDefaults(defineProps<ButtonProps>(), { variant: 'default' })
+const props = withDefaults(defineProps<ButtonProps>(), { variant: 'default' })
+
+const computedClass = computed(() => ({
+  [props.variant]: true,
+  disabled: props.disabled,
+}))
 </script>
 
 <template>
-  <div class="button-wrapper">
-    <button class="button" :class="{ [variant]: true, disabled }">
+  <div class="button-wrapper" :class="computedClass">
+    <button class="button" :class="computedClass">
       <slot></slot>
     </button>
 
@@ -23,6 +29,18 @@ withDefaults(defineProps<ButtonProps>(), { variant: 'default' })
   flex-direction: column;
   gap: 0.3rem;
 
+  &.default {
+    color: var(--tx-gray-darker);
+  }
+
+  &.dark {
+    color: var(--tx-gray-darker);
+  }
+
+  &.colored {
+    color: var(--tx-main-dark);
+  }
+
   .button {
     @include button;
 
@@ -36,18 +54,15 @@ withDefaults(defineProps<ButtonProps>(), { variant: 'default' })
 
     &.default {
       background-color: var(--bg-trans-03);
-      color: var(--tx-gray-darker);
     }
 
     &.dark {
       background-color: var(--bg-trans-2);
-      color: var(--tx-gray-darker);
     }
 
     &.colored {
       background-color: var(--bg-main-light);
       @include bevel(var(--bg-main));
-      color: var(--tx-main-dark);
     }
 
     &.disabled {

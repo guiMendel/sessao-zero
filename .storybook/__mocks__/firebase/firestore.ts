@@ -27,8 +27,6 @@ export const onSnapshot = (
   target: any,
   callback: (snapshot: Partial<DocumentSnapshot>) => void
 ) => {
-  console.log({ onSnapshotSendData, target })
-
   if (target?.id in onSnapshotSendData)
     callback({ id: target.id, data: () => onSnapshotSendData[target.id] })
 

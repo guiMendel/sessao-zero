@@ -52,6 +52,7 @@ onBeforeUnmount(() => window.removeEventListener('keyup', rejectOnEscape))
         <!-- Message -->
         <div
           v-html="currentInput.getter.messageHtml"
+          class="message-wrapper"
           :class="currentInput.getter.messageClass"
         ></div>
 
@@ -98,7 +99,7 @@ onBeforeUnmount(() => window.removeEventListener('keyup', rejectOnEscape))
 <style scoped lang="scss">
 @import '@/styles/variables.scss';
 
-.backdrop {
+#app .backdrop {
   z-index: 30;
 
   position: fixed;
@@ -122,7 +123,7 @@ onBeforeUnmount(() => window.removeEventListener('keyup', rejectOnEscape))
     padding: 1rem 1rem 1.5rem;
     border-radius: $border-radius;
     gap: 1rem;
-    max-width: 96vw;
+    max-width: 92vw;
     max-height: 96vh;
 
     position: relative;
@@ -149,6 +150,10 @@ onBeforeUnmount(() => window.removeEventListener('keyup', rejectOnEscape))
       &:hover {
         filter: brightness(1.02);
       }
+    }
+
+    .message-wrapper {
+      display: inline;
     }
 
     form {

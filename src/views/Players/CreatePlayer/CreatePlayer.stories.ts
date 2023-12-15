@@ -4,6 +4,9 @@ import { CreatePlayer } from '.'
 const meta = {
   title: 'Views/CreatePlayer',
   component: CreatePlayer,
+  parameters: {
+    layout: 'fullscreen',
+  },
 } satisfies Meta<typeof CreatePlayer>
 
 export default meta

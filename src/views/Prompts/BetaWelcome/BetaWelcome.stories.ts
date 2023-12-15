@@ -4,6 +4,9 @@ import { BetaWelcome } from '.'
 const meta = {
   title: 'Views/BetaWelcome',
   component: BetaWelcome,
+  parameters: {
+    layout: 'fullscreen',
+  },
 } satisfies Meta<typeof BetaWelcome>
 
 export default meta

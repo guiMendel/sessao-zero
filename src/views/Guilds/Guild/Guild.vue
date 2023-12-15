@@ -5,6 +5,7 @@ import { BackButton, LoadingSpinner } from '@/components'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 import { GuildPanel } from './GuildPanel'
+import { JoinGuildPrompt } from './JoinGuildPrompt'
 
 const { guild } = storeToRefs(useCurrentGuild())
 const { player } = storeToRefs(useCurrentPlayer())
@@ -25,6 +26,8 @@ const isVisitor = computed(
 
     <GuildPanel v-else :guild="guild" />
 
+    <JoinGuildPrompt class="join-prompt" :guild="guild" />
+
     <div class="guild">
       <RouterView />
     </div>
@@ -42,5 +45,9 @@ const isVisitor = computed(
   width: 100%;
   flex: 1;
   padding: 0 1.5rem 2rem;
+}
+
+.join-prompt {
+  margin-top: 1rem;
 }
 </style>

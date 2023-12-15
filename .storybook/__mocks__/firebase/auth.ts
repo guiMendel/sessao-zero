@@ -11,8 +11,6 @@ export const authDecorator: Decorator = (story, { parameters }) => {
 
     onSnapshotSendData[parameters.mockCurrentPlayer.id] =
       parameters.mockCurrentPlayer
-
-    console.log('update to', onSnapshotSendData)
   }
 
   // Gera um auth state changed event do firebase

@@ -4,6 +4,9 @@ import { AccessibilityPrompt } from '.'
 const meta = {
   title: 'Views/AccessibilityPrompt',
   component: AccessibilityPrompt,
+  parameters: {
+    layout: 'fullscreen',
+  },
 } satisfies Meta<typeof AccessibilityPrompt>
 
 export default meta

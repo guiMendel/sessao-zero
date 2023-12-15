@@ -4,6 +4,9 @@ import { Login } from '.'
 const meta = {
   title: 'Views/Login',
   component: Login,
+  parameters: {
+    layout: 'fullscreen',
+  },
 } satisfies Meta<typeof Login>
 
 export default meta
