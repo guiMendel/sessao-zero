@@ -9,7 +9,7 @@ import {
   getDocs as firestoreGetDocs,
   query,
 } from 'firebase/firestore'
-import { getFullInstance } from '../getFullInstance'
+import { makeFullInstance } from '../makeFullInstance'
 
 // ====================================
 // TIPOS DO RETURN
@@ -42,14 +42,14 @@ export const getResourceGetter = <P extends ResourcePath>(
     /** Pega uma instancia do recurso */
     get: (id: string) =>
       firestoreGetDoc(getDoc(id)).then(
-        (doc) => getFullInstance(doc, resourcePath, cleanupManager, [])[0]
+        (doc) => makeFullInstance(doc, resourcePath, cleanupManager, [])[0]
       ),
 
     /** Pega uma lista filtrada do recurso */
     getList: (filters: QueryFieldFilterConstraint[] = []) =>
       firestoreGetDocs(query(resourceCollection, ...filters)).then(
         (docs) =>
-          getFullInstance(
+          makeFullInstance(
             docs,
             resourcePath,
             cleanupManager,

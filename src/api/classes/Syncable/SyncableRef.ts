@@ -1,5 +1,5 @@
 import type { FullInstance, ResourcePath } from '@/api/resources'
-import { getFullInstance } from '@/api/resources/functions/getFullInstance'
+import { makeFullInstance } from '@/api/resources/functions/makeFullInstance'
 import { CleanupManager } from '@/utils/classes'
 import { DocumentReference, Query } from 'firebase/firestore'
 import { Ref, ref } from 'vue'
@@ -54,7 +54,7 @@ export const syncableRef = <
       if ('docs' in snapshot) {
         previousValues = valueRef.value as FullInstance<P>[]
 
-        valueRef.value = getFullInstance(
+        valueRef.value = makeFullInstance(
           snapshot,
           resourcePath,
           ownCleanupManager,
@@ -68,7 +68,7 @@ export const syncableRef = <
       previousValues =
         valueRef.value == undefined ? [] : [valueRef.value as FullInstance<P>]
 
-      valueRef.value = getFullInstance(
+      valueRef.value = makeFullInstance(
         snapshot,
         resourcePath,
         ownCleanupManager,

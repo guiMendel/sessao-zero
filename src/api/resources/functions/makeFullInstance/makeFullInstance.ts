@@ -1,6 +1,6 @@
 import type { FullInstance, ResourcePath } from '@/api/resources'
 import { buildRelations } from '@/api/resources/functions/buildRelations'
-import { getResource } from '@/api/resources/functions/getResource'
+import { makeResource } from '@/api/resources/functions/makeResource'
 import { CleanupManager } from '@/utils/classes'
 import { DocumentSnapshot, QuerySnapshot } from 'firebase/firestore'
 
@@ -10,7 +10,7 @@ import { DocumentSnapshot, QuerySnapshot } from 'firebase/firestore'
  * @param cleanupManager O manager para associar a novos recursos alocados
  * @param previousValues Uma piscina de valores da qual podemos reutilizar recursos para nao ter de recriar eles
  */
-export const getFullInstance = <P extends ResourcePath>(
+export const makeFullInstance = <P extends ResourcePath>(
   snapshot: DocumentSnapshot | QuerySnapshot,
   resourcePath: P,
   cleanupManager: CleanupManager,
@@ -23,7 +23,7 @@ export const getFullInstance = <P extends ResourcePath>(
   )
 
   /** Gera os resources a partir dos snapshots */
-  const extractedResources = getResource(snapshot, resourcePath)
+  const extractedResources = makeResource(snapshot, resourcePath)
 
   /** Injeta relacoes para tornar os recursos em instancias */
   return extractedResources.map(

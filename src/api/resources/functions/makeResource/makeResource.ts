@@ -9,7 +9,7 @@ import {
 /** Gera um (ou varios) Resources dos dados recebidos como documento ou query
  * @param snapshot Possui dados para popular as propriedades da nova instancia
  */
-export const getResource = <P extends ResourcePath>(
+export const makeResource = <P extends ResourcePath>(
   snapshot: DocumentSnapshot | QuerySnapshot,
   resourcePath: P
 ): Array<Resource<P> | undefined> => {
