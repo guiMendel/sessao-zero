@@ -52,6 +52,4 @@ export const setHasOneRelation = <
   source: FullInstance<P>,
   relation: R,
   target: UnrefedRelations<P>[R]
-) => {
-  
-}
+) => {}
