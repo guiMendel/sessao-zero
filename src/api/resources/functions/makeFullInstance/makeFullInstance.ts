@@ -1,6 +1,6 @@
 import type { FullInstance, ResourcePath } from '@/api/resources'
-import { buildRelations } from '@/api/resources/functions/buildRelations'
 import { makeResource } from '@/api/resources/functions/makeResource'
+import { buildRelations } from '@/api/resources/functions/relations'
 import { CleanupManager } from '@/utils/classes'
 import { DocumentSnapshot, QuerySnapshot } from 'firebase/firestore'
 

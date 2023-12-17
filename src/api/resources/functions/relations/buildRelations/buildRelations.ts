@@ -10,7 +10,7 @@ import {
   Relations,
   ResourcePath,
   relationSettings,
-} from '../../resources'
+} from '../../../resources'
 
 /** Adiciona a um objeto uma flag que indica se ele nao deve ser descartado */
 export type WithDisposeFlag<T> = T & {
@@ -83,17 +83,17 @@ const createRelation = <P extends ResourcePath>(
   cleanupManager: CleanupManager
 ) => {
   switch (definition.type) {
-    case 'has-many':
-      return createHasManyRelation(
-        source,
-        definition as RelationDefinition<P, ResourcePath, 'has-many'>,
-        cleanupManager
-      )
-
     case 'has-one':
       return createHasOneRelation(
         source,
         definition as RelationDefinition<P, ResourcePath, 'has-one'>,
+        cleanupManager
+      )
+
+    case 'has-many':
+      return createHasManyRelation(
+        source,
+        definition as RelationDefinition<P, ResourcePath, 'has-many'>,
         cleanupManager
       )
 
