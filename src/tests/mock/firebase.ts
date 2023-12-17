@@ -1,9 +1,4 @@
-import {
-  Resource,
-  ResourcePath,
-  Uploadable,
-  useResource,
-} from '@/api/resources'
+import { Resource, ResourcePath, Uploadable } from '@/api/resources'
 import {
   addDoc,
   collection,
@@ -50,20 +45,9 @@ export const mockWhere = where as Mock
 type Snapshot = { data: () => any; id: string }
 type Listener<T> = (newValue: T) => void
 
-export const parseTestSnapshot = (
-  id: string,
-  data: any
-): Resource<ResourcePath> =>
-  data && {
-    ...data,
-    id,
-    resourcePath: 'test-resource',
-    createdAt: new Date(data.createdAt),
-    modifiedAt: new Date(data.modifiedAt),
-  }
-
-export const getMockDatabase = (
-  values: Record<string, Uploadable<ResourcePath>>
+export const getMockDatabase = <P extends ResourcePath>(
+  values: Record<string, Uploadable<P>>,
+  resourcePath: P = 'players' as P
 ) => {
   const mockSnapshotDatabase: Record<string, Snapshot> = {}
 
@@ -90,7 +74,16 @@ export const getMockDatabase = (
 
   let nextId = 0
 
-  const addDatabaseValue = async (value: Uploadable<ResourcePath>) => {
+  const parseTestSnapshot = (id: string, data: any): Resource<P> =>
+    data && {
+      ...data,
+      id,
+      resourcePath,
+      createdAt: new Date(data.createdAt),
+      modifiedAt: new Date(data.modifiedAt),
+    }
+
+  const addDatabaseValue = async (value: Uploadable<P>) => {
     const id = (nextId++).toString()
 
     addSnapshot(id)
@@ -102,7 +95,7 @@ export const getMockDatabase = (
   const getDatabaseValue = (id: string) =>
     parseTestSnapshot(id, mockSnapshotDatabase[id]?.data())
 
-  const indexDatabaseValues = (): Resource<ResourcePath>[] =>
+  const indexDatabaseValues = (): Resource<P>[] =>
     Object.entries(mockSnapshotDatabase).map(([id, value]) =>
       parseTestSnapshot(id, value.data())
     )
@@ -187,7 +180,7 @@ export const getMockDatabase = (
     }
   )
 
-  mockAddDoc.mockImplementation((_, properties: Uploadable<ResourcePath>) =>
+  mockAddDoc.mockImplementation((_, properties: Uploadable<P>) =>
     addDatabaseValue(properties)
   )
 
@@ -198,19 +191,17 @@ export const getMockDatabase = (
     delete values[id]
   })
 
-  mockSetDoc.mockImplementation(
-    async (id: string, value: Uploadable<ResourcePath>) => {
-      addSnapshot(id)
+  mockSetDoc.mockImplementation(async (id: string, value: Uploadable<P>) => {
+    addSnapshot(id)
 
-      values[id] = {
-        ...value,
-        createdAt: values[id]?.createdAt ?? new Date().toJSON(),
-        modifiedAt: new Date().toJSON(),
-      }
-
-      alertListeners(id)
+    values[id] = {
+      ...value,
+      createdAt: values[id]?.createdAt ?? new Date().toJSON(),
+      modifiedAt: new Date().toJSON(),
     }
-  )
+
+    alertListeners(id)
+  })
 
   mockGetDoc.mockImplementation(async (id: string) => mockSnapshotDatabase[id])
 

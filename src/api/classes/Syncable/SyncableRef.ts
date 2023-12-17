@@ -42,7 +42,8 @@ export const syncableRef = <
     ? Ref<FullInstance<P>[]>
     : Ref<FullInstance<P> | undefined>
 
-  const initialTarget = typeof target === 'string' ? undefined : target
+  const initialTarget =
+    target === 'empty-document' || target === 'empty-query' ? undefined : target
 
   /** O Syncable deste recurso */
   const syncable = new Syncable<M>(

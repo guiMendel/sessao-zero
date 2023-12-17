@@ -10,7 +10,9 @@ import {
 const compareTargets = (
   target1: DocumentReference | Query | undefined,
   target2: DocumentReference | Query | undefined
-) => JSON.stringify(target1) === JSON.stringify(target2)
+) =>
+  typeof target1 === typeof target2 &&
+  JSON.stringify(target1) === JSON.stringify(target2)
 
 type OnNextCallback<T extends DocumentReference | Query> = (
   snapshot: T extends Query ? QuerySnapshot : DocumentSnapshot,
