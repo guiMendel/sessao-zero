@@ -3,20 +3,12 @@ import { getMockDatabase } from '@/tests/mock/firebase'
 import { mockPlayer } from '@/tests'
 import { CleanupManager } from '@/utils/classes'
 import { where } from 'firebase/firestore'
-import { Mock } from 'vitest'
 import { getResourceGetter } from '.'
-import { makeFullInstance } from '../makeFullInstance'
-import { makeResource } from '../makeResource'
-
-vi.mock('../makeFullInstance')
-
-const mockMakeFullInstance = makeFullInstance as Mock
+import * as MakeFullInstanceNamespace from '../makeFullInstance'
 
 describe('getResourceGetter', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
-
-    mockMakeFullInstance.mockImplementation(makeResource)
   })
 
   describe('get', () => {
@@ -27,7 +19,7 @@ describe('getResourceGetter', () => {
         players: { [id]: mockPlayer({}, 'uploadable') },
       })
 
-      const { get } = getResourceGetter('players', new CleanupManager())
+      const { get } = getResourceGetter('players')
 
       await expect(get(id)).resolves.toStrictEqual(
         await getDatabaseValue('players', id)
@@ -35,6 +27,13 @@ describe('getResourceGetter', () => {
     })
 
     it('passes the correct params to make full instance', async () => {
+      const mockMakeFullInstance = vi.fn().mockReturnValue([])
+
+      vi.spyOn(
+        MakeFullInstanceNamespace,
+        'makeFullInstance'
+      ).mockImplementation(mockMakeFullInstance)
+
       const id = '1'
 
       getMockDatabase({
@@ -77,7 +76,7 @@ describe('getResourceGetter', () => {
         },
       })
 
-      const { getList } = getResourceGetter('players', new CleanupManager())
+      const { getList } = getResourceGetter('players')
 
       await expect(getList()).resolves.toStrictEqual(
         await indexDatabaseValues('players')
@@ -104,7 +103,7 @@ describe('getResourceGetter', () => {
         },
       })
 
-      const { getList } = getResourceGetter('players', new CleanupManager())
+      const { getList } = getResourceGetter('players')
 
       const expectedResult = (await indexDatabaseValues('players')).filter(
         ({ nickname }) => nickname === 'stevens'
@@ -117,6 +116,13 @@ describe('getResourceGetter', () => {
     })
 
     it('passes the correct params to make full instance', async () => {
+      const mockMakeFullInstance = vi.fn().mockReturnValue([])
+
+      vi.spyOn(
+        MakeFullInstanceNamespace,
+        'makeFullInstance'
+      ).mockImplementation(mockMakeFullInstance)
+
       const id = '1'
 
       getMockDatabase({
