@@ -1,21 +1,24 @@
 import { getMockDatabase } from '@/tests/mock/firebase'
-import { deleteResource } from '.'
+
 import { mockPlayer } from '@/tests'
+import { deleteResource } from '.'
 
 describe('deleteResource', () => {
-  it('should erase the resource', () => {
+  it('should erase the resource', async () => {
     const id = '1'
 
     const { getDatabaseValue, indexDatabaseValues } = getMockDatabase({
-      [id]: mockPlayer({}, 'uploadable'),
+      players: {
+        [id]: mockPlayer({}, 'uploadable'),
+      },
     })
 
-    expect(getDatabaseValue(id)).toBeDefined()
-    expect(indexDatabaseValues()).toHaveLength(1)
+    await expect(getDatabaseValue('players', id)).resolves.toBeDefined()
+    await expect(indexDatabaseValues('players')).resolves.toHaveLength(1)
 
-    deleteResource('players', id)
+    await deleteResource('players', id)
 
-    expect(getDatabaseValue(id)).not.toBeDefined()
-    expect(indexDatabaseValues()).toHaveLength(0)
+    await expect(getDatabaseValue('players', id)).resolves.not.toBeDefined()
+    await expect(indexDatabaseValues('players')).resolves.toHaveLength(0)
   })
 })

@@ -2,11 +2,9 @@ import { RealDate, getMockDatabase } from '@/tests/mock/firebase'
 
 import { db } from '@/api/firebase'
 import { Player } from '@/api/resourcePaths/players'
-import { ResourcePath } from '@/api/resources'
+import { mockPlayer } from '@/tests'
 import { addDoc, collection } from 'firebase/firestore'
 import { createResource } from '.'
-
-const resourcePath = 'test-resource' as ResourcePath
 
 describe('createResource', () => {
   it('should not upload password or id, and should override modifiedAt and createdAt', () => {
@@ -31,35 +29,35 @@ describe('createResource', () => {
 
   it('should add the doc with the provided properties', async () => {
     const properties = {
-      count: 1,
       name: 'scooby',
+      about: 'memes',
     }
 
     const { getDatabaseValue } = getMockDatabase({})
 
     const { id } = await createResource(
-      resourcePath,
-      properties as unknown as Player
+      'players',
+      mockPlayer(properties, 'uploadable')
     )
 
-    expect(getDatabaseValue(id)).toStrictEqual(
+    await expect(getDatabaseValue('players', id)).resolves.toStrictEqual(
       expect.objectContaining(properties)
     )
   })
 
-  it('should use the id passed as second argument', () => {
+  it('should use the id passed as second argument', async () => {
     const id = 'noice'
 
     const properties = {
-      count: 1,
       name: 'scooby',
+      about: 'memes',
     }
 
     const { getDatabaseValue } = getMockDatabase({})
 
-    createResource(resourcePath, properties as unknown as Player, id)
+    createResource('players', mockPlayer(properties, 'uploadable'), id)
 
-    expect(getDatabaseValue(id)).toStrictEqual(
+    await expect(getDatabaseValue('players', id)).resolves.toStrictEqual(
       expect.objectContaining(properties)
     )
   })

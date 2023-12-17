@@ -161,9 +161,7 @@ export const getMockDatabase = (values: Database) => {
   ) => {
     const value = lookupDatabase(path, id)
 
-    if (value == undefined) return undefined
-
-    parseTestSnapshot(path, id, value)
+    return value == undefined ? undefined : parseTestSnapshot(path, id, value)
   }
 
   const indexDatabaseValues = async <P extends ResourcePath>(
@@ -294,15 +292,15 @@ export const getMockDatabase = (values: Database) => {
 
   mockAddDoc.mockImplementation(addDatabaseValue)
 
-  mockUpdateDoc.mockImplementation(({ id, path }: MockedDoc, data) =>
+  mockUpdateDoc.mockImplementation(async ({ id, path }: MockedDoc, data) =>
     updateDatabaseValue(path, id, data)
   )
 
-  mockDeleteDoc.mockImplementation(({ id, path }: MockedDoc) => {
+  mockDeleteDoc.mockImplementation(async ({ id, path }: MockedDoc) => {
     if (database[path] != undefined) delete database[path]![id]
   })
 
-  mockSetDoc.mockImplementation(({ id, path }: MockedDoc, data) => {
+  mockSetDoc.mockImplementation(async ({ id, path }: MockedDoc, data) => {
     if (database[path] == undefined) database[path] = {}
 
     const pathDatabase = database[path]
@@ -318,7 +316,7 @@ export const getMockDatabase = (values: Database) => {
     alertListeners(path, id)
   })
 
-  mockGetDoc.mockImplementation(({ id, path }: MockedDoc) =>
+  mockGetDoc.mockImplementation(async ({ id, path }: MockedDoc) =>
     toSnapshot(path, id)
   )
 
@@ -332,6 +330,8 @@ export const getMockDatabase = (values: Database) => {
     updateDatabaseValue,
     hasListener,
     hasListListener,
+    toSnapshot,
+    allSnapshots,
   }
 }
 

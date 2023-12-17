@@ -1,11 +1,12 @@
 import { getMockDatabase } from '@/tests/mock/firebase'
 
 import { mockPlayer } from '@/tests'
-import { getResourceGetter } from '.'
 import { CleanupManager } from '@/utils/classes'
-import { makeFullInstance, makeResource } from '..'
-import { Mock } from 'vitest'
 import { where } from 'firebase/firestore'
+import { Mock } from 'vitest'
+import { getResourceGetter } from '.'
+import { makeFullInstance } from '../makeFullInstance'
+import { makeResource } from '../makeResource'
 
 vi.mock('../makeFullInstance')
 
@@ -19,73 +20,121 @@ describe('getResourceGetter', () => {
   })
 
   describe('get', () => {
-    it('should get the appropriate value', () => {
+    it('should get the appropriate value', async () => {
       const id = '1'
 
       const { getDatabaseValue } = getMockDatabase({
-        [id]: mockPlayer({}, 'uploadable'),
+        players: { [id]: mockPlayer({}, 'uploadable') },
       })
 
       const { get } = getResourceGetter('players', new CleanupManager())
 
-      expect(get(id)).resolves.toStrictEqual(getDatabaseValue(id))
+      await expect(get(id)).resolves.toStrictEqual(
+        await getDatabaseValue('players', id)
+      )
+    })
+
+    it('passes the correct params to make full instance', async () => {
+      const id = '1'
+
+      getMockDatabase({
+        players: { [id]: mockPlayer({}, 'uploadable') },
+      })
+
+      const cleanupManager = new CleanupManager()
+
+      const { get } = getResourceGetter('players', cleanupManager)
+
+      await get(id)
+
+      expect(mockMakeFullInstance).toHaveBeenCalledWith(
+        expect.objectContaining({ id }),
+        'players',
+        cleanupManager,
+        []
+      )
     })
   })
 
   describe('getList', () => {
-    it('with no filters should get all the docs', () => {
+    it('with no filters should get all the docs', async () => {
       const { indexDatabaseValues } = getMockDatabase({
-        '1': mockPlayer(
-          {
-            name: 'scooby',
-            nickname: 'snacks',
-          },
-          'uploadable'
-        ),
-        '2': mockPlayer(
-          {
-            name: 'bobby',
-            nickname: 'stevens',
-          },
-          'uploadable'
-        ),
+        players: {
+          '1': mockPlayer(
+            {
+              name: 'scooby',
+              nickname: 'snacks',
+            },
+            'uploadable'
+          ),
+          '2': mockPlayer(
+            {
+              name: 'bobby',
+              nickname: 'stevens',
+            },
+            'uploadable'
+          ),
+        },
       })
 
       const { getList } = getResourceGetter('players', new CleanupManager())
 
-      expect(getList()).resolves.toStrictEqual(indexDatabaseValues())
+      await expect(getList()).resolves.toStrictEqual(
+        await indexDatabaseValues('players')
+      )
     })
 
     it('should appropriately filter the docs', async () => {
       const { indexDatabaseValues } = getMockDatabase({
-        '1': mockPlayer(
-          {
-            name: 'scooby',
-            nickname: 'snacks',
-          },
-          'uploadable'
-        ),
-        '2': mockPlayer(
-          {
-            name: 'bobby',
-            nickname: 'stevens',
-          },
-          'uploadable'
-        ),
+        players: {
+          '1': mockPlayer(
+            {
+              name: 'scooby',
+              nickname: 'snacks',
+            },
+            'uploadable'
+          ),
+          '2': mockPlayer(
+            {
+              name: 'bobby',
+              nickname: 'stevens',
+            },
+            'uploadable'
+          ),
+        },
       })
 
       const { getList } = getResourceGetter('players', new CleanupManager())
 
-      const expectedResult = indexDatabaseValues().filter(
+      const expectedResult = (await indexDatabaseValues('players')).filter(
         ({ nickname }) => nickname === 'stevens'
       )
 
       const list = await getList([where('nickname', '==', 'stevens')])
 
       expect(list).toStrictEqual(expectedResult)
-      expect(list).not.toStrictEqual(indexDatabaseValues())
+      expect(list).not.toStrictEqual(await indexDatabaseValues('players'))
+    })
+
+    it('passes the correct params to make full instance', async () => {
+      const id = '1'
+
+      getMockDatabase({
+        players: { [id]: mockPlayer({}, 'uploadable') },
+      })
+
+      const cleanupManager = new CleanupManager()
+
+      const { getList } = getResourceGetter('players', cleanupManager)
+
+      await getList()
+
+      expect(mockMakeFullInstance).toHaveBeenCalledWith(
+        { docs: [expect.objectContaining({ id })] },
+        'players',
+        cleanupManager,
+        []
+      )
     })
   })
-
-  it.todo('should link the cleanup manager')
 })

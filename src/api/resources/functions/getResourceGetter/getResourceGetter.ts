@@ -5,8 +5,8 @@ import {
   QueryFieldFilterConstraint,
   collection,
   doc,
-  getDoc as firestoreGetDoc,
-  getDocs as firestoreGetDocs,
+  getDoc,
+  getDocs,
   query,
 } from 'firebase/firestore'
 import { makeFullInstance } from '../makeFullInstance'
@@ -35,19 +35,16 @@ export const getResourceGetter = <P extends ResourcePath>(
   /** A collection deste recurso */
   const resourceCollection = collection(db, resourcePath)
 
-  /** Obtem a referencia de documento para o id fornecido */
-  const getDoc = (id: string) => doc(resourceCollection, id)
-
   return {
     /** Pega uma instancia do recurso */
     get: (id: string) =>
-      firestoreGetDoc(getDoc(id)).then(
+      getDoc(doc(resourceCollection, id)).then(
         (doc) => makeFullInstance(doc, resourcePath, cleanupManager, [])[0]
       ),
 
     /** Pega uma lista filtrada do recurso */
     getList: (filters: QueryFieldFilterConstraint[] = []) =>
-      firestoreGetDocs(query(resourceCollection, ...filters)).then(
+      getDocs(query(resourceCollection, ...filters)).then(
         (docs) =>
           makeFullInstance(
             docs,

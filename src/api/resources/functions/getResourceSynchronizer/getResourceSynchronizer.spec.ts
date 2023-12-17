@@ -1,12 +1,21 @@
 import { getMockDatabase } from '@/tests/mock/firebase'
 
+import * as SyncableRefNamespace from '@/api/classes/Syncable/SyncableRef'
 import { mockPlayer } from '@/tests'
-import { getResourceSynchronizer } from '.'
 import { CleanupManager } from '@/utils/classes'
-import { makeFullInstance, makeResource } from '..'
+import {
+  DocumentReference,
+  Query,
+  collection,
+  doc,
+  query,
+  where,
+} from 'firebase/firestore'
 import { Mock } from 'vitest'
-import { DocumentReference, Query, where } from 'firebase/firestore'
-import { syncableRef } from '@/api/classes'
+import { getResourceSynchronizer } from '.'
+import { makeFullInstance } from '../makeFullInstance'
+import { makeResource } from '../makeResource'
+import { db } from '@/api/firebase'
 
 vi.mock('../makeFullInstance')
 
@@ -20,11 +29,13 @@ describe('getResourceSynchronizer', () => {
   })
 
   describe('sync', () => {
-    it('should sync current call', () => {
+    it('should sync current call', async () => {
       const id = '1'
 
       const { getDatabaseValue, updateDatabaseValue } = getMockDatabase({
-        [id]: mockPlayer({}, 'uploadable'),
+        players: {
+          [id]: mockPlayer({}, 'uploadable'),
+        },
       })
 
       const { sync } = getResourceSynchronizer('players', new CleanupManager())
@@ -32,45 +43,80 @@ describe('getResourceSynchronizer', () => {
       const instance = sync(id)
 
       // Ensures it initializes properly
-      expect(instance.value).toStrictEqual(getDatabaseValue(id))
+      expect(instance.value).toStrictEqual(
+        await getDatabaseValue('players', id)
+      )
 
-      updateDatabaseValue(id, { count: 10 })
+      await updateDatabaseValue('players', id, { about: 'jooj' })
 
       // Ensures it synced properly
-      expect(instance.value).toStrictEqual(getDatabaseValue(id))
+      expect(instance.value).toStrictEqual(
+        await getDatabaseValue('players', id)
+      )
     })
 
-    it('should also sync the provided ref', () => {
+    it('should also sync the provided ref', async () => {
       const id = '1'
 
       const { getDatabaseValue, updateDatabaseValue } = getMockDatabase({
-        [id]: mockPlayer({}, 'uploadable'),
+        players: {
+          [id]: mockPlayer({}, 'uploadable'),
+        },
       })
 
       const { sync } = getResourceSynchronizer('players', new CleanupManager())
 
-      const instanceRef = syncableRef<'players', DocumentReference>(
+      const instanceRef = SyncableRefNamespace.syncableRef<
         'players',
-        'empty-document',
-        new CleanupManager()
-      )
+        DocumentReference
+      >('players', 'empty-document', new CleanupManager())
 
       sync(id, instanceRef)
 
       // Ensures it initializes properly
-      expect(instanceRef.value).toStrictEqual(getDatabaseValue(id))
+      expect(instanceRef.value).toStrictEqual(
+        await getDatabaseValue('players', id)
+      )
 
-      updateDatabaseValue(id, { count: 10 })
+      await updateDatabaseValue('players', id, { about: 'jooj' })
 
       // Ensures it synced properly
-      expect(instanceRef.value).toStrictEqual(getDatabaseValue(id))
+      expect(instanceRef.value).toStrictEqual(
+        await getDatabaseValue('players', id)
+      )
+    })
+
+    it('passes the correct params to syncableRef', async () => {
+      const mockSyncableRef = vi.fn()
+
+      vi.spyOn(SyncableRefNamespace, 'syncableRef').mockImplementation(
+        mockSyncableRef
+      )
+
+      const id = '1'
+
+      getMockDatabase({
+        players: { [id]: mockPlayer({}, 'uploadable') },
+      })
+
+      const cleanupManager = new CleanupManager()
+
+      const { sync } = getResourceSynchronizer('players', cleanupManager)
+
+      sync(id)
+
+      expect(mockSyncableRef).toHaveBeenCalledWith(
+        'players',
+        doc(collection(db, 'players'), id),
+        cleanupManager
+      )
     })
   })
 
   describe('syncing list', () => {
-    describe('syncing', () => {
-      it('should sync to database content', () => {
-        const { indexDatabaseValues, updateDatabaseValue } = getMockDatabase({
+    it('should sync to database content', async () => {
+      const { indexDatabaseValues, updateDatabaseValue } = getMockDatabase({
+        players: {
           '1': mockPlayer(
             {
               name: 'scooby',
@@ -85,25 +131,27 @@ describe('getResourceSynchronizer', () => {
             },
             'uploadable'
           ),
-        })
-
-        const { syncList } = getResourceSynchronizer(
-          'players',
-          new CleanupManager()
-        )
-
-        const list = syncList()
-
-        // Verifica se inicializa adequadamente
-        expect(list.value).toStrictEqual(indexDatabaseValues())
-
-        updateDatabaseValue('2', { count: 10 })
-
-        expect(list.value).toStrictEqual(indexDatabaseValues())
+        },
       })
 
-      it('should also sync the provided ref', () => {
-        const { indexDatabaseValues, updateDatabaseValue } = getMockDatabase({
+      const { syncList } = getResourceSynchronizer(
+        'players',
+        new CleanupManager()
+      )
+
+      const list = syncList()
+
+      // Verifica se inicializa adequadamente
+      expect(list.value).toStrictEqual(await indexDatabaseValues('players'))
+
+      await updateDatabaseValue('players', '2', { about: 'meem' })
+
+      expect(list.value).toStrictEqual(await indexDatabaseValues('players'))
+    })
+
+    it('should also sync the provided ref', async () => {
+      const { indexDatabaseValues, updateDatabaseValue } = getMockDatabase({
+        players: {
           '1': mockPlayer(
             {
               name: 'scooby',
@@ -118,33 +166,35 @@ describe('getResourceSynchronizer', () => {
             },
             'uploadable'
           ),
-        })
-
-        const { syncList } = getResourceSynchronizer(
-          'players',
-          new CleanupManager()
-        )
-
-        const listRef = syncableRef<'players', Query>(
-          'players',
-          'empty-query',
-          new CleanupManager()
-        )
-
-        expect(listRef.value).toStrictEqual([])
-
-        syncList([], listRef)
-
-        // Verifica se inicializa adequadamente
-        expect(listRef.value).toStrictEqual(indexDatabaseValues())
-
-        updateDatabaseValue('2', { count: 10 })
-
-        expect(listRef.value).toStrictEqual(indexDatabaseValues())
+        },
       })
 
-      it('should filter list to match query and keep filter synced', () => {
-        const { indexDatabaseValues } = getMockDatabase({
+      const { syncList } = getResourceSynchronizer(
+        'players',
+        new CleanupManager()
+      )
+
+      const listRef = SyncableRefNamespace.syncableRef<'players', Query>(
+        'players',
+        'empty-query',
+        new CleanupManager()
+      )
+
+      expect(listRef.value).toStrictEqual([])
+
+      syncList([], listRef)
+
+      // Verifica se inicializa adequadamente
+      expect(listRef.value).toStrictEqual(await indexDatabaseValues('players'))
+
+      await updateDatabaseValue('players', '2', { about: 'meem' })
+
+      expect(listRef.value).toStrictEqual(await indexDatabaseValues('players'))
+    })
+
+    it('should filter list to match query and keep filter synced', async () => {
+      const { indexDatabaseValues } = getMockDatabase({
+        players: {
           '1': mockPlayer(
             {
               name: 'scooby',
@@ -159,24 +209,50 @@ describe('getResourceSynchronizer', () => {
             },
             'uploadable'
           ),
-        })
-
-        const { syncList } = getResourceSynchronizer(
-          'players',
-          new CleanupManager()
-        )
-
-        const expectedResult = indexDatabaseValues().filter(
-          ({ nickname }) => nickname === 'stevens'
-        )
-
-        const list = syncList([where('nickname', '==', 'stevens')])
-
-        expect(list.value).toStrictEqual(expectedResult)
-        expect(list.value).not.toStrictEqual(indexDatabaseValues())
+        },
       })
+
+      const { syncList } = getResourceSynchronizer(
+        'players',
+        new CleanupManager()
+      )
+
+      const expectedResult = (await indexDatabaseValues('players')).filter(
+        ({ nickname }) => nickname === 'stevens'
+      )
+
+      const list = syncList([where('nickname', '==', 'stevens')])
+
+      expect(list.value).toStrictEqual(expectedResult)
+      expect(list.value).not.toStrictEqual(await indexDatabaseValues('players'))
+    })
+
+    it('passes the correct params to make full instance', async () => {
+      const mockSyncableRef = vi.fn()
+
+      vi.spyOn(SyncableRefNamespace, 'syncableRef').mockImplementation(
+        mockSyncableRef
+      )
+
+      const id = '1'
+
+      getMockDatabase({
+        players: { [id]: mockPlayer({}, 'uploadable') },
+      })
+
+      const cleanupManager = new CleanupManager()
+
+      const { syncList } = getResourceSynchronizer('players', cleanupManager)
+
+      syncList()
+
+      expect(mockSyncableRef).toHaveBeenCalledWith(
+        'players',
+        expect.objectContaining(
+          JSON.parse(JSON.stringify(query(collection(db, 'players'))))
+        ),
+        cleanupManager
+      )
     })
   })
-
-  it.todo('should link the cleanup manager to the syncable refs')
 })

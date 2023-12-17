@@ -1,13 +1,10 @@
 import { RealDate, getMockDatabase } from '@/tests/mock/firebase'
 
-import { ResourcePath } from '@/api/resources'
-import { updateResource } from '.'
-import { collection, updateDoc } from 'firebase/firestore'
 import { db } from '@/api/firebase'
-import { mockPlayer } from '@/tests'
 import { Player } from '@/api/resourcePaths/players'
-
-const resourcePath = 'test-resource' as ResourcePath
+import { mockPlayer } from '@/tests'
+import { collection, updateDoc } from 'firebase/firestore'
+import { updateResource } from '.'
 
 describe('updateResource', () => {
   it('should not upload password, createdAt or id, and correctly update the modifiedAt property', async () => {
@@ -22,10 +19,10 @@ describe('updateResource', () => {
 
     const realId = '1'
 
-    await updateResource(resourcePath, realId, properties)
+    await updateResource('players', realId, properties)
 
     expect(updateDoc).toHaveBeenCalledWith(
-      { id: realId, collection: collection(db, resourcePath) },
+      { id: realId, collection: collection(db, 'players') },
       {
         count: properties.count,
         name: properties.name,
@@ -48,12 +45,12 @@ describe('updateResource', () => {
     const id = '1'
 
     const { getDatabaseValue } = getMockDatabase({
-      [id]: mockPlayer(originalProperties, 'uploadable'),
+      players: { [id]: mockPlayer(originalProperties, 'uploadable') },
     })
 
-    await updateResource(resourcePath, id, newProperties)
+    await updateResource('players', id, newProperties)
 
-    expect(getDatabaseValue(id)).toStrictEqual(
+    await expect(getDatabaseValue('players', id)).resolves.toStrictEqual(
       expect.objectContaining(newProperties)
     )
   })
@@ -71,15 +68,15 @@ describe('updateResource', () => {
     const id = '1'
 
     const { getDatabaseValue } = getMockDatabase({
-      [id]: mockPlayer(originalProperties, 'uploadable'),
+      players: { [id]: mockPlayer(originalProperties, 'uploadable') },
     })
 
-    await updateResource(resourcePath, id, newProperties, { overwrite: true })
+    await updateResource('players', id, newProperties, { overwrite: true })
 
-    expect(getDatabaseValue(id)).toStrictEqual(
-      expect.objectContaining(newProperties)
-    )
+    const result = await getDatabaseValue('players', id)
 
-    expect(getDatabaseValue(id).name).not.toBeDefined()
+    expect(result).toStrictEqual(expect.objectContaining(newProperties))
+
+    expect(result!.name).not.toBeDefined()
   })
 })
