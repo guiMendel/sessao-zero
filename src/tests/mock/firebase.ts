@@ -1,9 +1,17 @@
-import { Resource, ResourcePath, Uploadable } from '@/api/resources'
+import {
+  ManyToManySettings,
+  ManyToManyTable,
+  Resource,
+  ResourcePath,
+  Uploadable,
+  resourcePaths,
+} from '@/api/resources'
 import {
   addDoc,
   collection,
   deleteDoc,
   doc,
+  documentId,
   getDoc,
   getDocs,
   onSnapshot,
@@ -28,6 +36,7 @@ vi.mock('firebase/firestore', () => ({
   setDoc: vi.fn(),
   getDoc: vi.fn(),
   getDocs: vi.fn(),
+  documentId: vi.fn(),
 }))
 
 export const mockGetDocs = getDocs as Mock
@@ -41,17 +50,39 @@ export const mockOnSnapshot = onSnapshot as Mock
 export const mockCollection = collection as Mock
 export const mockQuery = query as Mock
 export const mockWhere = where as Mock
+export const mockDocumentId = documentId as Mock
 
-type Snapshot<P extends ResourcePath> = {
-  data: () => Uploadable<P> | undefined
+type DatabaseTable = ResourcePath | ManyToManyTable
+
+type ManyToManyEntry<P extends ManyToManyTable> = {
+  [key in ManyToManySettings[P][number]]: string
+}
+
+type EntryFor<P extends DatabaseTable> = P extends ResourcePath
+  ? Uploadable<P>
+  : P extends ManyToManyTable
+  ? ManyToManyEntry<P>
+  : never
+
+type ExternalEntryFor<P extends DatabaseTable> = P extends ResourcePath
+  ? Resource<P>
+  : P extends ManyToManyTable
+  ? ManyToManyEntry<P>
+  : never
+
+type Snapshot<P extends DatabaseTable> = {
+  data: () => EntryFor<P> | undefined
   id: string
 }
 
 type Database = Partial<{
-  [P in ResourcePath]: Record<string, Uploadable<P>>
+  [P in DatabaseTable]: Record<string, EntryFor<P>>
 }>
 
 type Listener<T> = (newValue: T | undefined) => void
+
+const isResourcePath = (path: DatabaseTable): path is ResourcePath =>
+  resourcePaths.includes(path as any)
 
 export const getMockDatabase = (values: Database) => {
   const database: Database = { ...values }
@@ -61,7 +92,7 @@ export const getMockDatabase = (values: Database) => {
   }> = {}
 
   const databaseListeners: Partial<{
-    [P in ResourcePath]: {
+    [P in DatabaseTable]: {
       listener: Listener<{ docs: Snapshot<P>[] }>
       query: (snapshots: Snapshot<P>[]) => Snapshot<P>[]
     }[]
@@ -82,10 +113,10 @@ export const getMockDatabase = (values: Database) => {
       modifiedAt: new Date(data.modifiedAt),
     }
 
-  const lookupDatabase = <P extends ResourcePath>(
+  const lookupDatabase = <P extends DatabaseTable>(
     path: P,
     id: string
-  ): Uploadable<P> | undefined => {
+  ): EntryFor<P> | undefined => {
     const pathDatabase = database[path]
 
     return pathDatabase ? pathDatabase[id] : undefined
@@ -161,19 +192,32 @@ export const getMockDatabase = (values: Database) => {
   ) => {
     const value = lookupDatabase(path, id)
 
-    return value == undefined ? undefined : parseTestSnapshot(path, id, value)
+    return value == undefined
+      ? undefined
+      : parseTestSnapshot(path, id, value as Uploadable<P>)
   }
 
-  const indexDatabaseValues = async <P extends ResourcePath>(
+  async function indexDatabaseValues<P extends ResourcePath>(
     path: P
-  ): Promise<Resource<P>[]> => {
+  ): Promise<Resource<P>[]>
+
+  async function indexDatabaseValues<P extends ManyToManyTable>(
+    path: P
+  ): Promise<ManyToManyEntry<P>[]>
+
+  async function indexDatabaseValues<P extends DatabaseTable>(
+    path: P
+  ): Promise<ExternalEntryFor<P>[]> {
     const pathDatabase = database[path]
 
     if (pathDatabase == undefined) return []
 
-    return Object.entries(pathDatabase).map(([id, data]) =>
-      parseTestSnapshot(path, id, data)
-    )
+    if (isResourcePath(path))
+      return Object.entries(pathDatabase).map(
+        ([id, data]) => parseTestSnapshot(path, id, data as any) as any
+      )
+
+    return Object.values(pathDatabase).map((data) => data as any)
   }
 
   const hasListener = <P extends ResourcePath>(path: P, id: string) => {
@@ -188,6 +232,12 @@ export const getMockDatabase = (values: Database) => {
     return pathListeners != undefined && pathListeners.length > 0
   }
 
+  type DocumentIdSentinel = { sentinel: 'documentId' }
+
+  mockDocumentId.mockReturnValue({
+    sentinel: 'documentId',
+  } as DocumentIdSentinel)
+
   mockCollection.mockImplementation((_, path) => path)
 
   // Simplifica os docs
@@ -197,12 +247,29 @@ export const getMockDatabase = (values: Database) => {
 
   mockWhere.mockImplementation(
     (
-        property: keyof Uploadable<ResourcePath>,
-        _: '==',
-        value: string | boolean | number
-      ) =>
-      (snapshots: Snapshot<ResourcePath>[]) =>
-        snapshots.filter((snapshot) => snapshot.data()?.[property] === value)
+      property: keyof Uploadable<ResourcePath> | DocumentIdSentinel,
+      operation: '==' | 'in',
+      value: string | boolean | number | any[]
+    ): ((snapshots: Snapshot<ResourcePath>[]) => Snapshot<ResourcePath>[]) => {
+      const getTarget = (snapshot: Snapshot<ResourcePath>) =>
+        typeof property === 'string' ? snapshot.data()?.[property] : snapshot.id
+
+      switch (operation) {
+        case '==':
+          return (snapshots) =>
+            snapshots.filter((snapshot) => getTarget(snapshot) === value)
+
+        case 'in':
+          return (snapshots) =>
+            snapshots.filter((snapshot) =>
+              (value as any[]).includes(getTarget(snapshot))
+            )
+
+        default:
+          const exhaustiveCheck: never = operation
+          return exhaustiveCheck
+      }
+    }
   )
 
   type MockedQuery = {
@@ -262,7 +329,7 @@ export const getMockDatabase = (values: Database) => {
 
       // Se for do database inteiro
       const listener = rawListener as Listener<{
-        docs: Snapshot<ResourcePath>[]
+        docs: Snapshot<DatabaseTable>[]
       }>
 
       // Adiciona o listener
@@ -271,7 +338,7 @@ export const getMockDatabase = (values: Database) => {
       const pathListeners = databaseListeners[path]
 
       if (pathListeners == undefined)
-        throw new Error('Impossible with query! How can this be??')
+        throw new Error('Impossible (with query)! How can this be??')
 
       pathListeners.push({ listener, query: filter as any })
 

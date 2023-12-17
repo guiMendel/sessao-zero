@@ -8,7 +8,13 @@ import {
   relationSettings,
 } from '@/api/resources'
 import { CleanupManager } from '@/utils/classes'
-import { collection, getDocs, query, where } from 'firebase/firestore'
+import {
+  collection,
+  documentId,
+  getDocs,
+  query,
+  where,
+} from 'firebase/firestore'
 
 export const getRelation = <
   P extends ResourcePath,
@@ -107,7 +113,7 @@ const getManyToManyRelation = async <P extends ResourcePath>(
     (doc) => doc.data()[definition.targetResourcePath]
   )
 
-  const targetFilters = [where('id', 'in', targetIds)]
+  const targetFilters = [where(documentId(), 'in', targetIds)]
 
   return getList(targetFilters)
 }

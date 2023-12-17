@@ -21,17 +21,20 @@ export interface Properties {
 const customPropertyExtractors: CustomPropertyExtractor = {}
 
 /** Permite definir nomes para tabelas de many-to-many */
-export type ManyToManyTable = 'players-guilds'
+export const manyToManySettings = {
+  playersGuilds: ['guilds', 'players'],
+} satisfies Record<string, [ResourcePath, ResourcePath]>
 
 /** Define os nomes das relacoes que serao injetadas em cada recurso */
 export const relationSettings = {
   guilds: {
     owner: isOne('players', { relationKey: 'ownerUid' }),
-    players: isMany('players', { manyToManyTable: 'players-guilds' }),
+    players: isMany('players', { manyToManyTable: 'playersGuilds' }),
   },
+
   players: {
     ownedGuilds: isMany('guilds', { relationKey: 'ownerUid' }),
-    guilds: isMany('guilds', { manyToManyTable: 'players-guilds' }),
+    guilds: isMany('guilds', { manyToManyTable: 'playersGuilds' }),
   },
 } satisfies Partial<{
   [path in ResourcePath]: Record<
@@ -92,6 +95,12 @@ export const getPropertyExtrator = <P extends ResourcePath>(
 /** Tipos de relacao possiveis */
 type RelationType = 'has-one' | 'has-many' | 'many-to-many'
 
+/** Mapeia cada many-to-many aos paths que os compoem */
+export type ManyToManySettings = typeof manyToManySettings
+
+/** Nomes de tabelas de many-to-many */
+export type ManyToManyTable = keyof ManyToManySettings
+
 /** Define uma relacao entre um path S e um path T */
 export type RelationDefinition<
   S extends ResourcePath,
@@ -137,6 +146,18 @@ export type UnrefedRelations<P extends ResourcePath> = {
       FullInstance<RelationSettings<P>[relation]['targetResourcePath']>[]
 }
 
+/** Dado 2 paths P e Q, retorna as many-to-many tables que incluem eles */
+export type ResourceManyToManyTables<
+  P extends ResourcePath,
+  Q extends ResourcePath
+> = {
+  [T in ManyToManyTable]: ManyToManySettings[T] extends [P, Q]
+    ? T
+    : ManyToManySettings[T] extends [Q, P]
+    ? T
+    : never
+}[ManyToManyTable]
+
 // declare const test: FullInstance<'players'>
 
 // test.ownedGuilds.value
@@ -154,13 +175,13 @@ function isMany<S extends ResourcePath, T extends ResourcePath>(
 /** Constroi uma definicao de relacao n:n */
 function isMany<S extends ResourcePath, T extends ResourcePath>(
   targetResourcePath: T,
-  { manyToManyTable }: { manyToManyTable: ManyToManyTable }
+  { manyToManyTable }: { manyToManyTable: ResourceManyToManyTables<S, T> }
 ): RelationDefinition<S, T, 'many-to-many'>
 
 function isMany<S extends ResourcePath, T extends ResourcePath>(
   targetResourcePath: T,
   key:
-    | { manyToManyTable: ManyToManyTable }
+    | { manyToManyTable: ResourceManyToManyTables<S, T> }
     | { relationKey: keyof Properties[T] }
 ): RelationDefinition<S, T, 'many-to-many' | 'has-many'> {
   return 'relationKey' in key

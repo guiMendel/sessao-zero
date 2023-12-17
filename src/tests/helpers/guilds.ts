@@ -1,30 +1,74 @@
 import { syncableRef } from '@/api/classes'
-import { FullInstance } from '@/api/resources'
+import { db } from '@/api/firebase'
+import { Guild } from '@/api/resourcePaths/guilds'
+import { FullInstance, Resource, Uploadable } from '@/api/resources'
 import { CleanupManager } from '@/utils/classes'
-import { DocumentReference, Query } from 'firebase/firestore'
+import { DocumentReference, Query, collection, doc } from 'firebase/firestore'
 
-export const mockGuild = (
-  overrides?: Partial<FullInstance<'guilds'>>
-): FullInstance<'guilds'> => ({
-  createdAt: new Date(),
-  players: syncableRef<'players', Query>(
-    'players',
-    'empty-query',
-    new CleanupManager()
-  ),
-  id: '1',
-  modifiedAt: new Date(),
-  name: 'brotherhood',
-  owner: syncableRef<'players', DocumentReference>(
-    'players',
-    'empty-document',
-    new CleanupManager()
-  ),
-  resourcePath: 'guilds',
-  allowAdventureSubscription: true,
-  listingBehavior: 'public',
-  open: true,
-  ownerUid: '1',
-  requireAdmission: false,
-  ...overrides,
-})
+export function mockGuild(
+  overrides?: Partial<FullInstance<'guilds'>>,
+  level?: 'full-instance'
+): FullInstance<'guilds'>
+
+export function mockGuild(
+  overrides: Partial<Resource<'guilds'>>,
+  level: 'resource'
+): Resource<'guilds'>
+
+export function mockGuild(
+  overrides: Partial<Uploadable<'guilds'>>,
+  level: 'uploadable'
+): Uploadable<'guilds'>
+
+export function mockGuild(overrides: Partial<Guild>, level: 'properties'): Guild
+
+export function mockGuild(
+  overrides?: Partial<FullInstance<'guilds'> | Uploadable<'guilds'>>,
+  level?: 'properties' | 'resource' | 'full-instance' | 'uploadable'
+): FullInstance<'guilds'> | Resource<'guilds'> | Guild | Uploadable<'guilds'> {
+  const ownerUid = overrides?.ownerUid ?? '1'
+
+  const properties: Guild = {
+    name: 'brotherhood',
+    allowAdventureSubscription: true,
+    listingBehavior: 'public',
+    open: true,
+    ownerUid,
+    requireAdmission: false,
+  }
+
+  if (level === 'properties') return { ...properties, ...overrides }
+
+  if (level === 'uploadable')
+    return {
+      ...properties,
+      createdAt: new Date().toString(),
+      modifiedAt: new Date().toString(),
+      ...overrides,
+    }
+
+  const resource: Resource<'guilds'> = {
+    ...properties,
+    createdAt: new Date(),
+    id: '1',
+    modifiedAt: new Date(),
+    resourcePath: 'guilds',
+  }
+
+  if (level === 'resource') return { ...resource, ...overrides }
+
+  return {
+    ...resource,
+    players: syncableRef<'players', Query>(
+      'players',
+      'empty-query',
+      new CleanupManager()
+    ),
+    owner: syncableRef<'players', DocumentReference>(
+      'players',
+      doc(collection(db, 'players'), ownerUid),
+      new CleanupManager()
+    ),
+    ...overrides,
+  }
+}
