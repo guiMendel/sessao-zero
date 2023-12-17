@@ -42,182 +42,294 @@ export const mockCollection = collection as Mock
 export const mockQuery = query as Mock
 export const mockWhere = where as Mock
 
-type Snapshot = { data: () => any; id: string }
-type Listener<T> = (newValue: T) => void
+type Snapshot<P extends ResourcePath> = {
+  data: () => Uploadable<P> | undefined
+  id: string
+}
 
-export const getMockDatabase = <P extends ResourcePath>(
-  values: Record<string, Uploadable<P>>,
-  resourcePath: P = 'players' as P
-) => {
-  const mockSnapshotDatabase: Record<string, Snapshot> = {}
+type Database = Partial<{
+  [P in ResourcePath]: Record<string, Uploadable<P>>
+}>
 
-  const docListeners: Record<string, Listener<Snapshot>> = {}
+type Listener<T> = (newValue: T | undefined) => void
 
-  const databaseListeners: {
-    listener: Listener<{ docs: Snapshot[] }>
-    query: (snapshots: Snapshot[]) => Snapshot[]
-  }[] = []
+export const getMockDatabase = (values: Database) => {
+  const database: Database = { ...values }
 
-  const alertListeners = (modifiedId: string) => {
-    // Update all listeners
-    if (modifiedId in docListeners)
-      docListeners[modifiedId](mockSnapshotDatabase[modifiedId])
+  const docListeners: Partial<{
+    [P in ResourcePath]: Record<string, Listener<Snapshot<P>>>
+  }> = {}
 
-    for (const { listener, query } of databaseListeners) {
-      const queriedSnapshots = query(Object.values(mockSnapshotDatabase))
-
-      // If the updated snapshot is in this query, trigger it
-      if (queriedSnapshots.some(({ id }) => id === modifiedId))
-        listener({ docs: queriedSnapshots })
-    }
-  }
+  const databaseListeners: Partial<{
+    [P in ResourcePath]: {
+      listener: Listener<{ docs: Snapshot<P>[] }>
+      query: (snapshots: Snapshot<P>[]) => Snapshot<P>[]
+    }[]
+  }> = {}
 
   let nextId = 0
 
-  const parseTestSnapshot = (id: string, data: any): Resource<P> =>
+  const parseTestSnapshot = <P extends ResourcePath>(
+    path: P,
+    id: string,
+    data: Uploadable<P>
+  ): Resource<P> =>
     data && {
       ...data,
       id,
-      resourcePath,
+      resourcePath: path,
       createdAt: new Date(data.createdAt),
       modifiedAt: new Date(data.modifiedAt),
     }
 
-  const addDatabaseValue = async (value: Uploadable<P>) => {
-    const id = (nextId++).toString()
+  const lookupDatabase = <P extends ResourcePath>(
+    path: P,
+    id: string
+  ): Uploadable<P> | undefined => {
+    const pathDatabase = database[path]
 
-    addSnapshot(id)
-    updateDatabaseValue(id, value)
-
-    return mockSnapshotDatabase[id]
+    return pathDatabase ? pathDatabase[id] : undefined
   }
 
-  const getDatabaseValue = (id: string) =>
-    parseTestSnapshot(id, mockSnapshotDatabase[id]?.data())
+  const toSnapshot = <P extends ResourcePath>(
+    path: P,
+    id: string
+  ): Snapshot<P> => ({
+    data: () => lookupDatabase(path, id),
+    id,
+  })
 
-  const indexDatabaseValues = (): Resource<P>[] =>
-    Object.entries(mockSnapshotDatabase).map(([id, value]) =>
-      parseTestSnapshot(id, value.data())
-    )
+  const allSnapshots = <P extends ResourcePath>(path: P): Snapshot<P>[] =>
+    Object.keys(database[path] ?? {}).map((id) => toSnapshot(path, id))
 
-  const updateDatabaseValue = (id: string, newValue: any) => {
-    values[id] = {
-      ...values[id],
+  const alertListeners = <P extends ResourcePath>(
+    path: P,
+    modifiedId: string
+  ) => {
+    // Update all listeners
+    const docPathListeners = docListeners[path]
+
+    if (docPathListeners && modifiedId in docPathListeners)
+      docPathListeners[modifiedId](toSnapshot(path, modifiedId))
+
+    const databasePathListeners = databaseListeners[path]
+
+    if (databasePathListeners) {
+      for (const { listener, query } of databasePathListeners) {
+        const queriedSnapshots = query(allSnapshots(path))
+
+        // If the updated snapshot is in this query, trigger it
+        if (queriedSnapshots.some(({ id }) => id === modifiedId))
+          listener({ docs: queriedSnapshots })
+      }
+    }
+  }
+
+  const updateDatabaseValue = async <P extends ResourcePath>(
+    path: P,
+    id: string,
+    newValue: Partial<Uploadable<P>>
+  ) => {
+    if (database[path] == undefined) database[path] = {}
+
+    const pathDatabase = database[path]
+
+    if (pathDatabase == undefined) throw new Error('wtf just happened')
+
+    pathDatabase[id] = {
+      ...pathDatabase[id],
       ...newValue,
     }
 
-    alertListeners(id)
+    alertListeners(path, id)
   }
 
-  const hasListener = (id: string) => id in docListeners
+  const addDatabaseValue = async <P extends ResourcePath>(
+    path: P,
+    value: Uploadable<P>
+  ) => {
+    const id = (nextId++).toString()
 
-  const hasListListener = () => databaseListeners.length > 0
+    updateDatabaseValue(path, id, value)
 
-  // Inicializa a database
-  const addSnapshot = (id: string) =>
-    (mockSnapshotDatabase[id] = {
-      data: () => values[id],
-      id: id,
-    })
+    return toSnapshot(path, id)
+  }
 
-  for (const id in values) addSnapshot(id)
+  const getDatabaseValue = async <P extends ResourcePath>(
+    path: P,
+    id: string
+  ) => {
+    const value = lookupDatabase(path, id)
+
+    if (value == undefined) return undefined
+
+    parseTestSnapshot(path, id, value)
+  }
+
+  const indexDatabaseValues = async <P extends ResourcePath>(
+    path: P
+  ): Promise<Resource<P>[]> => {
+    const pathDatabase = database[path]
+
+    if (pathDatabase == undefined) return []
+
+    return Object.entries(pathDatabase).map(([id, data]) =>
+      parseTestSnapshot(path, id, data)
+    )
+  }
+
+  const hasListener = <P extends ResourcePath>(path: P, id: string) => {
+    const pathListeners = docListeners[path]
+
+    return pathListeners != undefined && id in pathListeners
+  }
+
+  const hasListListener = <P extends ResourcePath>(path: P) => {
+    const pathListeners = databaseListeners[path]
+
+    return pathListeners != undefined && pathListeners.length > 0
+  }
+
+  mockCollection.mockImplementation((_, path) => path)
 
   // Simplifica os docs
-  mockDoc.mockImplementation((_, id) => id)
+  type MockedDoc = { path: ResourcePath; id: string }
+
+  mockDoc.mockImplementation((path, id): MockedDoc => ({ path, id }))
 
   mockWhere.mockImplementation(
-    (property: string, _: '==', value: string | boolean | number) =>
-      (snapshots: Snapshot[]) =>
-        snapshots.filter((snapshot) => snapshot.data()[property] === value)
+    (
+        property: keyof Uploadable<ResourcePath>,
+        _: '==',
+        value: string | boolean | number
+      ) =>
+      (snapshots: Snapshot<ResourcePath>[]) =>
+        snapshots.filter((snapshot) => snapshot.data()?.[property] === value)
   )
 
+  type MockedQuery = {
+    path: ResourcePath
+    filter: (snapshots: Snapshot<ResourcePath>[]) => Snapshot<ResourcePath>[]
+  }
+
   mockQuery.mockImplementation(
-    (_, ...filters: ((snapshots: Snapshot[]) => Snapshot[])[]) =>
-      (snapshots: Snapshot[]) =>
+    (
+      path: ResourcePath,
+      ...filters: ((
+        snapshots: Snapshot<ResourcePath>[]
+      ) => Snapshot<ResourcePath>[])[]
+    ): MockedQuery => ({
+      path,
+      filter: (snapshots: Snapshot<ResourcePath>[]) =>
         filters.reduce(
           (filteredSnapshots, filter) => filter(filteredSnapshots),
           snapshots
-        )
+        ),
+    })
   )
 
   // Sobrescreve snapshots
   mockOnSnapshot.mockImplementation(
     (
-      query: string | ((snapshots: Snapshot[]) => Snapshot[]),
-      rawListener: Listener<Snapshot> | Listener<{ docs: Snapshot[] }>
+      query: MockedDoc | MockedQuery,
+      rawListener:
+        | Listener<Snapshot<ResourcePath>>
+        | Listener<{ docs: Snapshot<ResourcePath>[] }>
     ) => {
       // Se for de um doc so
-      if (typeof query === 'string') {
-        const listener = rawListener as Listener<Snapshot>
+      if ('id' in query) {
+        const { id, path } = query
+
+        const listener = rawListener as Listener<Snapshot<ResourcePath>>
 
         // Adiciona o listener
-        docListeners[query] = listener
+        if (docListeners[path] == undefined) docListeners[path] = {}
+
+        const pathListeners = docListeners[path]
+
+        if (pathListeners == undefined)
+          throw new Error('Impossible! How can this be??')
+
+        pathListeners[id] = listener
 
         // Ja inicializa ele
-        listener(mockSnapshotDatabase[query])
+        listener(toSnapshot(path, id))
 
         return vi.fn().mockImplementation(() => {
-          delete docListeners[query]
+          if (docListeners[path]) delete docListeners[path]![id]
         })
       }
 
+      const { filter, path } = query
+
       // Se for do database inteiro
-      const listener = rawListener as Listener<{ docs: Snapshot[] }>
+      const listener = rawListener as Listener<{
+        docs: Snapshot<ResourcePath>[]
+      }>
 
       // Adiciona o listener
-      databaseListeners.push({ listener, query })
+      if (databaseListeners[path] == undefined) databaseListeners[path] = []
+
+      const pathListeners = databaseListeners[path]
+
+      if (pathListeners == undefined)
+        throw new Error('Impossible with query! How can this be??')
+
+      pathListeners.push({ listener, query: filter as any })
 
       // Ja inicializa ele
-      listener({ docs: query(Object.values(mockSnapshotDatabase)) })
+      listener({ docs: filter(allSnapshots(path)) })
 
       return vi.fn().mockImplementation(() => {
-        const targetIndex = databaseListeners.findIndex(
+        if (databaseListeners[path] == undefined) return
+
+        const targetIndex = databaseListeners[path]!.findIndex(
           ({ listener: storedListener }) => storedListener === listener
         )
 
-        databaseListeners.splice(targetIndex, 1)
+        databaseListeners[path]!.splice(targetIndex, 1)
       })
     }
   )
 
-  mockAddDoc.mockImplementation((_, properties: Uploadable<P>) =>
-    addDatabaseValue(properties)
+  mockAddDoc.mockImplementation(addDatabaseValue)
+
+  mockUpdateDoc.mockImplementation(({ id, path }: MockedDoc, data) =>
+    updateDatabaseValue(path, id, data)
   )
 
-  mockUpdateDoc.mockImplementation(updateDatabaseValue)
-
-  mockDeleteDoc.mockImplementation((id: string) => {
-    delete mockSnapshotDatabase[id]
-    delete values[id]
+  mockDeleteDoc.mockImplementation(({ id, path }: MockedDoc) => {
+    if (database[path] != undefined) delete database[path]![id]
   })
 
-  mockSetDoc.mockImplementation(async (id: string, value: Uploadable<P>) => {
-    addSnapshot(id)
+  mockSetDoc.mockImplementation(({ id, path }: MockedDoc, data) => {
+    if (database[path] == undefined) database[path] = {}
 
-    values[id] = {
-      ...value,
-      createdAt: values[id]?.createdAt ?? new Date().toJSON(),
+    const pathDatabase = database[path]
+
+    if (pathDatabase == undefined) throw new Error('wtf just happened')
+
+    pathDatabase[id] = {
+      ...data,
+      createdAt: data[id]?.createdAt ?? new Date().toJSON(),
       modifiedAt: new Date().toJSON(),
     }
 
-    alertListeners(id)
+    alertListeners(path, id)
   })
 
-  mockGetDoc.mockImplementation(async (id: string) => mockSnapshotDatabase[id])
-
-  mockGetDocs.mockImplementation(
-    async (query?: (snapshots: Snapshot[]) => Snapshot[]) => ({
-      docs: query
-        ? query(Object.values(mockSnapshotDatabase))
-        : Object.values(mockSnapshotDatabase),
-    })
+  mockGetDoc.mockImplementation(({ id, path }: MockedDoc) =>
+    toSnapshot(path, id)
   )
+
+  mockGetDocs.mockImplementation(async ({ filter, path }: MockedQuery) => ({
+    docs: filter(allSnapshots(path)),
+  }))
 
   return {
     getDatabaseValue,
     indexDatabaseValues,
     updateDatabaseValue,
-    mockSnapshotDatabase,
     hasListener,
     hasListListener,
   }
