@@ -103,6 +103,11 @@ const createRelation = <P extends ResourcePath>(
         definition as RelationDefinition<P, ResourcePath, 'many-to-many'>,
         cleanupManager
       )
+
+    // Exhaustiveness checking: https://www.typescriptlang.org/docs/handbook/2/narrowing.html#exhaustiveness-checking
+    default:
+      const exhaustiveCheck: never = definition.type
+      return exhaustiveCheck
   }
 }
 
