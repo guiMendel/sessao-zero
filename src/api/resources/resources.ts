@@ -28,7 +28,7 @@ export const manyToManySettings = {
 /** Define os nomes das relacoes que serao injetadas em cada recurso */
 export const relationSettings = {
   guilds: {
-    owner: isOne('players', { relationKey: 'ownerUid' }),
+    owner: isOne('players', { relationKey: 'ownerUid' }, 'required'),
     players: isMany('players', { manyToManyTable: 'playersGuilds' }),
   },
 
@@ -39,7 +39,7 @@ export const relationSettings = {
 } satisfies Partial<{
   [path in ResourcePath]: Record<
     string,
-    RelationDefinition<path, any, RelationType>
+    RelationDefinition<path, any, RelationType, boolean>
   >
 }>
 
@@ -105,10 +105,12 @@ export type ManyToManyTable = keyof ManyToManySettings
 export type RelationDefinition<
   S extends ResourcePath,
   T extends ResourcePath,
-  TY extends RelationType = RelationType
+  TY extends RelationType = RelationType,
+  R extends boolean = false
 > = {
   targetResourcePath: T
   type: TY
+  required: R
 } & (TY extends 'many-to-many'
   ? { manyToManyTable: ManyToManyTable }
   : {
@@ -144,6 +146,16 @@ export type UnrefedRelations<P extends ResourcePath> = {
       FullInstance<RelationSettings<P>[relation]['targetResourcePath']>
     : // @ts-ignore
       FullInstance<RelationSettings<P>[relation]['targetResourcePath']>[]
+}
+
+/** Dado um path P, retorna suas relacoes (sem um ref) */
+export type UnrefedResourceRelations<P extends ResourcePath> = {
+  // @ts-ignore
+  [relation in keyof RelationSettings<P>]: RelationSettings<P>[relation]['type'] extends 'has-one'
+    ? // @ts-ignore
+      Resource<RelationSettings<P>[relation]['targetResourcePath']>
+    : // @ts-ignore
+      Resource<RelationSettings<P>[relation]['targetResourcePath']>[]
 }
 
 /** Dado 2 paths P e Q, retorna as many-to-many tables que incluem eles */
@@ -185,18 +197,36 @@ function isMany<S extends ResourcePath, T extends ResourcePath>(
     | { relationKey: keyof Properties[T] }
 ): RelationDefinition<S, T, 'many-to-many' | 'has-many'> {
   return 'relationKey' in key
-    ? { relationKey: key.relationKey, targetResourcePath, type: 'has-many' }
+    ? {
+        relationKey: key.relationKey,
+        targetResourcePath,
+        type: 'has-many',
+        required: false,
+      }
     : {
         manyToManyTable: key.manyToManyTable,
         targetResourcePath,
         type: 'many-to-many',
+        required: false,
       }
 }
 
 /** Constroi uma definicao de relacao n:1 */
-function isOne<S extends ResourcePath, T extends ResourcePath>(
+function isOne<
+  S extends ResourcePath,
+  T extends ResourcePath,
+  R extends 'required' | 'optional' = 'optional'
+>(
   targetResourcePath: T,
-  { relationKey }: { relationKey: keyof Properties[S] }
-): RelationDefinition<S, T, 'has-one'> {
-  return { relationKey, targetResourcePath, type: 'has-one' }
+  { relationKey }: { relationKey: keyof Properties[S] },
+  isRequired: R = 'optional' as R
+): RelationDefinition<S, T, 'has-one', R extends 'required' ? true : false> {
+  return {
+    required: (isRequired === 'required') as R extends 'required'
+      ? true
+      : false,
+    relationKey,
+    targetResourcePath,
+    type: 'has-one',
+  }
 }

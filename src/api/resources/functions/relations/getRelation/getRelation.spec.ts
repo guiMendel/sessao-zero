@@ -2,21 +2,12 @@ import { getMockDatabase } from '@/tests/mock/firebase'
 
 import { mockGuild, mockPlayer } from '@/tests'
 import { CleanupManager } from '@/utils/classes'
-import { Mock } from 'vitest'
 import { getRelation } from '.'
-import { makeResource } from '../..'
 import * as GetResourceGetterNamespace from '../../getResourceGetter'
-import { makeFullInstance } from '../../makeFullInstance'
-
-vi.mock('../../makeFullInstance')
-
-const mockMakeFullInstance = makeFullInstance as Mock
 
 describe('getRelation', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-
-    mockMakeFullInstance.mockImplementation(makeResource)
   })
 
   describe('has-one relation', () => {
@@ -35,9 +26,7 @@ describe('getRelation', () => {
       if (guild == undefined || owner == undefined)
         throw new Error('error in database')
 
-      await expect(
-        getRelation(guild, 'owner', new CleanupManager())
-      ).resolves.toStrictEqual(owner)
+      await expect(getRelation(guild, 'owner')).resolves.toStrictEqual(owner)
     })
 
     it('passes the cleanup manager ahead', async () => {
@@ -95,9 +84,9 @@ describe('getRelation', () => {
       if (ownedGuilds.length == 0 || owner == undefined)
         throw new Error('error in database')
 
-      await expect(
-        getRelation(owner, 'ownedGuilds', new CleanupManager())
-      ).resolves.toStrictEqual(ownedGuilds)
+      await expect(getRelation(owner, 'ownedGuilds')).resolves.toStrictEqual(
+        ownedGuilds
+      )
     })
 
     it('passes the cleanup manager ahead', async () => {
@@ -179,13 +168,13 @@ describe('getRelation', () => {
         if (player1 == undefined || player2 == undefined)
           throw new Error('error in database')
 
-        await expect(
-          getRelation(player1, 'guilds', new CleanupManager())
-        ).resolves.toStrictEqual(guilds1)
+        await expect(getRelation(player1, 'guilds')).resolves.toStrictEqual(
+          guilds1
+        )
 
-        await expect(
-          getRelation(player2, 'guilds', new CleanupManager())
-        ).resolves.toStrictEqual(guilds2)
+        await expect(getRelation(player2, 'guilds')).resolves.toStrictEqual(
+          guilds2
+        )
       }
 
       // For guilds
@@ -220,17 +209,17 @@ describe('getRelation', () => {
         if (guild1 == undefined || guild2 == undefined || guild3 == undefined)
           throw new Error('error in database')
 
-        await expect(
-          getRelation(guild1, 'players', new CleanupManager())
-        ).resolves.toStrictEqual(players1)
+        await expect(getRelation(guild1, 'players')).resolves.toStrictEqual(
+          players1
+        )
 
-        await expect(
-          getRelation(guild2, 'players', new CleanupManager())
-        ).resolves.toStrictEqual(players2)
+        await expect(getRelation(guild2, 'players')).resolves.toStrictEqual(
+          players2
+        )
 
-        await expect(
-          getRelation(guild3, 'players', new CleanupManager())
-        ).resolves.toStrictEqual(players3)
+        await expect(getRelation(guild3, 'players')).resolves.toStrictEqual(
+          players3
+        )
       }
     })
 

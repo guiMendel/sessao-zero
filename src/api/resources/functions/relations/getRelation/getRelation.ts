@@ -1,6 +1,8 @@
 import { db } from '@/api/firebase'
 import {
+  FullInstance,
   RelationDefinition,
+  RelationSettings,
   Resource,
   ResourcePath,
   UnrefedRelations,
@@ -16,14 +18,35 @@ import {
   where,
 } from 'firebase/firestore'
 
-export const getRelation = <
+/** Retorna a(s) instancia(s) associada a relacao de um recurso, como full instance */
+export function getRelation<
   P extends ResourcePath,
   R extends keyof UnrefedRelations<P>
 >(
   source: Resource<P>,
   relation: R,
   cleanupManager: CleanupManager
-) => {
+): Promise<
+  // @ts-ignore
+  undefined | FullInstance<RelationSettings<P>[R]['targetResourcePath']>
+>
+
+/** Retorna a(s) instancia(s) associada a relacao de um recurso */
+export function getRelation<
+  P extends ResourcePath,
+  R extends keyof UnrefedRelations<P>
+>(
+  source: Resource<P>,
+  relation: R
+): Promise<
+  // @ts-ignore
+  undefined | Resource<RelationSettings<P>[R]['targetResourcePath']>
+>
+
+export function getRelation<
+  P extends ResourcePath,
+  R extends keyof UnrefedRelations<P>
+>(source: Resource<P>, relation: R, cleanupManager?: CleanupManager) {
   const definition = relationSettings[source.resourcePath][
     relation
   ] as RelationDefinition<P, ResourcePath>
@@ -60,12 +83,11 @@ export const getRelation = <
 const getHasOneRelation = <P extends ResourcePath>(
   source: Resource<P>,
   definition: RelationDefinition<P, ResourcePath, 'has-one'>,
-  cleanupManager: CleanupManager
+  cleanupManager?: CleanupManager
 ) => {
-  const { get } = getResourceGetter(
-    definition.targetResourcePath,
-    cleanupManager
-  )
+  const { get } = cleanupManager
+    ? getResourceGetter(definition.targetResourcePath, cleanupManager)
+    : getResourceGetter(definition.targetResourcePath)
 
   const targetId = source[definition.relationKey] as string
 
@@ -75,12 +97,11 @@ const getHasOneRelation = <P extends ResourcePath>(
 const getHasManyRelation = <P extends ResourcePath>(
   source: Resource<P>,
   definition: RelationDefinition<P, ResourcePath, 'has-many'>,
-  cleanupManager: CleanupManager
+  cleanupManager?: CleanupManager
 ) => {
-  const { getList } = getResourceGetter(
-    definition.targetResourcePath,
-    cleanupManager
-  )
+  const { getList } = cleanupManager
+    ? getResourceGetter(definition.targetResourcePath, cleanupManager)
+    : getResourceGetter(definition.targetResourcePath)
 
   const targetFilters = [
     where(definition.relationKey as string, '==', source.id),
@@ -89,17 +110,11 @@ const getHasManyRelation = <P extends ResourcePath>(
   return getList(targetFilters)
 }
 
-const getManyToManyRelation = async <P extends ResourcePath>(
+/** Retorna os ids do target path associados a este source de uma relacao many-to-many */
+export const getManyToManyTargetIds = async <P extends ResourcePath>(
   source: Resource<P>,
-  definition: RelationDefinition<P, ResourcePath, 'many-to-many'>,
-  cleanupManager: CleanupManager
+  definition: RelationDefinition<P, ResourcePath, 'many-to-many'>
 ) => {
-  const { getList } = getResourceGetter(
-    definition.targetResourcePath,
-    cleanupManager
-  )
-
-  // Essa query encontra os ids dos alvos mapeados a esse source
   const bridgeQuery = query(
     collection(db, definition.manyToManyTable),
     where(source.resourcePath, '==', source.id)
@@ -109,11 +124,27 @@ const getManyToManyRelation = async <P extends ResourcePath>(
 
   if (bridgeSnapshot.empty) return []
 
-  const targetIds = bridgeSnapshot.docs.map(
-    (doc) => doc.data()[definition.targetResourcePath]
+  return bridgeSnapshot.docs.map((doc) => ({
+    targetId: doc.data()[definition.targetResourcePath] as string,
+    bridgeId: doc.id,
+  }))
+}
+
+const getManyToManyRelation = async <P extends ResourcePath>(
+  source: Resource<P>,
+  definition: RelationDefinition<P, ResourcePath, 'many-to-many'>,
+  cleanupManager?: CleanupManager
+) => {
+  const { getList } = cleanupManager
+    ? getResourceGetter(definition.targetResourcePath, cleanupManager)
+    : getResourceGetter(definition.targetResourcePath)
+
+  // Essa query encontra os ids dos alvos mapeados a esse source
+  const targetIds = (await getManyToManyTargetIds(source, definition)).map(
+    ({ targetId }) => targetId
   )
 
-  const targetFilters = [where(documentId(), 'in', targetIds)]
+  if (targetIds.length === 0) return []
 
-  return getList(targetFilters)
+  return getList([where(documentId(), 'in', targetIds)])
 }
