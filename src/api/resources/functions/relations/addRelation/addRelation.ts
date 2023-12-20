@@ -1,16 +1,15 @@
-import { addDoc, collection, deleteDoc, doc } from 'firebase/firestore'
+import { db } from '@/api/firebase'
+import { addDoc, collection } from 'firebase/firestore'
 import {
-  Properties,
   RelationDefinition,
+  RelationSettings,
   Resource,
   ResourcePath,
   UnrefedResourceRelations,
   relationSettings,
-  RelationSettings,
 } from '../../..'
 import { updateResource } from '../../write'
 import { getManyToManyTargetIds, getRelation } from '../getRelation'
-import { db } from '@/api/firebase'
 
 /** Permite adicionar um novo valor para uma relaçao
  * @param source A instancia que vai receber uma nova instancia a relacao
@@ -108,11 +107,8 @@ const addHasManyRelation = async <
   >[]
 
   // Adiciona as novas
-  return internalAddHasManyRelations(
-    source,
-    definition,
-    target,
-    currentRelations
+  return Promise.all(
+    internalAddHasManyRelations(source, definition, target, currentRelations)
   )
 }
 
@@ -165,10 +161,12 @@ const addManyToManyRelation = async <
   const currentRelatedIds = await getManyToManyTargetIds(source, definition)
 
   // Adiciona as novas
-  return internalAddManyToManyRelations(
-    source,
-    definition,
-    target,
-    currentRelatedIds
+  return Promise.all(
+    internalAddManyToManyRelations(
+      source,
+      definition,
+      target,
+      currentRelatedIds
+    )
   )
 }

@@ -93,7 +93,7 @@ export const getPropertyExtrator = <P extends ResourcePath>(
 // === RELACOES
 
 /** Tipos de relacao possiveis */
-type RelationType = 'has-one' | 'has-many' | 'many-to-many'
+export type RelationType = 'has-one' | 'has-many' | 'many-to-many'
 
 /** Mapeia cada many-to-many aos paths que os compoem */
 export type ManyToManySettings = typeof manyToManySettings
