@@ -11,6 +11,10 @@ import {
 import { updateResource } from '../../write'
 import { getManyToManyTargetIds, getRelation } from '../getRelation'
 import { db } from '@/api/firebase'
+import {
+  internalAddHasManyRelations,
+  internalAddManyToManyRelations,
+} from '../addRelation'
 
 /** Um map de definicoes de relacao do target resource path */
 type TargetsRelations<
@@ -151,7 +155,7 @@ const setHasManyRelation = async <
 ) => {
   const definition = relationSettings[source.resourcePath][
     relation
-  ] as RelationDefinition<P, ResourcePath, 'has-one'>
+  ] as RelationDefinition<P, ResourcePath, 'has-many'>
 
   if (!Array.isArray(target))
     throw new Error(
@@ -182,7 +186,10 @@ const setHasManyRelation = async <
     )
   }
 
-  const currentRelations = await getRelation(source, relation)
+  const currentRelations = (await getRelation(source, relation)) as Resource<
+    // @ts-ignore
+    RelationSettings<P>[R]['targetResourcePath']
+  >[]
 
   // Remove as relacoes atuais que nao estao na nova lista
   let removePromises: Promise<void>[] = []
@@ -204,21 +211,12 @@ const setHasManyRelation = async <
   }
 
   // Adiciona as novas
-  const addPromises = target
-    // Pega as que nao estao na lista existente
-    .filter((targetInstance) =>
-      currentRelations && Array.isArray(currentRelations)
-        ? currentRelations.every(
-            (currentRelation) => currentRelation.id !== targetInstance.id
-          )
-        : true
-    )
-    // Troca a relation key para a id do source, criando a relacao
-    .map((targetInstance) =>
-      updateResource(definition.targetResourcePath, targetInstance.id, {
-        [definition.relationKey]: source.id,
-      })
-    )
+  const addPromises = internalAddHasManyRelations(
+    source,
+    definition,
+    target,
+    currentRelations ?? []
+  )
 
   return Promise.all([...removePromises, ...addPromises])
 }
@@ -257,21 +255,12 @@ const setManyToManyRelation = async <
     )
 
   // Adiciona as novas
-  const addPromises = target
-    // Pega as que nao estao na lista existente
-    .filter((targetInstance) =>
-      currentRelatedIds.every(
-        ({ targetId: currentRelatedId }) =>
-          currentRelatedId !== targetInstance.id
-      )
-    )
-    // Adiciona um doc para estabeler a relacao. Tem o formato de: o resourcePath eh a chave, o id da isntancia relacionada eh o valor.
-    .map((targetInstance) =>
-      addDoc(collection(db, definition.manyToManyTable), {
-        [source.resourcePath]: source.id,
-        [definition.targetResourcePath]: targetInstance.id,
-      })
-    )
+  const addPromises = internalAddManyToManyRelations(
+    source,
+    definition,
+    target,
+    currentRelatedIds
+  )
 
   return Promise.all([...removePromises, ...addPromises])
 }

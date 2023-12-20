@@ -28,7 +28,11 @@ export function getRelation<
   cleanupManager: CleanupManager
 ): Promise<
   // @ts-ignore
-  undefined | FullInstance<RelationSettings<P>[R]['targetResourcePath']>
+  RelationSettings<P>[R]['type'] extends 'has-one'
+    ? // @ts-ignore
+      FullInstance<RelationSettings<P>[R]['targetResourcePath']> | undefined
+    : // @ts-ignore
+      FullInstance<RelationSettings<P>[R]['targetResourcePath']>[]
 >
 
 /** Retorna a(s) instancia(s) associada a relacao de um recurso */
@@ -40,7 +44,11 @@ export function getRelation<
   relation: R
 ): Promise<
   // @ts-ignore
-  undefined | Resource<RelationSettings<P>[R]['targetResourcePath']>
+  RelationSettings<P>[R]['type'] extends 'has-one'
+    ? // @ts-ignore
+      Resource<RelationSettings<P>[R]['targetResourcePath']> | undefined
+    : // @ts-ignore
+      Resource<RelationSettings<P>[R]['targetResourcePath']>[]
 >
 
 export function getRelation<
