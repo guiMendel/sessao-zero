@@ -58,6 +58,7 @@ export const getResourceSynchronizer = <
 
     // Cria um novo syncable
     return syncableRef<C, P, M>(
+      client,
       resourcePath,
       target ?? 'empty-document',
       cleanupManager

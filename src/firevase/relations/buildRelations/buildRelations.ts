@@ -139,7 +139,12 @@ const createHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
     targetId
   )
 
-  return syncableRef(definition.targetResourcePath, targetDoc, cleanupManager)
+  return syncableRef(
+    client,
+    definition.targetResourcePath,
+    targetDoc,
+    cleanupManager
+  )
 }
 
 /** Relation key refers to a property of target */
@@ -157,7 +162,12 @@ const createHasManyRelation = <
     where(definition.relationKey as string, '==', source.id)
   )
 
-  return syncableRef(definition.targetResourcePath, targetQuery, cleanupManager)
+  return syncableRef(
+    client,
+    definition.targetResourcePath,
+    targetQuery,
+    cleanupManager
+  )
 }
 
 /** Relation key refers to a property of target */
@@ -200,6 +210,7 @@ const createManyToManyRelation = <
 
   // Criamos o syncable ref com a query dos alvos
   const targets = syncableRef<C, typeof definition.targetResourcePath, Query>(
+    client,
     definition.targetResourcePath,
     'empty-query',
     cleanupManager

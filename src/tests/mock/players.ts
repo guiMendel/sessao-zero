@@ -1,23 +1,27 @@
-import { syncableRef } from '@/firevase/classes'
+import { Vase, vase } from '@/api'
 import { Player } from '@/api/players'
-import { FullInstance, Properties, Resource, Uploadable } from '@/firevase/resources'
+import { syncableRef } from '@/firevase/Syncable'
+import { HalfResource, Resource, Uploadable } from '@/firevase/resources'
 import { CleanupManager } from '@/utils/classes'
 import { Query } from 'firebase/firestore'
+import { setUpFirebaseMocks } from './firebase'
+
+setUpFirebaseMocks()
 
 export function mockPlayer(
-  overrides?: Partial<FullInstance<'players'>>,
-  level?: 'full-instance'
-): FullInstance<'players'>
+  overrides?: Partial<Resource<Vase, 'players'>>,
+  level?: 'resource'
+): Resource<Vase, 'players'>
 
 export function mockPlayer(
-  overrides: Partial<Resource<'players'>>,
-  level: 'resource'
-): Resource<'players'>
+  overrides: Partial<HalfResource<Vase, 'players'>>,
+  level: 'half-resource'
+): HalfResource<Vase, 'players'>
 
 export function mockPlayer(
-  overrides: Partial<Uploadable<'players'>>,
+  overrides: Partial<Uploadable<Vase, 'players'>>,
   level: 'uploadable'
-): Uploadable<'players'>
+): Uploadable<Vase, 'players'>
 
 export function mockPlayer(
   overrides: Partial<Player>,
@@ -25,13 +29,13 @@ export function mockPlayer(
 ): Player
 
 export function mockPlayer(
-  overrides?: Partial<FullInstance<'players'> | Uploadable<'players'>>,
-  level?: 'properties' | 'resource' | 'full-instance' | 'uploadable'
+  overrides?: Partial<Resource<Vase, 'players'> | Uploadable<Vase, 'players'>>,
+  level?: 'properties' | 'half-resource' | 'resource' | 'uploadable'
 ):
-  | FullInstance<'players'>
-  | Resource<'players'>
+  | Resource<Vase, 'players'>
+  | HalfResource<Vase, 'players'>
   | Player
-  | Uploadable<'players'> {
+  | Uploadable<Vase, 'players'> {
   const properties: Player = {
     about: 'about',
     admin: false,
@@ -50,7 +54,7 @@ export function mockPlayer(
       ...overrides,
     }
 
-  const resource: Resource<'players'> = {
+  const resource: HalfResource<Vase, 'players'> = {
     ...properties,
     createdAt: new Date(),
     id: '1',
@@ -58,16 +62,18 @@ export function mockPlayer(
     resourcePath: 'players',
   }
 
-  if (level === 'resource') return { ...resource, ...overrides }
+  if (level === 'half-resource') return { ...resource, ...overrides }
 
   return {
     ...resource,
-    guilds: syncableRef<'guilds', Query>(
+    guilds: syncableRef<Vase, 'guilds', Query>(
+      vase,
       'guilds',
       'empty-query',
       new CleanupManager()
     ),
-    ownedGuilds: syncableRef<'guilds', Query>(
+    ownedGuilds: syncableRef<Vase, 'guilds', Query>(
+      vase,
       'guilds',
       'empty-query',
       new CleanupManager()

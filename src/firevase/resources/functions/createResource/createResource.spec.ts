@@ -1,4 +1,4 @@
-import { RealDate, getMockDatabase } from '@/tests/mock/firebase'
+import { RealDate, getMockDatabase } from '@/tests/mock/backend'
 
 import { db } from '@/api/firebase'
 import { Player } from '@/api/players'

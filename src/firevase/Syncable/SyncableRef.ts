@@ -34,6 +34,7 @@ export const syncableRef = <
   P extends PathsFrom<C>,
   M extends Query | DocumentReference
 >(
+  client: C,
   resourcePath: P,
   target: M | 'empty-document' | 'empty-query',
   parentCleanupManager: CleanupManager
@@ -60,6 +61,7 @@ export const syncableRef = <
         previousValues = valueRef.value as Resource<C, P>[]
 
         valueRef.value = makeResource(
+          client,
           snapshot,
           resourcePath,
           ownCleanupManager,
@@ -74,6 +76,7 @@ export const syncableRef = <
         valueRef.value == undefined ? [] : [valueRef.value as Resource<C, P>]
 
       valueRef.value = makeResource(
+        client,
         snapshot,
         resourcePath,
         ownCleanupManager,

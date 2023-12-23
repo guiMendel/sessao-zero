@@ -1,4 +1,4 @@
-import { getMockDatabase } from '@/tests/mock/firebase'
+import { getMockDatabase } from '@/tests/mock/backend'
 
 import * as SyncableRefNamespace from '@/firevase/Syncable/SyncableRef'
 import { mockPlayer } from '@/tests'

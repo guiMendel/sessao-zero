@@ -28,6 +28,7 @@ export const useCurrentPlayer = defineStore('current-player', () => {
 
   /** A instancia de player atual */
   const player = syncableRef<Vase, 'players', DocumentReference>(
+    vase,
     'players',
     'empty-document',
     cleanupManager

@@ -1,31 +1,39 @@
-import { syncableRef } from '@/firevase/classes'
+import { Vase, vase } from '@/api'
 import { db } from '@/api/firebase'
 import { Guild } from '@/api/guilds'
-import { FullInstance, Resource, Uploadable } from '@/firevase/resources'
+import { syncableRef } from '@/firevase/Syncable'
+import { HalfResource, Resource, Uploadable } from '@/firevase/resources'
 import { CleanupManager } from '@/utils/classes'
 import { DocumentReference, Query, collection, doc } from 'firebase/firestore'
+import { setUpFirebaseMocks } from './firebase'
+
+setUpFirebaseMocks()
 
 export function mockGuild(
-  overrides?: Partial<FullInstance<'guilds'>>,
-  level?: 'full-instance'
-): FullInstance<'guilds'>
+  overrides?: Partial<Resource<Vase, 'guilds'>>,
+  level?: 'resource'
+): Resource<Vase, 'guilds'>
 
 export function mockGuild(
-  overrides: Partial<Resource<'guilds'>>,
-  level: 'resource'
-): Resource<'guilds'>
+  overrides: Partial<HalfResource<Vase, 'guilds'>>,
+  level: 'half-resource'
+): HalfResource<Vase, 'guilds'>
 
 export function mockGuild(
-  overrides: Partial<Uploadable<'guilds'>>,
+  overrides: Partial<Uploadable<Vase, 'guilds'>>,
   level: 'uploadable'
-): Uploadable<'guilds'>
+): Uploadable<Vase, 'guilds'>
 
 export function mockGuild(overrides: Partial<Guild>, level: 'properties'): Guild
 
 export function mockGuild(
-  overrides?: Partial<FullInstance<'guilds'> | Uploadable<'guilds'>>,
-  level?: 'properties' | 'resource' | 'full-instance' | 'uploadable'
-): FullInstance<'guilds'> | Resource<'guilds'> | Guild | Uploadable<'guilds'> {
+  overrides?: Partial<Resource<Vase, 'guilds'> | Uploadable<Vase, 'guilds'>>,
+  level?: 'properties' | 'resource' | 'half-resource' | 'uploadable'
+):
+  | Resource<Vase, 'guilds'>
+  | HalfResource<Vase, 'guilds'>
+  | Guild
+  | Uploadable<Vase, 'guilds'> {
   const ownerUid = overrides?.ownerUid ?? '1'
 
   const properties: Guild = {
@@ -47,7 +55,7 @@ export function mockGuild(
       ...overrides,
     }
 
-  const resource: Resource<'guilds'> = {
+  const resource: HalfResource<Vase, 'guilds'> = {
     ...properties,
     createdAt: new Date(),
     id: '1',
@@ -55,16 +63,18 @@ export function mockGuild(
     resourcePath: 'guilds',
   }
 
-  if (level === 'resource') return { ...resource, ...overrides }
+  if (level === 'half-resource') return { ...resource, ...overrides }
 
   return {
     ...resource,
-    players: syncableRef<'players', Query>(
+    players: syncableRef<Vase, 'players', Query>(
+      vase,
       'players',
       'empty-query',
       new CleanupManager()
     ),
-    owner: syncableRef<'players', DocumentReference>(
+    owner: syncableRef<Vase, 'players', DocumentReference>(
+      vase,
       'players',
       doc(collection(db, 'players'), ownerUid),
       new CleanupManager()

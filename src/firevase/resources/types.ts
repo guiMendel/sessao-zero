@@ -1,5 +1,5 @@
 import { FirevaseClient } from '../firevase'
-import { Relations } from '../relations'
+import { RelationsRefs } from '../relations'
 import { PathsFrom, PropertiesFrom } from '../types'
 
 /** Has the properties and metadata of a resource */
@@ -21,7 +21,7 @@ export type HalfResource<
 export type Resource<
   C extends FirevaseClient,
   P extends PathsFrom<C>
-> = HalfResource<C, P> & Relations<C, P>
+> = HalfResource<C, P> & RelationsRefs<C, P>
 
 // declare const test: HalfResource<Vase, 'guilds'>
 // test.

@@ -1,4 +1,4 @@
-import { getMockDatabase } from '@/tests/mock/firebase'
+import { getMockDatabase } from '@/tests/mock/backend'
 
 import { mockGuild, mockPlayer } from '@/tests'
 import { CleanupManager } from '@/utils/classes'

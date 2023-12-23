@@ -1,6 +1,3 @@
-import { firebaseApp } from '@/api/firebase'
-import { Guild } from '@/api/guilds'
-import { Player } from '@/api/players'
 import { FirebaseApp } from 'firebase/app'
 import { Auth, getAuth } from 'firebase/auth'
 import { Firestore, getFirestore } from 'firebase/firestore'

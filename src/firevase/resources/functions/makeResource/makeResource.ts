@@ -12,6 +12,7 @@ import { buildRelations } from '../../../relations'
  * @param previousValues Uma piscina de valores da qual podemos reutilizar recursos para nao ter de recriar eles
  */
 export const makeResource = <C extends FirevaseClient, P extends PathsFrom<C>>(
+  client: C,
   snapshot: DocumentSnapshot | QuerySnapshot,
   resourcePath: P,
   cleanupManager: CleanupManager,
@@ -35,6 +36,7 @@ export const makeResource = <C extends FirevaseClient, P extends PathsFrom<C>>(
           previousValues: previousValuesMap,
           cleanupManager,
           source: extractedResource,
+          client,
         }),
       }
   )
