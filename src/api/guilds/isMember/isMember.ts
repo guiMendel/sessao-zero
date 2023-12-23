@@ -1,9 +1,10 @@
-import { FullInstance, Resource, UnrefedFullInstance } from '@/firevase/resources'
+import { Vase } from '@/api'
+import { HalfResource, Resource } from '@/firevase/resources'
 import { toValue } from 'vue'
 
 export const isMember = (
-  player?: Resource<'players'>,
-  guild?: UnrefedFullInstance<'guilds'> | FullInstance<'guilds'>
+  player?: HalfResource<Vase, 'players'>,
+  guild?: Resource<Vase, 'guilds'>
 ) =>
   Boolean(
     guild &&

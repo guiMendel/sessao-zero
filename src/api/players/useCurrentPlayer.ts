@@ -1,5 +1,5 @@
-import { syncableRef } from '@/firevase/classes'
 import { auth } from '@/api/firebase'
+import { syncableRef } from '@/firevase/Syncable'
 import { Uploadable, useResource } from '@/firevase/resources'
 import { CleanupManager } from '@/utils/classes'
 import {
@@ -14,6 +14,7 @@ import { DocumentReference } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { onBeforeUnmount } from 'vue'
 import { Player } from '.'
+import { Vase, vase } from '..'
 import { useCurrentAuth } from '../../stores'
 
 export const useCurrentPlayer = defineStore('current-player', () => {
@@ -23,10 +24,10 @@ export const useCurrentPlayer = defineStore('current-player', () => {
   const cleanupManager = new CleanupManager()
 
   /** Acessa a API do firestore do player */
-  const { getDoc, create, update, deleteForever } = useResource('players')
+  const { getDoc, create, update, deleteForever } = useResource(vase, 'players')
 
   /** A instancia de player atual */
-  const player = syncableRef<'players', DocumentReference>(
+  const player = syncableRef<Vase, 'players', DocumentReference>(
     'players',
     'empty-document',
     cleanupManager
@@ -61,7 +62,7 @@ export const useCurrentPlayer = defineStore('current-player', () => {
 
         const date = new Date().toJSON()
 
-        const newPlayer: Uploadable<'players'> = {
+        const newPlayer: Uploadable<Vase, 'players'> = {
           name,
           email,
           nickname,

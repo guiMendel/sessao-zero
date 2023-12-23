@@ -1,11 +1,12 @@
-import { GetListMethod, SyncListMethod } from '@/firevase/resources'
+import { GetListMethod, Resource, SyncListMethod } from '@/firevase/resources'
 import { where } from 'firebase/firestore'
 import { storeToRefs } from 'pinia'
+import { Vase, vase } from '..'
 import { useResource } from '../../firevase/resources/hooks/useResource'
 import { useCurrentPlayer } from '../players'
 
 export const useGuild = () => {
-  const api = useResource('guilds')
+  const api = useResource(vase, 'guilds')
 
   /** Consome o player atual */
   const { player } = storeToRefs(useCurrentPlayer())
@@ -25,10 +26,12 @@ export const useGuild = () => {
     })
   }
 
-  const getList: GetListMethod<'guilds'> = (filters) =>
+  type GetList = GetListMethod<Vase, 'guilds', Resource<Vase, 'guilds'>[]>
+
+  const getList: GetList = (filters) =>
     api.getList([...(filters ?? []), where('listingBehavior', '==', 'public')])
 
-  const syncList: SyncListMethod<'guilds'> = (filters, existingRef) =>
+  const syncList: SyncListMethod<Vase, 'guilds'> = (filters, existingRef) =>
     api.syncList(
       [...(filters ?? []), where('listingBehavior', '==', 'public')],
       existingRef

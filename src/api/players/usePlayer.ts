@@ -1,8 +1,9 @@
-import { useResource } from '../../firevase/resources/hooks/useResource'
+import { useResource } from '@/firevase/resources'
+import { vase } from '..'
 
 /** API para os players. Note que somente fornece metodos de read. Para fazer operacoes de write, veja useCurrentPlayer */
 export const usePlayer = () => {
-  const api = useResource('players')
+  const api = useResource(vase, 'players')
 
   // Filtra metods de escrita e delecao
   return {

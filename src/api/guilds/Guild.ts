@@ -14,8 +14,4 @@ export interface Guild {
 
   /** Quando ativado, jogadores nao podem entrar diretamente — eles enviam uma solicitaçao de admissão */
   requireAdmission: boolean
-
-  // players: Array<IndexPlayer>
-  // adventures: Array<IndexAdventure>
-  // current_player_joined: boolean
 }
