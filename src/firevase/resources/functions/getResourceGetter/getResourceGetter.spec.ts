@@ -1,10 +1,10 @@
 import { mockFantasyDatabase } from '@/tests/mock/backend'
 
-import { mockPlayer } from '@/tests'
 import { CleanupManager } from '@/utils/classes'
 import { where } from 'firebase/firestore'
 import { getResourceGetter } from '.'
-import * as MakeFullInstanceNamespace from '../makeResource'
+import * as MakeResourceNamespace from '../makeResource'
+import { fantasyVase, mockKnight } from '@/tests/mock/fantasyVase'
 
 describe('getResourceGetter', () => {
   beforeEach(() => {
@@ -16,23 +16,22 @@ describe('getResourceGetter', () => {
       const id = '1'
 
       const { getDatabaseValue } = mockFantasyDatabase({
-        knights: { [id]: mockPlayer({}, 'uploadable') },
+        knights: { [id]: mockKnight('uploadable') },
       })
 
-      const { get } = getResourceGetter('players')
+      const { get } = getResourceGetter(fantasyVase, 'knights')
 
       await expect(get(id)).resolves.toStrictEqual(
-        await getDatabaseValue('players', id)
+        await getDatabaseValue('knights', id)
       )
     })
 
-    it('passes the correct params to make full instance', async () => {
-      const mockMakeFullInstance = vi.fn().mockReturnValue([])
+    it('passes the correct params to make full resource', async () => {
+      const mockMakeResource = vi.fn().mockReturnValue([])
 
-      vi.spyOn(
-        MakeFullInstanceNamespace,
-        'makeFullInstance'
-      ).mockImplementation(mockMakeFullInstance)
+      vi.spyOn(MakeResourceNamespace, 'makeResource').mockImplementation(
+        mockMakeResource
+      )
 
       const id = '1'
 
@@ -46,7 +45,7 @@ describe('getResourceGetter', () => {
 
       await get(id)
 
-      expect(mockMakeFullInstance).toHaveBeenCalledWith(
+      expect(mockMakeResource).toHaveBeenCalledWith(
         expect.objectContaining({ id }),
         'players',
         cleanupManager,
@@ -116,12 +115,11 @@ describe('getResourceGetter', () => {
     })
 
     it('passes the correct params to make full instance', async () => {
-      const mockMakeFullInstance = vi.fn().mockReturnValue([])
+      const mockMakeResource = vi.fn().mockReturnValue([])
 
-      vi.spyOn(
-        MakeFullInstanceNamespace,
-        'makeFullInstance'
-      ).mockImplementation(mockMakeFullInstance)
+      vi.spyOn(MakeResourceNamespace, 'makeResource').mockImplementation(
+        mockMakeResource
+      )
 
       const id = '1'
 
@@ -135,7 +133,7 @@ describe('getResourceGetter', () => {
 
       await getList()
 
-      expect(mockMakeFullInstance).toHaveBeenCalledWith(
+      expect(mockMakeResource).toHaveBeenCalledWith(
         { docs: [expect.objectContaining({ id })] },
         'players',
         cleanupManager,

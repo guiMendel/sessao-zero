@@ -1,24 +1,24 @@
 <script setup lang="ts">
 import { useGuild } from '@/api/resourcePaths/guilds'
 import { useCurrentPlayer } from '@/api/resourcePaths/players'
-import { FullInstance } from '@/api/resources'
+import { Resource } from '@/api/resources'
 import { LoadingSpinner, Typography } from '@/components'
 import { useInput } from '@/stores'
 import { storeToRefs } from 'pinia'
 import { toValue } from 'vue'
 import { useRouter } from 'vue-router'
 
-defineProps<{ guilds: FullInstance<'guilds'>[]; hideNewButton?: boolean }>()
+defineProps<{ guilds: Resource<'guilds'>[]; hideNewButton?: boolean }>()
 
 const { player } = storeToRefs(useCurrentPlayer())
 const router = useRouter()
 const { create } = useGuild()
 const { getStringInput } = useInput()
 
-const openGuildPage = (guild: FullInstance<'guilds'>) =>
+const openGuildPage = (guild: Resource<'guilds'>) =>
   router.push({ name: 'adventures', params: { guildId: guild.id } })
 
-const getOwnerLabel = (owner: FullInstance<'players'>) =>
+const getOwnerLabel = (owner: Resource<'players'>) =>
   player.value?.id === toValue(owner).id ? 'Você' : toValue(owner).name
 
 const newGuild = async () => {
@@ -175,4 +175,3 @@ const newGuild = async () => {
   }
 }
 </style>
-@/firevase/resources@/api/guilds@/api/players

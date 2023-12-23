@@ -1,8 +1,12 @@
+import { setUpFirebaseMocks } from './firebase'
+
+import { fantasyVase } from './fantasyVase'
+
 import { vase } from '@/api'
 import { FirevaseClient } from '@/firevase'
 import {
-  Uploadable as OriginalUploadable,
   HalfResource as OriginalHalfResource,
+  Uploadable as OriginalUploadable,
 } from '@/firevase/resources'
 import { ManyToManyFrom, PathsFrom } from '@/firevase/types'
 import {
@@ -20,25 +24,6 @@ import {
   where,
 } from 'firebase/firestore'
 import { Mock } from 'vitest'
-import { setUpFirebaseMocks } from './firebase'
-import { fantasyVase } from './fantasyVase'
-
-vi.mock('@/api/firebase', () => ({ db: 'mockDb' }))
-
-vi.mock('firebase/firestore', () => ({
-  doc: vi.fn(),
-  collection: vi.fn(),
-  query: vi.fn(),
-  onSnapshot: vi.fn(),
-  where: vi.fn(),
-  addDoc: vi.fn(),
-  updateDoc: vi.fn(),
-  deleteDoc: vi.fn(),
-  setDoc: vi.fn(),
-  getDoc: vi.fn(),
-  getDocs: vi.fn(),
-  documentId: vi.fn(),
-}))
 
 export const mockGetDocs = getDocs as Mock
 export const mockGetDoc = getDoc as Mock

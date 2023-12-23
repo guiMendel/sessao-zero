@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { isMember } from '@/api/resourcePaths/guilds'
 import { useCurrentPlayer } from '@/api/resourcePaths/players'
-import { UnrefedFullInstance } from '@/api/resources'
+import { UnrefedResource } from '@/api/resources'
 import { Button, Typography } from '@/components'
 import { useInput } from '@/stores'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 
 const props = defineProps<{
-  guild: UnrefedFullInstance<'guilds'>
+  guild: UnrefedResource<'guilds'>
 }>()
 
 const { player } = storeToRefs(useCurrentPlayer())
@@ -82,4 +82,3 @@ const join = () =>
   }
 }
 </style>
-@/firevase/resources@/api/guilds@/api/players

@@ -1,6 +1,6 @@
 import { fillFirevase } from '@/firevase'
-import { mockFirebaseApp, setUpFirebaseMocks } from '../firebase'
 import { King, Knight, Land, Mission } from './'
+import { firebaseApp } from '@/api/firebase'
 
 /** Client firevase de teste */
 export const fantasyVase = fillFirevase<{
@@ -8,7 +8,7 @@ export const fantasyVase = fillFirevase<{
   kings: King
   lands: Land
   missions: Mission
-}>(mockFirebaseApp, ['kings', 'knights', 'lands', 'missions'])
+}>(firebaseApp, ['kings', 'knights', 'lands', 'missions'])
   .configureManyToMany({
     knightsLands: ['knights', 'lands'],
     knightsMissions: ['knights', 'missions'],
@@ -37,5 +37,3 @@ export const fantasyVase = fillFirevase<{
 
 /** Tipo do cliente firevase de teste */
 export type FantasyVase = typeof fantasyVase
-
-export const setupFantasyVaseMocks = () => setUpFirebaseMocks()

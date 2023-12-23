@@ -75,7 +75,7 @@ export function getResourceGetter<
     get: (id: string) =>
       getDoc(doc(resourceCollection, id)).then((doc) =>
         cleanupManager != undefined
-          ? makeResource<C, P>(doc, resourcePath, cleanupManager, [])[0]
+          ? makeResource<C, P>(client, doc, resourcePath, cleanupManager, [])[0]
           : makeHalfResource<C, P>(doc, resourcePath)[0]
       ),
 
@@ -84,6 +84,7 @@ export function getResourceGetter<
       getDocs(query(resourceCollection, ...filters)).then((docs) =>
         cleanupManager != undefined
           ? (makeResource<C, P>(
+              client,
               docs,
               resourcePath,
               cleanupManager,

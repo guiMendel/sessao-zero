@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { UnrefedFullInstance } from '@/api/resources'
+import { UnrefedResource } from '@/api/resources'
 import { Typography } from '@/components'
 import { useRouter } from 'vue-router'
 import { ProfilePicture } from '..'
 
 const props = defineProps<{
-  player: UnrefedFullInstance<'players'>
+  player: UnrefedResource<'players'>
 }>()
 
 const router = useRouter()
@@ -74,5 +74,3 @@ const openProfilePage = () =>
   }
 }
 </style>
-@/utils/types
-@/firevase/resources
