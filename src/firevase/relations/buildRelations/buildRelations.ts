@@ -1,68 +1,73 @@
+import { FirevaseClient } from '@/firevase'
 import { Syncable } from '@/firevase/Syncable/Syncable'
 import { syncableRef } from '@/firevase/Syncable/SyncableRef'
-import { db } from '@/api/firebase'
-import type { Resource } from '@/firevase/resources/types'
+import type { HalfResource, Resource } from '@/firevase/resources/types'
+import { PathsFrom } from '@/firevase/types'
 import { CleanupManager } from '@/utils/classes'
 import { Query, collection, doc, query, where } from 'firebase/firestore'
-import {
-  FullInstance,
-  RelationDefinition,
-  Relations,
-  ResourcePath,
-  relationSettings,
-} from '../../resources/resources'
+import { RelationDefinitionFrom, RelationsRefs } from '..'
 
 /** Adiciona a um objeto uma flag que indica se ele nao deve ser descartado */
 export type WithDisposeFlag<T> = T & {
   dontDispose?: boolean
 }
 
-type BuildRelationsParams<P extends ResourcePath> = {
+type BuildRelationsParams<C extends FirevaseClient, P extends PathsFrom<C>> = {
+  /** Client where to get relation definitions */
+  client: C
   /** O item para o qual gerar as relacoes */
-  source: Resource<P>
+  source: HalfResource<C, P>
   /** Um mapa dos ids para os antigos valores de itens do mesmo tipo de source.
    * Utilizado para evitar reconstruir syncs desnecessarios */
-  previousValues: Record<string, WithDisposeFlag<FullInstance<P>>>
+  previousValues: Record<string, WithDisposeFlag<Resource<C, P>>>
   /** Permite associar qualquer sync criado a um cleanup */
   cleanupManager: CleanupManager
 }
 
 /** Constroi um objeto de relacoes para a instancia fornecida */
-export const buildRelations = <P extends ResourcePath>({
+export const buildRelations = <
+  C extends FirevaseClient,
+  P extends PathsFrom<C>
+>({
   cleanupManager,
   previousValues,
   source,
-}: BuildRelationsParams<P>): Relations<P> => {
+  client,
+}: BuildRelationsParams<C, P>): RelationsRefs<C, P> => {
+  if (client.relationSettings == undefined)
+    throw new Error(
+      `Impossible to build relations for ${source.resourcePath} — client has no relation settings`
+    )
+
   // Se essa source estiver em previous values, reutiliza as relacoes do previous value
   if (source.id in previousValues) {
     // Marca para nao descartar esses valores
     previousValues[source.id].dontDispose = true
 
-    return extractRelations(previousValues[source.id])
+    return extractRelations(client, previousValues[source.id])
   }
 
-  return createRelations(source, cleanupManager)
+  return createRelations(client, source, cleanupManager)
 }
 
-const createRelations = <P extends ResourcePath>(
-  source: Resource<P>,
+const createRelations = <C extends FirevaseClient, P extends PathsFrom<C>>(
+  client: C,
+  source: HalfResource<C, P>,
   cleanupManager: CleanupManager
-): Relations<P> =>
-  Object.entries(relationSettings[source.resourcePath]).reduce(
-    (
-      otherRelations,
-      [relationName, relation]: [string, RelationDefinition<P, ResourcePath>]
-    ) => ({
+): RelationsRefs<C, P> =>
+  Object.entries(client.relationSettings[source.resourcePath]).reduce(
+    (otherRelations, [relationName, relation]: [string, any]) => ({
       ...otherRelations,
-      [relationName]: createRelation(source, relation, cleanupManager),
+      [relationName]: createRelation(client, source, relation, cleanupManager),
     }),
-    {} as Relations<P>
+    {} as RelationsRefs<C, P>
   )
 
-const extractRelations = <P extends ResourcePath>(
-  instance: FullInstance<P>
-): Relations<P> =>
-  Object.keys(relationSettings[instance.resourcePath]).reduce(
+const extractRelations = <C extends FirevaseClient, P extends PathsFrom<C>>(
+  client: C,
+  instance: Resource<C, P>
+): RelationsRefs<C, P> =>
+  Object.keys(client.relationSettings[instance.resourcePath]).reduce(
     (relations, relationName) => {
       if (relationName in instance == false)
         throw new Error(
@@ -71,36 +76,45 @@ const extractRelations = <P extends ResourcePath>(
 
       return {
         ...relations,
-        [relationName]: instance[relationName as keyof FullInstance<P>],
+        [relationName]: instance[relationName as keyof Resource<C, P>],
       }
     },
-    {} as Relations<P>
+    {} as RelationsRefs<C, P>
   )
 
-const createRelation = <P extends ResourcePath>(
-  source: Resource<P>,
-  definition: RelationDefinition<P, ResourcePath>,
+const createRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
+  client: C,
+  source: HalfResource<C, P>,
+  definition: RelationDefinitionFrom<C, P, PathsFrom<C>>,
   cleanupManager: CleanupManager
 ) => {
   switch (definition.type) {
     case 'has-one':
       return createHasOneRelation(
+        client,
         source,
-        definition as RelationDefinition<P, ResourcePath, 'has-one'>,
+        definition as RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-one'>,
         cleanupManager
       )
 
     case 'has-many':
       return createHasManyRelation(
+        client,
         source,
-        definition as RelationDefinition<P, ResourcePath, 'has-many'>,
+        definition as RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-many'>,
         cleanupManager
       )
 
     case 'many-to-many':
       return createManyToManyRelation(
+        client,
         source,
-        definition as RelationDefinition<P, ResourcePath, 'many-to-many'>,
+        definition as RelationDefinitionFrom<
+          C,
+          P,
+          PathsFrom<C>,
+          'many-to-many'
+        >,
         cleanupManager
       )
 
@@ -112,26 +126,34 @@ const createRelation = <P extends ResourcePath>(
 }
 
 /** Relation key refers to a property of source */
-const createHasOneRelation = <P extends ResourcePath>(
-  source: Resource<P>,
-  definition: RelationDefinition<P, ResourcePath, 'has-one'>,
+const createHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
+  client: C,
+  source: HalfResource<C, P>,
+  definition: RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-one'>,
   cleanupManager: CleanupManager
 ) => {
   const targetId = source[definition.relationKey] as string
 
-  const targetDoc = doc(collection(db, definition.targetResourcePath), targetId)
+  const targetDoc = doc(
+    collection(client.db, definition.targetResourcePath as string),
+    targetId
+  )
 
   return syncableRef(definition.targetResourcePath, targetDoc, cleanupManager)
 }
 
 /** Relation key refers to a property of target */
-const createHasManyRelation = <P extends ResourcePath>(
-  source: Resource<P>,
-  definition: RelationDefinition<P, ResourcePath, 'has-many'>,
+const createHasManyRelation = <
+  C extends FirevaseClient,
+  P extends PathsFrom<C>
+>(
+  client: C,
+  source: HalfResource<C, P>,
+  definition: RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-many'>,
   cleanupManager: CleanupManager
 ) => {
   const targetQuery = query(
-    collection(db, definition.targetResourcePath),
+    collection(client.db, definition.targetResourcePath as string),
     where(definition.relationKey as string, '==', source.id)
   )
 
@@ -139,14 +161,18 @@ const createHasManyRelation = <P extends ResourcePath>(
 }
 
 /** Relation key refers to a property of target */
-const createManyToManyRelation = <P extends ResourcePath>(
-  source: Resource<P>,
-  definition: RelationDefinition<P, ResourcePath, 'many-to-many'>,
+const createManyToManyRelation = <
+  C extends FirevaseClient,
+  P extends PathsFrom<C>
+>(
+  client: C,
+  source: HalfResource<C, P>,
+  definition: RelationDefinitionFrom<C, P, PathsFrom<C>, 'many-to-many'>,
   cleanupManager: CleanupManager
 ) => {
   // Essa query encontra os ids dos alvos mapeados a esse source
   const bridgeQuery = query(
-    collection(db, definition.manyToManyTable),
+    collection(client.db, definition.manyToManyTable as string),
     where(source.resourcePath, '==', source.id)
   )
 
@@ -159,12 +185,12 @@ const createManyToManyRelation = <P extends ResourcePath>(
     }
 
     const targetIds = snapshot.docs.map(
-      (doc) => doc.data()[definition.targetResourcePath]
+      (doc) => doc.data()[definition.targetResourcePath as string]
     )
 
     // A query que retorna os alvos de fato
     const targetsQuery = query(
-      collection(db, definition.targetResourcePath),
+      collection(client.db, definition.targetResourcePath as string),
       where('id', 'in', targetIds)
     )
 
@@ -173,7 +199,7 @@ const createManyToManyRelation = <P extends ResourcePath>(
   })
 
   // Criamos o syncable ref com a query dos alvos
-  const targets = syncableRef<typeof definition.targetResourcePath, Query>(
+  const targets = syncableRef<C, typeof definition.targetResourcePath, Query>(
     definition.targetResourcePath,
     'empty-query',
     cleanupManager
@@ -186,3 +212,16 @@ const createManyToManyRelation = <P extends ResourcePath>(
 
   return targets
 }
+
+// const playerRelations = buildRelations({
+//   cleanupManager: new CleanupManager(),
+//   client: vase,
+//   previousValues: {},
+//   source: syncableRef<Vase, 'players', DocumentReference>(
+//     'players',
+//     'empty-document',
+//     new CleanupManager()
+//   ).value,
+// })
+
+// playerRelations.guilds.value.at(0)?.owner

@@ -1,14 +1,8 @@
-import { db } from '@/api/firebase'
+import { FirevaseClient } from '@/firevase'
+import { HalfResource, updateResource } from '@/firevase/resources'
+import { PathsFrom, RelationsFrom } from '@/firevase/types'
 import { addDoc, collection } from 'firebase/firestore'
-import {
-  RelationDefinition,
-  RelationSettings,
-  Resource,
-  ResourcePath,
-  UnrefedResourceRelations,
-  relationSettings,
-} from '../../resources'
-import { updateResource } from '../../resources/functions/write'
+import { HalfResourceRelations, RelationDefinitionFrom } from '..'
 import { getManyToManyTargetIds, getRelation } from '../getRelation'
 
 /** Permite adicionar um novo valor para uma relaçao
@@ -17,19 +11,27 @@ import { getManyToManyTargetIds, getRelation } from '../getRelation'
  * @param target O novo valor para essa relaçao
  */
 export const addRelation = <
-  P extends ResourcePath,
-  R extends keyof UnrefedResourceRelations<P>
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  R extends keyof HalfResourceRelations<C, P>
 >(
-  source: Resource<P>,
+  client: C,
+  source: HalfResource<C, P>,
   relation: R,
-  // @ts-ignore
-  target: RelationSettings<P>[R]['type'] extends 'has-one'
+  target: RelationsFrom<C>[P][R]['type'] extends 'has-one'
     ? never
-    : UnrefedResourceRelations<P>[R]
+    : HalfResourceRelations<C, P>[R]
 ) => {
-  const definition = relationSettings[source.resourcePath][
-    relation
-  ] as RelationDefinition<P, ResourcePath>
+  const definition = client.relationSettings?.[source.resourcePath]?.[
+    relation as any
+  ] as RelationDefinitionFrom<C, P, PathsFrom<C>> | undefined
+
+  if (definition == undefined)
+    throw new Error(
+      `Can't add relation ${relation as string} from ${
+        source.resourcePath as string
+      } — firevase client relation settings don't exist for it`
+    )
 
   switch (definition.type) {
     case 'has-one':
@@ -40,10 +42,10 @@ export const addRelation = <
       )
 
     case 'has-many':
-      return addHasManyRelation(source, relation, target)
+      return addHasManyRelation(client, source, relation, target)
 
     case 'many-to-many':
-      return addManyToManyRelation(source, relation, target)
+      return addManyToManyRelation(client, source, relation, target)
 
     // Exhaustiveness checking: https://www.typescriptlang.org/docs/handbook/2/narrowing.html#exhaustiveness-checking
     default:
@@ -52,20 +54,19 @@ export const addRelation = <
   }
 }
 
-// declare const player: Resource<'players'>
-// declare const guild: Resource<'guilds'>
-
-// addRelation(player, 'ownedGuilds', [guild])
-// addRelation(guild, 'owner', player)
-// addRelation(guild, 'players', [player])
-
-export const internalAddHasManyRelations = <P extends ResourcePath>(
-  source: Resource<P>,
-  definition: RelationDefinition<P, ResourcePath, 'has-many'>,
-  // @ts-ignore
-  target: Resource<RelationSettings<P>[R]['targetResourcePath']>[],
-  // @ts-ignore
-  currentRelations: Resource<RelationSettings<P>[R]['targetResourcePath']>[]
+export const internalAddHasManyRelations = <
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  R extends keyof HalfResourceRelations<C, P>
+>(
+  client: C,
+  source: HalfResource<C, P>,
+  definition: RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-many'>,
+  target: HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[],
+  currentRelations: HalfResource<
+    C,
+    RelationsFrom<C>[P][R]['targetResourcePath']
+  >[]
 ) =>
   target
     // Pega as que nao estao na lista existente
@@ -78,46 +79,56 @@ export const internalAddHasManyRelations = <P extends ResourcePath>(
     )
     // Troca a relation key para a id do source, criando a relacao
     .map((targetInstance) =>
-      updateResource(definition.targetResourcePath, targetInstance.id, {
+      updateResource(client, definition.targetResourcePath, targetInstance.id, {
         [definition.relationKey]: source.id,
-      })
+      } as any)
     )
 
 const addHasManyRelation = async <
-  P extends ResourcePath,
-  R extends keyof UnrefedResourceRelations<P>
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  R extends keyof HalfResourceRelations<C, P>
 >(
-  source: Resource<P>,
+  client: C,
+  source: HalfResource<C, P>,
   relation: R,
-  rawTarget: UnrefedResourceRelations<P>[R]
+  rawTarget: HalfResourceRelations<C, P>[R]
 ) => {
-  const definition = relationSettings[source.resourcePath][
+  const definition = client.relationSettings[source.resourcePath][
     relation
-  ] as RelationDefinition<P, ResourcePath, 'has-many'>
+  ] as RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-many'>
 
   const target = (
     Array.isArray(rawTarget) ? rawTarget : [rawTarget]
-  ) /* @ts-ignore */ /* @ts-ignore */ as Resource<
-    RelationSettings<P>[R]['targetResourcePath']
-  >[]
+  ) as HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
 
-  const currentRelations = (await getRelation(source, relation)) as Resource<
-    // @ts-ignore
-    RelationSettings<P>[R]['targetResourcePath']
-  >[]
+  const currentRelations = (await getRelation(
+    client,
+    source,
+    relation
+  )) as HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
 
   // Adiciona as novas
   return Promise.all(
-    internalAddHasManyRelations(source, definition, target, currentRelations)
+    internalAddHasManyRelations(
+      client,
+      source,
+      definition,
+      target,
+      currentRelations
+    )
   )
 }
 
-export const internalAddManyToManyRelations = <P extends ResourcePath>(
-  source: Resource<P>,
-  definition: RelationDefinition<P, ResourcePath, 'many-to-many'>,
-  // @ts-ignore
-  target: Resource<RelationSettings<P>[R]['targetResourcePath']>[],
-  // @ts-ignore
+export const internalAddManyToManyRelations = <
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  R extends keyof HalfResourceRelations<C, P>
+>(
+  client: C,
+  source: HalfResource<C, P>,
+  definition: RelationDefinitionFrom<C, P, PathsFrom<C>, 'many-to-many'>,
+  target: HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[],
   currentRelatedIds: {
     targetId: string
     bridgeId: string
@@ -133,36 +144,41 @@ export const internalAddManyToManyRelations = <P extends ResourcePath>(
     )
     // Adiciona um doc para estabeler a relacao. Tem o formato de: o resourcePath eh a chave, o id da isntancia relacionada eh o valor.
     .map((targetInstance) =>
-      addDoc(collection(db, definition.manyToManyTable), {
+      addDoc(collection(client.db, definition.manyToManyTable as string), {
         [source.resourcePath]: source.id,
         [definition.targetResourcePath]: targetInstance.id,
       })
     )
 
 const addManyToManyRelation = async <
-  P extends ResourcePath,
-  R extends keyof UnrefedResourceRelations<P>
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  R extends keyof HalfResourceRelations<C, P>
 >(
-  source: Resource<P>,
+  client: C,
+  source: HalfResource<C, P>,
   relation: R,
-  rawTarget: UnrefedResourceRelations<P>[R]
+  rawTarget: HalfResourceRelations<C, P>[R]
 ) => {
-  const definition = relationSettings[source.resourcePath][
+  const definition = client.relationSettings[source.resourcePath][
     relation
-  ] as RelationDefinition<P, ResourcePath, 'many-to-many'>
+  ] as RelationDefinitionFrom<C, P, PathsFrom<C>, 'many-to-many'>
 
   const target = (
     Array.isArray(rawTarget) ? rawTarget : [rawTarget]
-  ) /* @ts-ignore */ /* @ts-ignore */ as Resource<
-    RelationSettings<P>[R]['targetResourcePath']
-  >[]
+  ) as HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
 
   // Essa query encontra os ids das instancias atualmente mapeados a esse source
-  const currentRelatedIds = await getManyToManyTargetIds(source, definition)
+  const currentRelatedIds = await getManyToManyTargetIds(
+    client,
+    source,
+    definition
+  )
 
   // Adiciona as novas
   return Promise.all(
     internalAddManyToManyRelations(
+      client,
       source,
       definition,
       target,
@@ -170,3 +186,8 @@ const addManyToManyRelation = async <
     )
   )
 }
+
+// declare const player: HalfResource<Vase, 'players'>
+// declare const guild: HalfResource<Vase, 'guilds'>
+
+// addRelation(vase, guild, 'players', [])

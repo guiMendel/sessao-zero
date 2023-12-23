@@ -1,4 +1,3 @@
-import { db } from '@/api/firebase'
 import { FirevaseClient } from '@/firevase'
 import { HalfResource, Resource, getResourceGetter } from '@/firevase/resources'
 import { PathsFrom, RelationsFrom } from '@/firevase/types'
@@ -73,6 +72,7 @@ export function getRelation<
   switch (definition.type) {
     case 'has-one':
       return getHasOneRelation(
+        client,
         source,
         definition as RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-one'>,
         cleanupManager
@@ -80,6 +80,7 @@ export function getRelation<
 
     case 'has-many':
       return getHasManyRelation(
+        client,
         source,
         definition as RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-many'>,
         cleanupManager
@@ -87,6 +88,7 @@ export function getRelation<
 
     case 'many-to-many':
       return getManyToManyRelation(
+        client,
         source,
         definition as RelationDefinitionFrom<
           C,
@@ -105,13 +107,14 @@ export function getRelation<
 }
 
 const getHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
+  client: C,
   source: HalfResource<C, P>,
   definition: RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-one'>,
   cleanupManager?: CleanupManager
 ) => {
   const { get } = cleanupManager
-    ? getResourceGetter(definition.targetResourcePath, cleanupManager)
-    : getResourceGetter(definition.targetResourcePath)
+    ? getResourceGetter(client, definition.targetResourcePath, cleanupManager)
+    : getResourceGetter(client, definition.targetResourcePath)
 
   const targetId = source[definition.relationKey] as string
 
@@ -119,13 +122,14 @@ const getHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
 }
 
 const getHasManyRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
+  client: C,
   source: HalfResource<C, P>,
   definition: RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-many'>,
   cleanupManager?: CleanupManager
 ) => {
   const { getList } = cleanupManager
-    ? getResourceGetter(definition.targetResourcePath, cleanupManager)
-    : getResourceGetter(definition.targetResourcePath)
+    ? getResourceGetter(client, definition.targetResourcePath, cleanupManager)
+    : getResourceGetter(client, definition.targetResourcePath)
 
   const targetFilters = [
     where(definition.relationKey as string, '==', source.id),
@@ -139,11 +143,12 @@ export const getManyToManyTargetIds = async <
   C extends FirevaseClient,
   P extends PathsFrom<C>
 >(
+  client: C,
   source: HalfResource<C, P>,
   definition: RelationDefinitionFrom<C, P, PathsFrom<C>, 'many-to-many'>
 ) => {
   const bridgeQuery = query(
-    collection(db, definition.manyToManyTable),
+    collection(client.db, definition.manyToManyTable as string),
     where(source.resourcePath as string, '==', source.id)
   )
 
@@ -161,18 +166,19 @@ const getManyToManyRelation = async <
   C extends FirevaseClient,
   P extends PathsFrom<C>
 >(
+  client: C,
   source: HalfResource<C, P>,
   definition: RelationDefinitionFrom<C, P, PathsFrom<C>, 'many-to-many'>,
   cleanupManager?: CleanupManager
 ) => {
   const { getList } = cleanupManager
-    ? getResourceGetter(definition.targetResourcePath, cleanupManager)
-    : getResourceGetter(definition.targetResourcePath)
+    ? getResourceGetter(client, definition.targetResourcePath, cleanupManager)
+    : getResourceGetter(client, definition.targetResourcePath)
 
   // Essa query encontra os ids dos alvos mapeados a esse source
-  const targetIds = (await getManyToManyTargetIds(source, definition)).map(
-    ({ targetId }) => targetId
-  )
+  const targetIds = (
+    await getManyToManyTargetIds(client, source, definition)
+  ).map(({ targetId }) => targetId)
 
   if (targetIds.length === 0) return []
 
