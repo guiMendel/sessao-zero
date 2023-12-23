@@ -13,13 +13,13 @@ import {
 } from 'firebase/firestore'
 import { Mock } from 'vitest'
 import { getResourceSynchronizer } from '.'
-import { makeFullInstance } from '../makeFullInstance'
 import { makeResource } from '../makeResource'
+import { makeResource } from '../makeHalfResource'
 import { db } from '@/api/firebase'
 
 vi.mock('../makeFullInstance')
 
-const mockMakeFullInstance = makeFullInstance as Mock
+const mockMakeFullInstance = makeResource as Mock
 
 describe('getResourceSynchronizer', () => {
   beforeEach(() => {

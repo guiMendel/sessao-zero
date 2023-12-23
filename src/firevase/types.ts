@@ -35,25 +35,14 @@ export type ConstrainRelationSettings<
 // ACCESSORS
 // ======================================================
 
-/** Represents some client */
-export type GenericClient = FirevaseClient<
-  ConstrainProperties,
-  ConstrainManyToManySettings<ConstrainProperties> | undefined,
-  | ConstrainRelationSettings<
-      ConstrainProperties,
-      ConstrainManyToManySettings<ConstrainProperties>
-    >
-  | undefined
->
-
 /** Gets the resource paths from a client */
-export type PathsFrom<C extends GenericClient> = keyof C['_tsAnchor']
+export type PathsFrom<C extends FirevaseClient> = keyof C['_tsAnchor']
 
 /** Gets the resource properties from a client */
-export type PropertiesFrom<C extends GenericClient> = C['_tsAnchor']
+export type PropertiesFrom<C extends FirevaseClient> = C['_tsAnchor']
 
 /** Gets the many to many settings from a client */
-export type ManyToManyFrom<C extends GenericClient> = C['manyToManySettings']
+export type ManyToManyFrom<C extends FirevaseClient> = C['manyToManySettings']
 
 /** Gets the relation settings from a client */
-export type RelationsFrom<C extends GenericClient> = C['relationSettings']
+export type RelationsFrom<C extends FirevaseClient> = C['relationSettings']

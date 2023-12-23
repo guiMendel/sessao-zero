@@ -1,9 +1,10 @@
-import { makeFullInstance } from '@/firevase/resources/functions/makeFullInstance'
+import { makeResource } from '@/firevase/resources/functions/makeResource'
 import { CleanupManager } from '@/utils/classes'
 import { DocumentReference, Query } from 'firebase/firestore'
 import { Ref, ref } from 'vue'
+import { FirevaseClient } from '..'
 import { Resource } from '../resources'
-import { GenericClient, PathsFrom } from '../types'
+import { PathsFrom } from '../types'
 import { Syncable } from './Syncable'
 
 // ===========================
@@ -11,7 +12,7 @@ import { Syncable } from './Syncable'
 // ===========================
 
 export type SyncableRef<
-  C extends GenericClient,
+  C extends FirevaseClient,
   P extends PathsFrom<C>,
   M extends Query | DocumentReference
 > = Ref<M extends Query ? Resource<C, P>[] : Resource<C, P>> & {
@@ -29,7 +30,7 @@ export const isQueryTarget = (
  * @param parentCleanupManager Um cleanup manager que, quando ativar o dispose, deve ativar o dispose desse ref tambem
  */
 export const syncableRef = <
-  C extends GenericClient,
+  C extends FirevaseClient,
   P extends PathsFrom<C>,
   M extends Query | DocumentReference
 >(
@@ -58,7 +59,7 @@ export const syncableRef = <
       if ('docs' in snapshot) {
         previousValues = valueRef.value as Resource<C, P>[]
 
-        valueRef.value = makeFullInstance(
+        valueRef.value = makeResource(
           snapshot,
           resourcePath,
           ownCleanupManager,
@@ -72,7 +73,7 @@ export const syncableRef = <
       previousValues =
         valueRef.value == undefined ? [] : [valueRef.value as Resource<C, P>]
 
-      valueRef.value = makeFullInstance(
+      valueRef.value = makeResource(
         snapshot,
         resourcePath,
         ownCleanupManager,

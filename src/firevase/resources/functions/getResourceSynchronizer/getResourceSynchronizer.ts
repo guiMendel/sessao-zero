@@ -1,6 +1,6 @@
+import { FirevaseClient } from '@/firevase'
 import { SyncableRef, syncableRef } from '@/firevase/Syncable/SyncableRef'
-import { db } from '@/api/firebase'
-import { ResourcePath } from '@/firevase/resources'
+import { PathsFrom } from '@/firevase/types'
 import { CleanupManager } from '@/utils/classes'
 import {
   DocumentReference,
@@ -15,26 +15,30 @@ import {
 // TIPOS DO RETURN
 // ====================================
 
-export type SyncListMethod<P extends ResourcePath> = (
+export type SyncListMethod<C extends FirevaseClient, P extends PathsFrom<C>> = (
   filters?: QueryFieldFilterConstraint[],
-  existingRef?: SyncableRef<P, Query>
-) => SyncableRef<P, Query>
+  existingRef?: SyncableRef<C, P, Query>
+) => SyncableRef<C, P, Query>
 
-export type SyncMethod<P extends ResourcePath> = (
+export type SyncMethod<C extends FirevaseClient, P extends PathsFrom<C>> = (
   id: string,
-  existingRef?: SyncableRef<P, DocumentReference>
-) => SyncableRef<P, DocumentReference>
+  existingRef?: SyncableRef<C, P, DocumentReference>
+) => SyncableRef<C, P, DocumentReference>
 
 // ====================================
 // IMPLEMENTACAO
 // ====================================
 
-export const getResourceSynchronizer = <P extends ResourcePath>(
+export const getResourceSynchronizer = <
+  C extends FirevaseClient,
+  P extends PathsFrom<C>
+>(
+  client: C,
   resourcePath: P,
   cleanupManager: CleanupManager
-): { sync: SyncMethod<P>; syncList: SyncListMethod<P> } => {
+): { sync: SyncMethod<C, P>; syncList: SyncListMethod<C, P> } => {
   /** A collection deste recurso */
-  const resourceCollection = collection(db, resourcePath)
+  const resourceCollection = collection(client.db, resourcePath as string)
 
   /** Obtem a referencia de documento para o id fornecido */
   const getDoc = (id?: string) =>
@@ -43,7 +47,7 @@ export const getResourceSynchronizer = <P extends ResourcePath>(
   /** Gera um sync em doc ou query */
   const makeSync = <M extends DocumentReference | Query>(
     target?: M,
-    existingRef?: SyncableRef<P, M>
+    existingRef?: SyncableRef<C, P, M>
   ) => {
     // Se recebemos um ref, basta mudar seu target
     if (existingRef != undefined) {
@@ -53,7 +57,7 @@ export const getResourceSynchronizer = <P extends ResourcePath>(
     }
 
     // Cria um novo syncable
-    return syncableRef<P, M>(
+    return syncableRef<C, P, M>(
       resourcePath,
       target ?? 'empty-document',
       cleanupManager
@@ -72,3 +76,7 @@ export const getResourceSynchronizer = <P extends ResourcePath>(
       makeSync(query(resourceCollection, ...filters), existingRef),
   }
 }
+
+// const syncer = getResourceSynchronizer(vase, 'guilds', new CleanupManager())
+
+// syncer.sync('2').value.owner.ownedGuilds

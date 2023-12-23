@@ -4,7 +4,7 @@ import { mockPlayer } from '@/tests'
 import { CleanupManager } from '@/utils/classes'
 import { where } from 'firebase/firestore'
 import { getResourceGetter } from '.'
-import * as MakeFullInstanceNamespace from '../makeFullInstance'
+import * as MakeFullInstanceNamespace from '../makeResource'
 
 describe('getResourceGetter', () => {
   beforeEach(() => {

@@ -1,6 +1,7 @@
 import { db } from '@/api/firebase'
+import { FirevaseClient } from '@/firevase'
 import { HalfResource, Resource, getResourceGetter } from '@/firevase/resources'
-import { GenericClient, PathsFrom, RelationsFrom } from '@/firevase/types'
+import { PathsFrom, RelationsFrom } from '@/firevase/types'
 import { CleanupManager } from '@/utils/classes'
 import {
   collection,
@@ -13,7 +14,7 @@ import { RelationDefinitionFrom, Relations } from '..'
 
 /** Retorna a(s) instancia(s) associada a relacao de um recurso, como Resource */
 export function getRelation<
-  C extends GenericClient,
+  C extends FirevaseClient,
   P extends PathsFrom<C>,
   R extends keyof Relations<C, P>
 >(
@@ -32,7 +33,7 @@ export function getRelation<
 
 /** Retorna a(s) instancia(s) associada a relacao de um recurso, como HalfResource */
 export function getRelation<
-  C extends GenericClient,
+  C extends FirevaseClient,
   P extends PathsFrom<C>,
   R extends keyof Relations<C, P>
 >(
@@ -49,7 +50,7 @@ export function getRelation<
 >
 
 export function getRelation<
-  C extends GenericClient,
+  C extends FirevaseClient,
   P extends PathsFrom<C>,
   R extends keyof Relations<C, P>
 >(
@@ -103,7 +104,7 @@ export function getRelation<
   }
 }
 
-const getHasOneRelation = <C extends GenericClient, P extends PathsFrom<C>>(
+const getHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
   source: HalfResource<C, P>,
   definition: RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-one'>,
   cleanupManager?: CleanupManager
@@ -117,7 +118,7 @@ const getHasOneRelation = <C extends GenericClient, P extends PathsFrom<C>>(
   return get(targetId)
 }
 
-const getHasManyRelation = <C extends GenericClient, P extends PathsFrom<C>>(
+const getHasManyRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
   source: HalfResource<C, P>,
   definition: RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-many'>,
   cleanupManager?: CleanupManager
@@ -135,7 +136,7 @@ const getHasManyRelation = <C extends GenericClient, P extends PathsFrom<C>>(
 
 /** Retorna os ids do target path associados a este source de uma relacao many-to-many */
 export const getManyToManyTargetIds = async <
-  C extends GenericClient,
+  C extends FirevaseClient,
   P extends PathsFrom<C>
 >(
   source: HalfResource<C, P>,
@@ -157,7 +158,7 @@ export const getManyToManyTargetIds = async <
 }
 
 const getManyToManyRelation = async <
-  C extends GenericClient,
+  C extends FirevaseClient,
   P extends PathsFrom<C>
 >(
   source: HalfResource<C, P>,

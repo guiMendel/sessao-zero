@@ -1,11 +1,10 @@
 import { DocumentReference, Query } from 'firebase/firestore'
 import { SyncableRef } from '../Syncable'
-import { FirevaseClient, Vase } from '../firevase'
+import { FirevaseClient } from '../firevase'
 import { HalfResource, Resource } from '../resources'
 import {
   ConstrainManyToManySettings,
   ConstrainProperties,
-  GenericClient,
   ManyToManyFrom,
   PathsFrom,
   PropertiesFrom,
@@ -70,7 +69,7 @@ export type ResourceManyToManyTables<
 // ======================================================================
 
 export type RelationDefinitionFrom<
-  C extends GenericClient,
+  C extends FirevaseClient,
   S extends keyof PropertiesFrom<C>,
   T extends keyof PropertiesFrom<C>,
   TY extends ManyToManyFrom<C> extends undefined
@@ -80,36 +79,27 @@ export type RelationDefinitionFrom<
 > = RelationDefinition<PropertiesFrom<C>, ManyToManyFrom<C>, S, T, TY, R>
 
 /** Dado um path P, retorna suas relacoes (sem um ref) */
-export type Relations<C extends GenericClient, P extends PathsFrom<C>> = {
-  // @ts-ignore
+export type Relations<C extends FirevaseClient, P extends PathsFrom<C>> = {
   [relation in keyof RelationsFrom<C>[P]]: RelationsFrom<C>[P][relation]['type'] extends 'has-one'
-    ? // @ts-ignore
-      Resource<C, RelationsFrom<C>[P][relation]['targetResourcePath']>
-    : // @ts-ignore
-      Resource<C, RelationsFrom<C>[P][relation]['targetResourcePath']>[]
+    ? Resource<C, RelationsFrom<C>[P][relation]['targetResourcePath']>
+    : Resource<C, RelationsFrom<C>[P][relation]['targetResourcePath']>[]
 }
 
 /** Dado um path P, retorna suas relacoes (sem um ref) */
 export type HalfResourceRelations<
-  C extends GenericClient,
+  C extends FirevaseClient,
   P extends PathsFrom<C>
 > = {
-  // @ts-ignore
   [relation in keyof RelationsFrom<C>[P]]: RelationsFrom<C>[P][relation]['type'] extends 'has-one'
-    ? // @ts-ignore
-      HalfResource<C, RelationsFrom<C>[P][relation]['targetResourcePath']>
-    : // @ts-ignore
-      HalfResource<C, RelationsFrom<C>[P][relation]['targetResourcePath']>[]
+    ? HalfResource<C, RelationsFrom<C>[P][relation]['targetResourcePath']>
+    : HalfResource<C, RelationsFrom<C>[P][relation]['targetResourcePath']>[]
 }
 
 /** Dado um path P, retorna suas relacoes */
-export type RelationsRefs<C extends GenericClient, P extends PathsFrom<C>> = {
-  // @ts-ignore
+export type RelationsRefs<C extends FirevaseClient, P extends PathsFrom<C>> = {
   [relation in keyof RelationsFrom<C>[P]]: SyncableRef<
     C,
-    // @ts-ignore
     RelationsFrom<C>[P][relation]['targetResourcePath'],
-    // @ts-ignore
     RelationsFrom<C>[P][relation]['type'] extends 'has-one'
       ? DocumentReference
       : Query

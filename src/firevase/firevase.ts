@@ -1,5 +1,9 @@
+import { firebaseApp } from '@/api/firebase'
 import { Guild } from '@/api/guilds'
 import { Player } from '@/api/players'
+import { FirebaseApp } from 'firebase/app'
+import { Auth, getAuth } from 'firebase/auth'
+import { Firestore, getFirestore } from 'firebase/firestore'
 import { makeHasMany, makeHasOne } from './relations'
 import {
   ConstrainManyToManySettings,
@@ -16,6 +20,12 @@ export type FirevaseClient<
     | ConstrainRelationSettings<Properties, ManyToManySettings>
     | undefined = any
 > = {
+  /** The firestore db associated to this client */
+  db: Firestore
+
+  /** The firebase auth associated to this client */
+  auth: Auth
+
   /** The resource paths to be managed by firevase */
   paths: (keyof Properties)[]
 
@@ -57,9 +67,14 @@ export const fillFirevase = <
   RequireProperties extends Record<string, Record<any, any>> = never,
   Properties extends RequireProperties = RequireProperties
 >(
+  app: FirebaseApp,
   paths: Properties extends never ? never : (keyof Properties)[]
 ): FirevaseClient<Properties, undefined, undefined> => ({
   _tsAnchor: null as unknown as Properties,
+
+  auth: getAuth(app),
+
+  db: getFirestore(app),
 
   paths,
 
@@ -89,10 +104,10 @@ export const fillFirevase = <
 
 // For testing below:
 
-export const vase = fillFirevase<{ guilds: Guild; players: Player }>([
-  'guilds',
-  'players',
-])
+export const vase = fillFirevase<{ guilds: Guild; players: Player }>(
+  firebaseApp,
+  ['guilds', 'players']
+)
   .configureManyToMany({ playersGuilds: ['guilds', 'players'] })
   .configureRelations(({ hasMany, hasOne }) => ({
     guilds: {

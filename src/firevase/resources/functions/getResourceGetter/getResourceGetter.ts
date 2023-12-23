@@ -1,5 +1,5 @@
-import { db } from '@/api/firebase'
-import { FullInstance, ResourcePath } from '@/firevase/resources/resources'
+import { FirevaseClient } from '@/firevase'
+import { PathsFrom } from '@/firevase/types'
 import { CleanupManager } from '@/utils/classes'
 import {
   QueryFieldFilterConstraint,
@@ -9,66 +9,91 @@ import {
   getDocs,
   query,
 } from 'firebase/firestore'
-import { makeFullInstance } from '../makeFullInstance'
-import { Resource, makeResource } from '../..'
+import { HalfResource, Resource, makeHalfResource, makeResource } from '../..'
 
 // ====================================
 // TIPOS DO RETURN
 // ====================================
 
-export type GetListMethod<L extends FullInstance<any> | Resource<any>> = (
-  filters?: QueryFieldFilterConstraint[]
-) => Promise<L[]>
+export type GetListMethod<
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  L extends Resource<C, P>[] | HalfResource<C, P>[]
+> = (filters?: QueryFieldFilterConstraint[]) => Promise<L>
 
-export type GetMethod<L extends FullInstance<any> | Resource<any>> = (
-  id: string
-) => Promise<L | undefined>
+export type GetMethod<
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  L extends Resource<C, P> | HalfResource<C, P>
+> = (id: string) => Promise<L | undefined>
 
 // ====================================
 // IMPLEMENTACAO
 // ====================================
 
 /** Permite acesso a um recurso, sem injetar relacoes */
-export function getResourceGetter<P extends ResourcePath>(
+export function getResourceGetter<
+  C extends FirevaseClient,
+  P extends PathsFrom<C>
+>(
+  client: C,
   resourcePath: P
-): { get: GetMethod<Resource<P>>; getList: GetListMethod<Resource<P>> }
+): {
+  get: GetMethod<C, P, HalfResource<C, P>>
+  getList: GetListMethod<C, P, HalfResource<C, P>[]>
+}
 
 /** Permite acesso a um recurso e injeta relacoes */
-export function getResourceGetter<P extends ResourcePath>(
+export function getResourceGetter<
+  C extends FirevaseClient,
+  P extends PathsFrom<C>
+>(
+  client: C,
   resourcePath: P,
   cleanupManager: CleanupManager
-): { get: GetMethod<FullInstance<P>>; getList: GetListMethod<FullInstance<P>> }
+): {
+  get: GetMethod<C, P, Resource<C, P>>
+  getList: GetListMethod<C, P, Resource<C, P>[]>
+}
 
-export function getResourceGetter<P extends ResourcePath>(
+export function getResourceGetter<
+  C extends FirevaseClient,
+  P extends PathsFrom<C>
+>(
+  client: C,
   resourcePath: P,
   cleanupManager?: CleanupManager
 ): {
-  get: GetMethod<Resource<P> | FullInstance<P>>
-  getList: GetListMethod<Resource<P> | FullInstance<P>>
+  get: GetMethod<C, P, HalfResource<C, P> | Resource<C, P>>
+  getList: GetListMethod<C, P, HalfResource<C, P>[] | Resource<C, P>[]>
 } {
   /** A collection deste recurso */
-  const resourceCollection = collection(db, resourcePath)
+  const resourceCollection = collection(client.db, resourcePath as string)
 
   return {
     /** Pega uma instancia do recurso */
     get: (id: string) =>
       getDoc(doc(resourceCollection, id)).then((doc) =>
         cleanupManager != undefined
-          ? makeFullInstance(doc, resourcePath, cleanupManager, [])[0]
-          : makeResource(doc, resourcePath)[0]
+          ? makeResource<C, P>(doc, resourcePath, cleanupManager, [])[0]
+          : makeHalfResource<C, P>(doc, resourcePath)[0]
       ),
 
     /** Pega uma lista filtrada do recurso */
     getList: (filters: QueryFieldFilterConstraint[] = []) =>
       getDocs(query(resourceCollection, ...filters)).then((docs) =>
         cleanupManager != undefined
-          ? (makeFullInstance(
+          ? (makeResource<C, P>(
               docs,
               resourcePath,
               cleanupManager,
               []
-            ) as FullInstance<P>[])
-          : (makeResource(docs, resourcePath) as Resource<P>[])
+            ) as Resource<C, P>[])
+          : (makeHalfResource<C, P>(docs, resourcePath) as HalfResource<C, P>[])
       ),
   }
 }
+
+// const getter = getResourceGetter(vase, 'players')
+
+// getter.get('2').then((player) => player.)

@@ -1,44 +1,41 @@
-import { ResourcePath, getPropertyExtrator } from '@/firevase/resources/resources'
-import { Resource } from '@/firevase/resources/types'
-import {
-  DocumentSnapshot,
-  QueryDocumentSnapshot,
-  QuerySnapshot,
-} from 'firebase/firestore'
+import { FirevaseClient } from '@/firevase'
+import { PathsFrom } from '@/firevase/types'
+import { CleanupManager } from '@/utils/classes'
+import { DocumentSnapshot, QuerySnapshot } from 'firebase/firestore'
+import { Resource, makeHalfResource } from '../..'
+import { buildRelations } from '../../../relations'
 
-/** Gera um (ou varios) Resources dos dados recebidos como documento ou query
+/** Gera um (ou varios) Resource C, dos dados recebidos como documento ou query
+ * @param resourcePath O path que define o tipo de objeto a ser gerado
  * @param snapshot Possui dados para popular as propriedades da nova instancia
+ * @param cleanupManager O manager para associar a novos recursos alocados
+ * @param previousValues Uma piscina de valores da qual podemos reutilizar recursos para nao ter de recriar eles
  */
-export const makeResource = <P extends ResourcePath>(
+export const makeResource = <C extends FirevaseClient, P extends PathsFrom<C>>(
   snapshot: DocumentSnapshot | QuerySnapshot,
-  resourcePath: P
-): Array<Resource<P> | undefined> => {
-  // Lida com um query
-  if ('docs' in snapshot) {
-    return snapshot.docs.map((doc) => documentToResource(doc, resourcePath))
-  }
+  resourcePath: P,
+  cleanupManager: CleanupManager,
+  previousValues: Resource<C, P>[]
+): Array<Resource<C, P> | undefined> => {
+  /** Organiza os valores anteriores para aumentar eficiencia */
+  const previousValuesMap = previousValues.reduce(
+    (map, properties) => ({ ...map, [properties.id]: properties }),
+    {} as Record<string, Resource<C, P>>
+  )
 
-  return [documentToResource(snapshot, resourcePath)]
-}
+  /** Gera os resources a partir dos snapshots */
+  const extractedResources = makeHalfResource<C, P>(snapshot, resourcePath)
 
-/** Gera um recurso a partir de um documento */
-const documentToResource = <P extends ResourcePath>(
-  doc: DocumentSnapshot | QueryDocumentSnapshot,
-  resourcePath: P
-): Resource<P> | undefined => {
-  const data = doc.data()
-
-  if (data == undefined) return undefined
-
-  /** Obtem o extractor desse path */
-  const extractProperties = getPropertyExtrator(resourcePath)
-
-  return {
-    // Adiciona as propriedades
-    ...extractProperties(doc.id, data),
-    id: doc.id,
-    createdAt: new Date(data.createdAt),
-    modifiedAt: new Date(data.modifiedAt),
-    resourcePath,
-  }
+  /** Injeta relacoes para tornar os recursos em instancias */
+  return extractedResources.map(
+    (extractedResource) =>
+      extractedResource && {
+        ...extractedResource,
+        ...buildRelations({
+          previousValues: previousValuesMap,
+          cleanupManager,
+          source: extractedResource,
+        }),
+      }
+  )
 }

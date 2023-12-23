@@ -1,12 +1,16 @@
-import { Properties, ResourcePath } from '@/firevase/resources'
-import { secureData } from '../write'
+import { FirevaseClient, vase } from '@/firevase'
+import { PathsFrom, PropertiesFrom } from '@/firevase/types'
 import { collection, doc, setDoc, updateDoc } from 'firebase/firestore'
-import { db } from '@/api/firebase'
+import { secureData } from '../secureData'
 
-export const updateResource = <P extends ResourcePath>(
+export const updateResource = <
+  C extends FirevaseClient,
+  P extends PathsFrom<C>
+>(
+  client: C,
   resourcePath: P,
   id: string,
-  properties: Partial<Properties[P]>,
+  properties: Partial<PropertiesFrom<C>[P]>,
   { overwrite } = { overwrite: false }
 ) => {
   const securedData = {
@@ -14,9 +18,11 @@ export const updateResource = <P extends ResourcePath>(
     modifiedAt: new Date().toJSON(),
   }
 
-  const document = doc(collection(db, resourcePath), id)
+  const document = doc(collection(client.db, resourcePath as string), id)
 
   if (overwrite) return setDoc(document, securedData)
 
   return updateDoc(document, securedData)
 }
+
+// updateResource(vase, 'players', '2', {})
