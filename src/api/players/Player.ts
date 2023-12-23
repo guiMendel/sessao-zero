@@ -16,5 +16,4 @@ export interface Player {
   about?: string
 
   admin?: boolean
-  // guilds: Array<IndexGuild>
 }

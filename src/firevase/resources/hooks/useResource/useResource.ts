@@ -1,28 +1,31 @@
-import { db } from '@/api/firebase'
-import {
-  getResourceGetter,
-  getResourceSynchronizer,
-} from '@/firevase/resources/functions'
-import { Properties, ResourcePath } from '@/firevase/resources/resources'
-import { CleanupManager } from '@/utils/classes'
-import { collection, doc } from 'firebase/firestore'
-import { onBeforeUnmount } from 'vue'
+import { FirevaseClient } from '@/firevase'
 import {
   createResource,
   deleteResource,
+  getResourceGetter,
+  getResourceSynchronizer,
   updateResource,
-} from '../../functions/write'
+} from '@/firevase/resources'
+import { PathsFrom, PropertiesFrom } from '@/firevase/types'
+import { CleanupManager } from '@/utils/classes'
+import { collection, doc } from 'firebase/firestore'
+import { onBeforeUnmount } from 'vue'
 
 /** Fornece uma interface para ler e escrever dados de um recurso no firestore, com sync.
  * @param resourcePath O caminho do recurso no firestore
  */
-export const useResource = <P extends ResourcePath>(resourcePath: P) => {
+export const useResource = <C extends FirevaseClient, P extends PathsFrom<C>>(
+  client: C,
+  resourcePath: P
+) => {
+  type Properties = PropertiesFrom<C>
+
   // ========================================
   // UTILIDADES
   // ========================================
 
   /** A collection deste recurso */
-  const resourceCollection = collection(db, resourcePath)
+  const resourceCollection = collection(client.db, resourcePath as string)
 
   /** Gerenciador de cleanups desta instancia */
   const cleanupManager = new CleanupManager()
@@ -36,24 +39,28 @@ export const useResource = <P extends ResourcePath>(resourcePath: P) => {
 
   /** Cria um novo recurso */
   const create = (properties: Properties[P], useId?: string) =>
-    createResource(resourcePath, properties, useId)
+    createResource(client, resourcePath, properties, useId)
 
   /** Cria um novo recurso */
   const update = (
     id: string,
     properties: Partial<Properties[P]>,
     options = { overwrite: false }
-  ) => updateResource(resourcePath, id, properties, options)
+  ) => updateResource(client, resourcePath, id, properties, options)
 
   /** Destroi o recurso permanentemente */
-  const deleteForever = (id: string) => deleteResource(resourcePath, id)
+  const deleteForever = (id: string) => deleteResource(client, resourcePath, id)
 
   // ========================================
   // READ
   // ========================================
 
   /** Pega os getters */
-  const { get, getList } = getResourceGetter(resourcePath, cleanupManager)
+  const { get, getList } = getResourceGetter(
+    client,
+    resourcePath,
+    cleanupManager
+  )
 
   // ========================================
   // SYNC
@@ -61,6 +68,7 @@ export const useResource = <P extends ResourcePath>(resourcePath: P) => {
 
   /** Pega os metodos de sync */
   const { sync, syncList } = getResourceSynchronizer(
+    client,
     resourcePath,
     cleanupManager
   )
