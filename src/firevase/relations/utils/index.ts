@@ -1,2 +1,2 @@
 export * from './detectInvalidRemove'
-export * from './getDefinition'
+export * from './requireDefinition'

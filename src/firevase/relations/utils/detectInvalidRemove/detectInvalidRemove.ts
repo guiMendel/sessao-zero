@@ -1,6 +1,6 @@
 import { FirevaseClient } from '@/firevase'
 import { PathsFrom } from '@/firevase/types'
-import { getDefinition } from '..'
+import { requireDefinition } from '..'
 import { RelationDefinitionFrom, Relations } from '../..'
 
 /** Se a relacao for has-many, e a relacao respectiva do target path for required e has-one, rejeita */
@@ -12,7 +12,7 @@ export const detectInvalidRemove = <
   path: P,
   relation: keyof Relations<C, P>
 ) => {
-  const definition = getDefinition(client, path, relation, 'has-many')
+  const definition = requireDefinition(client, path, relation, 'has-many')
 
   const targetRelations = client.relationSettings?.[
     definition.targetResourcePath

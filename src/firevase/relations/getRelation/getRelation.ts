@@ -10,6 +10,7 @@ import {
   where,
 } from 'firebase/firestore'
 import { RelationDefinitionFrom, Relations } from '..'
+import { requireDefinition } from '../utils'
 
 /** Retorna a(s) instancia(s) associada a relacao de um recurso, como Resource */
 export function getRelation<
@@ -22,12 +23,9 @@ export function getRelation<
   relation: R,
   cleanupManager: CleanupManager
 ): Promise<
-  // @ts-ignore
   RelationsFrom<C>[P][R]['type'] extends 'has-one'
-    ? // @ts-ignore
-      Resource<C, RelationsFrom<C>[P][R]['targetResourcePath']> | undefined
-    : // @ts-ignore
-      Resource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
+    ? Resource<C, RelationsFrom<C>[P][R]['targetResourcePath']> | undefined
+    : Resource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
 >
 
 /** Retorna a(s) instancia(s) associada a relacao de um recurso, como HalfResource */
@@ -40,12 +38,9 @@ export function getRelation<
   source: HalfResource<C, P>,
   relation: R
 ): Promise<
-  // @ts-ignore
   RelationsFrom<C>[P][R]['type'] extends 'has-one'
-    ? // @ts-ignore
-      HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']> | undefined
-    : // @ts-ignore
-      HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
+    ? HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']> | undefined
+    : HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
 >
 
 export function getRelation<
@@ -58,16 +53,7 @@ export function getRelation<
   relation: R,
   cleanupManager?: CleanupManager
 ) {
-  const definition = client.relationSettings?.[source.resourcePath]?.[
-    relation as any
-  ] as RelationDefinitionFrom<C, P, PathsFrom<C>> | undefined
-
-  if (definition == undefined)
-    throw new Error(
-      `Can't get relation ${relation as string} from ${
-        source.resourcePath as string
-      } — firevase client relation settings don't exist for it`
-    )
+  const definition = requireDefinition(client, source.resourcePath, relation)
 
   switch (definition.type) {
     case 'has-one':
@@ -157,7 +143,7 @@ export const getManyToManyTargetIds = async <
   if (bridgeSnapshot.empty) return []
 
   return bridgeSnapshot.docs.map((doc) => ({
-    targetId: doc.data()[definition.targetResourcePath as string],
+    targetId: doc.data()[definition.targetResourcePath as string] as string,
     bridgeId: doc.id,
   }))
 }

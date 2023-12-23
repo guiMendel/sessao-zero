@@ -4,6 +4,7 @@ import { PathsFrom, RelationsFrom } from '@/firevase/types'
 import { addDoc, collection } from 'firebase/firestore'
 import { HalfResourceRelations, RelationDefinitionFrom } from '..'
 import { getManyToManyTargetIds, getRelation } from '../getRelation'
+import { requireDefinition } from '../utils'
 
 /** Permite adicionar um novo valor para uma relaçao
  * @param source A instancia que vai receber uma nova instancia a relacao
@@ -22,16 +23,7 @@ export const addRelation = <
     ? never
     : HalfResourceRelations<C, P>[R]
 ) => {
-  const definition = client.relationSettings?.[source.resourcePath]?.[
-    relation as any
-  ] as RelationDefinitionFrom<C, P, PathsFrom<C>> | undefined
-
-  if (definition == undefined)
-    throw new Error(
-      `Can't add relation ${relation as string} from ${
-        source.resourcePath as string
-      } — firevase client relation settings don't exist for it`
-    )
+  const definition = requireDefinition(client, source.resourcePath, relation)
 
   switch (definition.type) {
     case 'has-one':
@@ -94,9 +86,12 @@ const addHasManyRelation = async <
   relation: R,
   rawTarget: HalfResourceRelations<C, P>[R]
 ) => {
-  const definition = client.relationSettings[source.resourcePath][
-    relation
-  ] as RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-many'>
+  const definition = requireDefinition(
+    client,
+    source.resourcePath,
+    relation,
+    'has-many'
+  )
 
   const target = (
     Array.isArray(rawTarget) ? rawTarget : [rawTarget]
@@ -160,9 +155,12 @@ const addManyToManyRelation = async <
   relation: R,
   rawTarget: HalfResourceRelations<C, P>[R]
 ) => {
-  const definition = client.relationSettings[source.resourcePath][
-    relation
-  ] as RelationDefinitionFrom<C, P, PathsFrom<C>, 'many-to-many'>
+  const definition = requireDefinition(
+    client,
+    source.resourcePath,
+    relation,
+    'many-to-many'
+  )
 
   const target = (
     Array.isArray(rawTarget) ? rawTarget : [rawTarget]

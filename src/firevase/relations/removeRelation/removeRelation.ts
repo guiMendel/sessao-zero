@@ -1,31 +1,29 @@
 import { db } from '@/api/firebase'
 import { collection, deleteDoc, doc } from 'firebase/firestore'
-import {
-  Properties,
-  RelationDefinition,
-  RelationSettings,
-  Resource,
-  ResourcePath,
-  UnrefedResourceRelations,
-  relationSettings,
-} from '../../resources'
-import { updateResource } from '../../resources/functions/write'
 import { getManyToManyTargetIds, getRelation } from '../getRelation'
+import { detectInvalidRemove, requireDefinition } from '../utils'
+import { FirevaseClient } from '@/firevase'
+import { PathsFrom, PropertiesFrom, RelationsFrom } from '@/firevase/types'
+import { HalfResource, updateResource } from '@/firevase/resources'
 import {
   NonHasOneRelations,
   OptionalHasOneRelations,
   ValidHasManyTarget,
-} from '../types'
-import { detectInvalidRemove, getDefinition } from '../utils'
+} from '../internalTypes'
+import { HalfResourceRelations, RelationDefinitionFrom } from '..'
 
 /** Permite remover uma relacao has-one
  * @param source De onde remover as relacoes
  * @param relation A relaçao a remover
  * @param target As instancias a serem removidas
  */
-export function removeRelation<P extends ResourcePath>(
-  source: Resource<P>,
-  relation: OptionalHasOneRelations<P>
+export function removeRelation<
+  C extends FirevaseClient,
+  P extends PathsFrom<C>
+>(
+  client: C,
+  source: HalfResource<C, P>,
+  relation: OptionalHasOneRelations<C, P>
 ): Promise<void>
 
 /** Permite remover instancias de uma relaçao
@@ -34,27 +32,33 @@ export function removeRelation<P extends ResourcePath>(
  * @param target As instancias a serem removidas
  */
 export function removeRelation<
-  P extends ResourcePath,
-  R extends NonHasOneRelations<P>
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  R extends keyof NonHasOneRelations<C, P>
 >(
-  source: Resource<P>,
+  client: C,
+  source: HalfResource<C, P>,
   relation: R,
-  // @ts-ignore
-  target: ValidHasManyTarget<P, R>
+  target: ValidHasManyTarget<C, P, R>
 ): Promise<void>
 
 export function removeRelation<
-  P extends ResourcePath,
-  R extends keyof UnrefedResourceRelations<P>
->(source: Resource<P>, relation: R, target?: ValidHasManyTarget<P, R>) {
-  const definition = relationSettings[source.resourcePath][
-    relation
-  ] as RelationDefinition<P, ResourcePath>
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  R extends keyof HalfResourceRelations<C, P>
+>(
+  client: C,
+  source: HalfResource<C, P>,
+  relation: R,
+  target?: ValidHasManyTarget<C, P, R>
+) {
+  const definition = requireDefinition(client, source.resourcePath, relation)
 
   if (definition.type === 'has-one')
     return removeHasOneRelation(
+      client,
       source,
-      relation as unknown as OptionalHasOneRelations<P>
+      relation as unknown as OptionalHasOneRelations<C, P>
     )
 
   if (target == undefined)
@@ -66,10 +70,10 @@ export function removeRelation<
 
   switch (definition.type) {
     case 'has-many':
-      return removeHasManyRelation(source, relation, target)
+      return removeHasManyRelation(client, source, relation, target)
 
     case 'many-to-many':
-      return removeManyToManyRelation(source, relation, target)
+      return removeManyToManyRelation(client, source, relation, target)
 
     // Exhaustiveness checking: https://www.typescriptlang.org/docs/handbook/2/narrowing.html#exhaustiveness-checking
     default:
@@ -78,36 +82,48 @@ export function removeRelation<
   }
 }
 
-// declare const player: Resource<'players'>
-// declare const guild: Resource<'guilds'>
+// declare const player: HalfResource<C,'players'>
+// declare const guild: HalfResource<C,'guilds'>
 
 // removeRelation(player, 'ownedGuilds', [guild])
 // removeRelation(guild, 'owner')
 // removeRelation(guild, 'players', [player])
 
-const removeHasOneRelation = <P extends ResourcePath>(
-  source: Resource<P>,
-  relation: OptionalHasOneRelations<P>
+const removeHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
+  client: C,
+  source: HalfResource<C, P>,
+  relation: OptionalHasOneRelations<C, P>
 ) => {
-  const definition = getDefinition(source.resourcePath, relation, 'has-one')
+  const definition = requireDefinition(
+    client,
+    source.resourcePath,
+    relation,
+    'has-one'
+  )
 
   // Rejeita se for required e undefined
   if (definition.required)
     throw new Error(
-      `Tentativa de remover relacao required ${relation as unknown as string}`
+      `Tentativa de remover relacao required ${relation as string}`
     )
 
-  return updateResource(source.resourcePath, source.id, {
+  return updateResource(client, source.resourcePath, source.id, {
     [definition.relationKey]: undefined,
-  } as Partial<Properties[P]>)
+  } as Partial<PropertiesFrom<C>[P]>)
 }
 
-export const internalRemoveHasManyRelations = <P extends ResourcePath>(
-  definition: RelationDefinition<P, ResourcePath, 'has-many'>,
-  // @ts-ignore
-  target: Resource<RelationSettings<P>[R]['targetResourcePath']>[],
-  // @ts-ignore
-  currentRelations: Resource<RelationSettings<P>[R]['targetResourcePath']>[]
+export const internalRemoveHasManyRelations = <
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  R extends keyof HalfResourceRelations<C, P>
+>(
+  client: C,
+  definition: RelationDefinitionFrom<C, P, keyof PropertiesFrom<C>, 'has-many'>,
+  target: HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[],
+  currentRelations: HalfResource<
+    C,
+    RelationsFrom<C>[P][R]['targetResourcePath']
+  >[]
 ) =>
   currentRelations
     // Pega as que nao estao na nova lista
@@ -116,44 +132,63 @@ export const internalRemoveHasManyRelations = <P extends ResourcePath>(
     )
     // Troca a relation key para undefined, quebrando a relacao
     .map((currentRelation) =>
-      updateResource(definition.targetResourcePath, currentRelation.id, {
-        [definition.relationKey]: undefined,
-      })
+      updateResource(
+        client,
+        definition.targetResourcePath,
+        currentRelation.id,
+        {
+          [definition.relationKey]: undefined,
+        } as Partial<PropertiesFrom<C>[keyof PropertiesFrom<C>]>
+      )
     )
 
 const removeHasManyRelation = async <
-  P extends ResourcePath,
-  R extends keyof UnrefedResourceRelations<P>
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  R extends keyof HalfResourceRelations<C, P>
 >(
-  source: Resource<P>,
+  client: C,
+  source: HalfResource<C, P>,
   relation: R,
-  rawTarget: UnrefedResourceRelations<P>[R]
+  rawTarget: HalfResourceRelations<C, P>[R]
 ) => {
-  const definition = getDefinition(source.resourcePath, relation, 'has-many')
+  const definition = requireDefinition(
+    client,
+    source.resourcePath,
+    relation,
+    'has-many'
+  )
 
-  detectInvalidRemove(source.resourcePath, relation)
+  detectInvalidRemove(client, source.resourcePath, relation)
 
   const target = (
     Array.isArray(rawTarget) ? rawTarget : [rawTarget]
-  ) /* @ts-ignore */ /* @ts-ignore */ as Resource<
-    RelationSettings<P>[R]['targetResourcePath']
-  >[]
+  ) as HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
 
-  const currentRelations = (await getRelation(source, relation)) as Resource<
-    // @ts-ignore
-    RelationSettings<P>[R]['targetResourcePath']
-  >[]
+  const currentRelations = (await getRelation(
+    client,
+    source,
+    relation
+  )) as HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
 
   return Promise.all(
-    internalRemoveHasManyRelations(definition, target, currentRelations)
+    internalRemoveHasManyRelations(client, definition, target, currentRelations)
   )
 }
 
-export const internalRemoveManyToManyRelations = <P extends ResourcePath>(
-  definition: RelationDefinition<P, ResourcePath, 'many-to-many'>,
-  // @ts-ignore
-  target: Resource<RelationSettings<P>[R]['targetResourcePath']>[],
-  // @ts-ignore
+export const internalRemoveManyToManyRelations = <
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  R extends keyof HalfResourceRelations<C, P>
+>(
+  client: C,
+  definition: RelationDefinitionFrom<
+    C,
+    P,
+    keyof C['_tsAnchor'],
+    'many-to-many'
+  >,
+  target: HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[],
   currentRelatedIds: {
     targetId: string
     bridgeId: string
@@ -166,18 +201,26 @@ export const internalRemoveManyToManyRelations = <P extends ResourcePath>(
     )
     // Destroi o doc que estabelece essa relacao
     .map(({ bridgeId }) =>
-      deleteDoc(doc(collection(db, definition.manyToManyTable), bridgeId))
+      deleteDoc(
+        doc(
+          collection(client.db, definition.manyToManyTable as string),
+          bridgeId
+        )
+      )
     )
 
 const removeManyToManyRelation = async <
-  P extends ResourcePath,
-  R extends keyof UnrefedResourceRelations<P>
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  R extends keyof HalfResourceRelations<C, P>
 >(
-  source: Resource<P>,
+  client: C,
+  source: HalfResource<C, P>,
   relation: R,
-  rawTarget: UnrefedResourceRelations<P>[R]
+  rawTarget: HalfResourceRelations<C, P>[R]
 ) => {
-  const definition = getDefinition(
+  const definition = requireDefinition(
+    client,
     source.resourcePath,
     relation,
     'many-to-many'
@@ -185,15 +228,22 @@ const removeManyToManyRelation = async <
 
   const target = (
     Array.isArray(rawTarget) ? rawTarget : [rawTarget]
-  ) /* @ts-ignore */ /* @ts-ignore */ as Resource<
-    RelationSettings<P>[R]['targetResourcePath']
-  >[]
+  ) as HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
 
   // Essa query encontra os ids das instancias atualmente mapeados a esse source
-  const currentRelatedIds = await getManyToManyTargetIds(source, definition)
+  const currentRelatedIds = await getManyToManyTargetIds(
+    client,
+    source,
+    definition
+  )
 
   // Remove as relacoes atuais que nao estao na nova lista
   return Promise.all(
-    internalRemoveManyToManyRelations(definition, target, currentRelatedIds)
+    internalRemoveManyToManyRelations(
+      client,
+      definition,
+      target,
+      currentRelatedIds
+    )
   )
 }

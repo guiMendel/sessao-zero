@@ -1,24 +1,18 @@
-import {
-  Properties,
-  RelationDefinition,
-  RelationSettings,
-  Resource,
-  ResourcePath,
-  UnrefedResourceRelations,
-  relationSettings,
-} from '../../resources'
-import { updateResource } from '../../resources/functions/write'
+import { FirevaseClient } from '@/firevase'
+import { HalfResource, updateResource } from '@/firevase/resources'
+import { PathsFrom, PropertiesFrom, RelationsFrom } from '@/firevase/types'
+import { HalfResourceRelations } from '..'
 import {
   internalAddHasManyRelations,
   internalAddManyToManyRelations,
 } from '../addRelation'
 import { getManyToManyTargetIds, getRelation } from '../getRelation'
+import { ValidHasManyTarget } from '../internalTypes'
 import {
   internalRemoveHasManyRelations,
   internalRemoveManyToManyRelations,
 } from '../removeRelation'
-import { ValidHasManyTarget } from '../types'
-import { detectInvalidRemove, getDefinition } from '../utils'
+import { detectInvalidRemove, requireDefinition } from '../utils'
 
 /** Permite sobrescrever um novo valor para uma relaçao
  * @param source A instancia que vai ter sua relaçao sobrescrita
@@ -26,26 +20,26 @@ import { detectInvalidRemove, getDefinition } from '../utils'
  * @param target O novo valor para essa relaçao
  */
 export const setRelation = <
-  P extends ResourcePath,
-  R extends keyof UnrefedResourceRelations<P>
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  R extends keyof HalfResourceRelations<C, P>
 >(
-  source: Resource<P>,
+  client: C,
+  source: HalfResource<C, P>,
   relation: R,
-  target: ValidHasManyTarget<P, R>
+  target: ValidHasManyTarget<C, P, R>
 ) => {
-  const definition = relationSettings[source.resourcePath][
-    relation
-  ] as RelationDefinition<P, ResourcePath>
+  const definition = requireDefinition(client, source.resourcePath, relation)
 
   switch (definition.type) {
     case 'has-one':
-      return setHasOneRelation(source, relation, target)
+      return setHasOneRelation(client, source, relation, target)
 
     case 'has-many':
-      return setHasManyRelation(source, relation, target)
+      return setHasManyRelation(client, source, relation, target)
 
     case 'many-to-many':
-      return setManyToManyRelation(source, relation, target)
+      return setManyToManyRelation(client, source, relation, target)
 
     // Exhaustiveness checking: https://www.typescriptlang.org/docs/handbook/2/narrowing.html#exhaustiveness-checking
     default:
@@ -62,17 +56,23 @@ export const setRelation = <
 // setRelation(guild, 'players', [player])
 
 const setHasOneRelation = <
-  P extends ResourcePath,
-  R extends keyof UnrefedResourceRelations<P>
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  R extends keyof HalfResourceRelations<C, P>
 >(
-  source: Resource<P>,
+  client: C,
+  source: HalfResource<C, P>,
   relation: R,
-  // @ts-ignore
-  target: RelationSettings<P>[R]['required'] extends true
-    ? UnrefedResourceRelations<P>[R]
-    : UnrefedResourceRelations<P>[R] | undefined
+  target: RelationsFrom<C>[P][R]['required'] extends true
+    ? HalfResourceRelations<C, P>[R]
+    : HalfResourceRelations<C, P>[R] | undefined
 ) => {
-  const definition = getDefinition(source.resourcePath, relation, 'has-one')
+  const definition = requireDefinition(
+    client,
+    source.resourcePath,
+    relation,
+    'has-one'
+  )
 
   // Rejeita arrays
   if (Array.isArray(target))
@@ -88,36 +88,43 @@ const setHasOneRelation = <
       }`
     )
 
-  return updateResource(source.resourcePath, source.id, {
+  return updateResource<C, P>(client, source.resourcePath, source.id, {
     [definition.relationKey]: target?.id,
-  } as Partial<Properties[P]>)
+  } as Partial<PropertiesFrom<C>[P]>)
 }
 
 const setHasManyRelation = async <
-  P extends ResourcePath,
-  R extends keyof UnrefedResourceRelations<P>
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  R extends keyof HalfResourceRelations<C, P>
 >(
-  source: Resource<P>,
+  client: C,
+  source: HalfResource<C, P>,
   relation: R,
-  rawTarget: UnrefedResourceRelations<P>[R]
+  rawTarget: HalfResourceRelations<C, P>[R]
 ) => {
-  const definition = getDefinition(source.resourcePath, relation, 'has-many')
+  const definition = requireDefinition(
+    client,
+    source.resourcePath,
+    relation,
+    'has-many'
+  )
 
-  detectInvalidRemove(source.resourcePath, relation)
+  detectInvalidRemove(client, source.resourcePath, relation)
 
   const target = (
     Array.isArray(rawTarget) ? rawTarget : [rawTarget]
-  ) /* @ts-ignore */ /* @ts-ignore */ as Resource<
-    RelationSettings<P>[R]['targetResourcePath']
-  >[]
+  ) as HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
 
-  const currentRelations = (await getRelation(source, relation)) as Resource<
-    // @ts-ignore
-    RelationSettings<P>[R]['targetResourcePath']
-  >[]
+  const currentRelations = (await getRelation(
+    client,
+    source,
+    relation
+  )) as HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
 
   // Remove as relacoes atuais que nao estao na nova lista
   const removePromises = internalRemoveHasManyRelations(
+    client,
     definition,
     target,
     currentRelations
@@ -125,6 +132,7 @@ const setHasManyRelation = async <
 
   // Adiciona as novas
   const addPromises = internalAddHasManyRelations(
+    client,
     source,
     definition,
     target,
@@ -135,29 +143,35 @@ const setHasManyRelation = async <
 }
 
 const setManyToManyRelation = async <
-  P extends ResourcePath,
-  R extends keyof UnrefedResourceRelations<P>
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  R extends keyof HalfResourceRelations<C, P>
 >(
-  source: Resource<P>,
+  client: C,
+  source: HalfResource<C, P>,
   relation: R,
-  rawTarget: UnrefedResourceRelations<P>[R]
+  rawTarget: HalfResourceRelations<C, P>[R]
 ) => {
-  const definition = getDefinition(
+  const definition = requireDefinition(
+    client,
     source.resourcePath,
     relation,
     'many-to-many'
   )
   const target = (
     Array.isArray(rawTarget) ? rawTarget : [rawTarget]
-  ) /* @ts-ignore */ /* @ts-ignore */ as Resource<
-    RelationSettings<P>[R]['targetResourcePath']
-  >[]
+  ) as HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
 
   // Essa query encontra os ids das instancias atualmente mapeados a esse source
-  const currentRelatedIds = await getManyToManyTargetIds(source, definition)
+  const currentRelatedIds = await getManyToManyTargetIds<C, P>(
+    client,
+    source,
+    definition
+  )
 
   // Remove as relacoes atuais que nao estao na nova lista
   const removePromises = internalRemoveManyToManyRelations(
+    client,
     definition,
     target,
     currentRelatedIds
@@ -165,6 +179,7 @@ const setManyToManyRelation = async <
 
   // Adiciona as novas
   const addPromises = internalAddManyToManyRelations(
+    client,
     source,
     definition,
     target,
