@@ -101,24 +101,3 @@ export const fillFirevase = <
     }
   },
 })
-
-// For testing below:
-
-export const vase = fillFirevase<{ guilds: Guild; players: Player }>(
-  firebaseApp,
-  ['guilds', 'players']
-)
-  .configureManyToMany({ playersGuilds: ['guilds', 'players'] })
-  .configureRelations(({ hasMany, hasOne }) => ({
-    guilds: {
-      owner: hasOne('players', { relationKey: 'ownerUid' }, 'required'),
-      players: hasMany('players', { manyToManyTable: 'playersGuilds' }),
-    },
-
-    players: {
-      ownedGuilds: hasMany('guilds', { relationKey: 'ownerUid' }),
-      guilds: hasMany('guilds', { manyToManyTable: 'playersGuilds' }),
-    },
-  }))
-
-export type Vase = typeof vase

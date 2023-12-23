@@ -1,16 +1,15 @@
-import { db } from '@/api/firebase'
-import { collection, deleteDoc, doc } from 'firebase/firestore'
-import { getManyToManyTargetIds, getRelation } from '../getRelation'
-import { detectInvalidRemove, requireDefinition } from '../utils'
 import { FirevaseClient } from '@/firevase'
-import { PathsFrom, PropertiesFrom, RelationsFrom } from '@/firevase/types'
 import { HalfResource, updateResource } from '@/firevase/resources'
+import { PathsFrom, PropertiesFrom, RelationsFrom } from '@/firevase/types'
+import { collection, deleteDoc, doc } from 'firebase/firestore'
+import { HalfResourceRelations, RelationDefinitionFrom } from '..'
+import { getManyToManyTargetIds, getRelation } from '../getRelation'
 import {
   NonHasOneRelations,
   OptionalHasOneRelations,
   ValidHasManyTarget,
 } from '../internalTypes'
-import { HalfResourceRelations, RelationDefinitionFrom } from '..'
+import { detectInvalidRemove, requireDefinition } from '../utils'
 
 /** Permite remover uma relacao has-one
  * @param source De onde remover as relacoes
@@ -34,7 +33,7 @@ export function removeRelation<
 export function removeRelation<
   C extends FirevaseClient,
   P extends PathsFrom<C>,
-  R extends keyof NonHasOneRelations<C, P>
+  R extends NonHasOneRelations<C, P>
 >(
   client: C,
   source: HalfResource<C, P>,
@@ -81,13 +80,6 @@ export function removeRelation<
       return exhaustiveCheck
   }
 }
-
-// declare const player: HalfResource<C,'players'>
-// declare const guild: HalfResource<C,'guilds'>
-
-// removeRelation(player, 'ownedGuilds', [guild])
-// removeRelation(guild, 'owner')
-// removeRelation(guild, 'players', [player])
 
 const removeHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
   client: C,
@@ -247,3 +239,11 @@ const removeManyToManyRelation = async <
     )
   )
 }
+
+// declare const player: HalfResource<Vase, 'players'>
+// declare const guild: HalfResource<Vase, 'guilds'>
+
+// removeRelation(vase, player, 'ownedGuilds', [guild])
+// removeRelation(vase, player, 'guilds', [guild])
+// removeRelation(vase, guild, 'owner')
+// removeRelation(vase, guild, 'players', [player])

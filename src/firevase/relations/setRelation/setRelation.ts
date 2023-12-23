@@ -48,13 +48,6 @@ export const setRelation = <
   }
 }
 
-// declare const player: Resource<'players'>
-// declare const guild: Resource<'guilds'>
-
-// setRelation(player, 'ownedGuilds', [guild])
-// setRelation(guild, 'owner', player)
-// setRelation(guild, 'players', [player])
-
 const setHasOneRelation = <
   C extends FirevaseClient,
   P extends PathsFrom<C>,
@@ -188,3 +181,11 @@ const setManyToManyRelation = async <
 
   return Promise.all([...removePromises, ...addPromises])
 }
+
+// declare const player: HalfResource<Vase, 'players'>
+// declare const guild: HalfResource<Vase, 'guilds'>
+
+// setRelation(vase, player, 'guilds', [guild])
+// setRelation(vase, player, 'ownedGuilds', [guild])
+// setRelation(vase, guild, 'owner', player)
+// setRelation(vase, guild, 'players', [player])
