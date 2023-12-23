@@ -1,7 +1,7 @@
 import { mockPlayer } from '@/tests'
 import { Meta, StoryFn } from '@storybook/vue3'
 import { JoinGuildPrompt } from '.'
-import { mockGuild } from '../../../../tests/mock/guilds'
+import { mockGuild } from '../../../../tests/mock/vase/guilds'
 import { InputGetter } from '../../../../App/InputGetter'
 
 const meta = {

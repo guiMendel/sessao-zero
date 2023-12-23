@@ -1,4 +1,4 @@
-import { getMockDatabase } from '@/tests/mock/backend'
+import { mockFantasyDatabase } from '@/tests/mock/backend'
 
 import { mockPlayer } from '@/tests'
 import { CleanupManager } from '@/utils/classes'
@@ -15,8 +15,8 @@ describe('getResourceGetter', () => {
     it('should get the appropriate value', async () => {
       const id = '1'
 
-      const { getDatabaseValue } = getMockDatabase({
-        players: { [id]: mockPlayer({}, 'uploadable') },
+      const { getDatabaseValue } = mockFantasyDatabase({
+        knights: { [id]: mockPlayer({}, 'uploadable') },
       })
 
       const { get } = getResourceGetter('players')

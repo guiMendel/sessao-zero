@@ -1,3 +1,4 @@
+import { vase } from '@/api'
 import { FirevaseClient } from '@/firevase'
 import {
   Uploadable as OriginalUploadable,
@@ -19,6 +20,8 @@ import {
   where,
 } from 'firebase/firestore'
 import { Mock } from 'vitest'
+import { setUpFirebaseMocks } from './firebase'
+import { fantasyVase } from './fantasyVase'
 
 vi.mock('@/api/firebase', () => ({ db: 'mockDb' }))
 
@@ -50,7 +53,9 @@ export const mockQuery = query as Mock
 export const mockWhere = where as Mock
 export const mockDocumentId = documentId as Mock
 
-export const getMockDatabase = <C extends FirevaseClient>(client: C) => {
+setUpFirebaseMocks()
+
+const createDatabase = <C extends FirevaseClient>(client: C) => {
   // ======================================================
   // BASIC TYPES
   // ======================================================
@@ -446,3 +451,7 @@ export const RealDate = Date
 afterEach(() => {
   global.Date = RealDate
 })
+
+export const mockVaseDatabase = createDatabase(vase).init
+
+export const mockFantasyDatabase = createDatabase(fantasyVase).init

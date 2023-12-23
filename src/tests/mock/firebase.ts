@@ -23,6 +23,9 @@ export const mockAuth = {} as Auth
 
 export const mockDb = {} as Firestore
 
+/** Sets up firebase functions for returning mocks.
+ * User this when your tests rely on auth and db not being undefined.
+ */
 export const setUpFirebaseMocks = () => {
   ;(initializeApp as Mock).mockReturnValue(mockFirebaseApp)
   ;(getAuth as Mock).mockReturnValue(mockAuth)

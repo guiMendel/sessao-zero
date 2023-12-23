@@ -1,5 +1,7 @@
 export * from './fieldRef'
 export * from './mergeObjects'
+export * from './randomRange'
+export * from './sample'
 export * from './selectOptions'
 export * from './sleep'
 export * from './storageAccess'

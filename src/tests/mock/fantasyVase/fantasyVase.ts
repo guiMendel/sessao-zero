@@ -1,32 +1,9 @@
 import { fillFirevase } from '@/firevase'
-import { mockFirebaseApp, setUpFirebaseMocks } from './firebase'
-
-type Knight = {
-  name: string
-  gold: number
-
-  kingId: string
-}
-
-type King = {
-  name: string
-  age: number
-  hasSuccessor: boolean
-}
-
-type Land = {
-  name: string
-  biome: 'desert' | 'woods' | 'plains' | 'hills' | 'swamp' | 'tundra'
-
-  kingId: string
-}
-
-type Mission = {
-  priority: 'urgent' | 'high' | 'medium'
-}
+import { mockFirebaseApp, setUpFirebaseMocks } from '../firebase'
+import { King, Knight, Land, Mission } from './'
 
 /** Client firevase de teste */
-export const mockVase = fillFirevase<{
+export const fantasyVase = fillFirevase<{
   knights: Knight
   kings: King
   lands: Land
@@ -59,6 +36,6 @@ export const mockVase = fillFirevase<{
   }))
 
 /** Tipo do cliente firevase de teste */
-export type MockVase = typeof mockVase
+export type FantasyVase = typeof fantasyVase
 
-export const setupVaseMocks = () => setUpFirebaseMocks()
+export const setupFantasyVaseMocks = () => setUpFirebaseMocks()
