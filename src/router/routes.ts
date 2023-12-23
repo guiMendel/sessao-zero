@@ -1,4 +1,4 @@
-import { makeGuildInvitation } from '@/api/resourcePaths/guilds'
+import { makeGuildInvitation } from '@/api/guilds'
 import Adventure from '@/views/Adventures/Adventure.vue'
 import AdventuresIndex from '@/views/Adventures/AdventuresIndex.vue'
 import CreateAdventure from '@/views/Adventures/CreateAdventure.vue'

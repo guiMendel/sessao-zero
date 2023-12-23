@@ -107,3 +107,4 @@ const { player } = storeToRefs(useCurrentPlayer())
 }
 </style>
 @/utils/types
+@/firevase/resources@/api/players

@@ -82,3 +82,4 @@ const otherAvailableGuilds = computed(() =>
 }
 </style>
 @/utils/types
+@/api/guilds@/api/players

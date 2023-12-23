@@ -51,3 +51,4 @@ const isVisitor = computed(
   margin-top: 1rem;
 }
 </style>
+@/api/guilds@/api/players

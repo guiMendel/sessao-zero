@@ -1,6 +1,6 @@
-import { syncableRef } from '@/api/classes'
-import { Player } from '@/api/resourcePaths/players'
-import { FullInstance, Properties, Resource, Uploadable } from '@/api/resources'
+import { syncableRef } from '@/firevase/classes'
+import { Player } from '@/api/players'
+import { FullInstance, Properties, Resource, Uploadable } from '@/firevase/resources'
 import { CleanupManager } from '@/utils/classes'
 import { Query } from 'firebase/firestore'
 

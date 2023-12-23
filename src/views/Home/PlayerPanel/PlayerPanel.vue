@@ -87,3 +87,4 @@ const goToConfigurations = () => {
   }
 }
 </style>
+@/api/players

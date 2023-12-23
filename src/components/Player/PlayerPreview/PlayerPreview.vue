@@ -75,3 +75,4 @@ const openProfilePage = () =>
 }
 </style>
 @/utils/types
+@/firevase/resources

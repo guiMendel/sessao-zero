@@ -5,7 +5,7 @@ import {
   ResourcePath,
   Uploadable,
   resourcePaths,
-} from '@/api/resources'
+} from '@/firevase/resources'
 import {
   addDoc,
   collection,

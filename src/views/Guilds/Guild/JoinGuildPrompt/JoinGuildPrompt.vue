@@ -82,3 +82,4 @@ const join = () =>
   }
 }
 </style>
+@/firevase/resources@/api/guilds@/api/players

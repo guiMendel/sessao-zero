@@ -175,3 +175,4 @@ const newGuild = async () => {
   }
 }
 </style>
+@/firevase/resources@/api/guilds@/api/players

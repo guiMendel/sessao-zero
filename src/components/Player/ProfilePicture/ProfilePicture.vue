@@ -45,3 +45,4 @@ const initials = computed(() =>
 }
 </style>
 @/utils/types
+@/api/players

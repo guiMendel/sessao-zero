@@ -1,18 +1,20 @@
+import { Guild } from '@/api/guilds'
+import { Player } from '@/api/players'
 import { makeHasMany, makeHasOne } from './relations'
 import {
   ConstrainManyToManySettings,
   ConstrainProperties,
   ConstrainRelationSettings,
-} from './typeConstraints'
+} from './types'
 
-type FirevaseClient<
-  Properties extends ConstrainProperties,
+export type FirevaseClient<
+  Properties extends ConstrainProperties = any,
   ManyToManySettings extends
     | ConstrainManyToManySettings<Properties>
-    | undefined = undefined,
+    | undefined = any,
   RelationSettings extends
     | ConstrainRelationSettings<Properties, ManyToManySettings>
-    | undefined = undefined
+    | undefined = any
 > = {
   /** The resource paths to be managed by firevase */
   paths: (keyof Properties)[]
@@ -56,7 +58,7 @@ export const fillFirevase = <
   Properties extends RequireProperties = RequireProperties
 >(
   paths: Properties extends never ? never : (keyof Properties)[]
-): FirevaseClient<Properties> => ({
+): FirevaseClient<Properties, undefined, undefined> => ({
   _tsAnchor: null as unknown as Properties,
 
   paths,
@@ -84,3 +86,24 @@ export const fillFirevase = <
     }
   },
 })
+
+// For testing below:
+
+export const vase = fillFirevase<{ guilds: Guild; players: Player }>([
+  'guilds',
+  'players',
+])
+  .configureManyToMany({ playersGuilds: ['guilds', 'players'] })
+  .configureRelations(({ hasMany, hasOne }) => ({
+    guilds: {
+      owner: hasOne('players', { relationKey: 'ownerUid' }, 'required'),
+      players: hasMany('players', { manyToManyTable: 'playersGuilds' }),
+    },
+
+    players: {
+      ownedGuilds: hasMany('guilds', { relationKey: 'ownerUid' }),
+      guilds: hasMany('guilds', { manyToManyTable: 'playersGuilds' }),
+    },
+  }))
+
+export type Vase = typeof vase

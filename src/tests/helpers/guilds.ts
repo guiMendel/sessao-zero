@@ -1,7 +1,7 @@
-import { syncableRef } from '@/api/classes'
+import { syncableRef } from '@/firevase/classes'
 import { db } from '@/api/firebase'
-import { Guild } from '@/api/resourcePaths/guilds'
-import { FullInstance, Resource, Uploadable } from '@/api/resources'
+import { Guild } from '@/api/guilds'
+import { FullInstance, Resource, Uploadable } from '@/firevase/resources'
 import { CleanupManager } from '@/utils/classes'
 import { DocumentReference, Query, collection, doc } from 'firebase/firestore'
 

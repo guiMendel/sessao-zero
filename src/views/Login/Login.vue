@@ -229,3 +229,4 @@ const submit = () => {
   }
 }
 </style>
+@/api/players

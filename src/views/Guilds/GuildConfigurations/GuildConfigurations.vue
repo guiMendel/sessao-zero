@@ -216,3 +216,4 @@ Digite <code>${guild.value.name}</code> para confirmar.`,
   }
 }
 </style>
+@/api/guilds

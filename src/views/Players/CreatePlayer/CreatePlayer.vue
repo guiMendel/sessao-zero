@@ -136,3 +136,4 @@ form {
   }
 }
 </style>
+@/api/players

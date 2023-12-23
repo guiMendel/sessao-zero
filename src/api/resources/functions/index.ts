@@ -1,6 +1,0 @@
-export * from './relations/buildRelations'
-export * from './makeFullInstance'
-export * from './getResourceGetter'
-export * from './getResourceSynchronizer'
-export * from './makeResource'
-export * from './relations'
