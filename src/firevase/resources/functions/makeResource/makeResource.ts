@@ -19,7 +19,9 @@ export const makeResource = <C extends FirevaseClient, P extends PathsFrom<C>>(
   cleanupManager: CleanupManager,
   previousValues: Resource<C, P>[]
 ): Array<Resource<C, P> | undefined> => {
-  /** Organiza os valores anteriores para aumentar eficiencia */
+  /** Organiza os valores anteriores para aumentar eficiencia.
+   * Em um objeto que mapeia id para dados
+   */
   const previousValuesMap = previousValues.reduce(
     (map, properties) => ({ ...map, [properties.id]: properties }),
     {} as Record<string, Resource<C, P>>
