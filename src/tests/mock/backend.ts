@@ -97,9 +97,7 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
         client.paths.includes(path)
 
       // Mock dates
-      global.Date = vi
-        .fn()
-        .mockReturnValue(new Date(mockDate)) as unknown as DateConstructor
+      applyDateMock()
 
       /** The actual place where values are stored */
       const database: Database = { ...values }
@@ -432,6 +430,11 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
 
 export const mockDate = '2019-04-22T10:20:30Z'
 export const RealDate = Date
+
+export const applyDateMock = () =>
+  (global.Date = vi
+    .fn()
+    .mockReturnValue(new Date(mockDate)) as unknown as DateConstructor)
 
 afterEach(() => {
   global.Date = RealDate

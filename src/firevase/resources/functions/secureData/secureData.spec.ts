@@ -1,5 +1,6 @@
 import { FieldsNotToUpload, fieldsNotToUpload, secureData } from '.'
 
+
 describe('secureData', () => {
   it('remove metodos', () => {
     const method = 'baba'

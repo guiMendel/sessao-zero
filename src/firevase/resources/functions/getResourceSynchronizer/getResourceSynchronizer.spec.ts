@@ -1,7 +1,8 @@
-import { getMockDatabase } from '@/tests/mock/backend'
+import { mockFantasyDatabase } from '@/tests/mock/backend'
 
+import { db } from '@/api/firebase'
 import * as SyncableRefNamespace from '@/firevase/Syncable/SyncableRef'
-import { mockPlayer } from '@/tests'
+import { FantasyVase, fantasyVase, mockKnight } from '@/tests/mock/fantasyVase'
 import { CleanupManager } from '@/utils/classes'
 import {
   DocumentReference,
@@ -13,9 +14,7 @@ import {
 } from 'firebase/firestore'
 import { Mock } from 'vitest'
 import { getResourceSynchronizer } from '.'
-import { makeResource } from '../makeResource'
-import { makeHalfResource } from '../makeHalfResource'
-import { db } from '@/api/firebase'
+import { makeHalfResource, makeResource } from '..'
 
 vi.mock('../makeResource')
 
@@ -25,64 +24,75 @@ describe('getResourceSynchronizer', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
 
-    mockMakeResource.mockImplementation(makeResource)
+    mockMakeResource.mockImplementation((_, snapshot, path) =>
+      makeHalfResource(snapshot, path)
+    )
   })
 
   describe('sync', () => {
     it('should sync current call', async () => {
       const id = '1'
 
-      const { getDatabaseValue, updateDatabaseValue } = getMockDatabase({
-        players: {
-          [id]: mockPlayer({}, 'uploadable'),
+      const { getDatabaseValue, updateDatabaseValue } = mockFantasyDatabase({
+        knights: {
+          [id]: mockKnight('uploadable'),
         },
       })
 
-      const { sync } = getResourceSynchronizer('players', new CleanupManager())
+      const { sync } = getResourceSynchronizer(
+        fantasyVase,
+        'knights',
+        new CleanupManager()
+      )
 
       const instance = sync(id)
 
       // Ensures it initializes properly
       expect(instance.value).toStrictEqual(
-        await getDatabaseValue('players', id)
+        await getDatabaseValue('knights', id)
       )
 
-      await updateDatabaseValue('players', id, { about: 'jooj' })
+      await updateDatabaseValue('knights', id, { gold: 5000 })
 
       // Ensures it synced properly
       expect(instance.value).toStrictEqual(
-        await getDatabaseValue('players', id)
+        await getDatabaseValue('knights', id)
       )
     })
 
     it('should also sync the provided ref', async () => {
       const id = '1'
 
-      const { getDatabaseValue, updateDatabaseValue } = getMockDatabase({
-        players: {
-          [id]: mockPlayer({}, 'uploadable'),
+      const { getDatabaseValue, updateDatabaseValue } = mockFantasyDatabase({
+        knights: {
+          [id]: mockKnight('uploadable'),
         },
       })
 
-      const { sync } = getResourceSynchronizer('players', new CleanupManager())
+      const { sync } = getResourceSynchronizer(
+        fantasyVase,
+        'knights',
+        new CleanupManager()
+      )
 
       const instanceRef = SyncableRefNamespace.syncableRef<
-        'players',
+        FantasyVase,
+        'knights',
         DocumentReference
-      >('players', 'empty-document', new CleanupManager())
+      >(fantasyVase, 'knights', 'empty-document', new CleanupManager())
 
       sync(id, instanceRef)
 
       // Ensures it initializes properly
       expect(instanceRef.value).toStrictEqual(
-        await getDatabaseValue('players', id)
+        await getDatabaseValue('knights', id)
       )
 
-      await updateDatabaseValue('players', id, { about: 'jooj' })
+      await updateDatabaseValue('knights', id, { gold: 5000 })
 
       // Ensures it synced properly
       expect(instanceRef.value).toStrictEqual(
-        await getDatabaseValue('players', id)
+        await getDatabaseValue('knights', id)
       )
     })
 
@@ -95,19 +105,24 @@ describe('getResourceSynchronizer', () => {
 
       const id = '1'
 
-      getMockDatabase({
-        players: { [id]: mockPlayer({}, 'uploadable') },
+      mockFantasyDatabase({
+        knights: { [id]: mockKnight('uploadable') },
       })
 
       const cleanupManager = new CleanupManager()
 
-      const { sync } = getResourceSynchronizer('players', cleanupManager)
+      const { sync } = getResourceSynchronizer(
+        fantasyVase,
+        'knights',
+        cleanupManager
+      )
 
       sync(id)
 
       expect(mockSyncableRef).toHaveBeenCalledWith(
-        'players',
-        doc(collection(db, 'players'), id),
+        fantasyVase,
+        'knights',
+        doc(collection(db, 'knights'), id),
         cleanupManager
       )
     })
@@ -115,116 +130,84 @@ describe('getResourceSynchronizer', () => {
 
   describe('syncing list', () => {
     it('should sync to database content', async () => {
-      const { indexDatabaseValues, updateDatabaseValue } = getMockDatabase({
-        players: {
-          '1': mockPlayer(
-            {
-              name: 'scooby',
-              nickname: 'snacks',
-            },
-            'uploadable'
-          ),
-          '2': mockPlayer(
-            {
-              name: 'bobby',
-              nickname: 'stevens',
-            },
-            'uploadable'
-          ),
+      const { indexDatabaseValues, updateDatabaseValue } = mockFantasyDatabase({
+        knights: {
+          '1': mockKnight('uploadable', { name: 'Lancelot' }),
+          '2': mockKnight('uploadable'),
         },
       })
 
       const { syncList } = getResourceSynchronizer(
-        'players',
+        fantasyVase,
+        'knights',
         new CleanupManager()
       )
 
       const list = syncList()
 
       // Verifica se inicializa adequadamente
-      expect(list.value).toStrictEqual(await indexDatabaseValues('players'))
+      expect(list.value).toStrictEqual(await indexDatabaseValues('knights'))
 
-      await updateDatabaseValue('players', '2', { about: 'meem' })
+      await updateDatabaseValue('knights', '2', { gold: 5000 })
 
-      expect(list.value).toStrictEqual(await indexDatabaseValues('players'))
+      expect(list.value).toStrictEqual(await indexDatabaseValues('knights'))
     })
 
     it('should also sync the provided ref', async () => {
-      const { indexDatabaseValues, updateDatabaseValue } = getMockDatabase({
-        players: {
-          '1': mockPlayer(
-            {
-              name: 'scooby',
-              nickname: 'snacks',
-            },
-            'uploadable'
-          ),
-          '2': mockPlayer(
-            {
-              name: 'bobby',
-              nickname: 'stevens',
-            },
-            'uploadable'
-          ),
+      const { indexDatabaseValues, updateDatabaseValue } = mockFantasyDatabase({
+        knights: {
+          '1': mockKnight('uploadable', { name: 'Lancelot' }),
+          '2': mockKnight('uploadable'),
         },
       })
 
       const { syncList } = getResourceSynchronizer(
-        'players',
+        fantasyVase,
+        'knights',
         new CleanupManager()
       )
 
-      const listRef = SyncableRefNamespace.syncableRef<'players', Query>(
-        'players',
-        'empty-query',
-        new CleanupManager()
-      )
+      const listRef = SyncableRefNamespace.syncableRef<
+        FantasyVase,
+        'knights',
+        Query
+      >(fantasyVase, 'knights', 'empty-query', new CleanupManager())
 
       expect(listRef.value).toStrictEqual([])
 
       syncList([], listRef)
 
       // Verifica se inicializa adequadamente
-      expect(listRef.value).toStrictEqual(await indexDatabaseValues('players'))
+      expect(listRef.value).toStrictEqual(await indexDatabaseValues('knights'))
 
-      await updateDatabaseValue('players', '2', { about: 'meem' })
+      await updateDatabaseValue('knights', '2', { gold: 5000 })
 
-      expect(listRef.value).toStrictEqual(await indexDatabaseValues('players'))
+      expect(listRef.value).toStrictEqual(await indexDatabaseValues('knights'))
     })
 
     it('should filter list to match query and keep filter synced', async () => {
-      const { indexDatabaseValues } = getMockDatabase({
-        players: {
-          '1': mockPlayer(
-            {
-              name: 'scooby',
-              nickname: 'snacks',
-            },
-            'uploadable'
-          ),
-          '2': mockPlayer(
-            {
-              name: 'bobby',
-              nickname: 'stevens',
-            },
-            'uploadable'
-          ),
+      const { indexDatabaseValues } = mockFantasyDatabase({
+        knights: {
+          '1': mockKnight('uploadable', { name: 'Lancelot' }),
+          '2': mockKnight('uploadable'),
         },
       })
 
       const { syncList } = getResourceSynchronizer(
-        'players',
+        fantasyVase,
+        'knights',
         new CleanupManager()
       )
 
-      const expectedResult = (await indexDatabaseValues('players')).filter(
-        ({ nickname }) => nickname === 'stevens'
+      const expectedResult = (await indexDatabaseValues('knights')).filter(
+        ({ name }) => name === 'Lancelot'
       )
 
-      const list = syncList([where('nickname', '==', 'stevens')])
+      const list = syncList([where('name', '==', 'Lancelot')])
 
+      expect(list.value).not.toHaveLength(0)
       expect(list.value).toStrictEqual(expectedResult)
-      expect(list.value).not.toStrictEqual(await indexDatabaseValues('players'))
+      expect(list.value).not.toStrictEqual(await indexDatabaseValues('knights'))
     })
 
     it('passes the correct params to make full instance', async () => {
@@ -236,20 +219,25 @@ describe('getResourceSynchronizer', () => {
 
       const id = '1'
 
-      getMockDatabase({
-        players: { [id]: mockPlayer({}, 'uploadable') },
+      mockFantasyDatabase({
+        knights: { [id]: mockKnight('uploadable') },
       })
 
       const cleanupManager = new CleanupManager()
 
-      const { syncList } = getResourceSynchronizer('players', cleanupManager)
+      const { syncList } = getResourceSynchronizer(
+        fantasyVase,
+        'knights',
+        cleanupManager
+      )
 
       syncList()
 
       expect(mockSyncableRef).toHaveBeenCalledWith(
-        'players',
+        fantasyVase,
+        'knights',
         expect.objectContaining(
-          JSON.parse(JSON.stringify(query(collection(db, 'players'))))
+          JSON.parse(JSON.stringify(query(collection(db, 'knights'))))
         ),
         cleanupManager
       )

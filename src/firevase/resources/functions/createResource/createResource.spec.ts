@@ -1,12 +1,17 @@
-import { RealDate, getMockDatabase } from '@/tests/mock/backend'
+import {
+  RealDate,
+  applyDateMock,
+  mockFantasyDatabase,
+} from '@/tests/mock/backend'
 
 import { db } from '@/api/firebase'
-import { Player } from '@/api/players'
-import { mockPlayer } from '@/tests'
+import { Knight, fantasyVase, mockKnight } from '@/tests/mock/fantasyVase'
 import { addDoc, collection } from 'firebase/firestore'
 import { createResource } from '.'
 
 describe('createResource', () => {
+  beforeEach(applyDateMock)
+
   it('should not upload password or id, and should override modifiedAt and createdAt', () => {
     const properties = {
       count: 1,
@@ -17,9 +22,9 @@ describe('createResource', () => {
       modifiedAt: new RealDate(1999, 6),
     }
 
-    createResource('players', properties as unknown as Player)
+    createResource(fantasyVase, 'knights', properties as unknown as Knight)
 
-    expect(addDoc).toHaveBeenCalledWith(collection(db, 'players'), {
+    expect(addDoc).toHaveBeenCalledWith(collection(db, 'knights'), {
       count: properties.count,
       name: properties.name,
       createdAt: new Date().toJSON(),
@@ -29,18 +34,19 @@ describe('createResource', () => {
 
   it('should add the doc with the provided properties', async () => {
     const properties = {
-      name: 'scooby',
-      about: 'memes',
+      name: 'Sir Scooby',
+      gold: 5,
     }
 
-    const { getDatabaseValue } = getMockDatabase({})
+    const { getDatabaseValue } = mockFantasyDatabase({})
 
     const { id } = await createResource(
-      'players',
-      mockPlayer(properties, 'uploadable')
+      fantasyVase,
+      'knights',
+      mockKnight('uploadable', properties)
     )
 
-    await expect(getDatabaseValue('players', id)).resolves.toStrictEqual(
+    await expect(getDatabaseValue('knights', id)).resolves.toStrictEqual(
       expect.objectContaining(properties)
     )
   })
@@ -49,15 +55,20 @@ describe('createResource', () => {
     const id = 'noice'
 
     const properties = {
-      name: 'scooby',
-      about: 'memes',
+      name: 'Sir Scooby',
+      gold: 5,
     }
 
-    const { getDatabaseValue } = getMockDatabase({})
+    const { getDatabaseValue } = mockFantasyDatabase({})
 
-    createResource('players', mockPlayer(properties, 'uploadable'), id)
+    createResource(
+      fantasyVase,
+      'knights',
+      mockKnight('uploadable', properties),
+      id
+    )
 
-    await expect(getDatabaseValue('players', id)).resolves.toStrictEqual(
+    await expect(getDatabaseValue('knights', id)).resolves.toStrictEqual(
       expect.objectContaining(properties)
     )
   })

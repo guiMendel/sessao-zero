@@ -1,13 +1,20 @@
-import { RealDate, getMockDatabase } from '@/tests/mock/backend'
+import {
+  RealDate,
+  applyDateMock,
+  mockFantasyDatabase,
+} from '@/tests/mock/backend'
 
 import { db } from '@/api/firebase'
-import { Player } from '@/api/players'
-import { mockPlayer } from '@/tests'
 import { collection, updateDoc } from 'firebase/firestore'
 import { updateResource } from '.'
+import { Knight, fantasyVase, mockKnight } from '@/tests/mock/fantasyVase'
 
 describe('updateResource', () => {
+  beforeEach(applyDateMock)
+
   it('should not upload password, createdAt or id, and correctly update the modifiedAt property', async () => {
+    mockFantasyDatabase({})
+
     const properties = {
       count: 10,
       id: '25',
@@ -19,10 +26,10 @@ describe('updateResource', () => {
 
     const realId = '1'
 
-    await updateResource('players', realId, properties)
+    await updateResource(fantasyVase, 'knights', realId, properties)
 
     expect(updateDoc).toHaveBeenCalledWith(
-      { id: realId, collection: collection(db, 'players') },
+      { id: realId, path: collection(db, 'knights') },
       {
         count: properties.count,
         name: properties.name,
@@ -33,47 +40,49 @@ describe('updateResource', () => {
 
   it('should update the doc with the provided properties', async () => {
     const originalProperties = {
-      count: 1,
-      name: 'scooby',
+      gold: 1,
+      name: 'Scooby',
     }
 
     const newProperties = {
-      count: 10,
-      name: 'shaggy',
+      gold: 10,
+      name: 'Shaggy',
     }
 
     const id = '1'
 
-    const { getDatabaseValue } = getMockDatabase({
-      players: { [id]: mockPlayer(originalProperties, 'uploadable') },
+    const { getDatabaseValue } = mockFantasyDatabase({
+      knights: { [id]: mockKnight('uploadable', originalProperties) },
     })
 
-    await updateResource('players', id, newProperties)
+    await updateResource(fantasyVase, 'knights', id, newProperties)
 
-    await expect(getDatabaseValue('players', id)).resolves.toStrictEqual(
+    await expect(getDatabaseValue('knights', id)).resolves.toStrictEqual(
       expect.objectContaining(newProperties)
     )
   })
 
   it('should set the properties when overwrite is true', async () => {
     const originalProperties = {
-      name: 'scooby',
-      nickname: 'bobby',
+      name: 'Scooby',
+      gold: 20,
     }
 
     const newProperties = {
-      nickname: 'swags',
-    } as unknown as Player
+      gold: 5,
+    } as unknown as Knight
 
     const id = '1'
 
-    const { getDatabaseValue } = getMockDatabase({
-      players: { [id]: mockPlayer(originalProperties, 'uploadable') },
+    const { getDatabaseValue } = mockFantasyDatabase({
+      knights: { [id]: mockKnight('uploadable', originalProperties) },
     })
 
-    await updateResource('players', id, newProperties, { overwrite: true })
+    await updateResource(fantasyVase, 'knights', id, newProperties, {
+      overwrite: true,
+    })
 
-    const result = await getDatabaseValue('players', id)
+    const result = await getDatabaseValue('knights', id)
 
     expect(result).toStrictEqual(expect.objectContaining(newProperties))
 
