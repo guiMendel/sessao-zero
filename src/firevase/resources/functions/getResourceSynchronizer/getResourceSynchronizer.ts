@@ -41,7 +41,7 @@ export const getResourceSynchronizer = <
   const resourceCollection = collection(client.db, resourcePath as string)
 
   /** Obtem a referencia de documento para o id fornecido */
-  const getDoc = (id?: string) =>
+  const docWithId = (id?: string) =>
     id != undefined ? doc(resourceCollection, id) : undefined
 
   /** Gera um sync em doc ou query */
@@ -70,7 +70,7 @@ export const getResourceSynchronizer = <
      * @param id O id do recurso alvo
      * @param existingRef Um ref para utilizar na sincronizacao
      */
-    sync: (id, existingRef) => makeSync(getDoc(id), existingRef),
+    sync: (id, existingRef) => makeSync(docWithId(id), existingRef),
 
     /** Obtem uma lista dos recursos, filtrados */
     syncList: (filters = [], existingRef) =>

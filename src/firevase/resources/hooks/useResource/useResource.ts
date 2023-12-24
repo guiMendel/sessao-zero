@@ -31,7 +31,7 @@ export const useResource = <C extends FirevaseClient, P extends PathsFrom<C>>(
   const cleanupManager = new CleanupManager()
 
   /** Obtem a referencia de documento para o id fornecido */
-  const getDoc = (id: string) => doc(resourceCollection, id)
+  const docWithId = (id: string) => doc(resourceCollection, id)
 
   // ========================================
   // WRITE
@@ -83,19 +83,18 @@ export const useResource = <C extends FirevaseClient, P extends PathsFrom<C>>(
   return {
     // Utilidades
     resourceCollection,
-    getDoc,
+    docWithId,
+    cleanupManager,
 
-    // Create & Update
+    // Write
     create,
     update,
+    deleteForever,
 
     // Read & Sync
     get,
     getList,
     sync,
     syncList,
-
-    // Delete
-    deleteForever,
   }
 }
