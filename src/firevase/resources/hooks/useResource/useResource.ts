@@ -5,7 +5,7 @@ import {
   getResourceGetter,
   getResourceSynchronizer,
   updateResource,
-} from '@/firevase/resources'
+} from '@/firevase/resources/functions'
 import { PathsFrom, PropertiesFrom } from '@/firevase/types'
 import { CleanupManager } from '@/utils/classes'
 import { collection, doc } from 'firebase/firestore'

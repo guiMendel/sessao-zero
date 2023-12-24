@@ -1,6 +1,6 @@
-import { fantasyVase } from '.'
 import { setUpFirebaseMocks } from '../firebase'
 import { makeResourceMocker } from '../makeResourceMocker'
+import { fantasyVase } from './fantasyVase'
 
 export type Land = {
   name: string

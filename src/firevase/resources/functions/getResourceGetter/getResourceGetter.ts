@@ -9,7 +9,9 @@ import {
   getDocs,
   query,
 } from 'firebase/firestore'
-import { HalfResource, Resource, makeHalfResource, makeResource } from '../..'
+import { makeHalfResource } from '../../functions/makeHalfResource'
+import { makeResource } from '../../functions/makeResource'
+import { HalfResource, Resource } from '../../types'
 
 // ====================================
 // TIPOS DO RETURN

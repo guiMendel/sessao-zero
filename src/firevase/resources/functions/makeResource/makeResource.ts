@@ -2,8 +2,9 @@ import { FirevaseClient } from '@/firevase'
 import { PathsFrom } from '@/firevase/types'
 import { CleanupManager } from '@/utils/classes'
 import { DocumentSnapshot, QuerySnapshot } from 'firebase/firestore'
-import { Resource, makeHalfResource } from '../..'
-import { buildRelations } from '../../../relations'
+import { buildRelations } from '../../../relations/buildRelations'
+import { makeHalfResource } from '../../functions/makeHalfResource'
+import { Resource } from '../../types'
 
 /** Gera um (ou varios) Resource C, dos dados recebidos como documento ou query
  * @param resourcePath O path que define o tipo de objeto a ser gerado
