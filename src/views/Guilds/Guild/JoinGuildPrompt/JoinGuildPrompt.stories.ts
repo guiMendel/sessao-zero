@@ -1,8 +1,8 @@
-import { mockPlayer } from '@/tests'
+import { mockPlayer } from '@/tests/mock/vase'
 import { Meta, StoryFn } from '@storybook/vue3'
 import { JoinGuildPrompt } from '.'
-import { mockGuild } from '../../../../tests/mock/vase/guilds'
 import { InputGetter } from '../../../../App/InputGetter'
+import { mockGuild } from '../../../../tests/mock/vase/guilds'
 
 const meta = {
   title: 'views/Guilds/JoinGuildPrompt',

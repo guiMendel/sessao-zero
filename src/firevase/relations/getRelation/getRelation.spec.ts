@@ -1,32 +1,39 @@
-import { getMockDatabase } from '@/tests/mock/backend'
+import { mockFantasyDatabase } from '@/tests/mock/backend'
 
-import { mockGuild, mockPlayer } from '@/tests'
+import {
+  fantasyVase,
+  mockKing,
+  mockKnight,
+  mockLand,
+} from '@/tests/mock/fantasyVase'
 import { CleanupManager } from '@/utils/classes'
 import { getRelation } from '.'
 import * as GetResourceGetterNamespace from '../../resources/functions/getResourceGetter'
 
 describe('getRelation', () => {
   beforeEach(() => {
-    vi.resetAllMocks()
+    vi.restoreAllMocks()
   })
 
   describe('has-one relation', () => {
     it('gets adequately', async () => {
       const id = '1'
-      const ownerUid = '2'
+      const kingId = '2'
 
-      const { getDatabaseValue } = getMockDatabase({
-        players: { [ownerUid]: mockPlayer({}, 'uploadable') },
-        guilds: { [id]: mockGuild({ ownerUid }, 'uploadable') },
+      const { getDatabaseValue } = mockFantasyDatabase({
+        kings: { [kingId]: mockKing('uploadable') },
+        knights: { [id]: mockKnight('uploadable', { kingId }) },
       })
 
-      const guild = await getDatabaseValue('guilds', id)
-      const owner = await getDatabaseValue('players', ownerUid)
+      const knight = await getDatabaseValue('knights', id)
+      const king = await getDatabaseValue('kings', kingId)
 
-      if (guild == undefined || owner == undefined)
+      if (knight == undefined || king == undefined)
         throw new Error('error in database')
 
-      await expect(getRelation(guild, 'owner')).resolves.toStrictEqual(owner)
+      await expect(
+        getRelation(fantasyVase, knight, 'king')
+      ).resolves.toStrictEqual(king)
     })
 
     it('passes the cleanup manager ahead', async () => {
@@ -38,23 +45,24 @@ describe('getRelation', () => {
       ).mockImplementation(mockGetResourceGetter)
 
       const id = '1'
-      const ownerUid = '2'
+      const kingId = '2'
 
-      const { getDatabaseValue } = getMockDatabase({
-        players: { [ownerUid]: mockPlayer({}, 'uploadable') },
-        guilds: { [id]: mockGuild({ ownerUid }, 'uploadable') },
+      const { getDatabaseValue } = mockFantasyDatabase({
+        kings: { [kingId]: mockKing('uploadable') },
+        knights: { [id]: mockKnight('uploadable', { kingId }) },
       })
 
-      const guild = await getDatabaseValue('guilds', id)
+      const knight = await getDatabaseValue('knights', id)
 
-      if (guild == undefined) throw new Error('error in database')
+      if (knight == undefined) throw new Error('error in database')
 
       const cleanupManager = new CleanupManager()
 
-      await getRelation(guild, 'owner', cleanupManager)
+      await getRelation(fantasyVase, knight, 'king', cleanupManager)
 
       expect(mockGetResourceGetter).toHaveBeenCalledWith(
-        'players',
+        fantasyVase,
+        'kings',
         cleanupManager
       )
     })
@@ -64,29 +72,28 @@ describe('getRelation', () => {
     it('gets adequately', async () => {
       const id = '1'
 
-      const { getDatabaseValue, indexDatabaseValues } = getMockDatabase({
-        players: { [id]: mockPlayer({}, 'uploadable') },
-        guilds: {
-          [2]: mockGuild({ ownerUid: id }, 'uploadable'),
-          [3]: mockGuild({ ownerUid: id }, 'uploadable'),
-          [4]: mockGuild(
-            { ownerUid: (parseInt(id) + 1).toString() },
-            'uploadable'
-          ),
+      const { getDatabaseValue, indexDatabaseValues } = mockFantasyDatabase({
+        kings: { [id]: mockKing('uploadable') },
+        knights: {
+          [2]: mockKnight('uploadable', { kingId: id }),
+          [3]: mockKnight('uploadable', { kingId: id }),
+          [4]: mockKnight('uploadable', {
+            kingId: (parseInt(id) + 1).toString(),
+          }),
         },
       })
 
-      const owner = await getDatabaseValue('players', id)
-      const ownedGuilds = (await indexDatabaseValues('guilds')).filter(
-        (guild) => guild.ownerUid === id
+      const king = await getDatabaseValue('kings', id)
+      const knights = (await indexDatabaseValues('knights')).filter(
+        (knight) => knight.kingId === id
       )
 
-      if (ownedGuilds.length == 0 || owner == undefined)
+      if (knights.length == 0 || king == undefined)
         throw new Error('error in database')
 
-      await expect(getRelation(owner, 'ownedGuilds')).resolves.toStrictEqual(
-        ownedGuilds
-      )
+      await expect(
+        getRelation(fantasyVase, king, 'knights')
+      ).resolves.toStrictEqual(knights)
     })
 
     it('passes the cleanup manager ahead', async () => {
@@ -101,20 +108,21 @@ describe('getRelation', () => {
 
       const id = '1'
 
-      const { getDatabaseValue } = getMockDatabase({
-        players: { [id]: mockPlayer({}, 'uploadable') },
+      const { getDatabaseValue } = mockFantasyDatabase({
+        kings: { [id]: mockKing('uploadable') },
       })
 
-      const owner = await getDatabaseValue('players', id)
+      const king = await getDatabaseValue('kings', id)
 
-      if (owner == undefined) throw new Error('error in database')
+      if (king == undefined) throw new Error('error in database')
 
       const cleanupManager = new CleanupManager()
 
-      await getRelation(owner, 'ownedGuilds', cleanupManager)
+      await getRelation(fantasyVase, king, 'knights', cleanupManager)
 
       expect(mockGetResourceGetter).toHaveBeenCalledWith(
-        'guilds',
+        fantasyVase,
+        'knights',
         cleanupManager
       )
     })
@@ -128,98 +136,101 @@ describe('getRelation', () => {
       const linkedId2 = '4'
       const linkedId3 = '5'
 
-      const { getDatabaseValue, indexDatabaseValues } = getMockDatabase({
-        players: {
-          [id1]: mockPlayer({}, 'uploadable'),
-          [id2]: mockPlayer({}, 'uploadable'),
+      const { getDatabaseValue, indexDatabaseValues } = mockFantasyDatabase({
+        lands: {
+          [id1]: mockLand('uploadable'),
+          [id2]: mockLand('uploadable'),
         },
-        guilds: {
-          [linkedId1]: mockGuild({}, 'uploadable'),
-          [linkedId2]: mockGuild({}, 'uploadable'),
-          [linkedId3]: mockGuild({}, 'uploadable'),
+        knights: {
+          [linkedId1]: mockKnight('uploadable'),
+          [linkedId2]: mockKnight('uploadable'),
+          [linkedId3]: mockKnight('uploadable'),
         },
-        playersGuilds: {
-          [6]: { guilds: linkedId1, players: id1 },
-          [7]: { guilds: linkedId2, players: id1 },
-          [8]: { guilds: linkedId2, players: id2 },
-          [9]: { guilds: linkedId3, players: id2 },
+        knightsLands: {
+          [6]: { knights: linkedId1, lands: id1 },
+          [7]: { knights: linkedId2, lands: id1 },
+          [8]: { knights: linkedId2, lands: id2 },
+          [9]: { knights: linkedId3, lands: id2 },
         },
       })
 
-      // For players
+      // For lands
       {
-        const player1 = await getDatabaseValue('players', id1)
-        const player2 = await getDatabaseValue('players', id2)
+        const land1 = await getDatabaseValue('lands', id1)
+        const land2 = await getDatabaseValue('lands', id2)
 
-        const guildsBridge1 = (
-          await indexDatabaseValues('playersGuilds')
-        ).filter(({ players }) => players === id1)
-        const guildsBridge2 = (
-          await indexDatabaseValues('playersGuilds')
-        ).filter(({ players }) => players === id2)
+        const knightsBridge1 = (
+          await indexDatabaseValues('knightsLands')
+        ).filter(({ lands }) => lands === id1)
+        const knightsBridge2 = (
+          await indexDatabaseValues('knightsLands')
+        ).filter(({ lands }) => lands === id2)
 
-        const guilds1 = (await indexDatabaseValues('guilds')).filter((guild) =>
-          guildsBridge1.some((bridge) => bridge.guilds === guild.id)
+        const knights1 = (await indexDatabaseValues('knights')).filter(
+          (knight) =>
+            knightsBridge1.some((bridge) => bridge.knights === knight.id)
         )
-        const guilds2 = (await indexDatabaseValues('guilds')).filter((guild) =>
-          guildsBridge2.some((bridge) => bridge.guilds === guild.id)
+        const knights2 = (await indexDatabaseValues('knights')).filter(
+          (knight) =>
+            knightsBridge2.some((bridge) => bridge.knights === knight.id)
         )
 
-        if (player1 == undefined || player2 == undefined)
+        if (land1 == undefined || land2 == undefined)
           throw new Error('error in database')
 
-        await expect(getRelation(player1, 'guilds')).resolves.toStrictEqual(
-          guilds1
-        )
+        await expect(
+          getRelation(fantasyVase, land1, 'supervisors')
+        ).resolves.toStrictEqual(knights1)
 
-        await expect(getRelation(player2, 'guilds')).resolves.toStrictEqual(
-          guilds2
-        )
+        await expect(
+          getRelation(fantasyVase, land2, 'supervisors')
+        ).resolves.toStrictEqual(knights2)
       }
 
-      // For guilds
+      // For knights
       {
-        const guild1 = await getDatabaseValue('guilds', linkedId1)
-        const guild2 = await getDatabaseValue('guilds', linkedId2)
-        const guild3 = await getDatabaseValue('guilds', linkedId3)
+        const knight1 = await getDatabaseValue('knights', linkedId1)
+        const knight2 = await getDatabaseValue('knights', linkedId2)
+        const knight3 = await getDatabaseValue('knights', linkedId3)
 
-        const playersBridge1 = (
-          await indexDatabaseValues('playersGuilds')
-        ).filter(({ guilds }) => guilds === linkedId1)
-        const playersBridge2 = (
-          await indexDatabaseValues('playersGuilds')
-        ).filter(({ guilds }) => guilds === linkedId2)
-        const playersBridge3 = (
-          await indexDatabaseValues('playersGuilds')
-        ).filter(({ guilds }) => guilds === linkedId3)
-
-        const players1 = (await indexDatabaseValues('players')).filter(
-          (player) =>
-            playersBridge1.some((bridge) => bridge.players === player.id)
+        const landsBridge1 = (await indexDatabaseValues('knightsLands')).filter(
+          ({ knights }) => knights === linkedId1
         )
-        const players2 = (await indexDatabaseValues('players')).filter(
-          (player) =>
-            playersBridge2.some((bridge) => bridge.players === player.id)
+        const landsBridge2 = (await indexDatabaseValues('knightsLands')).filter(
+          ({ knights }) => knights === linkedId2
         )
-        const players3 = (await indexDatabaseValues('players')).filter(
-          (player) =>
-            playersBridge3.some((bridge) => bridge.players === player.id)
+        const landsBridge3 = (await indexDatabaseValues('knightsLands')).filter(
+          ({ knights }) => knights === linkedId3
         )
 
-        if (guild1 == undefined || guild2 == undefined || guild3 == undefined)
+        const lands1 = (await indexDatabaseValues('lands')).filter((land) =>
+          landsBridge1.some((bridge) => bridge.lands === land.id)
+        )
+        const lands2 = (await indexDatabaseValues('lands')).filter((land) =>
+          landsBridge2.some((bridge) => bridge.lands === land.id)
+        )
+        const lands3 = (await indexDatabaseValues('lands')).filter((land) =>
+          landsBridge3.some((bridge) => bridge.lands === land.id)
+        )
+
+        if (
+          knight1 == undefined ||
+          knight2 == undefined ||
+          knight3 == undefined
+        )
           throw new Error('error in database')
 
-        await expect(getRelation(guild1, 'players')).resolves.toStrictEqual(
-          players1
-        )
+        await expect(
+          getRelation(fantasyVase, knight1, 'supervisedLands')
+        ).resolves.toStrictEqual(lands1)
 
-        await expect(getRelation(guild2, 'players')).resolves.toStrictEqual(
-          players2
-        )
+        await expect(
+          getRelation(fantasyVase, knight2, 'supervisedLands')
+        ).resolves.toStrictEqual(lands2)
 
-        await expect(getRelation(guild3, 'players')).resolves.toStrictEqual(
-          players3
-        )
+        await expect(
+          getRelation(fantasyVase, knight3, 'supervisedLands')
+        ).resolves.toStrictEqual(lands3)
       }
     })
 
@@ -235,20 +246,21 @@ describe('getRelation', () => {
 
       const id = '1'
 
-      const { getDatabaseValue } = getMockDatabase({
-        players: { [id]: mockPlayer({}, 'uploadable') },
+      const { getDatabaseValue } = mockFantasyDatabase({
+        lands: { [id]: mockLand('uploadable') },
       })
 
-      const player = await getDatabaseValue('players', id)
+      const land = await getDatabaseValue('lands', id)
 
-      if (player == undefined) throw new Error('error in database')
+      if (land == undefined) throw new Error('error in database')
 
       const cleanupManager = new CleanupManager()
 
-      await getRelation(player, 'guilds', cleanupManager)
+      await getRelation(fantasyVase, land, 'supervisors', cleanupManager)
 
       expect(mockGetResourceGetter).toHaveBeenCalledWith(
-        'guilds',
+        fantasyVase,
+        'knights',
         cleanupManager
       )
     })
