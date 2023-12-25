@@ -3,6 +3,7 @@ import { mockFantasyDatabase } from '@/tests/mock/backend'
 import { FirevaseClient } from '@/firevase'
 import * as SyncableRefNamespace from '@/firevase/Syncable'
 import {
+  FantasyVase,
   fantasyVase,
   mockKing,
   mockKnight,
@@ -10,6 +11,8 @@ import {
 } from '@/tests/mock/fantasyVase'
 import { CleanupManager } from '@/utils/classes'
 import { buildRelations } from '.'
+import { Resource } from '@/firevase/resources'
+import { toValue } from 'vue'
 
 describe('buildRelations', () => {
   beforeEach(() => {
@@ -93,12 +96,6 @@ describe('buildRelations', () => {
     })
   })
 
-  describe('resourceLayersLimit', () => {
-    it.todo('raises if resourceLayersLimit is 0')
-
-    it.todo('returns %s relation layer when resourceLayersLimit is %s')
-  })
-
   describe('creating relations', () => {
     describe('has-one', () => {
       it('should properly create has-one relation', async () => {
@@ -138,6 +135,8 @@ describe('buildRelations', () => {
         const source = (await getDatabaseValue('knights', knightId))!
         const king = await getDatabaseValue('kings', kingId)
 
+        if (king == undefined) throw new Error('database error')
+
         const relations = buildRelations({
           cleanupManager: new CleanupManager(),
           client: fantasyVase,
@@ -148,7 +147,11 @@ describe('buildRelations', () => {
 
         expect(relations.king.value).toStrictEqual(king)
 
-        await updateDatabaseValue('kings', kingId, { age: 9999 })
+        king.age = 9999
+
+        expect(relations.king.value).not.toStrictEqual(king)
+
+        await updateDatabaseValue('kings', kingId, { age: king.age })
 
         expect(relations.king.value).toStrictEqual(king)
       })
@@ -445,5 +448,76 @@ describe('buildRelations', () => {
 
       it.todo('should link the passed cleanup manager')
     })
+  })
+
+  describe('resourceLayersLimit', () => {
+    it('raises if resourceLayersLimit is 0', () => {
+      const callback = () =>
+        buildRelations({
+          cleanupManager: new CleanupManager(),
+          client: fantasyVase,
+          previousValues: {},
+          source: mockKnight('half-resource'),
+          resourceLayersLimit: 0,
+        })
+
+      expect(callback).toThrow('resourceLayersLimit is 0')
+    })
+
+    it.each([1, 2, 3])(
+      'returns correct number of relation layers when resourceLayersLimit is %s',
+      async (layers) => {
+        const kingId = '1'
+        const knightId = '2'
+
+        const { getDatabaseValue } = mockFantasyDatabase({
+          knights: { [knightId]: mockKnight('uploadable', { kingId }) },
+
+          kings: { [kingId]: mockKing('uploadable') },
+        })
+
+        const source = (await getDatabaseValue('knights', knightId))!
+
+        const relations = buildRelations({
+          cleanupManager: new CleanupManager(),
+          client: fantasyVase,
+          previousValues: {},
+          resourceLayersLimit: layers,
+          source,
+        })
+
+        const check = (
+          value: Resource<FantasyVase, 'kings' | 'knights'>,
+          remainingLayers: number
+        ) => {
+          if (value.resourcePath === 'kings') {
+            const king = value as Resource<FantasyVase, 'kings'>
+
+            if (remainingLayers === 1) {
+              expect(toValue(king.knights)).toBeUndefined()
+              return
+            }
+
+            expect(toValue(king.knights)).toBeDefined()
+
+            check(toValue(king.knights)[0], remainingLayers - 1)
+
+            return
+          }
+          const knight = value as Resource<FantasyVase, 'knights'>
+
+          if (remainingLayers === 1) {
+            expect(toValue(knight.king)).toBeUndefined()
+            return
+          }
+
+          expect(toValue(knight.king)).toBeDefined()
+
+          check(toValue(knight.king), remainingLayers - 1)
+        }
+
+        check(relations.king.value, layers)
+      }
+    )
   })
 })
