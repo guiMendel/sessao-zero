@@ -1,6 +1,6 @@
 import { FirevaseClient } from '@/firevase'
 import { Syncable } from '@/firevase/Syncable/Syncable'
-import { syncableRef } from '@/firevase/Syncable/SyncableRef'
+import { syncableRef } from '@/firevase/Syncable'
 import type { HalfResource, Resource } from '@/firevase/resources/types'
 import { PathsFrom } from '@/firevase/types'
 import { CleanupManager } from '@/utils/classes'
@@ -29,6 +29,8 @@ type BuildRelationsParams<C extends FirevaseClient, P extends PathsFrom<C>> = {
   previousValues: Record<string, WithDisposeFlag<Resource<C, P>>>
   /** Permite associar qualquer sync criado a um cleanup */
   cleanupManager: CleanupManager
+  /** Quantas camadas de relacoes construir. Veja a definicao completa em makeResource */
+  resourceLayersLimit: number
 }
 
 /** Constroi um objeto de relacoes para a instancia fornecida */
@@ -40,7 +42,13 @@ export const buildRelations = <
   previousValues,
   source,
   client,
+  resourceLayersLimit,
 }: BuildRelationsParams<C, P>): RelationsRefs<C, P> => {
+  if (resourceLayersLimit === 0)
+    throw new Error(
+      `Impossible to build relations for ${source.resourcePath} — resourceLayersLimit is 0`
+    )
+
   if (client.relationSettings == undefined)
     throw new Error(
       `Impossible to build relations for ${source.resourcePath} — client has no relation settings`
@@ -54,18 +62,30 @@ export const buildRelations = <
     return extractRelations(client, previousValues[source.id])
   }
 
-  return createRelations(client, source, cleanupManager)
+  return createRelations(
+    client,
+    source,
+    resourceLayersLimit - 1,
+    cleanupManager
+  )
 }
 
 const createRelations = <C extends FirevaseClient, P extends PathsFrom<C>>(
   client: C,
   source: HalfResource<C, P>,
+  newResourceLayersLimit: number,
   cleanupManager: CleanupManager
 ): RelationsRefs<C, P> =>
   Object.entries(client.relationSettings[source.resourcePath]).reduce(
     (otherRelations, [relationName, relation]: [string, any]) => ({
       ...otherRelations,
-      [relationName]: createRelation(client, source, relation, cleanupManager),
+      [relationName]: createRelation(
+        client,
+        source,
+        relation,
+        newResourceLayersLimit,
+        cleanupManager
+      ),
     }),
     {} as RelationsRefs<C, P>
   )
@@ -93,6 +113,7 @@ const createRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
   client: C,
   source: HalfResource<C, P>,
   definition: RelationDefinitionFrom<C, P, PathsFrom<C>>,
+  newResourceLayersLimit: number,
   cleanupManager: CleanupManager
 ) => {
   switch (definition.type) {
@@ -101,6 +122,7 @@ const createRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
         client,
         source,
         definition as RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-one'>,
+        newResourceLayersLimit,
         cleanupManager
       )
 
@@ -109,6 +131,7 @@ const createRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
         client,
         source,
         definition as RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-many'>,
+        newResourceLayersLimit,
         cleanupManager
       )
 
@@ -122,6 +145,7 @@ const createRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
           PathsFrom<C>,
           'many-to-many'
         >,
+        newResourceLayersLimit,
         cleanupManager
       )
 
@@ -137,6 +161,7 @@ const createHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
   client: C,
   source: HalfResource<C, P>,
   definition: RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-one'>,
+  newResourceLayersLimit: number,
   cleanupManager: CleanupManager
 ) => {
   const targetId = source[definition.relationKey] as string
@@ -150,7 +175,8 @@ const createHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
     client,
     definition.targetResourcePath,
     targetDoc,
-    cleanupManager
+    cleanupManager,
+    newResourceLayersLimit
   )
 }
 
@@ -162,6 +188,7 @@ const createHasManyRelation = <
   client: C,
   source: HalfResource<C, P>,
   definition: RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-many'>,
+  newResourceLayersLimit: number,
   cleanupManager: CleanupManager
 ) => {
   const targetQuery = query(
@@ -173,7 +200,8 @@ const createHasManyRelation = <
     client,
     definition.targetResourcePath,
     targetQuery,
-    cleanupManager
+    cleanupManager,
+    newResourceLayersLimit
   )
 }
 
@@ -185,6 +213,7 @@ const createManyToManyRelation = <
   client: C,
   source: HalfResource<C, P>,
   definition: RelationDefinitionFrom<C, P, PathsFrom<C>, 'many-to-many'>,
+  newResourceLayersLimit: number,
   cleanupManager: CleanupManager
 ) => {
   // Essa query encontra os ids dos alvos mapeados a esse source
@@ -220,7 +249,8 @@ const createManyToManyRelation = <
     client,
     definition.targetResourcePath,
     'empty-query',
-    cleanupManager
+    cleanupManager,
+    newResourceLayersLimit
   )
 
   // Quando o target receber trigger, damos trigger no bridge

@@ -2,10 +2,10 @@ import { makeResource } from '@/firevase/resources/functions/makeResource'
 import { CleanupManager } from '@/utils/classes'
 import { DocumentReference, Query } from 'firebase/firestore'
 import { Ref, ref } from 'vue'
-import { FirevaseClient } from '..'
-import { Resource } from '../resources'
-import { PathsFrom } from '../types'
-import { Syncable } from './Syncable'
+import { FirevaseClient } from '../..'
+import { Resource } from '../../resources'
+import { PathsFrom } from '../../types'
+import { Syncable } from '../Syncable'
 
 // ===========================
 // IMPLEMENTATION
@@ -37,7 +37,8 @@ export const syncableRef = <
   client: C,
   resourcePath: P,
   target: M | 'empty-document' | 'empty-query',
-  parentCleanupManager: CleanupManager
+  parentCleanupManager: CleanupManager,
+  resourceLayersLimit = 1
 ): SyncableRef<C, P, M> => {
   const emptyValue = isQueryTarget(target)
     ? ([] as Resource<C, P>[])
@@ -64,6 +65,7 @@ export const syncableRef = <
           client,
           snapshot,
           resourcePath,
+          resourceLayersLimit,
           ownCleanupManager,
           previousValues
         ) as Resource<C, P>[]
@@ -79,6 +81,7 @@ export const syncableRef = <
         client,
         snapshot,
         resourcePath,
+        resourceLayersLimit,
         ownCleanupManager,
         previousValues
       )[0]

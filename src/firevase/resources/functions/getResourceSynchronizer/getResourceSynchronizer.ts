@@ -1,5 +1,5 @@
 import { FirevaseClient } from '@/firevase'
-import { SyncableRef, syncableRef } from '@/firevase/Syncable/SyncableRef'
+import { SyncableRef, syncableRef } from '@/firevase/Syncable'
 import { PathsFrom } from '@/firevase/types'
 import { CleanupManager } from '@/utils/classes'
 import {

@@ -24,7 +24,10 @@ export const useCurrentPlayer = defineStore('current-player', () => {
   const cleanupManager = new CleanupManager()
 
   /** Acessa a API do firestore do player */
-  const { getDoc, create, update, deleteForever } = useResource(vase, 'players')
+  const { docWithId, create, update, deleteForever } = useResource(
+    vase,
+    'players'
+  )
 
   /** A instancia de player atual */
   const player = syncableRef<Vase, 'players', DocumentReference>(
@@ -40,7 +43,7 @@ export const useCurrentPlayer = defineStore('current-player', () => {
     if (newUser == null) player.sync.reset()
     // Atualiza para o novo usuario
     else {
-      player.sync.updateTarget(getDoc(newUser.uid))
+      player.sync.updateTarget(docWithId(newUser.uid))
       player.sync.triggerSync()
     }
   })

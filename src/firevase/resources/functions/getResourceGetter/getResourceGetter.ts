@@ -33,6 +33,11 @@ export type GetMethod<
 // IMPLEMENTACAO
 // ====================================
 
+type GetResourceGetterOptions = {
+  cleanupManager: CleanupManager
+  resourceLayersLimit?: number
+}
+
 /** Permite acesso a um recurso, sem injetar relacoes */
 export function getResourceGetter<
   C extends FirevaseClient,
@@ -52,7 +57,7 @@ export function getResourceGetter<
 >(
   client: C,
   resourcePath: P,
-  cleanupManager: CleanupManager
+  options: GetResourceGetterOptions
 ): {
   get: GetMethod<C, P, Resource<C, P>>
   getList: GetListMethod<C, P, Resource<C, P>[]>
@@ -64,7 +69,7 @@ export function getResourceGetter<
 >(
   client: C,
   resourcePath: P,
-  cleanupManager?: CleanupManager
+  options?: GetResourceGetterOptions
 ): {
   get: GetMethod<C, P, HalfResource<C, P> | Resource<C, P>>
   getList: GetListMethod<C, P, HalfResource<C, P>[] | Resource<C, P>[]>
@@ -72,12 +77,21 @@ export function getResourceGetter<
   /** A collection deste recurso */
   const resourceCollection = collection(client.db, resourcePath as string)
 
+  const { cleanupManager, resourceLayersLimit = 1 } = options ?? {}
+
   return {
     /** Pega uma instancia do recurso */
     get: (id: string) =>
       getDoc(doc(resourceCollection, id)).then((doc) =>
         cleanupManager != undefined
-          ? makeResource<C, P>(client, doc, resourcePath, cleanupManager, [])[0]
+          ? makeResource<C, P>(
+              client,
+              doc,
+              resourcePath,
+              resourceLayersLimit,
+              cleanupManager,
+              []
+            )[0]
           : makeHalfResource<C, P>(doc, resourcePath)[0]
       ),
 
@@ -89,6 +103,7 @@ export function getResourceGetter<
               client,
               docs,
               resourcePath,
+              resourceLayersLimit,
               cleanupManager,
               []
             ) as Resource<C, P>[])

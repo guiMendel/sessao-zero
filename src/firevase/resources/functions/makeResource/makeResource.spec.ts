@@ -25,6 +25,8 @@ describe('makeResource', () => {
     mockBuildRelations.mockImplementation((args) => ({ buildRelations: args }))
   })
 
+  it.todo('should not call buildRelations when resourceLayersLimit is 0')
+
   describe('query snapshot', () => {
     it('should provide the values returned by makeHalfResource', () => {
       const data = [
