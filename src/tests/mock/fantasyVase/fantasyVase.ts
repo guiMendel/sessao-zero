@@ -20,7 +20,7 @@ export const fantasyVase = fillFirevase<{
     },
 
     knights: {
-      king: hasOne('kings', { relationKey: 'kingId' }, 'required'),
+      king: hasOne('kings', { relationKey: 'kingId' }, 'protected'),
       missions: hasMany('missions', { manyToManyTable: 'knightsMissions' }),
       supervisedLands: hasMany('lands', { manyToManyTable: 'knightsLands' }),
     },

@@ -3,7 +3,7 @@ import { PathsFrom } from '@/firevase/types'
 import type { RelationDefinitionFrom, Relations } from '../..'
 import { requireDefinition } from '../requireDefinition'
 
-/** Se a relacao for has-many, e a relacao respectiva do target path for required e has-one, rejeita */
+/** Se a relacao for has-many, e a relacao respectiva do target path for protected e has-one, rejeita */
 export const detectInvalidRemove = <
   C extends FirevaseClient,
   P extends PathsFrom<C>
@@ -32,7 +32,7 @@ export const detectInvalidRemove = <
   const oppositeRelation = Object.entries(targetRelations).filter(
     ([_, oppDefinition]) =>
       oppDefinition.type === 'has-one' &&
-      oppDefinition.required &&
+      oppDefinition.protected &&
       (oppDefinition as any).relationKey === definition.relationKey
   )
 
@@ -42,7 +42,7 @@ export const detectInvalidRemove = <
     throw new Error(
       `Proibido dar remove na relacao ${relation as string} de path ${
         path as string
-      }, pois isso poderia violar a relacao required ${oppRelation} de ${
+      }, pois isso poderia violar a relacao protected ${oppRelation} de ${
         definition.targetResourcePath as string
       }`
     )

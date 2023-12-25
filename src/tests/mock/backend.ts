@@ -475,6 +475,7 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
         indexDatabaseValues,
         updateDatabaseValue,
         deleteDatabaseValue,
+        addDatabaseValue,
         hasListener,
         hasListListener,
         toSnapshot,

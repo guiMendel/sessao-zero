@@ -20,6 +20,7 @@ type OnNextCallback<T extends DocumentReference | Query> = (
 ) => void
 
 export class Syncable<T extends DocumentReference | Query> {
+  private disposeListeners: Array<() => void> = []
   private resetListeners: Array<() => void> = []
   private beforeSyncListeners: Array<() => void> = []
 
@@ -50,7 +51,11 @@ export class Syncable<T extends DocumentReference | Query> {
     return this.cleanup
   }
 
-  public dispose = () => this.cleanup.dispose()
+  public dispose = () => {
+    this.cleanup.dispose()
+
+    for (const listener of this.disposeListeners) listener()
+  }
 
   constructor(target: T | undefined, onNext: OnNextCallback<T>) {
     this._target = target
@@ -109,6 +114,10 @@ export class Syncable<T extends DocumentReference | Query> {
     this.state = 'ready-to-sync'
 
     for (const listener of this.resetListeners) listener()
+  }
+
+  onDispose(callback: () => void) {
+    this.disposeListeners.push(callback)
   }
 
   onReset(callback: () => void) {

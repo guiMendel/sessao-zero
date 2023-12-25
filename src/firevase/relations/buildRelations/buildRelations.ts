@@ -5,6 +5,7 @@ import type { HalfResource, Resource } from '@/firevase/resources/types'
 import { PathsFrom } from '@/firevase/types'
 import { CleanupManager } from '@/utils/classes'
 import {
+  DocumentReference,
   Query,
   collection,
   doc,
@@ -164,20 +165,44 @@ const createHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
   newResourceLayersLimit: number,
   cleanupManager: CleanupManager
 ) => {
-  const targetId = source[definition.relationKey] as string
+  // Watches changes to the relation key
+  const bridgeSync = new Syncable(
+    doc(collection(client.db, source.resourcePath), source.id),
+    (snapshot) => {
+      const targetId = snapshot.data()?.[
+        definition.relationKey as string
+      ] as string
 
-  const targetDoc = doc(
-    collection(client.db, definition.targetResourcePath as string),
-    targetId
+      const targetDoc = doc(
+        collection(client.db, definition.targetResourcePath as string),
+        targetId
+      )
+
+      // Atualiza o query dos targets
+      target.sync.updateTarget(targetDoc)
+    }
   )
 
-  return syncableRef(
+  // Associamos o cleanup pai ao bridgeSync
+  cleanupManager.link('propagate-to', bridgeSync.getCleanupManager())
+
+  const target = syncableRef<
+    C,
+    typeof definition.targetResourcePath,
+    DocumentReference
+  >(
     client,
     definition.targetResourcePath,
-    targetDoc,
-    cleanupManager,
+    'empty-document',
+    bridgeSync.getCleanupManager(),
     newResourceLayersLimit
   )
+
+  // Ligamos sync e dispose do syncable ref ao sync bridge
+  target.sync.onBeforeSyncTrigger(() => bridgeSync.triggerSync())
+  target.sync.onDispose(() => bridgeSync.dispose())
+
+  return target
 }
 
 /** Relation key refers to a property of target */
@@ -244,22 +269,21 @@ const createManyToManyRelation = <
     targets.sync.updateTarget(targetsQuery)
   })
 
+  // Associamos o cleanup pai ao bridgeSync
+  cleanupManager.link('propagate-to', bridgeSync.getCleanupManager())
+
   // Criamos o syncable ref com a query dos alvos
   const targets = syncableRef<C, typeof definition.targetResourcePath, Query>(
     client,
     definition.targetResourcePath,
     'empty-query',
-    cleanupManager,
+    bridgeSync.getCleanupManager(),
     newResourceLayersLimit
   )
 
-  // Quando o target receber trigger, damos trigger no bridge
+  // Ligamos sync e dispose do syncable ref ao sync bridge
   targets.sync.onBeforeSyncTrigger(() => bridgeSync.triggerSync())
-
-  // Associamos o cleanup do syncableRef ao bridgeSync
-  targets.sync
-    .getCleanupManager()
-    .link('propagate-both', bridgeSync.getCleanupManager())
+  targets.sync.onDispose(() => bridgeSync.dispose())
 
   return targets
 }

@@ -56,7 +56,7 @@ const setHasOneRelation = <
   client: C,
   source: HalfResource<C, P>,
   relation: R,
-  target: RelationsFrom<C>[P][R]['required'] extends true
+  target: RelationsFrom<C>[P][R]['protected'] extends true
     ? HalfResourceRelations<C, P>[R]
     : HalfResourceRelations<C, P>[R] | undefined
 ) => {
@@ -73,10 +73,10 @@ const setHasOneRelation = <
       `Tentativa de atribuir um array a relaçao has-one ${relation as string}`
     )
 
-  // Rejeita se for required e undefined
-  if (definition.required && target == undefined)
+  // Rejeita se for protected e undefined
+  if (definition.protected && target == undefined)
     throw new Error(
-      `Tentativa de atribuir undefined para a relacao required ${
+      `Tentativa de atribuir undefined para a relacao protected ${
         relation as string
       }`
     )

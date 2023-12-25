@@ -39,10 +39,10 @@ describe('detectInvalidRemove', () => {
   it('should ignore if all opposite relations are valid', () => {
     mockTargetRelations.value = {
       a: { type: 'has-many' },
-      b: { type: 'has-one', required: false },
+      b: { type: 'has-one', protected: false },
       c: {
         type: 'has-one',
-        required: true,
+        protected: true,
         relationKey: relationKey.toUpperCase(),
       },
     }
@@ -53,15 +53,15 @@ describe('detectInvalidRemove', () => {
   it('should raise if at least one of the opposite relations is invalid', () => {
     mockTargetRelations.value = {
       a: { type: 'has-many' },
-      b: { type: 'has-one', required: false },
+      b: { type: 'has-one', protected: false },
       c: {
         type: 'has-one',
-        required: true,
+        protected: true,
         relationKey: relationKey.toUpperCase(),
       },
       d: {
         type: 'has-one',
-        required: true,
+        protected: true,
         relationKey,
       },
     }

@@ -9,7 +9,7 @@ type TargetsRelations<
   R extends keyof Relations<C, P>
 > = RelationsFrom<C>[RelationsFrom<C>[P][R]['targetResourcePath']]
 
-/** Retorna o tipo do target, mas retorna never para relacoes has-many se a relacao oposta dada pelo targetResourcePath for required e has-one */
+/** Retorna o tipo do target, mas retorna never para relacoes has-many se a relacao oposta dada pelo targetResourcePath for protected e has-one */
 // Aqui never eh usado de 2 formas diferentes: primeiro para gerar uma tupla vazia, depois para proibir um tipo invalido
 export type ValidHasManyTarget<
   C extends FirevaseClient,
@@ -27,9 +27,9 @@ export type ValidHasManyTarget<
       ? // A relacao oposta deve ser 'has-one
 
         TargetsRelations<C, P, R>[OR]['type'] extends 'has-one'
-        ? // A relacao oposta deve ser required
+        ? // A relacao oposta deve ser protected
 
-          TargetsRelations<C, P, R>[OR]['required'] extends true
+          TargetsRelations<C, P, R>[OR]['protected'] extends true
           ? // A relacao e a relacao oposta devem ter a mesma relationKey
 
             TargetsRelations<
@@ -53,13 +53,13 @@ export type ValidHasManyTarget<
 
 // declare const test: ValidHasManyTarget<Vase, 'players', 'ownedGuilds'>
 
-/** Dado um path P, retorna as relacoes has-one dele que nao sao required */
+/** Dado um path P, retorna as relacoes has-one dele que nao sao protected */
 export type OptionalHasOneRelations<
   C extends FirevaseClient,
   P extends PathsFrom<C>
 > = {
   [R in keyof RelationsFrom<C>[P]]: RelationsFrom<C>[P][R]['type'] extends 'has-one'
-    ? RelationsFrom<C>[P][R]['required'] extends false
+    ? RelationsFrom<C>[P][R]['protected'] extends false
       ? R
       : never
     : never

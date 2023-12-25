@@ -9,10 +9,15 @@ import {
   mockKnight,
   mockLand,
 } from '@/tests/mock/fantasyVase'
-import { CleanupManager } from '@/utils/classes'
+import * as CleanupManagerNamespace from '@/utils/classes/CleanupManager'
 import { buildRelations } from '.'
 import { Resource } from '@/firevase/resources'
 import { toValue } from 'vue'
+import {
+  CleanupManagerInterceptor,
+  cleanupManagerInterceptor,
+  interceptCleanupManagers,
+} from '@/tests/helpers'
 
 describe('buildRelations', () => {
   beforeEach(() => {
@@ -26,7 +31,7 @@ describe('buildRelations', () => {
 
     const callback = () =>
       buildRelations({
-        cleanupManager: new CleanupManager(),
+        cleanupManager: new CleanupManagerNamespace.CleanupManager(),
         client,
         previousValues: {},
         source: {},
@@ -36,6 +41,9 @@ describe('buildRelations', () => {
     expect(callback).toThrow('client has no relation settings')
   })
 
+  // TODO: testar que limpar o parent cleanup manager limpa os bridges e os refs gerados
+  // TODO: testar que o dispose dos refs gerados limpa o sync do bridge tambem
+
   describe('extracting relations', () => {
     it('should set the dont dispose flag', () => {
       mockFantasyDatabase({})
@@ -43,7 +51,7 @@ describe('buildRelations', () => {
       const source = mockKnight()
 
       buildRelations({
-        cleanupManager: new CleanupManager(),
+        cleanupManager: new CleanupManagerNamespace.CleanupManager(),
         client: fantasyVase,
         previousValues: { [source.id]: source },
         resourceLayersLimit: 1,
@@ -63,7 +71,7 @@ describe('buildRelations', () => {
 
       const callback = () =>
         buildRelations({
-          cleanupManager: new CleanupManager(),
+          cleanupManager: new CleanupManagerNamespace.CleanupManager(),
           client: fantasyVase,
           previousValues: { [source.id]: source },
           resourceLayersLimit: 1,
@@ -81,7 +89,7 @@ describe('buildRelations', () => {
       const previous = mockKnight('resource', source)
 
       const relations = buildRelations({
-        cleanupManager: new CleanupManager(),
+        cleanupManager: new CleanupManagerNamespace.CleanupManager(),
         client: fantasyVase,
         previousValues: { [previous.id]: previous },
         resourceLayersLimit: 1,
@@ -112,7 +120,7 @@ describe('buildRelations', () => {
         const king = await getDatabaseValue('kings', kingId)
 
         const relations = buildRelations({
-          cleanupManager: new CleanupManager(),
+          cleanupManager: new CleanupManagerNamespace.CleanupManager(),
           client: fantasyVase,
           previousValues: {},
           resourceLayersLimit: 1,
@@ -122,45 +130,82 @@ describe('buildRelations', () => {
         expect(relations.king.value).toStrictEqual(king)
       })
 
-      it.todo('should return a has-one ref that updates properly', async () => {
-        const kingId = '1'
-        const knightId = '2'
+      it('should return a has-one ref that updates properly', async () => {
+        const landId = '1'
+        const rulerIdA = '2'
 
-        const { getDatabaseValue, updateDatabaseValue } = mockFantasyDatabase({
-          knights: { [knightId]: mockKnight('uploadable', { kingId }) },
-
-          kings: { [kingId]: mockKing('uploadable') },
+        // No relation yet
+        const {
+          getDatabaseValue,
+          updateDatabaseValue,
+          addDatabaseValue,
+          deleteDatabaseValue,
+        } = mockFantasyDatabase({
+          lands: { [landId]: mockLand('uploadable', { kingId: undefined }) },
         })
 
-        const source = (await getDatabaseValue('knights', knightId))!
-        const king = await getDatabaseValue('kings', kingId)
+        const source = await getDatabaseValue('lands', landId)
 
-        if (king == undefined) throw new Error('database error')
+        if (source == undefined) throw new Error('database error')
 
         const relations = buildRelations({
-          cleanupManager: new CleanupManager(),
+          cleanupManager: new CleanupManagerNamespace.CleanupManager(),
           client: fantasyVase,
           previousValues: {},
           resourceLayersLimit: 1,
           source,
         })
 
-        expect(relations.king.value).toStrictEqual(king)
+        expect(relations.ruler.value).toStrictEqual(undefined)
 
-        king.age = 9999
+        // Add a relation
+        await updateDatabaseValue('lands', landId, { kingId: rulerIdA })
 
-        expect(relations.king.value).not.toStrictEqual(king)
+        expect(relations.ruler.value).toStrictEqual(undefined)
 
-        await updateDatabaseValue('kings', kingId, { age: king.age })
+        await updateDatabaseValue('kings', rulerIdA, mockKing('uploadable'))
 
-        expect(relations.king.value).toStrictEqual(king)
+        const kingA = await getDatabaseValue('kings', rulerIdA)
+
+        if (kingA == undefined) throw new Error('database error')
+
+        expect(relations.ruler.value).toStrictEqual(kingA)
+
+        // Update relation target's properties
+        kingA.age = 9999
+
+        expect(relations.ruler.value).not.toStrictEqual(kingA)
+
+        await updateDatabaseValue('kings', rulerIdA, { age: kingA.age })
+
+        expect(relations.ruler.value).toStrictEqual(kingA)
+
+        // Change relation target
+        const { id: rulerIdB } = await addDatabaseValue(
+          'kings',
+          mockKing('uploadable')
+        )
+
+        await updateDatabaseValue('lands', landId, { kingId: rulerIdB })
+
+        const kingB = await getDatabaseValue('kings', rulerIdB)
+
+        if (kingB == undefined) throw new Error('database error')
+
+        expect(relations.ruler.value).toStrictEqual(kingB)
+
+        // Delete relation target
+        await deleteDatabaseValue('kings', rulerIdB)
+
+        expect(relations.ruler.value).toBeUndefined()
       })
 
-      // TODO: check for discounted resourceLayersLimit
-      it.todo('should pass the correct params to syncable ref', () => {
+      it('should pass the correct params to syncable ref', () => {
         const mockSyncableRef = vi.fn().mockReturnValue({
           sync: {
-            getCleanupManager: () => new CleanupManager(),
+            getCleanupManager: () =>
+              new CleanupManagerNamespace.CleanupManager(),
+            onDispose: vi.fn(),
             onBeforeSyncTrigger: vi.fn(),
           },
         })
@@ -171,13 +216,13 @@ describe('buildRelations', () => {
 
         mockFantasyDatabase({})
 
-        const cleanupManager = new CleanupManager()
+        const resourceLayersLimit = 1
 
         buildRelations({
-          cleanupManager,
+          cleanupManager: new CleanupManagerNamespace.CleanupManager(),
           client: fantasyVase,
           previousValues: {},
-          resourceLayersLimit: 1,
+          resourceLayersLimit,
           source: mockKnight('half-resource'),
         })
 
@@ -186,8 +231,104 @@ describe('buildRelations', () => {
           fantasyVase,
           'kings',
           expect.anything(),
-          cleanupManager
+          expect.anything(),
+          resourceLayersLimit - 1
         )
+      })
+
+      it('should dispose bridge and ref syncs when parent cleanup manager disposes', () => {
+        // Removes all relations but the has-one king of a knight for better control
+        const vase = fantasyVase.configureRelations(({ hasOne }) => ({
+          knights: {
+            king: hasOne('kings', { relationKey: 'kingId' }, 'protected'),
+          },
+        }))
+
+        // Store each cleanup manager construction
+        const parentCleanupManager = cleanupManagerInterceptor()
+        const bridgeCleanup = cleanupManagerInterceptor()
+        const refCleanup = cleanupManagerInterceptor()
+
+        vi.spyOn(CleanupManagerNamespace, 'CleanupManager').mockImplementation(
+          interceptCleanupManagers(
+            parentCleanupManager,
+            bridgeCleanup,
+            refCleanup
+          )
+        )
+
+        // Create the parent
+        new CleanupManagerNamespace.CleanupManager()
+
+        if (parentCleanupManager.value == undefined)
+          throw new Error('Failed to store cleanup managers')
+
+        mockFantasyDatabase({})
+
+        buildRelations({
+          cleanupManager: parentCleanupManager.value!,
+          client: vase,
+          previousValues: {},
+          resourceLayersLimit: 1,
+          source: mockKnight('half-resource'),
+        })
+
+        if (bridgeCleanup.value == undefined || refCleanup.value == undefined)
+          throw new Error('Failed to store cleanup managers')
+
+        const countCleanup = vi.fn()
+
+        bridgeCleanup.value.onDispose(countCleanup)
+        refCleanup.value.onDispose(countCleanup)
+
+        expect(countCleanup).toHaveBeenCalledTimes(0)
+
+        parentCleanupManager.value.dispose()
+
+        expect(countCleanup).toHaveBeenCalledTimes(2)
+      })
+
+      it('should dispose bridge when ref disposes', () => {
+        // Removes all relations but the has-one king of a knight for better control
+        const vase = fantasyVase.configureRelations(({ hasOne }) => ({
+          knights: {
+            king: hasOne('kings', { relationKey: 'kingId' }, 'protected'),
+          },
+        }))
+
+        // Store each cleanup manager construction
+        const bridgeCleanup = cleanupManagerInterceptor()
+
+        vi.spyOn(CleanupManagerNamespace, 'CleanupManager').mockImplementation(
+          interceptCleanupManagers(
+            cleanupManagerInterceptor(),
+            bridgeCleanup,
+            cleanupManagerInterceptor()
+          )
+        )
+
+        mockFantasyDatabase({})
+
+        const relations = buildRelations({
+          cleanupManager: new CleanupManagerNamespace.CleanupManager(),
+          client: vase,
+          previousValues: {},
+          resourceLayersLimit: 1,
+          source: mockKnight('half-resource'),
+        })
+
+        if (bridgeCleanup.value == undefined)
+          throw new Error('Failed to store cleanup managers')
+
+        const bridgeDispose = vi.fn()
+
+        bridgeCleanup.value.onDispose(bridgeDispose)
+
+        expect(bridgeDispose).toHaveBeenCalledTimes(0)
+
+        relations.king.sync.dispose()
+
+        expect(bridgeDispose).toHaveBeenCalledOnce()
       })
     })
 
@@ -216,7 +357,7 @@ describe('buildRelations', () => {
         )
 
         const relations = buildRelations({
-          cleanupManager: new CleanupManager(),
+          cleanupManager: new CleanupManagerNamespace.CleanupManager(),
           client: fantasyVase,
           previousValues: {},
           resourceLayersLimit: 1,
@@ -250,7 +391,7 @@ describe('buildRelations', () => {
           const king = await getDatabaseValue('kings', kingId)
 
           const relations = buildRelations({
-            cleanupManager: new CleanupManager(),
+            cleanupManager: new CleanupManagerNamespace.CleanupManager(),
             client: fantasyVase,
             previousValues: {},
             resourceLayersLimit: 1,
@@ -269,7 +410,9 @@ describe('buildRelations', () => {
       it.todo('should pass the correct params to syncable ref', () => {
         const mockSyncableRef = vi.fn().mockReturnValue({
           sync: {
-            getCleanupManager: () => new CleanupManager(),
+            onDispose: vi.fn(),
+            getCleanupManager: () =>
+              new CleanupManagerNamespace.CleanupManager(),
             onBeforeSyncTrigger: vi.fn(),
           },
         })
@@ -280,7 +423,7 @@ describe('buildRelations', () => {
 
         mockFantasyDatabase({})
 
-        const cleanupManager = new CleanupManager()
+        const cleanupManager = new CleanupManagerNamespace.CleanupManager()
 
         buildRelations({
           cleanupManager,
@@ -327,7 +470,7 @@ describe('buildRelations', () => {
         const knights = allKnights.filter(({ id }) => id !== nonMemberKnightId)
 
         const relations = buildRelations({
-          cleanupManager: new CleanupManager(),
+          cleanupManager: new CleanupManagerNamespace.CleanupManager(),
           client: fantasyVase,
           previousValues: {},
           resourceLayersLimit: 1,
@@ -380,7 +523,7 @@ describe('buildRelations', () => {
           )
 
           const relations = buildRelations({
-            cleanupManager: new CleanupManager(),
+            cleanupManager: new CleanupManagerNamespace.CleanupManager(),
             client: fantasyVase,
             previousValues: {},
             resourceLayersLimit: 1,
@@ -416,7 +559,9 @@ describe('buildRelations', () => {
       it.todo('should pass the correct params to syncable ref', () => {
         const mockSyncableRef = vi.fn().mockReturnValue({
           sync: {
-            getCleanupManager: () => new CleanupManager(),
+            onDispose: vi.fn(),
+            getCleanupManager: () =>
+              new CleanupManagerNamespace.CleanupManager(),
             onBeforeSyncTrigger: vi.fn(),
           },
         })
@@ -427,7 +572,7 @@ describe('buildRelations', () => {
 
         mockFantasyDatabase({})
 
-        const cleanupManager = new CleanupManager()
+        const cleanupManager = new CleanupManagerNamespace.CleanupManager()
 
         buildRelations({
           cleanupManager,
@@ -454,7 +599,7 @@ describe('buildRelations', () => {
     it('raises if resourceLayersLimit is 0', () => {
       const callback = () =>
         buildRelations({
-          cleanupManager: new CleanupManager(),
+          cleanupManager: new CleanupManagerNamespace.CleanupManager(),
           client: fantasyVase,
           previousValues: {},
           source: mockKnight('half-resource'),
@@ -479,7 +624,7 @@ describe('buildRelations', () => {
         const source = (await getDatabaseValue('knights', knightId))!
 
         const relations = buildRelations({
-          cleanupManager: new CleanupManager(),
+          cleanupManager: new CleanupManagerNamespace.CleanupManager(),
           client: fantasyVase,
           previousValues: {},
           resourceLayersLimit: layers,

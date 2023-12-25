@@ -93,10 +93,10 @@ const removeHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
     'has-one'
   )
 
-  // Rejeita se for required e undefined
-  if (definition.required)
+  // Rejeita se for protected e undefined
+  if (definition.protected)
     throw new Error(
-      `Tentativa de remover relacao required ${relation as string}`
+      `Tentativa de remover relacao protected ${relation as string}`
     )
 
   return updateResource(client, source.resourcePath, source.id, {

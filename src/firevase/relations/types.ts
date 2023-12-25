@@ -33,7 +33,7 @@ export type RelationDefinition<
 > = {
   targetResourcePath: T
   type: TY
-  required: R
+  protected: R
 } & (TY extends 'many-to-many'
   ? ManyToManySettings extends undefined
     ? never

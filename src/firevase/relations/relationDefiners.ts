@@ -50,14 +50,14 @@ export const makeHasMany = <
           relationKey: key.relationKey,
           targetResourcePath,
           type: 'has-many',
-          required: false,
+          protected: false,
         }
       : {
           // @ts-ignore
           manyToManyTable: key.manyToManyTable,
           targetResourcePath,
           type: 'many-to-many',
-          required: false,
+          protected: false,
         }
   }
 
@@ -70,20 +70,20 @@ export const makeHasOne =
   <
     S extends keyof Properties,
     T extends keyof Properties,
-    R extends 'required' | 'optional' = 'optional'
+    R extends 'protected' | 'optional' = 'optional'
   >(
     targetResourcePath: T,
     { relationKey }: { relationKey: keyof Properties[S] },
-    isRequired: R = 'optional' as R
+    isProtected: R = 'optional' as R
   ): RelationDefinition<
     Properties,
     undefined,
     S,
     T,
     'has-one',
-    R extends 'required' ? true : false
+    R extends 'protected' ? true : false
   > => ({
-    required: (isRequired === 'required') as R extends 'required'
+    protected: (isProtected === 'protected') as R extends 'protected'
       ? true
       : false,
     relationKey,

@@ -11,7 +11,7 @@ export const vase = fillFirevase<{ guilds: Guild; players: Player }>(
   .configureManyToMany({ playersGuilds: ['guilds', 'players'] })
   .configureRelations(({ hasMany, hasOne }) => ({
     guilds: {
-      owner: hasOne('players', { relationKey: 'ownerUid' }, 'required'),
+      owner: hasOne('players', { relationKey: 'ownerUid' }, 'protected'),
       players: hasMany('players', { manyToManyTable: 'playersGuilds' }),
     },
 
