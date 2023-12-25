@@ -151,9 +151,36 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
       const allSnapshots = <P extends ResourcePath>(path: P): Snapshot<P>[] =>
         Object.keys(database[path] ?? {}).map((id) => toSnapshot(path, id))
 
+      /** Pega os database listeners que se importam com esse id */
+      const getRelevantDatabaseListeners = <P extends ResourcePath>(
+        path: P,
+        targetId: string
+      ) => {
+        const databasePathListeners = queryListeners[path]
+
+        if (databasePathListeners == undefined) return []
+
+        return databasePathListeners
+          .filter(({ query }) => {
+            const queriedSnapshots = query(allSnapshots(path))
+
+            // If the query has this doc, it's relevant
+            return queriedSnapshots.some(({ id }) => id === targetId)
+          })
+          .map(({ query, listener }) => {
+            const queriedSnapshots = query(allSnapshots(path))
+
+            // If the query has this doc, it's relevant
+            return { listener, queriedSnapshots }
+          })
+      }
+
       const alertListeners = <P extends ResourcePath>(
         path: P,
-        modifiedId: string
+        modifiedId: string,
+        extraDatabaseListeners: ReturnType<
+          typeof getRelevantDatabaseListeners
+        > = []
       ) => {
         // Update all listeners
         const docPathListeners = docListeners[path]
@@ -161,17 +188,32 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
         if (docPathListeners && modifiedId in docPathListeners)
           docPathListeners[modifiedId](toSnapshot(path, modifiedId))
 
-        const databasePathListeners = queryListeners[path]
-
-        if (databasePathListeners) {
-          for (const { listener, query } of databasePathListeners) {
-            const queriedSnapshots = query(allSnapshots(path))
-
-            // If the updated snapshot is in this query, trigger it
-            if (queriedSnapshots.some(({ id }) => id === modifiedId))
-              listener({ docs: queriedSnapshots })
-          }
+        for (const { listener, queriedSnapshots } of [
+          ...getRelevantDatabaseListeners(path, modifiedId),
+          ...extraDatabaseListeners,
+        ]) {
+          listener({
+            docs: queriedSnapshots.filter(
+              (snapshot) => snapshot.data() != undefined
+            ),
+          })
         }
+      }
+
+      const deleteDatabaseValue = async <P extends DatabaseTable>(
+        path: P,
+        id: string
+      ) => {
+        const pathDatabase = database[path]
+
+        if (pathDatabase == undefined) return
+
+        // Guarda os database listeners relevantes para esse doc antes de remove-lo
+        const relevantListeners = getRelevantDatabaseListeners(path, id)
+
+        delete pathDatabase[id]
+
+        alertListeners(path, id, relevantListeners)
       }
 
       const updateDatabaseValue = async <P extends ResourcePath>(
@@ -295,6 +337,7 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
       )
 
       type MockedQuery = {
+        type: 'query'
         path: ResourcePath
         filter: (
           snapshots: Snapshot<ResourcePath>[]
@@ -308,6 +351,7 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
             snapshots: Snapshot<ResourcePath>[]
           ) => Snapshot<ResourcePath>[])[]
         ): MockedQuery => ({
+          type: 'query',
           path,
           filter: (snapshots: Snapshot<ResourcePath>[]) =>
             filters.reduce(
@@ -325,6 +369,9 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
             | Listener<Snapshot<ResourcePath>>
             | Listener<{ docs: Snapshot<ResourcePath>[] }>
         ) => {
+          // TODO: ensure this log is only called as many times as necessary
+          // console.log('adding listener', query)
+
           // Se for de um doc so
           if ('id' in query) {
             const { id, path } = query
@@ -364,7 +411,10 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
           if (pathListeners == undefined)
             throw new Error('Impossible (with query)! How can this be??')
 
-          pathListeners.push({ listener, query: filter as any })
+          pathListeners.push({
+            listener,
+            query: filter as any,
+          })
 
           // Ja inicializa ele
           listener({ docs: filter(allSnapshots(path)) })
@@ -372,11 +422,16 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
           return vi.fn().mockImplementation(() => {
             if (queryListeners[path] == undefined) return
 
-            const targetIndex = queryListeners[path]!.findIndex(
+            const pathListeners = queryListeners[path]
+
+            if (pathListeners == undefined)
+              throw new Error('Impossible (with query)! How can this be??')
+
+            const targetIndex = pathListeners.findIndex(
               ({ listener: storedListener }) => storedListener === listener
             )
 
-            queryListeners[path]!.splice(targetIndex, 1)
+            pathListeners.splice(targetIndex, 1)
           })
         }
       )
@@ -419,6 +474,7 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
         getDatabaseValue,
         indexDatabaseValues,
         updateDatabaseValue,
+        deleteDatabaseValue,
         hasListener,
         hasListListener,
         toSnapshot,

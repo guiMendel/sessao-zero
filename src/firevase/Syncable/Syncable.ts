@@ -21,6 +21,7 @@ type OnNextCallback<T extends DocumentReference | Query> = (
 
 export class Syncable<T extends DocumentReference | Query> {
   private resetListeners: Array<() => void> = []
+  private beforeSyncListeners: Array<() => void> = []
 
   /** Gerencia o cleanup dos snapshot listeners */
   private cleanup: CleanupManager = new CleanupManager()
@@ -60,6 +61,8 @@ export class Syncable<T extends DocumentReference | Query> {
 
   /** Inicia o sync */
   triggerSync() {
+    for (const listener of this.beforeSyncListeners) listener()
+
     if (this.state === 'synced' || this._target == undefined) return
 
     this.state = 'synced'
@@ -110,5 +113,9 @@ export class Syncable<T extends DocumentReference | Query> {
 
   onReset(callback: () => void) {
     this.resetListeners.push(callback)
+  }
+
+  onBeforeSyncTrigger(callback: () => void) {
+    this.beforeSyncListeners.push(callback)
   }
 }

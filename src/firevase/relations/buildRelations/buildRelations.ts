@@ -4,7 +4,14 @@ import { syncableRef } from '@/firevase/Syncable/SyncableRef'
 import type { HalfResource, Resource } from '@/firevase/resources/types'
 import { PathsFrom } from '@/firevase/types'
 import { CleanupManager } from '@/utils/classes'
-import { Query, collection, doc, query, where } from 'firebase/firestore'
+import {
+  Query,
+  collection,
+  doc,
+  documentId,
+  query,
+  where,
+} from 'firebase/firestore'
 import { RelationDefinitionFrom, RelationsRefs } from '..'
 
 /** Adiciona a um objeto uma flag que indica se ele nao deve ser descartado */
@@ -201,7 +208,7 @@ const createManyToManyRelation = <
     // A query que retorna os alvos de fato
     const targetsQuery = query(
       collection(client.db, definition.targetResourcePath as string),
-      where('id', 'in', targetIds)
+      where(documentId(), 'in', targetIds)
     )
 
     // Atualiza o query dos targets
@@ -215,6 +222,9 @@ const createManyToManyRelation = <
     'empty-query',
     cleanupManager
   )
+
+  // Quando o target receber trigger, damos trigger no bridge
+  targets.sync.onBeforeSyncTrigger(() => bridgeSync.triggerSync())
 
   // Associamos o cleanup do syncableRef ao bridgeSync
   targets.sync
