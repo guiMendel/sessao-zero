@@ -80,6 +80,11 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
     id: string
   }
 
+  type QuerySnapshot<P extends DatabaseTable> = {
+    docs: Snapshot<P>[]
+    empty: boolean
+  }
+
   type Database = Partial<{
     [P in DatabaseTable]: Record<string, EntryFor<P>>
   }>
@@ -110,8 +115,8 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
       /** Listeners of Query */
       const queryListeners: Partial<{
         [P in DatabaseTable]: {
-          listener: Listener<{ docs: Snapshot<P>[] }>
-          query: (snapshots: Snapshot<P>[]) => Snapshot<P>[]
+          listener: Listener<QuerySnapshot<P>>
+          query: MockedQuery
         }[]
       }> = {}
 
@@ -140,7 +145,7 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
         return pathDatabase ? pathDatabase[id] : undefined
       }
 
-      const toSnapshot = <P extends ResourcePath>(
+      const toSnapshot = <P extends DatabaseTable>(
         path: P,
         id: string
       ): Snapshot<P> => ({
@@ -148,11 +153,11 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
         id,
       })
 
-      const allSnapshots = <P extends ResourcePath>(path: P): Snapshot<P>[] =>
+      const allSnapshots = <P extends DatabaseTable>(path: P): Snapshot<P>[] =>
         Object.keys(database[path] ?? {}).map((id) => toSnapshot(path, id))
 
       /** Pega os database listeners que se importam com esse id */
-      const getRelevantDatabaseListeners = <P extends ResourcePath>(
+      const getRelevantDatabaseListeners = <P extends DatabaseTable>(
         path: P,
         targetId: string
       ) => {
@@ -160,19 +165,12 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
 
         if (databasePathListeners == undefined) return []
 
-        return databasePathListeners
-          .filter(({ query }) => {
-            const queriedSnapshots = query(allSnapshots(path))
+        return databasePathListeners.filter(({ query }) => {
+          const queriedSnapshots = query.filterer.filter(allSnapshots(path))
 
-            // If the query has this doc, it's relevant
-            return queriedSnapshots.some(({ id }) => id === targetId)
-          })
-          .map(({ query, listener }) => {
-            const queriedSnapshots = query(allSnapshots(path))
-
-            // If the query has this doc, it's relevant
-            return { listener, queriedSnapshots }
-          })
+          // If the query has this doc, it's relevant
+          return queriedSnapshots.some(({ id }) => id === targetId)
+        })
       }
 
       const alertListeners = <P extends ResourcePath>(
@@ -188,14 +186,23 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
         if (docPathListeners && modifiedId in docPathListeners)
           docPathListeners[modifiedId](toSnapshot(path, modifiedId))
 
-        for (const { listener, queriedSnapshots } of [
+        const alertedListenersIds = new Set<string>()
+
+        for (const { listener, query } of [
           ...getRelevantDatabaseListeners(path, modifiedId),
           ...extraDatabaseListeners,
         ]) {
+          if (alertedListenersIds.has(query.filterer.id)) continue
+
+          alertedListenersIds.add(query.filterer.id)
+
+          const queriedSnapshots = query.filterer
+            .filter(allSnapshots(path))
+            .filter((snapshot) => snapshot.data() != undefined)
+
           listener({
-            docs: queriedSnapshots.filter(
-              (snapshot) => snapshot.data() != undefined
-            ),
+            docs: queriedSnapshots,
+            empty: queriedSnapshots.length === 0,
           })
         }
       }
@@ -216,10 +223,10 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
         alertListeners(path, id, relevantListeners)
       }
 
-      const updateDatabaseValue = async <P extends ResourcePath>(
+      const updateDatabaseValue = async <P extends DatabaseTable>(
         path: P,
         id: string,
-        newValue: Partial<Uploadable<P>>
+        newValue: Partial<EntryFor<P>>
       ) => {
         if (database[path] == undefined) database[path] = {}
 
@@ -227,21 +234,23 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
 
         if (pathDatabase == undefined) throw new Error('wtf just happened')
 
+        const extraDatabaseListeners = getRelevantDatabaseListeners(path, id)
+
         pathDatabase[id] = {
           ...pathDatabase[id],
           ...newValue,
         }
 
-        alertListeners(path, id)
+        alertListeners(path, id, extraDatabaseListeners)
       }
 
-      const addDatabaseValue = async <P extends ResourcePath>(
+      const addDatabaseValue = async <P extends DatabaseTable>(
         path: P,
-        value: Uploadable<P>
+        value: EntryFor<P>
       ) => {
         const id = (nextId++).toString()
 
-        updateDatabaseValue(path, id, value)
+        await updateDatabaseValue(path, id, value)
 
         return toSnapshot(path, id)
       }
@@ -255,6 +264,22 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
         return value == undefined
           ? undefined
           : parseTestSnapshot(path, id, value as Uploadable<P>)
+      }
+
+      const requireDatabaseValue = async <P extends ResourcePath>(
+        path: P,
+        id: string
+      ) => {
+        const value = await getDatabaseValue<P>(path, id)
+
+        if (value == undefined)
+          throw new Error(
+            `Mocked database error — required item of id ${id} in path ${
+              path as string
+            } was undefined`
+          )
+
+        return value
       }
 
       async function indexDatabaseValues<P extends ResourcePath>(
@@ -305,14 +330,26 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
 
       mockDoc.mockImplementation((path, id): MockedDoc => ({ path, id }))
 
+      type MockedWhere = {
+        filter: (
+          snapshots: Snapshot<ResourcePath>[]
+        ) => Snapshot<ResourcePath>[]
+        id: string
+      }
+
       mockWhere.mockImplementation(
         (
           property: keyof Uploadable<ResourcePath> | DocumentIdSentinel,
           operation: '==' | 'in',
           value: string | boolean | number | any[]
-        ): ((
-          snapshots: Snapshot<ResourcePath>[]
-        ) => Snapshot<ResourcePath>[]) => {
+        ): MockedWhere => {
+          const withId = <T>(filter: T) => ({
+            filter,
+            id: `${JSON.stringify(property)} ${operation} ${JSON.stringify(
+              value
+            )}`,
+          })
+
           const getTarget = (snapshot: Snapshot<ResourcePath>) =>
             typeof property === 'string'
               ? snapshot.data()?.[property]
@@ -320,14 +357,16 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
 
           switch (operation) {
             case '==':
-              return (snapshots) =>
+              return withId((snapshots) =>
                 snapshots.filter((snapshot) => getTarget(snapshot) === value)
+              )
 
             case 'in':
-              return (snapshots) =>
+              return withId((snapshots) =>
                 snapshots.filter((snapshot) =>
                   (value as any[]).includes(getTarget(snapshot))
                 )
+              )
 
             default:
               const exhaustiveCheck: never = operation
@@ -339,25 +378,26 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
       type MockedQuery = {
         type: 'query'
         path: ResourcePath
-        filter: (
-          snapshots: Snapshot<ResourcePath>[]
-        ) => Snapshot<ResourcePath>[]
+        filterer: MockedWhere
       }
 
       mockQuery.mockImplementation(
-        (
-          path: ResourcePath,
-          ...filters: ((
-            snapshots: Snapshot<ResourcePath>[]
-          ) => Snapshot<ResourcePath>[])[]
-        ): MockedQuery => ({
+        (path: ResourcePath, ...filters: MockedWhere[]): MockedQuery => ({
           type: 'query',
           path,
-          filter: (snapshots: Snapshot<ResourcePath>[]) =>
-            filters.reduce(
-              (filteredSnapshots, filter) => filter(filteredSnapshots),
-              snapshots
+          filterer: {
+            filter: (snapshots: Snapshot<ResourcePath>[]) =>
+              filters.reduce(
+                (filteredSnapshots, { filter }) => filter(filteredSnapshots),
+                snapshots
+              ),
+
+            id: filters.reduce(
+              (id, filter) =>
+                id.length > 0 ? `${filter.id} AND ${id}` : filter.id,
+              ''
             ),
+          },
         })
       )
 
@@ -367,7 +407,7 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
           query: MockedDoc | MockedQuery,
           rawListener:
             | Listener<Snapshot<ResourcePath>>
-            | Listener<{ docs: Snapshot<ResourcePath>[] }>
+            | Listener<QuerySnapshot<ResourcePath>>
         ) => {
           // TODO: ensure this log is only called as many times as necessary
           // console.log('adding listener', query)
@@ -396,12 +436,10 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
             })
           }
 
-          const { filter, path } = query
+          const { filterer, path } = query
 
           // Se for do database inteiro
-          const listener = rawListener as Listener<{
-            docs: Snapshot<DatabaseTable>[]
-          }>
+          const listener = rawListener as Listener<QuerySnapshot<ResourcePath>>
 
           // Adiciona o listener
           if (queryListeners[path] == undefined) queryListeners[path] = []
@@ -411,13 +449,12 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
           if (pathListeners == undefined)
             throw new Error('Impossible (with query)! How can this be??')
 
-          pathListeners.push({
-            listener,
-            query: filter as any,
-          })
+          pathListeners.push({ listener, query })
 
           // Ja inicializa ele
-          listener({ docs: filter(allSnapshots(path)) })
+          const initialValue = filterer.filter(allSnapshots(path))
+
+          listener({ docs: initialValue, empty: initialValue.length === 0 })
 
           return vi.fn().mockImplementation(() => {
             if (queryListeners[path] == undefined) return
@@ -466,12 +503,15 @@ const createDatabase = <C extends FirevaseClient>(client: C) => {
         toSnapshot(path, id)
       )
 
-      mockGetDocs.mockImplementation(async ({ filter, path }: MockedQuery) => ({
-        docs: filter(allSnapshots(path)),
-      }))
+      mockGetDocs.mockImplementation(
+        async ({ filterer, path }: MockedQuery) => ({
+          docs: filterer.filter(allSnapshots(path)),
+        })
+      )
 
       return {
         getDatabaseValue,
+        requireDatabaseValue,
         indexDatabaseValues,
         updateDatabaseValue,
         deleteDatabaseValue,

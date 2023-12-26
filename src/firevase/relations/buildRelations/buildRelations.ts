@@ -50,7 +50,7 @@ export const buildRelations = <
       `Impossible to build relations for ${source.resourcePath} — resourceLayersLimit is 0`
     )
 
-  if (client.relationSettings == undefined)
+  if (client.relationSettings?.[source.resourcePath] == undefined)
     throw new Error(
       `Impossible to build relations for ${source.resourcePath} — client has no relation settings`
     )

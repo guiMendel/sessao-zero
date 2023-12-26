@@ -93,8 +93,8 @@ export class Syncable<T extends DocumentReference | Query> {
     // Vai manter este estado
     const previousState = this.state
 
-    // Descarta alvo atual
-    this.dispose()
+    // Descarta somente o cleanup manager interno
+    this.cleanup.dispose()
 
     if (previousState === 'ready-to-sync') {
       this.state = 'ready-to-sync'

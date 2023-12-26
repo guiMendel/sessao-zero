@@ -51,13 +51,13 @@ describe('updateResource', () => {
 
     const id = '1'
 
-    const { getDatabaseValue } = mockFantasyDatabase({
+    const { requireDatabaseValue } = mockFantasyDatabase({
       knights: { [id]: mockKnight('uploadable', originalProperties) },
     })
 
     await updateResource(fantasyVase, 'knights', id, newProperties)
 
-    await expect(getDatabaseValue('knights', id)).resolves.toStrictEqual(
+    await expect(requireDatabaseValue('knights', id)).resolves.toStrictEqual(
       expect.objectContaining(newProperties)
     )
   })
@@ -74,7 +74,7 @@ describe('updateResource', () => {
 
     const id = '1'
 
-    const { getDatabaseValue } = mockFantasyDatabase({
+    const { requireDatabaseValue } = mockFantasyDatabase({
       knights: { [id]: mockKnight('uploadable', originalProperties) },
     })
 
@@ -82,7 +82,7 @@ describe('updateResource', () => {
       overwrite: true,
     })
 
-    const result = await getDatabaseValue('knights', id)
+    const result = await requireDatabaseValue('knights', id)
 
     expect(result).toStrictEqual(expect.objectContaining(newProperties))
 

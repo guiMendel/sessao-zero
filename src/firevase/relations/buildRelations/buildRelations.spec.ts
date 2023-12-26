@@ -2,6 +2,11 @@ import { mockFantasyDatabase } from '@/tests/mock/backend'
 
 import { FirevaseClient } from '@/firevase'
 import * as SyncableRefNamespace from '@/firevase/Syncable'
+import { HalfResource, Resource } from '@/firevase/resources'
+import {
+  cleanupManagerInterceptor,
+  interceptCleanupManagers,
+} from '@/tests/helpers'
 import {
   FantasyVase,
   fantasyVase,
@@ -10,14 +15,11 @@ import {
   mockLand,
 } from '@/tests/mock/fantasyVase'
 import * as CleanupManagerNamespace from '@/utils/classes/CleanupManager'
-import { buildRelations } from '.'
-import { Resource } from '@/firevase/resources'
 import { toValue } from 'vue'
-import {
-  CleanupManagerInterceptor,
-  cleanupManagerInterceptor,
-  interceptCleanupManagers,
-} from '@/tests/helpers'
+import { buildRelations } from '.'
+
+const sorted = (array: HalfResource<FirevaseClient, string>[]) =>
+  array.sort((a, b) => parseFloat(a.id) - parseFloat(b.id))
 
 describe('buildRelations', () => {
   beforeEach(() => {
@@ -40,9 +42,6 @@ describe('buildRelations', () => {
 
     expect(callback).toThrow('client has no relation settings')
   })
-
-  // TODO: testar que limpar o parent cleanup manager limpa os bridges e os refs gerados
-  // TODO: testar que o dispose dos refs gerados limpa o sync do bridge tambem
 
   describe('extracting relations', () => {
     it('should set the dont dispose flag', () => {
@@ -110,14 +109,14 @@ describe('buildRelations', () => {
         const kingId = '1'
         const knightId = '2'
 
-        const { getDatabaseValue } = mockFantasyDatabase({
+        const { requireDatabaseValue } = mockFantasyDatabase({
           knights: { [knightId]: mockKnight('uploadable', { kingId }) },
 
           kings: { [kingId]: mockKing('uploadable') },
         })
 
-        const source = (await getDatabaseValue('knights', knightId))!
-        const king = await getDatabaseValue('kings', kingId)
+        const source = await requireDatabaseValue('knights', knightId)
+        const king = await requireDatabaseValue('kings', kingId)
 
         const relations = buildRelations({
           cleanupManager: new CleanupManagerNamespace.CleanupManager(),
@@ -136,7 +135,7 @@ describe('buildRelations', () => {
 
         // No relation yet
         const {
-          getDatabaseValue,
+          requireDatabaseValue,
           updateDatabaseValue,
           addDatabaseValue,
           deleteDatabaseValue,
@@ -144,9 +143,7 @@ describe('buildRelations', () => {
           lands: { [landId]: mockLand('uploadable', { kingId: undefined }) },
         })
 
-        const source = await getDatabaseValue('lands', landId)
-
-        if (source == undefined) throw new Error('database error')
+        const source = await requireDatabaseValue('lands', landId)
 
         const relations = buildRelations({
           cleanupManager: new CleanupManagerNamespace.CleanupManager(),
@@ -165,9 +162,7 @@ describe('buildRelations', () => {
 
         await updateDatabaseValue('kings', rulerIdA, mockKing('uploadable'))
 
-        const kingA = await getDatabaseValue('kings', rulerIdA)
-
-        if (kingA == undefined) throw new Error('database error')
+        const kingA = await requireDatabaseValue('kings', rulerIdA)
 
         expect(relations.ruler.value).toStrictEqual(kingA)
 
@@ -188,9 +183,7 @@ describe('buildRelations', () => {
 
         await updateDatabaseValue('lands', landId, { kingId: rulerIdB })
 
-        const kingB = await getDatabaseValue('kings', rulerIdB)
-
-        if (kingB == undefined) throw new Error('database error')
+        const kingB = await requireDatabaseValue('kings', rulerIdB)
 
         expect(relations.ruler.value).toStrictEqual(kingB)
 
@@ -230,7 +223,7 @@ describe('buildRelations', () => {
         expect(mockSyncableRef).toHaveBeenCalledWith(
           fantasyVase,
           'kings',
-          expect.anything(),
+          'empty-document',
           expect.anything(),
           resourceLayersLimit - 1
         )
@@ -338,19 +331,20 @@ describe('buildRelations', () => {
         const knightIdA = '2'
         const knightIdB = '3'
 
-        const { getDatabaseValue, indexDatabaseValues } = mockFantasyDatabase({
-          knights: {
-            [knightIdA]: mockKnight('uploadable', { kingId }),
-            [knightIdB]: mockKnight('uploadable', { kingId }),
-            [4]: mockKnight('uploadable', {
-              kingId: (parseInt(kingId) + 1).toString(),
-            }),
-          },
+        const { requireDatabaseValue, indexDatabaseValues } =
+          mockFantasyDatabase({
+            knights: {
+              [knightIdA]: mockKnight('uploadable', { kingId }),
+              [knightIdB]: mockKnight('uploadable', { kingId }),
+              [4]: mockKnight('uploadable', {
+                kingId: (parseInt(kingId) + 1).toString(),
+              }),
+            },
 
-          kings: { [kingId]: mockKing('uploadable') },
-        })
+            kings: { [kingId]: mockKing('uploadable') },
+          })
 
-        const source = (await getDatabaseValue('kings', kingId))!
+        const source = await requireDatabaseValue('kings', kingId)
         const allKnights = await indexDatabaseValues('knights')
         const knights = allKnights.filter(
           ({ kingId: currentKingId }) => currentKingId === kingId
@@ -373,41 +367,84 @@ describe('buildRelations', () => {
         )
       })
 
-      it.todo(
-        'should return a has-many ref that updates properly',
-        async () => {
-          const kingId = '1'
-          const knightId = '2'
+      it('should return a has-many ref that updates properly', async () => {
+        const vase = fantasyVase.configureRelations(({ hasMany }) => ({
+          kings: {
+            lands: hasMany('lands', { relationKey: 'kingId' }),
+          },
+        }))
 
-          const { getDatabaseValue, updateDatabaseValue } = mockFantasyDatabase(
-            {
-              knights: { [knightId]: mockKnight('uploadable', { kingId }) },
+        const kingId = '1'
+        const landIdA = '2'
 
-              kings: { [kingId]: mockKing('uploadable') },
-            }
-          )
+        // No relations
+        const {
+          requireDatabaseValue,
+          updateDatabaseValue,
+          addDatabaseValue,
+          deleteDatabaseValue,
+        } = mockFantasyDatabase({
+          lands: {
+            [landIdA]: mockLand('uploadable', { kingId: undefined }),
+          },
 
-          const source = (await getDatabaseValue('knights', knightId))!
-          const king = await getDatabaseValue('kings', kingId)
+          kings: { [kingId]: mockKing('uploadable') },
+        })
 
-          const relations = buildRelations({
-            cleanupManager: new CleanupManagerNamespace.CleanupManager(),
-            client: fantasyVase,
-            previousValues: {},
-            resourceLayersLimit: 1,
-            source,
-          })
+        const king = await requireDatabaseValue('kings', kingId)
 
-          expect(relations.king.value).toStrictEqual(king)
+        const relations = buildRelations({
+          cleanupManager: new CleanupManagerNamespace.CleanupManager(),
+          client: vase,
+          previousValues: {},
+          resourceLayersLimit: 1,
+          source: king,
+        })
 
-          await updateDatabaseValue('kings', kingId, { age: 9999 })
+        expect(relations.lands.value).toStrictEqual([])
 
-          expect(relations.king.value).toStrictEqual(king)
-        }
-      )
+        // Add an existing item to the relation
+        await updateDatabaseValue('lands', landIdA, { kingId })
 
-      // TODO: check for discounted resourceLayersLimit
-      it.todo('should pass the correct params to syncable ref', () => {
+        const landA = await requireDatabaseValue('lands', landIdA)
+
+        expect(relations.lands.value).toStrictEqual([landA])
+
+        // Add a new item to the relation
+        const { id: landIdB } = await addDatabaseValue(
+          'lands',
+          mockLand('uploadable', { kingId })
+        )
+
+        const landB = await requireDatabaseValue('lands', landIdB)
+
+        expect(sorted(relations.lands.value)).toStrictEqual(
+          sorted([landA, landB])
+        )
+
+        // Mutate an item of the array
+        landA.name = 'Shangri-la'
+
+        await updateDatabaseValue('lands', landIdA, { name: landA.name })
+
+        expect(sorted(relations.lands.value)).toStrictEqual(
+          sorted([landA, landB])
+        )
+
+        // Remove an item from the relation
+        await updateDatabaseValue('lands', landIdA, {
+          kingId: (parseInt(kingId) + 1).toString(),
+        })
+
+        expect(relations.lands.value).toStrictEqual([landB])
+
+        // Delete an item in the relation
+        await deleteDatabaseValue('lands', landIdB)
+
+        expect(relations.lands.value).toStrictEqual([])
+      })
+
+      it('should pass the correct params to syncable ref', () => {
         const mockSyncableRef = vi.fn().mockReturnValue({
           sync: {
             onDispose: vi.fn(),
@@ -423,23 +460,70 @@ describe('buildRelations', () => {
 
         mockFantasyDatabase({})
 
-        const cleanupManager = new CleanupManagerNamespace.CleanupManager()
+        const resourceLayersLimit = 1
 
         buildRelations({
-          cleanupManager,
+          cleanupManager: new CleanupManagerNamespace.CleanupManager(),
           client: fantasyVase,
           previousValues: {},
-          resourceLayersLimit: 1,
+          resourceLayersLimit,
           source: mockKing('half-resource'),
         })
 
         expect(mockSyncableRef).toHaveBeenCalledTimes(2)
         expect(mockSyncableRef).toHaveBeenCalledWith(
           fantasyVase,
-          'knights',
+          'lands',
           expect.anything(),
-          cleanupManager
+          expect.anything(),
+          resourceLayersLimit - 1
         )
+      })
+
+      it('should dispose ref sync when parent cleanup manager disposes', () => {
+        // Removes all relations but the has-one king of a knight for better control
+        const vase = fantasyVase.configureRelations(({ hasMany }) => ({
+          kings: {
+            lands: hasMany('lands', { relationKey: 'kingId' }),
+          },
+        }))
+
+        // Store each cleanup manager construction
+        const parentCleanupManager = cleanupManagerInterceptor()
+        const refCleanup = cleanupManagerInterceptor()
+
+        vi.spyOn(CleanupManagerNamespace, 'CleanupManager').mockImplementation(
+          interceptCleanupManagers(parentCleanupManager, refCleanup)
+        )
+
+        // Create the parent
+        new CleanupManagerNamespace.CleanupManager()
+
+        if (parentCleanupManager.value == undefined)
+          throw new Error('Failed to store cleanup managers')
+
+        mockFantasyDatabase({})
+
+        buildRelations({
+          cleanupManager: parentCleanupManager.value!,
+          client: vase,
+          previousValues: {},
+          resourceLayersLimit: 1,
+          source: mockKing('half-resource'),
+        })
+
+        if (refCleanup.value == undefined)
+          throw new Error('Failed to store cleanup managers')
+
+        const countCleanup = vi.fn()
+
+        refCleanup.value.onDispose(countCleanup)
+
+        expect(countCleanup).toHaveBeenCalledTimes(0)
+
+        parentCleanupManager.value.dispose()
+
+        expect(countCleanup).toHaveBeenCalledTimes(1)
       })
     })
 
@@ -450,22 +534,23 @@ describe('buildRelations', () => {
         const knightIdB = '3'
         const nonMemberKnightId = '4'
 
-        const { getDatabaseValue, indexDatabaseValues } = mockFantasyDatabase({
-          knights: {
-            [knightIdA]: mockKnight('uploadable'),
-            [knightIdB]: mockKnight('uploadable'),
-            [nonMemberKnightId]: mockKnight('uploadable'),
-          },
+        const { requireDatabaseValue, indexDatabaseValues } =
+          mockFantasyDatabase({
+            knights: {
+              [knightIdA]: mockKnight('uploadable'),
+              [knightIdB]: mockKnight('uploadable'),
+              [nonMemberKnightId]: mockKnight('uploadable'),
+            },
 
-          lands: { [landId]: mockLand('uploadable') },
+            lands: { [landId]: mockLand('uploadable') },
 
-          knightsLands: {
-            [5]: { knights: knightIdA, lands: landId },
-            [6]: { knights: knightIdB, lands: landId },
-          },
-        })
+            knightsLands: {
+              [5]: { knights: knightIdA, lands: landId },
+              [6]: { knights: knightIdB, lands: landId },
+            },
+          })
 
-        const source = (await getDatabaseValue('lands', landId))!
+        const source = await requireDatabaseValue('lands', landId)
         const allKnights = await indexDatabaseValues('knights')
         const knights = allKnights.filter(({ id }) => id !== nonMemberKnightId)
 
@@ -486,77 +571,94 @@ describe('buildRelations', () => {
         )
       })
 
-      it.todo(
-        'should return many-to-many refs that update correctly',
-        async () => {
-          const landId = '1'
-          const knightIdA = '2'
-          const knightIdB = '3'
-          const nonMemberKnightId = '4'
+      it('should return many-to-many refs that update correctly', async () => {
+        const vase = fantasyVase.configureRelations(({ hasMany }) => ({
+          lands: {
+            supervisors: hasMany('knights', {
+              manyToManyTable: 'knightsLands',
+            }),
+          },
+        }))
 
-          const relationToRemoveId = '5'
+        const landId = '1'
+        const knightIdA = '2'
 
-          const {
-            getDatabaseValue,
-            indexDatabaseValues,
-            updateDatabaseValue,
-            deleteDatabaseValue,
-          } = mockFantasyDatabase({
-            knights: {
-              [knightIdA]: mockKnight('uploadable'),
-              [knightIdB]: mockKnight('uploadable'),
-              [nonMemberKnightId]: mockKnight('uploadable'),
-            },
+        const {
+          requireDatabaseValue,
+          updateDatabaseValue,
+          deleteDatabaseValue,
+          addDatabaseValue,
+        } = mockFantasyDatabase({
+          knights: {
+            [knightIdA]: mockKnight('uploadable'),
+          },
 
-            lands: { [landId]: mockLand('uploadable') },
+          lands: { [landId]: mockLand('uploadable') },
+        })
 
-            knightsLands: {
-              [relationToRemoveId]: { knights: knightIdA, lands: landId },
-              [6]: { knights: knightIdB, lands: landId },
-            },
-          })
+        // No relations
+        const land = await requireDatabaseValue('lands', landId)
 
-          const source = (await getDatabaseValue('lands', landId))!
-          const allKnights = await indexDatabaseValues('knights')
-          const knights = allKnights.filter(
-            ({ id }) => id !== nonMemberKnightId
-          )
+        const relations = buildRelations({
+          cleanupManager: new CleanupManagerNamespace.CleanupManager(),
+          client: vase,
+          previousValues: {},
+          resourceLayersLimit: 1,
+          source: land,
+        })
 
-          const relations = buildRelations({
-            cleanupManager: new CleanupManagerNamespace.CleanupManager(),
-            client: fantasyVase,
-            previousValues: {},
-            resourceLayersLimit: 1,
-            source,
-          })
+        expect(relations.supervisors.value).toStrictEqual([])
 
-          expect(relations.supervisors.value).toStrictEqual(
-            knights.map((knight) => knight)
-          )
+        // Add items to the relation
+        const { id: relationToRemoveId } = await addDatabaseValue(
+          'knightsLands',
+          {
+            knights: knightIdA,
+            lands: landId,
+          }
+        )
 
-          const newGold = 5000
-          await updateDatabaseValue('knights', knightIdA, { gold: newGold })
+        const knightA = await requireDatabaseValue('knights', knightIdA)
 
-          expect(relations.supervisors.value).toStrictEqual(
-            knights.map((knight) => {
-              if (knight.id === knightIdA) knight.gold = newGold
+        expect(relations.supervisors.value).toStrictEqual([knightA])
 
-              return knight
-            })
-          )
+        const { id: knightIdB } = await addDatabaseValue(
+          'knights',
+          mockKnight('uploadable')
+        )
 
-          await deleteDatabaseValue('knightsLands', relationToRemoveId)
+        await addDatabaseValue('knightsLands', {
+          knights: knightIdB,
+          lands: landId,
+        })
 
-          expect(relations.supervisors.value).toStrictEqual(
-            knights
-              .filter((knight) => knight.id !== knightIdA)
-              .map((knight) => knight)
-          )
-        }
-      )
+        const knightB = await requireDatabaseValue('knights', knightIdB)
 
-      // TODO: check for discounted resourceLayersLimit
-      it.todo('should pass the correct params to syncable ref', () => {
+        expect(sorted(relations.supervisors.value)).toStrictEqual(
+          sorted([knightA, knightB])
+        )
+
+        // Mutate an item of the array
+        knightA.name = 'Shakarron Makarron'
+
+        await updateDatabaseValue('knights', knightIdA, { name: knightA.name })
+
+        expect(sorted(relations.supervisors.value)).toStrictEqual(
+          sorted([knightA, knightB])
+        )
+
+        // Remove an item from the relation
+        await deleteDatabaseValue('knightsLands', relationToRemoveId)
+
+        expect(relations.supervisors.value).toStrictEqual([knightB])
+
+        // Delete an item in the relation
+        await deleteDatabaseValue('knights', knightIdB)
+
+        expect(relations.supervisors.value).toStrictEqual([])
+      })
+
+      it('should pass the correct params to syncable ref', () => {
         const mockSyncableRef = vi.fn().mockReturnValue({
           sync: {
             onDispose: vi.fn(),
@@ -572,13 +674,13 @@ describe('buildRelations', () => {
 
         mockFantasyDatabase({})
 
-        const cleanupManager = new CleanupManagerNamespace.CleanupManager()
+        const resourceLayersLimit = 1
 
         buildRelations({
-          cleanupManager,
+          cleanupManager: new CleanupManagerNamespace.CleanupManager(),
           client: fantasyVase,
           previousValues: {},
-          resourceLayersLimit: 1,
+          resourceLayersLimit,
           source: mockLand('half-resource'),
         })
 
@@ -587,11 +689,109 @@ describe('buildRelations', () => {
           fantasyVase,
           'knights',
           'empty-query',
-          cleanupManager
+          expect.anything(),
+          resourceLayersLimit - 1
         )
       })
 
-      it.todo('should link the passed cleanup manager')
+      it('should dispose bridge and ref syncs when parent cleanup manager disposes', () => {
+        // Removes all relations but the has-one king of a knight for better control
+        const vase = fantasyVase.configureRelations(({ hasMany }) => ({
+          lands: {
+            supervisors: hasMany('knights', {
+              manyToManyTable: 'knightsLands',
+            }),
+          },
+        }))
+
+        // Store each cleanup manager construction
+        const parentCleanupManager = cleanupManagerInterceptor()
+        const bridgeCleanup = cleanupManagerInterceptor()
+        const refCleanup = cleanupManagerInterceptor()
+
+        vi.spyOn(CleanupManagerNamespace, 'CleanupManager').mockImplementation(
+          interceptCleanupManagers(
+            parentCleanupManager,
+            bridgeCleanup,
+            refCleanup
+          )
+        )
+
+        // Create the parent
+        new CleanupManagerNamespace.CleanupManager()
+
+        if (parentCleanupManager.value == undefined)
+          throw new Error('Failed to store cleanup managers')
+
+        mockFantasyDatabase({})
+
+        buildRelations({
+          cleanupManager: parentCleanupManager.value,
+          client: vase,
+          previousValues: {},
+          resourceLayersLimit: 1,
+          source: mockLand('half-resource'),
+        })
+
+        if (bridgeCleanup.value == undefined || refCleanup.value == undefined)
+          throw new Error('Failed to store cleanup managers')
+
+        const countCleanup = vi.fn()
+
+        bridgeCleanup.value.onDispose(countCleanup)
+        refCleanup.value.onDispose(countCleanup)
+
+        expect(countCleanup).toHaveBeenCalledTimes(0)
+
+        parentCleanupManager.value.dispose()
+
+        expect(countCleanup).toHaveBeenCalledTimes(2)
+      })
+
+      it('should dispose bridge when ref disposes', () => {
+        // Removes all relations but the has-one king of a knight for better control
+        const vase = fantasyVase.configureRelations(({ hasMany }) => ({
+          lands: {
+            supervisors: hasMany('knights', {
+              manyToManyTable: 'knightsLands',
+            }),
+          },
+        }))
+
+        // Store each cleanup manager construction
+        const bridgeCleanup = cleanupManagerInterceptor()
+
+        vi.spyOn(CleanupManagerNamespace, 'CleanupManager').mockImplementation(
+          interceptCleanupManagers(
+            cleanupManagerInterceptor(),
+            bridgeCleanup,
+            cleanupManagerInterceptor()
+          )
+        )
+
+        mockFantasyDatabase({})
+
+        const relations = buildRelations({
+          cleanupManager: new CleanupManagerNamespace.CleanupManager(),
+          client: vase,
+          previousValues: {},
+          resourceLayersLimit: 1,
+          source: mockLand('half-resource'),
+        })
+
+        if (bridgeCleanup.value == undefined)
+          throw new Error('Failed to store cleanup managers')
+
+        const bridgeDispose = vi.fn()
+
+        bridgeCleanup.value.onDispose(bridgeDispose)
+
+        expect(bridgeDispose).toHaveBeenCalledTimes(0)
+
+        relations.supervisors.sync.dispose()
+
+        expect(bridgeDispose).toHaveBeenCalledOnce()
+      })
     })
   })
 
@@ -615,13 +815,13 @@ describe('buildRelations', () => {
         const kingId = '1'
         const knightId = '2'
 
-        const { getDatabaseValue } = mockFantasyDatabase({
+        const { requireDatabaseValue } = mockFantasyDatabase({
           knights: { [knightId]: mockKnight('uploadable', { kingId }) },
 
           kings: { [kingId]: mockKing('uploadable') },
         })
 
-        const source = (await getDatabaseValue('knights', knightId))!
+        const source = await requireDatabaseValue('knights', knightId)
 
         const relations = buildRelations({
           cleanupManager: new CleanupManagerNamespace.CleanupManager(),

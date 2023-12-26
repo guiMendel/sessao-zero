@@ -15,14 +15,14 @@ describe('getResourceGetter', () => {
     it('should get the appropriate value', async () => {
       const id = '1'
 
-      const { getDatabaseValue } = mockFantasyDatabase({
+      const { requireDatabaseValue } = mockFantasyDatabase({
         knights: { [id]: mockKnight('uploadable') },
       })
 
       const { get } = getResourceGetter(fantasyVase, 'knights')
 
       await expect(get(id)).resolves.toStrictEqual(
-        await getDatabaseValue('knights', id)
+        await requireDatabaseValue('knights', id)
       )
     })
 

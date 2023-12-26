@@ -38,7 +38,7 @@ describe('createResource', () => {
       gold: 5,
     }
 
-    const { getDatabaseValue } = mockFantasyDatabase({})
+    const { requireDatabaseValue } = mockFantasyDatabase({})
 
     const { id } = await createResource(
       fantasyVase,
@@ -46,7 +46,7 @@ describe('createResource', () => {
       mockKnight('uploadable', properties)
     )
 
-    await expect(getDatabaseValue('knights', id)).resolves.toStrictEqual(
+    await expect(requireDatabaseValue('knights', id)).resolves.toStrictEqual(
       expect.objectContaining(properties)
     )
   })
@@ -59,7 +59,7 @@ describe('createResource', () => {
       gold: 5,
     }
 
-    const { getDatabaseValue } = mockFantasyDatabase({})
+    const { requireDatabaseValue } = mockFantasyDatabase({})
 
     createResource(
       fantasyVase,
@@ -68,7 +68,7 @@ describe('createResource', () => {
       id
     )
 
-    await expect(getDatabaseValue('knights', id)).resolves.toStrictEqual(
+    await expect(requireDatabaseValue('knights', id)).resolves.toStrictEqual(
       expect.objectContaining(properties)
     )
   })

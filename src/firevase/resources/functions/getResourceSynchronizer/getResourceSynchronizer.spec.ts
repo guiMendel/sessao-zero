@@ -33,11 +33,13 @@ describe('getResourceSynchronizer', () => {
     it('should sync current call', async () => {
       const id = '1'
 
-      const { getDatabaseValue, updateDatabaseValue } = mockFantasyDatabase({
-        knights: {
-          [id]: mockKnight('uploadable'),
-        },
-      })
+      const { requireDatabaseValue, updateDatabaseValue } = mockFantasyDatabase(
+        {
+          knights: {
+            [id]: mockKnight('uploadable'),
+          },
+        }
+      )
 
       const { sync } = getResourceSynchronizer(
         fantasyVase,
@@ -49,25 +51,27 @@ describe('getResourceSynchronizer', () => {
 
       // Ensures it initializes properly
       expect(instance.value).toStrictEqual(
-        await getDatabaseValue('knights', id)
+        await requireDatabaseValue('knights', id)
       )
 
       await updateDatabaseValue('knights', id, { gold: 5000 })
 
       // Ensures it synced properly
       expect(instance.value).toStrictEqual(
-        await getDatabaseValue('knights', id)
+        await requireDatabaseValue('knights', id)
       )
     })
 
     it('should also sync the provided ref', async () => {
       const id = '1'
 
-      const { getDatabaseValue, updateDatabaseValue } = mockFantasyDatabase({
-        knights: {
-          [id]: mockKnight('uploadable'),
-        },
-      })
+      const { requireDatabaseValue, updateDatabaseValue } = mockFantasyDatabase(
+        {
+          knights: {
+            [id]: mockKnight('uploadable'),
+          },
+        }
+      )
 
       const { sync } = getResourceSynchronizer(
         fantasyVase,
@@ -85,14 +89,14 @@ describe('getResourceSynchronizer', () => {
 
       // Ensures it initializes properly
       expect(instanceRef.value).toStrictEqual(
-        await getDatabaseValue('knights', id)
+        await requireDatabaseValue('knights', id)
       )
 
       await updateDatabaseValue('knights', id, { gold: 5000 })
 
       // Ensures it synced properly
       expect(instanceRef.value).toStrictEqual(
-        await getDatabaseValue('knights', id)
+        await requireDatabaseValue('knights', id)
       )
     })
 
