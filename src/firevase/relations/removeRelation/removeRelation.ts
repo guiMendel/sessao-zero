@@ -10,6 +10,7 @@ import {
   ValidHasManyTarget,
 } from '../internalTypes'
 import { detectInvalidRemove, requireDefinition } from '../utils'
+import { getTargetIds } from '../utils/getTargetIds'
 
 /** Permite remover uma relacao has-one
  * @param source De onde remover as relacoes
@@ -38,7 +39,8 @@ export function removeRelation<
   client: C,
   source: HalfResource<C, P>,
   relation: R,
-  target: ValidHasManyTarget<C, P, R>
+  target: ValidHasManyTarget<C, P, R>,
+  options?: { force: boolean }
 ): Promise<void>
 
 export function removeRelation<
@@ -49,7 +51,8 @@ export function removeRelation<
   client: C,
   source: HalfResource<C, P>,
   relation: R,
-  target?: ValidHasManyTarget<C, P, R>
+  target?: ValidHasManyTarget<C, P, R>,
+  options?: { force: boolean }
 ) {
   const definition = requireDefinition(client, source.resourcePath, relation)
 
@@ -57,7 +60,8 @@ export function removeRelation<
     return removeHasOneRelation(
       client,
       source,
-      relation as unknown as OptionalHasOneRelations<C, P>
+      relation as unknown as OptionalHasOneRelations<C, P>,
+      options?.force
     )
 
   if (target == undefined)
@@ -69,7 +73,13 @@ export function removeRelation<
 
   switch (definition.type) {
     case 'has-many':
-      return removeHasManyRelation(client, source, relation, target)
+      return removeHasManyRelation(
+        client,
+        source,
+        relation,
+        target,
+        options?.force
+      )
 
     case 'many-to-many':
       return removeManyToManyRelation(client, source, relation, target)
@@ -84,7 +94,8 @@ export function removeRelation<
 const removeHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
   client: C,
   source: HalfResource<C, P>,
-  relation: OptionalHasOneRelations<C, P>
+  relation: OptionalHasOneRelations<C, P>,
+  force?: boolean
 ) => {
   const definition = requireDefinition(
     client,
@@ -94,7 +105,7 @@ const removeHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
   )
 
   // Rejeita se for protected e undefined
-  if (definition.protected)
+  if (!force && definition.protected)
     throw new Error(
       `Tentativa de remover relacao protected ${relation as string}`
     )
@@ -111,16 +122,18 @@ export const internalRemoveHasManyRelations = <
 >(
   client: C,
   definition: RelationDefinitionFrom<C, P, keyof PropertiesFrom<C>, 'has-many'>,
-  target: HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[],
+  targetIds: string[],
   currentRelations: HalfResource<
     C,
     RelationsFrom<C>[P][R]['targetResourcePath']
   >[]
 ) =>
   currentRelations
-    // Pega as que nao estao na nova lista
+    // Pega as que estao na lista de remocao
     .filter((currentRelation) =>
-      target.every((targetInstance) => targetInstance.id !== currentRelation.id)
+      targetIds.some(
+        (targetInstanceId) => targetInstanceId === currentRelation.id
+      )
     )
     // Troca a relation key para undefined, quebrando a relacao
     .map((currentRelation) =>
@@ -142,7 +155,8 @@ const removeHasManyRelation = async <
   client: C,
   source: HalfResource<C, P>,
   relation: R,
-  rawTarget: HalfResourceRelations<C, P>[R]
+  rawTarget: HalfResourceRelations<C, P>[R] | 'all',
+  force?: boolean
 ) => {
   const definition = requireDefinition(
     client,
@@ -151,11 +165,7 @@ const removeHasManyRelation = async <
     'has-many'
   )
 
-  detectInvalidRemove(client, source.resourcePath, relation)
-
-  const target = (
-    Array.isArray(rawTarget) ? rawTarget : [rawTarget]
-  ) as HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
+  if (!force) detectInvalidRemove(client, source.resourcePath, relation)
 
   const currentRelations = (await getRelation(
     client,
@@ -163,15 +173,24 @@ const removeHasManyRelation = async <
     relation
   )) as HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
 
+  const targetIds = getTargetIds(
+    rawTarget,
+    currentRelations.map((current) => current.id)
+  )
+
   return Promise.all(
-    internalRemoveHasManyRelations(client, definition, target, currentRelations)
+    internalRemoveHasManyRelations(
+      client,
+      definition,
+      targetIds,
+      currentRelations
+    )
   )
 }
 
 export const internalRemoveManyToManyRelations = <
   C extends FirevaseClient,
-  P extends PathsFrom<C>,
-  R extends keyof HalfResourceRelations<C, P>
+  P extends PathsFrom<C>
 >(
   client: C,
   definition: RelationDefinitionFrom<
@@ -180,16 +199,18 @@ export const internalRemoveManyToManyRelations = <
     keyof C['_tsAnchor'],
     'many-to-many'
   >,
-  target: HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[],
+  targetIds: string[],
   currentRelatedIds: {
     targetId: string
     bridgeId: string
   }[]
 ) =>
   currentRelatedIds
-    // Pega as que nao estao na nova lista
+    // Pega as que estao na lista de remover
     .filter(({ targetId: currentRelatedId }) =>
-      target.every((targetInstance) => targetInstance.id !== currentRelatedId)
+      targetIds.some(
+        (targetInstanceId) => targetInstanceId === currentRelatedId
+      )
     )
     // Destroi o doc que estabelece essa relacao
     .map(({ bridgeId }) =>
@@ -209,7 +230,7 @@ const removeManyToManyRelation = async <
   client: C,
   source: HalfResource<C, P>,
   relation: R,
-  rawTarget: HalfResourceRelations<C, P>[R]
+  rawTarget: HalfResourceRelations<C, P>[R] | 'all'
 ) => {
   const definition = requireDefinition(
     client,
@@ -218,10 +239,6 @@ const removeManyToManyRelation = async <
     'many-to-many'
   )
 
-  const target = (
-    Array.isArray(rawTarget) ? rawTarget : [rawTarget]
-  ) as HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
-
   // Essa query encontra os ids das instancias atualmente mapeados a esse source
   const currentRelatedIds = await getManyToManyTargetIds(
     client,
@@ -229,12 +246,17 @@ const removeManyToManyRelation = async <
     definition
   )
 
+  const targetIds = getTargetIds(
+    rawTarget,
+    currentRelatedIds.map((current) => current.targetId)
+  )
+
   // Remove as relacoes atuais que nao estao na nova lista
   return Promise.all(
     internalRemoveManyToManyRelations(
       client,
       definition,
-      target,
+      targetIds,
       currentRelatedIds
     )
   )

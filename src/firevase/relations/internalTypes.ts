@@ -48,7 +48,7 @@ export type ValidHasManyTarget<
   // Coloca a uniao em uma tupla para verificar contra [never] — explicacao https://stackoverflow.com/questions/53984650/typescript-never-type-inconsistently-matched-in-conditional-type
 ] extends [never]
   ? // Se for de boas pega o tipo do target da relacao, se nao, proibe com never
-    HalfResourceRelations<C, P>[R]
+    HalfResourceRelations<C, P>[R] | 'all'
   : never
 
 // declare const test: ValidHasManyTarget<Vase, 'players', 'ownedGuilds'>

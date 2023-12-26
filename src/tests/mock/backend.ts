@@ -40,7 +40,7 @@ export const mockDocumentId = documentId as Mock
 
 setUpFirebaseMocks()
 
-const createDatabase = <C extends FirevaseClient>(client: C) => {
+export const createDatabase = <C extends FirevaseClient>(client: C) => {
   // ======================================================
   // BASIC TYPES
   // ======================================================

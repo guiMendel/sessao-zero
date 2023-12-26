@@ -99,7 +99,9 @@ const getHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
   cleanupManager?: CleanupManager
 ) => {
   const { get } = cleanupManager
-    ? getResourceGetter(client, definition.targetResourcePath, cleanupManager)
+    ? getResourceGetter(client, definition.targetResourcePath, {
+        cleanupManager,
+      })
     : getResourceGetter(client, definition.targetResourcePath)
 
   const targetId = source[definition.relationKey] as string
@@ -114,7 +116,9 @@ const getHasManyRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
   cleanupManager?: CleanupManager
 ) => {
   const { getList } = cleanupManager
-    ? getResourceGetter(client, definition.targetResourcePath, cleanupManager)
+    ? getResourceGetter(client, definition.targetResourcePath, {
+        cleanupManager,
+      })
     : getResourceGetter(client, definition.targetResourcePath)
 
   const targetFilters = [
@@ -158,7 +162,9 @@ const getManyToManyRelation = async <
   cleanupManager?: CleanupManager
 ) => {
   const { getList } = cleanupManager
-    ? getResourceGetter(client, definition.targetResourcePath, cleanupManager)
+    ? getResourceGetter(client, definition.targetResourcePath, {
+        cleanupManager,
+      })
     : getResourceGetter(client, definition.targetResourcePath)
 
   // Essa query encontra os ids dos alvos mapeados a esse source
