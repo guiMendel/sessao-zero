@@ -225,7 +225,7 @@ describe('buildRelations', () => {
           'kings',
           'empty-document',
           expect.anything(),
-          resourceLayersLimit - 1
+          { resourceLayersLimit: resourceLayersLimit - 1 }
         )
       })
 
@@ -476,7 +476,7 @@ describe('buildRelations', () => {
           'lands',
           expect.anything(),
           expect.anything(),
-          resourceLayersLimit - 1
+          { resourceLayersLimit: resourceLayersLimit - 1 }
         )
       })
 
@@ -690,7 +690,7 @@ describe('buildRelations', () => {
           'knights',
           'empty-query',
           expect.anything(),
-          resourceLayersLimit - 1
+          { resourceLayersLimit: resourceLayersLimit - 1 }
         )
       })
 

@@ -1,10 +1,16 @@
+import { WithDisposeFlag } from '@/firevase/relations'
 import { makeResource } from '@/firevase/resources/functions/makeResource'
 import { CleanupManager } from '@/utils/classes'
 import { DocumentReference, Query } from 'firebase/firestore'
-import { Ref, ref } from 'vue'
+import { Ref, ref, toRaw } from 'vue'
 import { FirevaseClient } from '../..'
 import { Resource } from '../../resources'
-import { PathsFrom } from '../../types'
+import {
+  ConstrainRelationSettings,
+  ManyToManyFrom,
+  PathsFrom,
+  PropertiesFrom,
+} from '../../types'
 import { Syncable } from '../Syncable'
 
 // ===========================
@@ -38,7 +44,7 @@ export const syncableRef = <
   resourcePath: P,
   target: M | 'empty-document' | 'empty-query',
   parentCleanupManager: CleanupManager,
-  resourceLayersLimit = 1
+  options = { resourceLayersLimit: 1 }
 ): SyncableRef<C, P, M> => {
   const emptyValue = isQueryTarget(target)
     ? ([] as Resource<C, P>[])
@@ -65,28 +71,51 @@ export const syncableRef = <
           client,
           snapshot,
           resourcePath,
-          resourceLayersLimit,
+          options.resourceLayersLimit,
           ownCleanupManager,
           previousValues
         ) as Resource<C, P>[]
-
-        return
       }
 
       // Se for so um
-      previousValues =
-        valueRef.value == undefined ? [] : [valueRef.value as Resource<C, P>]
+      else {
+        previousValues =
+          valueRef.value == undefined ? [] : [valueRef.value as Resource<C, P>]
 
-      valueRef.value = makeResource(
-        client,
-        snapshot,
-        resourcePath,
-        resourceLayersLimit,
-        ownCleanupManager,
-        previousValues
-      )[0]
+        valueRef.value = makeResource(
+          client,
+          snapshot,
+          resourcePath,
+          options.resourceLayersLimit,
+          ownCleanupManager,
+          previousValues
+        )[0]
+      }
 
-      // TODO: chamar dispose em todos os valores de previouValues que nao foram reutilizados
+      // Nao precisa dar dispose em relaitons se elas nao sao construidas
+      if (options.resourceLayersLimit == 0) return
+
+      // Chama dispose em todos os valores de previousValues que nao foram reutilizados
+      for (const previousValue of previousValues as WithDisposeFlag<
+        Resource<C, P>
+      >[]) {
+        if (previousValue.dontDispose) continue
+
+        // Passa pelas relacoes
+        const relations = client.relationSettings?.[
+          previousValue.resourcePath
+        ] as
+          | undefined
+          | ConstrainRelationSettings<PropertiesFrom<C>, ManyToManyFrom<C>>[P]
+
+        if (relations == undefined) continue
+
+        // Need to use vue's toRaw due to their ref.value unpacking antics
+        for (const relation in relations) {
+          if (relation in previousValue)
+            toRaw(previousValue)[relation].sync.dispose()
+        }
+      }
     }
   )
 

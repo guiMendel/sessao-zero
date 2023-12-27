@@ -40,6 +40,7 @@ describe('makeResource', () => {
         mockClient,
         data as unknown as DocumentSnapshot,
         'test',
+        0,
         new CleanupManager(),
         []
       )
@@ -60,10 +61,13 @@ describe('makeResource', () => {
         { name: 'Chakron', count: 2 },
       ]
 
+      const resourceLayersLimit = 1
+
       const resource = makeResource(
         mockClient,
         data as unknown as DocumentSnapshot,
         'test',
+        resourceLayersLimit,
         cleanupManager,
         previousValues
       )
@@ -79,6 +83,7 @@ describe('makeResource', () => {
             },
             source: data,
             client: mockClient,
+            resourceLayersLimit,
           },
         }))
       )
@@ -91,6 +96,7 @@ describe('makeResource', () => {
         mockClient,
         undefined as unknown as DocumentSnapshot,
         'test',
+        0,
         new CleanupManager(),
         []
       )
@@ -107,6 +113,7 @@ describe('makeResource', () => {
         mockClient,
         data as unknown as DocumentSnapshot,
         'test',
+        0,
         new CleanupManager(),
         []
       )
@@ -124,10 +131,13 @@ describe('makeResource', () => {
 
       const data = { name: 'Aluvius', count: 10 }
 
+      const resourceLayersLimit = 1
+
       const resource = makeResource(
         mockClient,
         data as unknown as DocumentSnapshot,
         'test',
+        resourceLayersLimit,
         cleanupManager,
         previousValues
       )
@@ -143,6 +153,7 @@ describe('makeResource', () => {
             },
             source: data,
             client: mockClient,
+            resourceLayersLimit,
           },
         },
       ])

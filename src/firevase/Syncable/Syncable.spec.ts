@@ -40,6 +40,18 @@ describe('Syncable', () => {
 
       expect(syncable.syncState).toBe('disposed')
     })
+
+    it('should trigger listeners', () => {
+      const disposeCallback = vi.fn()
+
+      const syncable = new Syncable(docTarget, vi.fn())
+
+      syncable.onDispose(disposeCallback)
+
+      syncable.dispose()
+
+      expect(disposeCallback).toHaveBeenCalledOnce()
+    })
   })
 
   describe('updating target', () => {
@@ -154,6 +166,20 @@ describe('Syncable', () => {
       syncable.dispose()
 
       expect(mockCleanup).toHaveBeenCalledOnce()
+    })
+
+    it('triggers listeners', () => {
+      const listener = vi.fn()
+
+      const syncable = new Syncable(docTarget, vi.fn())
+
+      syncable.onBeforeSyncTrigger(listener)
+
+      expect(listener).not.toHaveBeenCalled()
+
+      syncable.triggerSync()
+
+      expect(listener).toHaveBeenCalledOnce()
     })
   })
 

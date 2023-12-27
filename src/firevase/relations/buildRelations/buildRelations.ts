@@ -195,7 +195,7 @@ const createHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
     definition.targetResourcePath,
     'empty-document',
     bridgeSync.getCleanupManager(),
-    newResourceLayersLimit
+    { resourceLayersLimit: newResourceLayersLimit }
   )
 
   // Ligamos sync e dispose do syncable ref ao sync bridge
@@ -226,7 +226,7 @@ const createHasManyRelation = <
     definition.targetResourcePath,
     targetQuery,
     cleanupManager,
-    newResourceLayersLimit
+    { resourceLayersLimit: newResourceLayersLimit }
   )
 }
 
@@ -278,7 +278,7 @@ const createManyToManyRelation = <
     definition.targetResourcePath,
     'empty-query',
     bridgeSync.getCleanupManager(),
-    newResourceLayersLimit
+    { resourceLayersLimit: newResourceLayersLimit }
   )
 
   // Ligamos sync e dispose do syncable ref ao sync bridge

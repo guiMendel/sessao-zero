@@ -55,11 +55,9 @@ describe('getRelation', () => {
 
       await getRelation(fantasyVase, knight, 'king', cleanupManager)
 
-      expect(mockGetResourceGetter).toHaveBeenCalledWith(
-        fantasyVase,
-        'kings',
-        cleanupManager
-      )
+      expect(mockGetResourceGetter).toHaveBeenCalledWith(fantasyVase, 'kings', {
+        cleanupManager,
+      })
     })
   })
 
@@ -117,7 +115,7 @@ describe('getRelation', () => {
       expect(mockGetResourceGetter).toHaveBeenCalledWith(
         fantasyVase,
         'knights',
-        cleanupManager
+        { cleanupManager }
       )
     })
   })
@@ -245,7 +243,7 @@ describe('getRelation', () => {
       expect(mockGetResourceGetter).toHaveBeenCalledWith(
         fantasyVase,
         'knights',
-        cleanupManager
+        { cleanupManager }
       )
     })
   })

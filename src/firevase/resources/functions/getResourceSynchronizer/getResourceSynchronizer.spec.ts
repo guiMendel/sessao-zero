@@ -237,12 +237,18 @@ describe('getResourceSynchronizer', () => {
 
       syncList()
 
+      const expectedQuery = query(collection(db, 'knights')) as any
+
       expect(mockSyncableRef).toHaveBeenCalledWith(
         fantasyVase,
         'knights',
-        expect.objectContaining(
-          JSON.parse(JSON.stringify(query(collection(db, 'knights'))))
-        ),
+        {
+          path: expectedQuery.path,
+          type: expectedQuery.type,
+          filterer: expect.objectContaining(
+            JSON.parse(JSON.stringify(expectedQuery.filterer))
+          ),
+        },
         cleanupManager
       )
     })

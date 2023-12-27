@@ -109,7 +109,7 @@ export const createDatabase = <C extends FirevaseClient>(client: C) => {
 
       /** Listeners of DocumentReference */
       const docListeners: Partial<{
-        [P in ResourcePath]: Record<string, Listener<Snapshot<P>>>
+        [P in ResourcePath]: { listener: Listener<Snapshot<P>>; id: string }[]
       }> = {}
 
       /** Listeners of Query */
@@ -183,8 +183,13 @@ export const createDatabase = <C extends FirevaseClient>(client: C) => {
         // Update all listeners
         const docPathListeners = docListeners[path]
 
-        if (docPathListeners && modifiedId in docPathListeners)
-          docPathListeners[modifiedId](toSnapshot(path, modifiedId))
+        if (docPathListeners) {
+          const snapshot = toSnapshot(path, modifiedId)
+
+          for (const { id, listener } of docPathListeners) {
+            if (id === modifiedId) listener(snapshot)
+          }
+        }
 
         const alertedListenersIds = new Set<string>()
 
@@ -419,20 +424,31 @@ export const createDatabase = <C extends FirevaseClient>(client: C) => {
             const listener = rawListener as Listener<Snapshot<ResourcePath>>
 
             // Adiciona o listener
-            if (docListeners[path] == undefined) docListeners[path] = {}
+            if (docListeners[path] == undefined) docListeners[path] = []
 
             const pathListeners = docListeners[path]
 
             if (pathListeners == undefined)
               throw new Error('Impossible! How can this be??')
 
-            pathListeners[id] = listener
+            pathListeners.push({ id, listener })
 
             // Ja inicializa ele
             listener(toSnapshot(path, id))
 
             return vi.fn().mockImplementation(() => {
-              if (docListeners[path]) delete docListeners[path]![id]
+              if (docListeners[path] == undefined) return
+
+              const pathListeners = docListeners[path]
+
+              if (pathListeners == undefined)
+                throw new Error('Impossible! How can this be??')
+
+              const targetIndex = pathListeners.findIndex(
+                ({ listener: storedListener }) => storedListener === listener
+              )
+
+              pathListeners.splice(targetIndex, 1)
             })
           }
 

@@ -43,11 +43,11 @@ export class Syncable<T extends DocumentReference | Query> {
     return this.state
   }
 
-  public getTarget() {
+  public getTarget = () => {
     return this._target
   }
 
-  public getCleanupManager() {
+  public getCleanupManager = () => {
     return this.cleanup
   }
 
@@ -65,7 +65,7 @@ export class Syncable<T extends DocumentReference | Query> {
   }
 
   /** Inicia o sync */
-  triggerSync() {
+  triggerSync = () => {
     for (const listener of this.beforeSyncListeners) listener()
 
     if (this.state === 'synced' || this._target == undefined) return
@@ -85,7 +85,7 @@ export class Syncable<T extends DocumentReference | Query> {
   }
 
   /** Atualiza o alvo de sync, e mantem o estado de sync */
-  updateTarget(newTarget?: T) {
+  updateTarget = (newTarget?: T) => {
     if (compareTargets(this._target, newTarget)) return
 
     this._target = newTarget
@@ -106,7 +106,7 @@ export class Syncable<T extends DocumentReference | Query> {
   }
 
   /** Reinicia o ref, resetando o alvo para undefined e o estado para 'empty' */
-  reset() {
+  reset = () => {
     this.dispose()
 
     this._target = undefined
@@ -116,15 +116,15 @@ export class Syncable<T extends DocumentReference | Query> {
     for (const listener of this.resetListeners) listener()
   }
 
-  onDispose(callback: () => void) {
+  onDispose = (callback: () => void) => {
     this.disposeListeners.push(callback)
   }
 
-  onReset(callback: () => void) {
+  onReset = (callback: () => void) => {
     this.resetListeners.push(callback)
   }
 
-  onBeforeSyncTrigger(callback: () => void) {
+  onBeforeSyncTrigger = (callback: () => void) => {
     this.beforeSyncListeners.push(callback)
   }
 }
