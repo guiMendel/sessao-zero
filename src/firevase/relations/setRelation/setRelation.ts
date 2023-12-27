@@ -13,6 +13,7 @@ import {
   internalRemoveManyToManyRelations,
 } from '../removeRelation'
 import { detectInvalidRemove, requireDefinition } from '../utils'
+import { getTargetIds } from '../utils/getTargetIds'
 
 /** Permite sobrescrever um novo valor para uma relaçao
  * @param source A instancia que vai ter sua relaçao sobrescrita
@@ -27,7 +28,7 @@ export const setRelation = <
   client: C,
   source: HalfResource<C, P>,
   relation: R,
-  target: ValidHasManyTarget<C, P, R>
+  target: ValidHasManyTarget<C, P, R, HalfResourceRelations<C, P>[R]>
 ) => {
   const definition = requireDefinition(client, source.resourcePath, relation)
 
@@ -70,15 +71,13 @@ const setHasOneRelation = <
   // Rejeita arrays
   if (Array.isArray(target))
     throw new Error(
-      `Tentativa de atribuir um array a relaçao has-one ${relation as string}`
+      `Attempt to assign an array to has-one relation ${relation as string}`
     )
 
   // Rejeita se for protected e undefined
   if (definition.protected && target == undefined)
     throw new Error(
-      `Tentativa de atribuir undefined para a relacao protected ${
-        relation as string
-      }`
+      `Attempt to assign undefined to protected relation ${relation as string}`
     )
 
   return updateResource<C, P>(client, source.resourcePath, source.id, {
@@ -105,9 +104,7 @@ const setHasManyRelation = async <
 
   detectInvalidRemove(client, source.resourcePath, relation)
 
-  const target = (
-    Array.isArray(rawTarget) ? rawTarget : [rawTarget]
-  ) as HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
+  const targetIds = getTargetIds(rawTarget)
 
   const currentRelations = (await getRelation(
     client,
@@ -115,11 +112,18 @@ const setHasManyRelation = async <
     relation
   )) as HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
 
+  /** Ids to remove — those that aren't in the new list */
+  const removeTargetIds = currentRelations
+    .map((relation) => relation.id)
+    .filter((currentId) =>
+      targetIds.every((targetId) => targetId !== currentId)
+    )
+
   // Remove as relacoes atuais que nao estao na nova lista
   const removePromises = internalRemoveHasManyRelations(
     client,
     definition,
-    target,
+    removeTargetIds,
     currentRelations
   )
 
@@ -128,7 +132,7 @@ const setHasManyRelation = async <
     client,
     source,
     definition,
-    target,
+    targetIds,
     currentRelations ?? []
   )
 
@@ -151,9 +155,8 @@ const setManyToManyRelation = async <
     relation,
     'many-to-many'
   )
-  const target = (
-    Array.isArray(rawTarget) ? rawTarget : [rawTarget]
-  ) as HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
+
+  const targetIds = getTargetIds(rawTarget)
 
   // Essa query encontra os ids das instancias atualmente mapeados a esse source
   const currentRelatedIds = await getManyToManyTargetIds<C, P>(
@@ -162,11 +165,18 @@ const setManyToManyRelation = async <
     definition
   )
 
+  /** Ids to remove — those that aren't in the new list */
+  const removeTargetIds = currentRelatedIds
+    .map((current) => current.targetId)
+    .filter((currentId) =>
+      targetIds.every((targetId) => targetId !== currentId)
+    )
+
   // Remove as relacoes atuais que nao estao na nova lista
   const removePromises = internalRemoveManyToManyRelations(
     client,
     definition,
-    target,
+    removeTargetIds,
     currentRelatedIds
   )
 
@@ -175,7 +185,7 @@ const setManyToManyRelation = async <
     client,
     source,
     definition,
-    target,
+    targetIds,
     currentRelatedIds
   )
 

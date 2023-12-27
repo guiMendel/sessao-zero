@@ -66,6 +66,6 @@ describe('detectInvalidRemove', () => {
       },
     }
 
-    expect(detectInvalidRemoveCallback).toThrow('Proibido dar remove')
+    expect(detectInvalidRemoveCallback).toThrow('which would violate protected relation')
   })
 })

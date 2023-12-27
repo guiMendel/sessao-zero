@@ -84,7 +84,7 @@ export function removeRelation<
   client: C,
   source: HalfResource<C, P>,
   relation: R,
-  target: ValidHasManyTarget<C, P, R>
+  target: ValidHasManyTarget<C, P, R, HalfResourceRelations<C, P>[R] | 'all'>
 ): Promise<void>
 
 export function removeRelation<

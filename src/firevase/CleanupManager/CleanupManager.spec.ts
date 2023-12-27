@@ -1,6 +1,8 @@
 import { CleanupManager } from '.'
 
 describe('CleanupManager', () => {
+  it.todo('add returns a method to trigger the clenaup early')
+
   it('should add a callback when calling add, and the callback should only be triggered on the very next disposal', () => {
     const manager = new CleanupManager()
 
