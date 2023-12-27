@@ -253,7 +253,10 @@ export const createDatabase = <C extends FirevaseClient>(client: C) => {
         path: P,
         value: EntryFor<P>
       ) => {
-        const id = (nextId++).toString()
+        let id = (nextId++).toString()
+
+        if (database[path] != undefined)
+          while (id in database[path]!) id = (nextId++).toString()
 
         await updateDatabaseValue(path, id, value)
 

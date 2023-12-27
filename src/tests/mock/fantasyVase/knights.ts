@@ -28,5 +28,5 @@ export const mockKnight = makeResourceMocker(fantasyVase, 'knights', {
     'Lady Smirkhelm the Spirited',
     'Sir Japeblade the Joyful',
   ],
-  kingId: '1',
+  kingId: '-1',
 })

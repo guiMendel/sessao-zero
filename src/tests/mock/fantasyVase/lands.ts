@@ -13,7 +13,7 @@ setUpFirebaseMocks()
 
 export const mockLand = makeResourceMocker(fantasyVase, 'lands', {
   biome: ['desert', 'woods', 'plains', 'hills', 'swamp', 'tundra'],
-  kingId: '1',
+  kingId: '-1',
   name: [
     'The Wormlands',
     'Desert of Whimsical Whirlwinds',

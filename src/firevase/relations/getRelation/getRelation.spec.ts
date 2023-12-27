@@ -85,9 +85,10 @@ describe('getRelation', () => {
 
       if (knights.length == 0) throw new Error('error in database')
 
-      await expect(
-        getRelation(fantasyVase, king, 'knights')
-      ).resolves.toStrictEqual(knights)
+      const kingsKnights = await getRelation(fantasyVase, king, 'knights')
+
+      expect(kingsKnights).toStrictEqual(knights)
+      expect(kingsKnights).toHaveLength(2)
     })
 
     it('passes the cleanup manager ahead', async () => {

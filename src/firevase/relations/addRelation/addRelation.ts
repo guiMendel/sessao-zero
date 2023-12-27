@@ -5,6 +5,7 @@ import { addDoc, collection } from 'firebase/firestore'
 import { HalfResourceRelations, RelationDefinitionFrom } from '..'
 import { getManyToManyTargetIds, getRelation } from '../getRelation'
 import { requireDefinition } from '../utils'
+import { getTargetIds } from '../utils/getTargetIds'
 
 /** Permite adicionar um novo valor para uma relaçao
  * @param source A instancia que vai receber uma nova instancia a relacao
@@ -28,9 +29,9 @@ export const addRelation = <
   switch (definition.type) {
     case 'has-one':
       throw new Error(
-        `Tentativa de adicionar nova relaçao para a relation ${
+        `Attempt to add to relation of type has-one ${
           relation as string
-        }, de path ${source.resourcePath}`
+        }, from path ${source.resourcePath}`
       )
 
     case 'has-many':
@@ -54,24 +55,24 @@ export const internalAddHasManyRelations = <
   client: C,
   source: HalfResource<C, P>,
   definition: RelationDefinitionFrom<C, P, PathsFrom<C>, 'has-many'>,
-  target: HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[],
+  tagetIds: string[],
   currentRelations: HalfResource<
     C,
     RelationsFrom<C>[P][R]['targetResourcePath']
   >[]
 ) =>
-  target
+  tagetIds
     // Pega as que nao estao na lista existente
-    .filter((targetInstance) =>
+    .filter((targetInstanceId) =>
       currentRelations && Array.isArray(currentRelations)
         ? currentRelations.every(
-            (currentRelation) => currentRelation.id !== targetInstance.id
+            (currentRelation) => currentRelation.id !== targetInstanceId
           )
         : true
     )
     // Troca a relation key para a id do source, criando a relacao
-    .map((targetInstance) =>
-      updateResource(client, definition.targetResourcePath, targetInstance.id, {
+    .map((targetInstanceId) =>
+      updateResource(client, definition.targetResourcePath, targetInstanceId, {
         [definition.relationKey]: source.id,
       } as any)
     )
@@ -93,9 +94,7 @@ const addHasManyRelation = async <
     'has-many'
   )
 
-  const target = (
-    Array.isArray(rawTarget) ? rawTarget : [rawTarget]
-  ) as HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
+  const tagetIds = getTargetIds(rawTarget)
 
   const currentRelations = (await getRelation(
     client,
@@ -109,7 +108,7 @@ const addHasManyRelation = async <
       client,
       source,
       definition,
-      target,
+      tagetIds,
       currentRelations
     )
   )
@@ -117,31 +116,30 @@ const addHasManyRelation = async <
 
 export const internalAddManyToManyRelations = <
   C extends FirevaseClient,
-  P extends PathsFrom<C>,
-  R extends keyof HalfResourceRelations<C, P>
+  P extends PathsFrom<C>
 >(
   client: C,
   source: HalfResource<C, P>,
   definition: RelationDefinitionFrom<C, P, PathsFrom<C>, 'many-to-many'>,
-  target: HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[],
+  targetIds: string[],
   currentRelatedIds: {
     targetId: string
     bridgeId: string
   }[]
 ) =>
-  target
+  targetIds
     // Pega as que nao estao na lista existente
-    .filter((targetInstance) =>
+    .filter((targetInstanceId) =>
       currentRelatedIds.every(
         ({ targetId: currentRelatedId }) =>
-          currentRelatedId !== targetInstance.id
+          currentRelatedId !== targetInstanceId
       )
     )
-    // Adiciona um doc para estabeler a relacao. Tem o formato de: o resourcePath eh a chave, o id da isntancia relacionada eh o valor.
-    .map((targetInstance) =>
+    // Adiciona um doc para estabeler a relacao. Tem o formato de: o resourcePath eh a chave, o id da instancia relacionada eh o valor.
+    .map((targetInstanceId) =>
       addDoc(collection(client.db, definition.manyToManyTable as string), {
         [source.resourcePath]: source.id,
-        [definition.targetResourcePath]: targetInstance.id,
+        [definition.targetResourcePath]: targetInstanceId,
       })
     )
 
@@ -162,9 +160,7 @@ const addManyToManyRelation = async <
     'many-to-many'
   )
 
-  const target = (
-    Array.isArray(rawTarget) ? rawTarget : [rawTarget]
-  ) as HalfResource<C, RelationsFrom<C>[P][R]['targetResourcePath']>[]
+  const targetIds = getTargetIds(rawTarget)
 
   // Essa query encontra os ids das instancias atualmente mapeados a esse source
   const currentRelatedIds = await getManyToManyTargetIds(
@@ -179,7 +175,7 @@ const addManyToManyRelation = async <
       client,
       source,
       definition,
-      target,
+      targetIds,
       currentRelatedIds
     )
   )

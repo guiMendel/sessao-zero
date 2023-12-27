@@ -7,6 +7,12 @@ describe('getTargetIds', () => {
     expect(getTargetIds([rawTarget], [])).toStrictEqual([rawTarget.id])
   })
 
+  it('should throw if no currentRelationsIds is provided but first param is "all"', () => {
+    expect(() => getTargetIds('all')).toThrow(
+      'no currentRelationsIds are provided'
+    )
+  })
+
   it('wraps a single object in an array', () => {
     const rawTarget: any = { id: 'scooby' }
 
