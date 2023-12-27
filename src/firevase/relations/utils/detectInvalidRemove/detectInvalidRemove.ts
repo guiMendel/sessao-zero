@@ -40,9 +40,9 @@ export const detectInvalidRemove = <
     const [oppRelation] = oppositeRelation[0]
 
     throw new Error(
-      `Proibido dar remove na relacao ${relation as string} de path ${
+      `Attempt to remove from relation ${relation as string} of path ${
         path as string
-      }, pois isso poderia violar a relacao protected ${oppRelation} de ${
+      }, which would violate protected relation ${oppRelation} of path ${
         definition.targetResourcePath as string
       }`
     )

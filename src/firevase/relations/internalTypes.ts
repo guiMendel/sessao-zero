@@ -54,6 +54,16 @@ export type ValidHasManyTarget<
 // declare const test: ValidHasManyTarget<Vase, 'players', 'ownedGuilds'>
 
 /** Dado um path P, retorna as relacoes has-one dele que nao sao protected */
+export type HasOneRelations<
+  C extends FirevaseClient,
+  P extends PathsFrom<C>
+> = {
+  [R in keyof RelationsFrom<C>[P]]: RelationsFrom<C>[P][R]['type'] extends 'has-one'
+    ? R
+    : never
+}[keyof RelationsFrom<C>[P]]
+
+/** Dado um path P, retorna as relacoes has-one dele que nao sao protected */
 export type OptionalHasOneRelations<
   C extends FirevaseClient,
   P extends PathsFrom<C>

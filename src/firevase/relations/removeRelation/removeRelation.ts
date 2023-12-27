@@ -5,6 +5,7 @@ import { collection, deleteDoc, doc } from 'firebase/firestore'
 import { HalfResourceRelations, RelationDefinitionFrom } from '..'
 import { getManyToManyTargetIds, getRelation } from '../getRelation'
 import {
+  HasOneRelations,
   NonHasOneRelations,
   OptionalHasOneRelations,
   ValidHasManyTarget,
@@ -12,7 +13,51 @@ import {
 import { detectInvalidRemove, requireDefinition } from '../utils'
 import { getTargetIds } from '../utils/getTargetIds'
 
-/** Permite remover uma relacao has-one
+/** Permite remover qualquer uma relacao has-one
+ * @param source De onde remover as relacoes
+ * @param relation A relaçao a remover
+ * @param target As instancias a serem removidas
+ */
+export function forceRemoveRelation<
+  C extends FirevaseClient,
+  P extends PathsFrom<C>
+>(
+  client: C,
+  source: HalfResource<C, P>,
+  relation: HasOneRelations<C, P>
+): Promise<void>
+
+/** Permite remover instancias de uma relaçao
+ * @param source De onde remover as relacoes
+ * @param relation A relaçao a remover
+ * @param target As instancias a serem removidas
+ */
+export function forceRemoveRelation<
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  R extends NonHasOneRelations<C, P>
+>(
+  client: C,
+  source: HalfResource<C, P>,
+  relation: R,
+  target: HalfResourceRelations<C, P>[R] | 'all'
+): Promise<void>
+
+export function forceRemoveRelation<
+  C extends FirevaseClient,
+  P extends PathsFrom<C>,
+  R extends keyof HalfResourceRelations<C, P>
+>(
+  client: C,
+  source: HalfResource<C, P>,
+  relation: R,
+  target?: HalfResourceRelations<C, P>[R] | 'all'
+) {
+  // @ts-ignore
+  return removeRelation(client, source, relation, target, { force: true })
+}
+
+/** Permite remover uma relacao has-one que nao seja protegida
  * @param source De onde remover as relacoes
  * @param relation A relaçao a remover
  * @param target As instancias a serem removidas
@@ -39,8 +84,7 @@ export function removeRelation<
   client: C,
   source: HalfResource<C, P>,
   relation: R,
-  target: ValidHasManyTarget<C, P, R>,
-  options?: { force: boolean }
+  target: ValidHasManyTarget<C, P, R>
 ): Promise<void>
 
 export function removeRelation<
@@ -51,7 +95,7 @@ export function removeRelation<
   client: C,
   source: HalfResource<C, P>,
   relation: R,
-  target?: ValidHasManyTarget<C, P, R>,
+  target?: HalfResourceRelations<C, P>[R] | 'all',
   options?: { force: boolean }
 ) {
   const definition = requireDefinition(client, source.resourcePath, relation)
@@ -66,9 +110,9 @@ export function removeRelation<
 
   if (target == undefined)
     throw new Error(
-      `Tentativa de remover da relacao ${relation as string} de tipo ${
+      `Attempt to remove relation ${relation as string} of type ${
         definition.type
-      }, do path ${source.resourcePath}, sem fornecer nenhum target`
+      }, in path ${source.resourcePath}, without providing a target`
     )
 
   switch (definition.type) {
@@ -107,8 +151,10 @@ const removeHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
   // Rejeita se for protected e undefined
   if (!force && definition.protected)
     throw new Error(
-      `Tentativa de remover relacao protected ${relation as string}`
+      `Attempt to remove protected relation ${relation as string}`
     )
+
+  if (source[definition.relationKey] == undefined) return
 
   return updateResource(client, source.resourcePath, source.id, {
     [definition.relationKey]: undefined,
