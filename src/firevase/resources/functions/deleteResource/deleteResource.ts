@@ -47,6 +47,4 @@ export const deleteResource = async <
   await deleteDoc(doc(collection(client.db, resourcePath as string), id))
 }
 
-// TODO: remover todas as referencias a esse recurso de relations
-
 // deleteResource(vase, 'guilds', '2')

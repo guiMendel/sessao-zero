@@ -26,8 +26,7 @@ describe('getResourceGetter', () => {
       )
     })
 
-    // TODO: update for resourceLayersLimit
-    it.todo('passes the correct params to make full resource', async () => {
+    it('passes the correct params to make full resource', async () => {
       const mockMakeResource = vi.fn().mockReturnValue([])
 
       vi.spyOn(MakeResourceNamespace, 'makeResource').mockImplementation(
@@ -42,7 +41,12 @@ describe('getResourceGetter', () => {
 
       const cleanupManager = new CleanupManager()
 
-      const { get } = getResourceGetter(fantasyVase, 'knights', cleanupManager)
+      const resourceLayersLimit = 1
+
+      const { get } = getResourceGetter(fantasyVase, 'knights', {
+        cleanupManager,
+        resourceLayersLimit,
+      })
 
       await get(id)
 
@@ -50,6 +54,7 @@ describe('getResourceGetter', () => {
         fantasyVase,
         expect.objectContaining({ id }),
         'knights',
+        resourceLayersLimit,
         cleanupManager,
         []
       )
@@ -92,8 +97,7 @@ describe('getResourceGetter', () => {
       expect(list).not.toStrictEqual(await indexDatabaseValues('knights'))
     })
 
-    // TODO: update for resourceLayersLimit
-    it.todo('passes the correct params to make full instance', async () => {
+    it('passes the correct params to make full instance', async () => {
       const mockMakeResource = vi.fn().mockReturnValue([])
 
       vi.spyOn(MakeResourceNamespace, 'makeResource').mockImplementation(
@@ -108,11 +112,12 @@ describe('getResourceGetter', () => {
 
       const cleanupManager = new CleanupManager()
 
-      const { getList } = getResourceGetter(
-        fantasyVase,
-        'knights',
-        cleanupManager
-      )
+      const resourceLayersLimit = 1
+
+      const { getList } = getResourceGetter(fantasyVase, 'knights', {
+        cleanupManager,
+        resourceLayersLimit,
+      })
 
       await getList()
 
@@ -120,6 +125,7 @@ describe('getResourceGetter', () => {
         fantasyVase,
         { docs: [expect.objectContaining({ id })] },
         'knights',
+        resourceLayersLimit,
         cleanupManager,
         []
       )
