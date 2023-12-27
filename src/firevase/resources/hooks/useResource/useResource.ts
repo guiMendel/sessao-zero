@@ -1,4 +1,5 @@
 import { FirevaseClient } from '@/firevase'
+import { CleanupManager } from '@/firevase/CleanupManager'
 import {
   createResource,
   deleteResource,
@@ -7,7 +8,6 @@ import {
   updateResource,
 } from '@/firevase/resources/functions'
 import { PathsFrom, PropertiesFrom } from '@/firevase/types'
-import { CleanupManager } from '@/utils/classes'
 import { collection, doc } from 'firebase/firestore'
 import { onBeforeUnmount } from 'vue'
 
@@ -56,11 +56,9 @@ export const useResource = <C extends FirevaseClient, P extends PathsFrom<C>>(
   // ========================================
 
   /** Pega os getters */
-  const { get, getList } = getResourceGetter(
-    client,
-    resourcePath,
-    cleanupManager
-  )
+  const { get, getList } = getResourceGetter(client, resourcePath, {
+    cleanupManager,
+  })
 
   // ========================================
   // SYNC

@@ -1,12 +1,12 @@
-import { mockFantasyDatabase, mockCollection } from '@/tests/mock/backend'
+import { mockCollection, mockFantasyDatabase } from '@/tests/mock/backend'
 
 import { FirevaseClient } from '@/firevase'
+import { CleanupManager } from '@/firevase/CleanupManager'
 import { mockDb } from '@/tests/mock/firebase'
 import { collection, doc } from 'firebase/firestore'
-import { useResource } from '.'
-import { onBeforeUnmount } from 'vue'
 import { Mock } from 'vitest'
-import { CleanupManager } from '@/utils/classes/CleanupManager'
+import { onBeforeUnmount } from 'vue'
+import { useResource } from '.'
 import {
   createResource,
   deleteResource,
@@ -17,7 +17,7 @@ import {
 
 vi.mock('vue')
 vi.mock('../../functions')
-vi.mock('@/utils/classes/CleanupManager')
+vi.mock('@/firevase/CleanupManager')
 
 const mockClient = { db: mockDb } as FirevaseClient
 
@@ -186,11 +186,9 @@ describe('useResource', () => {
 
     expect(getResourceGetter).toHaveBeenCalledOnce()
 
-    expect(getResourceGetter).toHaveBeenCalledWith(
-      mockClient,
-      path,
-      cleanupManager
-    )
+    expect(getResourceGetter).toHaveBeenCalledWith(mockClient, path, {
+      cleanupManager,
+    })
 
     expect(get).toBe(mockGet)
     expect(getList).toBe(mockGetList)

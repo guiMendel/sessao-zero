@@ -1,7 +1,7 @@
 import { auth } from '@/api/firebase'
+import { CleanupManager } from '@/firevase/CleanupManager'
 import { syncableRef } from '@/firevase/Syncable'
 import { Uploadable, useResource } from '@/firevase/resources'
-import { CleanupManager } from '@/utils/classes'
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,

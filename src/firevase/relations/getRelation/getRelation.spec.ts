@@ -1,12 +1,12 @@
 import { mockFantasyDatabase } from '@/tests/mock/backend'
 
+import { CleanupManager } from '@/firevase/CleanupManager'
 import {
   fantasyVase,
   mockKing,
   mockKnight,
   mockLand,
 } from '@/tests/mock/fantasyVase'
-import { CleanupManager } from '@/utils/classes'
 import { getRelation } from '.'
 import * as GetResourceGetterNamespace from '../../resources/functions/getResourceGetter'
 

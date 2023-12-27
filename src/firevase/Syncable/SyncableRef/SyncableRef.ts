@@ -1,6 +1,6 @@
+import { CleanupManager } from '@/firevase/CleanupManager'
 import { WithDisposeFlag } from '@/firevase/relations'
 import { makeResource } from '@/firevase/resources/functions/makeResource'
-import { CleanupManager } from '@/utils/classes'
 import { DocumentReference, Query } from 'firebase/firestore'
 import { Ref, ref, toRaw } from 'vue'
 import { FirevaseClient } from '../..'

@@ -1,4 +1,5 @@
 import { FirevaseClient } from '@/firevase'
+import { CleanupManager } from '@/firevase/CleanupManager'
 import { syncableRef } from '@/firevase/Syncable'
 import { RelationsRefs } from '@/firevase/relations'
 import { HalfResource, Resource, Uploadable } from '@/firevase/resources'
@@ -8,9 +9,8 @@ import {
   PathsFrom,
   PropertiesFrom,
 } from '@/firevase/types'
-import { CleanupManager } from '@/utils/classes'
-import { setUpFirebaseMocks } from './firebase'
 import { sample } from '@/utils/functions'
+import { setUpFirebaseMocks } from './firebase'
 
 setUpFirebaseMocks()
 

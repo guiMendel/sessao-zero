@@ -1,4 +1,3 @@
-import { CleanupManager } from '@/utils/classes'
 import {
   DocumentReference,
   DocumentSnapshot,
@@ -6,6 +5,7 @@ import {
   QuerySnapshot,
   onSnapshot,
 } from 'firebase/firestore'
+import { CleanupManager } from '../CleanupManager'
 
 const compareTargets = (
   target1: DocumentReference | Query | undefined,

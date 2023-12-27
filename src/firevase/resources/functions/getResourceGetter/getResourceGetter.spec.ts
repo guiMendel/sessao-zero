@@ -1,7 +1,7 @@
 import { mockFantasyDatabase } from '@/tests/mock/backend'
 
+import { CleanupManager } from '@/firevase/CleanupManager'
 import { fantasyVase, mockKnight } from '@/tests/mock/fantasyVase'
-import { CleanupManager } from '@/utils/classes'
 import { where } from 'firebase/firestore'
 import { getResourceGetter } from '.'
 import * as MakeResourceNamespace from '../makeResource'

@@ -1,10 +1,10 @@
-import { Mock } from 'vitest'
-import { makeHalfResource } from '../makeHalfResource'
-import { makeResource } from '.'
 import { FirevaseClient } from '@/firevase'
-import { CleanupManager } from '@/utils/classes'
-import { DocumentSnapshot } from 'firebase/firestore'
+import { CleanupManager } from '@/firevase/CleanupManager'
 import { buildRelations } from '@/firevase/relations/buildRelations'
+import { DocumentSnapshot } from 'firebase/firestore'
+import { Mock } from 'vitest'
+import { makeResource } from '.'
+import { makeHalfResource } from '../makeHalfResource'
 
 vi.mock('../makeHalfResource')
 vi.mock('@/firevase/relations/buildRelations')

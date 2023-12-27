@@ -14,7 +14,7 @@ import {
   mockKnight,
   mockLand,
 } from '@/tests/mock/fantasyVase'
-import * as CleanupManagerNamespace from '@/utils/classes/CleanupManager'
+import * as CleanupManagerNamespace from '@/firevase/CleanupManager'
 import { toValue } from 'vue'
 import { buildRelations } from '.'
 

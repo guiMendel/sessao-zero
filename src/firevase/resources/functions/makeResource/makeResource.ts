@@ -1,6 +1,6 @@
 import { FirevaseClient } from '@/firevase'
+import { CleanupManager } from '@/firevase/CleanupManager'
 import { PathsFrom } from '@/firevase/types'
-import { CleanupManager } from '@/utils/classes'
 import { DocumentSnapshot, QuerySnapshot } from 'firebase/firestore'
 import { buildRelations } from '../../../relations/buildRelations'
 import { makeHalfResource } from '../../functions/makeHalfResource'

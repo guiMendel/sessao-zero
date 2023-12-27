@@ -1,9 +1,9 @@
 import { mockFantasyDatabase } from '@/tests/mock/backend'
 
 import { db } from '@/api/firebase'
+import { CleanupManager } from '@/firevase/CleanupManager'
 import * as SyncableRefNamespace from '@/firevase/Syncable'
 import { FantasyVase, fantasyVase, mockKnight } from '@/tests/mock/fantasyVase'
-import { CleanupManager } from '@/utils/classes'
 import {
   DocumentReference,
   Query,

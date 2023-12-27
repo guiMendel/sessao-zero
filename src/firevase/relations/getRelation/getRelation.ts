@@ -1,7 +1,7 @@
 import { FirevaseClient } from '@/firevase'
+import { CleanupManager } from '@/firevase/CleanupManager'
 import { HalfResource, Resource, getResourceGetter } from '@/firevase/resources'
 import { PathsFrom, RelationsFrom } from '@/firevase/types'
-import { CleanupManager } from '@/utils/classes'
 import {
   collection,
   documentId,

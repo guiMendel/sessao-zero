@@ -1,5 +1,6 @@
 import { createDatabase, mockFantasyDatabase } from '@/tests/mock/backend'
 
+import { CleanupManager } from '@/firevase/CleanupManager'
 import * as BuildRelationNamespace from '@/firevase/relations/buildRelations'
 import { Resource } from '@/firevase/resources'
 import {
@@ -8,7 +9,6 @@ import {
   mockKing,
   mockKnight,
 } from '@/tests/mock/fantasyVase'
-import { CleanupManager } from '@/utils/classes'
 import { DocumentReference, collection, doc, query } from 'firebase/firestore'
 import { toRaw, toValue } from 'vue'
 import * as SyncableRefNamespace from '.'

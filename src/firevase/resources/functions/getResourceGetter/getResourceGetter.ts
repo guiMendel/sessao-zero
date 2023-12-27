@@ -1,6 +1,6 @@
 import { FirevaseClient } from '@/firevase'
+import { CleanupManager } from '@/firevase/CleanupManager'
 import { PathsFrom } from '@/firevase/types'
-import { CleanupManager } from '@/utils/classes'
 import {
   QueryFieldFilterConstraint,
   collection,

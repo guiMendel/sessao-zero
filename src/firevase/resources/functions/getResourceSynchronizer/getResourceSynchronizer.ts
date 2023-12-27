@@ -1,7 +1,7 @@
 import { FirevaseClient } from '@/firevase'
+import { CleanupManager } from '@/firevase/CleanupManager'
 import { SyncableRef, syncableRef } from '@/firevase/Syncable'
 import { PathsFrom } from '@/firevase/types'
-import { CleanupManager } from '@/utils/classes'
 import {
   DocumentReference,
   Query,
