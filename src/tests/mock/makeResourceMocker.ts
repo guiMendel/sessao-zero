@@ -16,7 +16,6 @@ import {
 } from '@/firevase/types'
 import { sample } from '@/utils/functions'
 import { setUpFirebaseMocks } from './firebase'
-import { Vase } from '@/api'
 import { mocksTable } from './mocksTable'
 
 setUpFirebaseMocks()
