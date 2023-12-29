@@ -6,7 +6,7 @@ describe('isMember', () => {
     expect(
       isMember(
         mockPlayer('resource', { id: '1' }),
-        mockGuild('resource', { ownerUid: '1' })
+        mockGuild('unrefed-resource', { ownerUid: '1' })
       )
     ).toBe(true)
   })
@@ -15,7 +15,7 @@ describe('isMember', () => {
     expect(
       isMember(
         mockPlayer('resource', { id: '1' }),
-        mockGuild('resource', { players: [{ id: '1' }] as any })
+        mockGuild('unrefed-resource', { players: [{ id: '1' }] as any })
       )
     ).toBe(true)
   })
@@ -24,7 +24,7 @@ describe('isMember', () => {
     expect(
       isMember(
         mockPlayer('resource', { id: '1' }),
-        mockGuild('resource', { ownerUid: '2' })
+        mockGuild('unrefed-resource', { ownerUid: '2' })
       )
     ).toBe(false)
   })

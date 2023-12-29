@@ -1,8 +1,13 @@
 import { FirevaseClient } from '@/firevase'
 import { CleanupManager } from '@/firevase/CleanupManager'
 import { syncableRef } from '@/firevase/Syncable'
-import { RelationsRefs } from '@/firevase/relations'
-import { HalfResource, Resource, Uploadable } from '@/firevase/resources'
+import { RelationDefinitionFrom, RelationsRefs } from '@/firevase/relations'
+import {
+  HalfResource,
+  Resource,
+  UnrefedResource,
+  Uploadable,
+} from '@/firevase/resources'
 import {
   ConstrainRelationSettings,
   ManyToManyFrom,
@@ -11,6 +16,8 @@ import {
 } from '@/firevase/types'
 import { sample } from '@/utils/functions'
 import { setUpFirebaseMocks } from './firebase'
+import { Vase } from '@/api'
+import { mocksTable } from './mocksTable'
 
 setUpFirebaseMocks()
 
@@ -21,6 +28,13 @@ type DefaultProperties<C extends FirevaseClient, P extends PathsFrom<C>> = {
     | Array<PropertiesFrom<C>[P][property]>
     | (() => PropertiesFrom<C>[P][property])
 }
+
+export type MockLevel =
+  | 'properties'
+  | 'half-resource'
+  | 'resource'
+  | 'uploadable'
+  | 'unrefed-resource'
 
 export const makeResourceMocker = <
   C extends FirevaseClient,
@@ -54,10 +68,18 @@ export const makeResourceMocker = <
     overrides?: Partial<PropertiesFrom<C>[P]>
   ): PropertiesFrom<C>[P]
 
+  /** Mocks in a properties level */
+  function mockResource(
+    level: 'unrefed-resource',
+    overrides?: Partial<UnrefedResource<C, P>>
+  ): UnrefedResource<C, P>
+
   // Implementation
   function mockResource(
-    level?: 'properties' | 'half-resource' | 'resource' | 'uploadable',
-    overrides?: Partial<Resource<C, P> | Uploadable<C, P>>
+    level?: MockLevel,
+    overrides?: Partial<
+      Resource<C, P> | Uploadable<C, P> | UnrefedResource<C, P>
+    >
   ):
     | Resource<C, P>
     | HalfResource<C, P>
@@ -99,7 +121,9 @@ export const makeResourceMocker = <
 
     if (level === 'half-resource') return { ...halfResource, ...overrides }
 
-    const relations =
+    const makeRelations = <T>(
+      relationBuilder: (definition: RelationDefinitionFrom<C, P, any>) => T
+    ) =>
       client.relationSettings?.[path] == undefined
         ? ({} as RelationsRefs<C, P>)
         : Object.entries(
@@ -111,18 +135,37 @@ export const makeResourceMocker = <
             (relations, [relation, definition]) =>
               ({
                 ...relations,
-                [relation]: syncableRef<C, P, any>(
-                  client,
-                  path,
-                  // @ts-ignore
-                  definition.type === 'has-one'
-                    ? 'empty-document'
-                    : 'empty-query',
-                  new CleanupManager()
-                ),
+                [relation]: relationBuilder(definition as any),
               } as RelationsRefs<C, P>),
             {} as RelationsRefs<C, P>
           )
+
+    if (level === 'unrefed-resource') {
+      const relations = makeRelations((definition) => {
+        const relation =
+          // @ts-ignore
+          mocksTable[definition.targetResourcePath as keyof typeof mocksTable](
+            'half-resource'
+          )
+
+        return definition.type === 'has-one' ? relation : [relation]
+      })
+
+      return {
+        ...halfResource,
+        ...relations,
+        ...overrides,
+      }
+    }
+
+    const relations = makeRelations((definition) =>
+      syncableRef<C, P, any>(
+        client,
+        definition.targetResourcePath,
+        definition.type === 'has-one' ? 'empty-document' : 'empty-query',
+        new CleanupManager()
+      )
+    )
 
     return {
       ...halfResource,
