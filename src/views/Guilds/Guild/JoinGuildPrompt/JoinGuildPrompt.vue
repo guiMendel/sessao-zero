@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { isMember } from '@/api/resourcePaths/guilds'
-import { useCurrentPlayer } from '@/api/resourcePaths/players'
-import { UnrefedResource } from '@/api/resources'
+import { Vase } from '@/api'
+import { isMember } from '@/api/guilds'
+import { useCurrentPlayer } from '@/api/players'
 import { Button, Typography } from '@/components'
+import { UnrefedResource } from '@/firevase/resources'
 import { useInput } from '@/stores'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 
 const props = defineProps<{
-  guild: UnrefedResource<'guilds'>
+  guild: UnrefedResource<Vase, 'guilds'>
 }>()
 
 const { player } = storeToRefs(useCurrentPlayer())

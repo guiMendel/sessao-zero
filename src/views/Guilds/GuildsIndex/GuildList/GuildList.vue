@@ -1,24 +1,28 @@
 <script setup lang="ts">
-import { useGuild } from '@/api/resourcePaths/guilds'
-import { useCurrentPlayer } from '@/api/resourcePaths/players'
-import { Resource } from '@/api/resources'
+import { Vase } from '@/api'
+import { useGuild } from '@/api/guilds'
+import { useCurrentPlayer } from '@/api/players'
 import { LoadingSpinner, Typography } from '@/components'
+import { HalfResource, Resource } from '@/firevase/resources'
 import { useInput } from '@/stores'
 import { storeToRefs } from 'pinia'
 import { toValue } from 'vue'
 import { useRouter } from 'vue-router'
 
-defineProps<{ guilds: Resource<'guilds'>[]; hideNewButton?: boolean }>()
+defineProps<{
+  guilds: Resource<Vase, 'guilds'>[]
+  hideNewButton?: boolean
+}>()
 
 const { player } = storeToRefs(useCurrentPlayer())
 const router = useRouter()
 const { create } = useGuild()
 const { getStringInput } = useInput()
 
-const openGuildPage = (guild: Resource<'guilds'>) =>
+const openGuildPage = (guild: HalfResource<Vase, 'guilds'>) =>
   router.push({ name: 'adventures', params: { guildId: guild.id } })
 
-const getOwnerLabel = (owner: Resource<'players'>) =>
+const getOwnerLabel = (owner: HalfResource<Vase, 'players'>) =>
   player.value?.id === toValue(owner).id ? 'Você' : toValue(owner).name
 
 const newGuild = async () => {

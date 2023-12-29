@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCurrentPlayer, usePlayerFields } from '@/api/resourcePaths/players'
+import { useCurrentPlayer, usePlayerFields } from '@/api/players'
 import { Button, InputField, Typography } from '@/components'
 import { useNotification } from '@/stores'
 import { localStorageKeys } from '@/utils/config'

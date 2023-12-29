@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { useCurrentPlayer } from '@/api/resourcePaths/players'
-import { UnrefedResource } from '@/api/resources'
+import { Vase } from '@/api'
+import { useCurrentPlayer } from '@/api/players'
 import { Button, Divisor, Drawer, Typography } from '@/components'
 import { IconButton } from '@/components/IconButton'
+import { HalfResource } from '@/firevase/resources'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 defineProps<{
-  guild: UnrefedResource<'guilds'>
+  guild: HalfResource<Vase, 'guilds'>
 }>()
 
 const router = useRouter()

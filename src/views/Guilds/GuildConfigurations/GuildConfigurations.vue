@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCurrentGuild } from '@/api/resourcePaths/guilds'
+import { useCurrentGuild } from '@/api/guilds'
 import {
   Button,
   InputField,

@@ -8,7 +8,7 @@ export const usePlayer = () => {
   // Filtra metods de escrita e delecao
   return {
     resourceCollection: api.resourceCollection,
-    getDoc: api.getDoc,
+    docWithId: api.docWithId,
     get: api.get,
     getList: api.getList,
     sync: api.sync,

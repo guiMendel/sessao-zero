@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { useCurrentGuild } from '@/api/resourcePaths/guilds'
-import { useCurrentPlayer } from '@/api/resourcePaths/players'
+import { useCurrentGuild } from '@/api/guilds'
+import { useCurrentPlayer } from '@/api/players'
 import { BackButton, LoadingSpinner } from '@/components'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'

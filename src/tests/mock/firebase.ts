@@ -3,10 +3,8 @@ import { FirebaseApp, FirebaseOptions, initializeApp } from 'firebase/app'
 import { Auth, getAuth } from 'firebase/auth'
 import {
   DocumentData,
-  DocumentReference,
   DocumentSnapshot,
   Firestore,
-  QueryDocumentSnapshot,
   QuerySnapshot,
   getFirestore,
 } from 'firebase/firestore'

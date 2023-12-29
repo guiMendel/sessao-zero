@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { UnrefedResource } from '@/api/resources'
+import { Vase } from '@/api'
 import { Typography } from '@/components'
+import { UnrefedResource } from '@/firevase/resources'
 import { useRouter } from 'vue-router'
 import { ProfilePicture } from '..'
 
 const props = defineProps<{
-  player: UnrefedResource<'players'>
+  player: UnrefedResource<Vase, 'players'>
 }>()
 
 const router = useRouter()

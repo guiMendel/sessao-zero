@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { useGuild } from '@/api/resourcePaths/guilds'
-import { useCurrentPlayer } from '@/api/resourcePaths/players'
+import { useGuild } from '@/api/guilds'
+import { useCurrentPlayer } from '@/api/players'
 import { Typography } from '@/components'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
@@ -81,5 +81,3 @@ const otherAvailableGuilds = computed(() =>
   }
 }
 </style>
-@/utils/types
-@/api/guilds@/api/players

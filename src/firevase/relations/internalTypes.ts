@@ -1,4 +1,4 @@
-import { HalfResourceRelations, Relations } from '.'
+import { Relations } from '.'
 import { FirevaseClient } from '../firevase'
 import { PathsFrom, RelationsFrom } from '../types'
 

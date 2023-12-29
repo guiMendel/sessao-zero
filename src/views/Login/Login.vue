@@ -1,15 +1,14 @@
 <script setup lang="ts">
+import {
+  checkPlayerExists,
+  useCurrentPlayer,
+  usePlayerFields,
+} from '@/api/players'
 import { BackButton, Button, InputField, Logo, Typography } from '@/components'
 import { useNotification } from '@/stores'
 import { localStorageKeys } from '@/utils/config'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-
-import {
-  checkPlayerExists,
-  useCurrentPlayer,
-  usePlayerFields,
-} from '@/api/resourcePaths/players'
 import illustration from '../../assets/illustration.png'
 
 // Campos de login

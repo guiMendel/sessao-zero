@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Player } from '@/api/resourcePaths/players'
+import { Player } from '@/api/players'
 import { computed } from 'vue'
 
 const props = defineProps<{ player: Player }>()
@@ -44,5 +44,4 @@ const initials = computed(() =>
   aspect-ratio: 1/1;
 }
 </style>
-@/utils/types
-@/api/players
+@/utils/types @/api/players

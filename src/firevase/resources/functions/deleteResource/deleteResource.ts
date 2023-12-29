@@ -1,5 +1,6 @@
 import { FirevaseClient } from '@/firevase'
-import { removeRelation } from '@/firevase/relations'
+import { forceRemoveRelation } from '@/firevase/relations'
+import { NonHasOneRelations } from '@/firevase/relations/internalTypes'
 import {
   ConstrainRelationSettings,
   ManyToManyFrom,
@@ -8,7 +9,6 @@ import {
 } from '@/firevase/types'
 import { collection, deleteDoc, doc } from 'firebase/firestore'
 import { HalfResource } from '../..'
-import { NonHasOneRelations } from '@/firevase/relations/internalTypes'
 
 /** Destroi um recurso para sempre */
 export const deleteResource = async <
@@ -32,12 +32,11 @@ export const deleteResource = async <
 
         // Nothing to do about has-one
         if (definition.type !== 'has-one')
-          return removeRelation(
+          return forceRemoveRelation(
             client,
             source,
             relation as NonHasOneRelations<C, P>,
-            'all' as any,
-            { force: true }
+            'all'
           )
       })
     )

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useCurrentPlayer } from '@/api/resourcePaths/players'
+import { useCurrentPlayer } from '@/api/players'
 import {
   Button,
   Divisor,
@@ -87,4 +87,3 @@ const goToConfigurations = () => {
   }
 }
 </style>
-@/api/players
