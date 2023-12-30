@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Vase } from '@/api'
+import { Vase, vase } from '@/api'
 import { isMember } from '@/api/guilds'
 import { useCurrentPlayer } from '@/api/players'
 import { Button, Typography } from '@/components'
+import { addRelation } from '@/firevase/relations'
 import { UnrefedResource } from '@/firevase/resources'
 import { useInput } from '@/stores'
 import { storeToRefs } from 'pinia'
@@ -24,10 +25,10 @@ const join = () =>
     messageHtml: `Tem certeza de que deseja se tornar membro da guilda <strong>${props.guild.name}</ strong>?`,
     trueButton: { buttonProps: { variant: 'colored' } },
   })
-    .then((decision) => {
+    .then(async (decision) => {
       if (!decision) return
 
-      console.log('JOINED')
+      return addRelation(vase, player.value, 'guilds', [props.guild])
     })
     .catch(() => {})
 </script>

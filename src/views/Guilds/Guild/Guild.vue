@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useCurrentGuild } from '@/api/guilds'
+import { isMember, useCurrentGuild } from '@/api/guilds'
 import { useCurrentPlayer } from '@/api/players'
 import { BackButton, LoadingSpinner } from '@/components'
 import { storeToRefs } from 'pinia'
@@ -11,11 +11,7 @@ const { guild } = storeToRefs(useCurrentGuild())
 const { player } = storeToRefs(useCurrentPlayer())
 
 /** Quando o jogador nao eh membro nem dono da guilda */
-const isVisitor = computed(
-  () =>
-    guild.value.ownerUid !== player.value.id &&
-    guild.value.players.every((member) => member.id !== player.value.id)
-)
+const isVisitor = computed(() => !isMember(player.value, guild.value))
 </script>
 
 <template>

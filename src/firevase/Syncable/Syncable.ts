@@ -68,9 +68,13 @@ export class Syncable<T extends DocumentReference | Query> {
   triggerSync = () => {
     for (const listener of this.beforeSyncListeners) listener()
 
-    if (this.state === 'synced' || this._target == undefined) return
+    if (this.state === 'synced') return
 
+    // Even when empty, we should set to synced
+    // This way, when we do get a target later on, we will know to trigger the sync
     this.state = 'synced'
+
+    if (this._target == undefined) return
 
     const cleanupListener = onSnapshot(
       this._target as any,
