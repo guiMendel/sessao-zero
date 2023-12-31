@@ -14,6 +14,7 @@ import {
   where,
 } from 'firebase/firestore'
 import { RelationDefinitionFrom, RelationsRefs } from '..'
+import { toRaw } from 'vue'
 
 /** Adiciona a um objeto uma flag que indica se ele nao deve ser descartado */
 export type WithDisposeFlag<T> = T & {
@@ -60,7 +61,7 @@ export const buildRelations = <
     // Marca para nao descartar esses valores
     previousValues[source.id].dontDispose = true
 
-    return extractRelations(client, previousValues[source.id])
+    return extractRelations(client, toRaw(previousValues[source.id]))
   }
 
   return createRelations(

@@ -112,8 +112,9 @@ export const syncableRef = <
 
         // Need to use vue's toRaw due to their ref.value unpacking antics
         for (const relation in relations) {
-          if (relation in previousValue)
+          if (relation in previousValue) {
             toRaw(previousValue)[relation].sync.dispose()
+          }
         }
       }
     }
@@ -131,7 +132,9 @@ export const syncableRef = <
 
   return new Proxy(syncedRef, {
     get: (currentState, property) => {
-      if (property === 'value') currentState.sync.triggerSync()
+      if (property === 'value') {
+        currentState.sync.triggerSync()
+      }
 
       return currentState[property as keyof typeof currentState]
     },

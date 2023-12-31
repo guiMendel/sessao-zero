@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { useGuild } from '@/api/guilds'
+import { isMember, useGuild } from '@/api/guilds'
 import { useCurrentPlayer } from '@/api/players'
 import { Typography } from '@/components'
 import { storeToRefs } from 'pinia'
-import { computed } from 'vue'
+import { computed, toValue, watch } from 'vue'
 import sadDragonIllustration from '../../../assets/sad-dragon.png'
 import { GuildList } from './GuildList'
 
@@ -13,22 +13,34 @@ const { player } = storeToRefs(useCurrentPlayer())
 
 const guilds = syncList()
 
-const otherAvailableGuilds = computed(() =>
-  guilds.value.filter(({ id }) =>
-    player.value?.ownedGuilds.every((ownedGuild) => ownedGuild.id != id)
+const joinedGuilds = computed(() =>
+  guilds.value.filter((guild) =>
+    toValue(guild.players).some((member) => member.id === player.value.id)
   )
+)
+
+const otherAvailableGuilds = computed(() =>
+  guilds.value.filter((guild) => !isMember(player.value, guild))
 )
 </script>
 
 <template>
   <div class="guilds-index">
-    <!-- Guildas que ja faz parte -->
+    <!-- Guildas que eh dono -->
     <template v-if="player?.ownedGuilds.length > 0">
-      <Typography variant="subtitle">Suas guildas</Typography>
+      <Typography variant="subtitle">Guildas administradas</Typography>
 
       <GuildList :guilds="player.ownedGuilds" />
     </template>
 
+    <!-- Guildas que ja faz parte -->
+    <template v-if="joinedGuilds.length > 0">
+      <Typography variant="subtitle">Suas guildas</Typography>
+
+      <GuildList :guilds="joinedGuilds" />
+    </template>
+
+    <!-- TODO: mostrar um botao para trocar entre guildas para entrar e guildas que ja eh membro -->
     <!-- Guildas disponiveis para entrar -->
     <template v-if="otherAvailableGuilds.length > 0">
       <Typography variant="subtitle">Guildas disponíveis</Typography>
