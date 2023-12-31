@@ -94,6 +94,24 @@ describe('Syncable', () => {
         expect(syncable.syncState).toBe(state)
       }
     )
+
+    it('triggers update listeners', () => {
+      const syncable = new Syncable(docTarget, vi.fn())
+
+      const updateCallback = vi.fn()
+
+      syncable.onUpdateTarget(updateCallback)
+
+      expect(updateCallback).not.toHaveBeenCalled()
+
+      syncable.updateTarget(undefined)
+
+      expect(updateCallback).toHaveBeenCalledOnce()
+
+      syncable.updateTarget(undefined)
+
+      expect(updateCallback).toHaveBeenCalledTimes(2)
+    })
   })
 
   describe('syncing', () => {

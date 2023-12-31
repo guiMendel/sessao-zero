@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { Vase } from '@/api'
+import { Vase, vase } from '@/api'
 import { useCurrentPlayer } from '@/api/players'
 import { Button, Divisor, Drawer, Typography } from '@/components'
 import { IconButton } from '@/components/IconButton'
+import { removeRelation } from '@/firevase/relations'
 import { HalfResource } from '@/firevase/resources'
+import { useInput } from '@/stores'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-defineProps<{
+const props = defineProps<{
   guild: HalfResource<Vase, 'guilds'>
 }>()
 
@@ -24,6 +26,24 @@ const configureGuild = () => {
 }
 
 const { player } = storeToRefs(useCurrentPlayer())
+
+const { getBooleanInput } = useInput()
+
+const leaveGuild = () =>
+  getBooleanInput({
+    cancellable: true,
+    messageHtml: `Tem certeza de que deseja abandonar a guilda <b>${props.guild.name}</b>?`,
+    trueButton: { buttonProps: { variant: 'colored' }, label: 'abandonar' },
+    falseButton: { label: 'cancelar' },
+  })
+    .then(async (confirm) => {
+      if (!confirm || !player.value) return
+
+      await removeRelation(vase, player.value, 'guilds', [props.guild])
+
+      router.push({ name: 'home' })
+    })
+    .catch(() => {})
 </script>
 
 <template>
@@ -31,7 +51,11 @@ const { player } = storeToRefs(useCurrentPlayer())
     <IconButton color="main-light" icon="bars" />
   </div>
 
-  <Drawer v-if="guild != null" v-model="isOpen" class="guild-panel">
+  <Drawer
+    v-if="guild != null && player != null"
+    v-model="isOpen"
+    class="guild-panel"
+  >
     <div class="heading">
       <Typography>painel da guilda</Typography>
       <Typography variant="title">{{ guild.name }}</Typography>
@@ -60,7 +84,7 @@ const { player } = storeToRefs(useCurrentPlayer())
       >
 
       <!-- Deixar guilda -->
-      <Button
+      <Button @click="leaveGuild"
         ><font-awesome-icon :icon="['fas', 'person-running']" /> deixar
         guilda</Button
       >

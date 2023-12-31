@@ -100,7 +100,7 @@ onBeforeUnmount(() => window.removeEventListener('keyup', rejectOnEscape))
 @import '@/styles/variables.scss';
 
 #app .backdrop {
-  z-index: 30;
+  z-index: 130;
 
   position: fixed;
   top: 0;

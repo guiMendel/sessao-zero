@@ -21,7 +21,7 @@ export type SyncableRef<
   C extends FirevaseClient,
   P extends PathsFrom<C>,
   M extends Query | DocumentReference
-> = Ref<M extends Query ? Resource<C, P>[] : Resource<C, P>> & {
+> = Ref<M extends Query ? Resource<C, P>[] : Resource<C, P> | undefined> & {
   sync: Syncable<M>
 }
 
@@ -129,6 +129,11 @@ export const syncableRef = <
 
   // Associa o cleanup manager
   parentCleanupManager.link('propagate-to', syncedRef.sync.getCleanupManager())
+
+  // Quando limpar o target do sync, limpa o valor do ref
+  syncedRef.sync.onUpdateTarget((newTarget) => {
+    if (newTarget == undefined) syncedRef.value = emptyValue as any
+  })
 
   return new Proxy(syncedRef, {
     get: (currentState, property) => {

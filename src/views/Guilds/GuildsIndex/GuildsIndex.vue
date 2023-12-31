@@ -3,7 +3,7 @@ import { isMember, useGuild } from '@/api/guilds'
 import { useCurrentPlayer } from '@/api/players'
 import { Typography } from '@/components'
 import { storeToRefs } from 'pinia'
-import { computed, toValue, watch } from 'vue'
+import { computed, toValue } from 'vue'
 import sadDragonIllustration from '../../../assets/sad-dragon.png'
 import { GuildList } from './GuildList'
 
@@ -14,9 +14,11 @@ const { player } = storeToRefs(useCurrentPlayer())
 const guilds = syncList()
 
 const joinedGuilds = computed(() =>
-  guilds.value.filter((guild) =>
-    toValue(guild.players).some((member) => member.id === player.value.id)
-  )
+  player.value == undefined
+    ? []
+    : guilds.value.filter((guild) =>
+        toValue(guild.players).some((member) => member.id === player.value!.id)
+      )
 )
 
 const otherAvailableGuilds = computed(() =>
@@ -25,9 +27,9 @@ const otherAvailableGuilds = computed(() =>
 </script>
 
 <template>
-  <div class="guilds-index">
+  <div v-if="player" class="guilds-index">
     <!-- Guildas que eh dono -->
-    <template v-if="player?.ownedGuilds.length > 0">
+    <template v-if="player.ownedGuilds.length > 0">
       <Typography variant="subtitle">Guildas administradas</Typography>
 
       <GuildList :guilds="player.ownedGuilds" />

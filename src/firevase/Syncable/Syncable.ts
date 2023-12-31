@@ -23,6 +23,7 @@ export class Syncable<T extends DocumentReference | Query> {
   private disposeListeners: Array<() => void> = []
   private resetListeners: Array<() => void> = []
   private beforeSyncListeners: Array<() => void> = []
+  private updateTargetListeners: Array<(target: T | undefined) => void> = []
 
   /** Gerencia o cleanup dos snapshot listeners */
   private cleanup: CleanupManager = new CleanupManager()
@@ -107,13 +108,15 @@ export class Syncable<T extends DocumentReference | Query> {
       this.triggerSync()
       return
     }
+
+    for (const listener of this.updateTargetListeners) listener(newTarget)
   }
 
   /** Reinicia o ref, resetando o alvo para undefined e o estado para 'empty' */
   reset = () => {
     this.dispose()
 
-    this._target = undefined
+    this.updateTarget(undefined)
 
     this.state = 'ready-to-sync'
 
@@ -126,6 +129,10 @@ export class Syncable<T extends DocumentReference | Query> {
 
   onReset = (callback: () => void) => {
     this.resetListeners.push(callback)
+  }
+
+  onUpdateTarget = (callback: (target: T | undefined) => void) => {
+    this.updateTargetListeners.push(callback)
   }
 
   onBeforeSyncTrigger = (callback: () => void) => {
