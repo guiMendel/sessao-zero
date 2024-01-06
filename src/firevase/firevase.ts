@@ -1,6 +1,8 @@
 import { FirebaseApp } from 'firebase/app'
 import { Auth, getAuth } from 'firebase/auth'
 import { Firestore, getFirestore } from 'firebase/firestore'
+import { firevaseEvents } from './events'
+import { deleteResourceRelations } from './events/listeners/deleteResourceRelations'
 import { makeHasMany, makeHasOne } from './relations'
 import {
   ConstrainManyToManySettings,
@@ -98,3 +100,6 @@ export const fillFirevase = <
     }
   },
 })
+
+// Set up listeners
+firevaseEvents.on('resourceRemoved', deleteResourceRelations)
