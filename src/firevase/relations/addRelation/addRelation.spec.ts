@@ -1,4 +1,5 @@
 import { mockFantasyDatabase } from '@/tests/mock/backend'
+
 import { addRelation } from '.'
 import {
   fantasyVase,

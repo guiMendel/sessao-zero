@@ -16,7 +16,7 @@ import {
 } from '@/firevase/types'
 import { sample } from '@/utils/functions'
 import { setUpFirebaseMocks } from './firebase'
-import { mocksTable } from './mocksTable'
+import type { MocksTable } from './mocksTable'
 
 setUpFirebaseMocks()
 
@@ -70,7 +70,8 @@ export const makeResourceMocker = <
   /** Mocks in a properties level */
   function mockResource(
     level: 'unrefed-resource',
-    overrides?: Partial<UnrefedResource<C, P>>
+    overrides: Partial<UnrefedResource<C, P>>,
+    mocksTable: MocksTable
   ): UnrefedResource<C, P>
 
   // Implementation
@@ -78,7 +79,8 @@ export const makeResourceMocker = <
     level?: MockLevel,
     overrides?: Partial<
       Resource<C, P> | Uploadable<C, P> | UnrefedResource<C, P>
-    >
+    >,
+    mocksTable?: MocksTable
   ):
     | Resource<C, P>
     | HalfResource<C, P>

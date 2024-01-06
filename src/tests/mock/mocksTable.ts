@@ -19,3 +19,5 @@ export const mocksTable = {
   keyof FantasyVase['_tsAnchor'] | keyof Vase['_tsAnchor'],
   (level?: any, overrides?: any) => any
 >
+
+export type MocksTable = typeof mocksTable

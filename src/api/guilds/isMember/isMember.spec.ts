@@ -1,3 +1,4 @@
+import { mocksTable } from '@/tests/mock/mocksTable'
 import { mockGuild, mockPlayer } from '@/tests/mock/vase'
 import { isMember } from '.'
 
@@ -6,7 +7,7 @@ describe('isMember', () => {
     expect(
       isMember(
         mockPlayer('resource', { id: '1' }),
-        mockGuild('unrefed-resource', { ownerUid: '1' })
+        mockGuild('unrefed-resource', { ownerUid: '1' }, mocksTable)
       )
     ).toBe(true)
   })
@@ -15,7 +16,11 @@ describe('isMember', () => {
     expect(
       isMember(
         mockPlayer('resource', { id: '1' }),
-        mockGuild('unrefed-resource', { players: [{ id: '1' }] as any })
+        mockGuild(
+          'unrefed-resource',
+          { players: [{ id: '1' }] as any },
+          mocksTable
+        )
       )
     ).toBe(true)
   })
@@ -24,7 +29,7 @@ describe('isMember', () => {
     expect(
       isMember(
         mockPlayer('resource', { id: '1' }),
-        mockGuild('unrefed-resource', { ownerUid: '2' })
+        mockGuild('unrefed-resource', { ownerUid: '2' }, mocksTable)
       )
     ).toBe(false)
   })
