@@ -27,6 +27,7 @@ describe('SyncableRef', () => {
       const MockSyncable = vi.fn().mockReturnValue({
         onReset: vi.fn(),
         onDispose: vi.fn(),
+        onUpdateTarget: vi.fn(),
         onBeforeSyncTrigger: vi.fn(),
         getCleanupManager: () => new CleanupManager(),
       })
@@ -113,6 +114,8 @@ describe('SyncableRef', () => {
         new CleanupManager()
       )
 
+      if (knight.value == undefined) throw new Error('Database error')
+
       const onChildDispose = vi.fn()
 
       const kingCleanup = toRaw(knight.value).king.sync.getCleanupManager()
@@ -176,6 +179,7 @@ describe('SyncableRef', () => {
       const MockSyncable = vi.fn().mockReturnValue({
         onReset: vi.fn(),
         onDispose: vi.fn(),
+        onUpdateTarget: vi.fn(),
         onBeforeSyncTrigger: vi.fn(),
         getCleanupManager: () => new CleanupManager(),
       })
@@ -293,6 +297,8 @@ describe('SyncableRef', () => {
 
         expect(mockSyncableRef).not.toHaveBeenCalled()
         expect(mockBuildRelations).not.toHaveBeenCalled()
+
+        if (knight.value == undefined) throw new Error('Database error')
 
         expect(toValue(knight.value.king)).toBeDefined()
 
@@ -476,6 +482,8 @@ describe('SyncableRef', () => {
         { resourceLayersLimit: layers }
       )
 
+      if (knight.value == undefined) throw new Error('Database error')
+
       const check = (
         value: Resource<FantasyVase, 'kings' | 'knights'>,
         remainingLayers: number
@@ -501,9 +509,11 @@ describe('SyncableRef', () => {
           return
         }
 
-        expect(toValue(knight.king)).toBeDefined()
+        const king = toValue(knight.king)
 
-        check(toValue(knight.king), remainingLayers - 1)
+        if (king == undefined) throw new Error('Database error')
+
+        check(king, remainingLayers - 1)
       }
 
       check(knight.value, layers)

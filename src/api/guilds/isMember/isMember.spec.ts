@@ -28,7 +28,7 @@ describe('isMember', () => {
   it('should be false if player has neither joined nor is the owner', () => {
     expect(
       isMember(
-        mockPlayer('resource', { id: '1' }),
+        mockPlayer('half-resource', { id: '10' }),
         mockGuild('unrefed-resource', { ownerUid: '2' }, mocksTable)
       )
     ).toBe(false)

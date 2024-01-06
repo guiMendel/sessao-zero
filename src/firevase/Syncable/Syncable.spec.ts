@@ -104,11 +104,11 @@ describe('Syncable', () => {
 
       expect(updateCallback).not.toHaveBeenCalled()
 
-      syncable.updateTarget(undefined)
+      syncable.updateTarget('bob' as any)
 
       expect(updateCallback).toHaveBeenCalledOnce()
 
-      syncable.updateTarget(undefined)
+      syncable.updateTarget('lisa' as any)
 
       expect(updateCallback).toHaveBeenCalledTimes(2)
     })

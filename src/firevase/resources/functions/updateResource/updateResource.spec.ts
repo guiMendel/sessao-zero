@@ -4,18 +4,13 @@ import {
   mockFantasyDatabase,
 } from '@/tests/mock/backend'
 
-// import { db } from '@/api/firebase'
-// import { collection, updateDoc } from 'firebase/firestore'
-// import { updateResource } from '.'
-// import { Knight, fantasyVase, mockKnight } from '@/tests/mock/fantasyVase'
+import { db } from '@/api/firebase'
+import { collection, updateDoc } from 'firebase/firestore'
+import { updateResource } from '.'
+import { Knight, fantasyVase, mockKnight } from '@/tests/mock/fantasyVase'
 
 describe('updateResource', () => {
   beforeEach(applyDateMock)
-
-  
-  
-
-
 
   it('should not upload password, createdAt or id, and correctly update the modifiedAt property', async () => {
     mockFantasyDatabase({})

@@ -101,13 +101,9 @@ export class Syncable<T extends DocumentReference | Query> {
     // Descarta somente o cleanup manager interno
     this.cleanup.dispose()
 
-    if (previousState === 'ready-to-sync') {
-      this.state = 'ready-to-sync'
-      return
-    } else if (previousState === 'synced' && newTarget != undefined) {
+    if (previousState === 'ready-to-sync') this.state = 'ready-to-sync'
+    else if (previousState === 'synced' && newTarget != undefined)
       this.triggerSync()
-      return
-    }
 
     for (const listener of this.updateTargetListeners) listener(newTarget)
   }
