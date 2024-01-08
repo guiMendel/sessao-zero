@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { isMember, useGuild } from '@/api/guilds'
+import { useGuild } from '@/api/guilds'
 import { useCurrentPlayer } from '@/api/players'
-import { Typography } from '@/components'
+import { Button, Typography } from '@/components'
 import { storeToRefs } from 'pinia'
 import { computed, toValue } from 'vue'
-import sadDragonIllustration from '../../../assets/sad-dragon.png'
+import { useRouter } from 'vue-router'
 import { GuildList } from './GuildList'
 
 const { syncList } = useGuild()
@@ -21,16 +21,20 @@ const joinedGuilds = computed(() =>
       )
 )
 
-const otherAvailableGuilds = computed(() =>
-  guilds.value.filter((guild) => !isMember(player.value, guild))
-)
+const router = useRouter()
+
+const addNewGuild = () => {
+  router.push({
+    name: 'add-guild',
+  })
+}
 </script>
 
 <template>
   <div v-if="player" class="guilds-index">
     <!-- Guildas que eh dono -->
     <template v-if="player.ownedGuilds.length > 0">
-      <Typography variant="subtitle">Guildas administradas</Typography>
+      <!-- <Typography variant="subtitle">Mestre</Typography> -->
 
       <GuildList :guilds="player.ownedGuilds" />
     </template>
@@ -42,27 +46,9 @@ const otherAvailableGuilds = computed(() =>
       <GuildList :guilds="joinedGuilds" />
     </template>
 
-    <!-- TODO: mostrar um botao para trocar entre guildas para entrar e guildas que ja eh membro -->
-    <!-- Guildas disponiveis para entrar -->
-    <template v-if="otherAvailableGuilds.length > 0">
-      <Typography variant="subtitle">Guildas disponíveis</Typography>
-
-      <GuildList hide-new-button :guilds="otherAvailableGuilds" />
-    </template>
-
-    <!-- Se nao tem nenhuma guilda e nao pode criar guilda -->
-    <template v-else-if="!player?.admin">
-      <div class="no-guilds">
-        <Typography class="title" variant="subtitle">Sem guildas</Typography>
-
-        <Typography
-          >Oh não, você não tem acesso a nenhuma guilda! Solicite um convite a
-          um mestre de guilda!</Typography
-        >
-
-        <img class="sad-dragon" :src="sadDragonIllustration" />
-      </div>
-    </template>
+    <Button variant="light" class="enter-new-guild-button" @click="addNewGuild"
+      ><font-awesome-icon :icon="['fas', 'plus']" /> adicionar guilda</Button
+    >
   </div>
 </template>
 
@@ -92,6 +78,17 @@ const otherAvailableGuilds = computed(() =>
     .sad-dragon {
       width: 9rem;
     }
+  }
+
+  .ask-for-invite-hint {
+    text-align: center;
+    margin-top: 2rem;
+    color: var(--tx-trans-3);
+    font-size: 0.9rem;
+  }
+
+  .enter-new-guild-button {
+    margin-top: 1rem;
   }
 }
 </style>

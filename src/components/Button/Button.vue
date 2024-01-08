@@ -37,6 +37,10 @@ const computedClass = computed(() => ({
     color: var(--tx-gray-darker);
   }
 
+  &.light {
+    color: var(--tx-gray-darker);
+  }
+
   &.colored {
     color: var(--tx-main-dark);
   }
@@ -58,6 +62,10 @@ const computedClass = computed(() => ({
 
     &.dark {
       background-color: var(--bg-trans-2);
+    }
+
+    &.light {
+      background-color: var(--bg-gray-washed);
     }
 
     &.colored {

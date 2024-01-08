@@ -3,7 +3,12 @@ import Adventure from '@/views/Adventures/Adventure.vue'
 import AdventuresIndex from '@/views/Adventures/AdventuresIndex.vue'
 import CreateAdventure from '@/views/Adventures/CreateAdventure.vue'
 import { Configurations } from '@/views/Configurations'
-import { Guild, GuildConfigurations, GuildsIndex } from '@/views/Guilds'
+import {
+  AvailableGuilds,
+  CurrentGuilds,
+  Guild,
+  GuildConfigurations,
+} from '@/views/Guilds'
 import GuildInvitation from '@/views/Guilds/GuildInvitation.vue'
 import { Home } from '@/views/Home'
 import { Login } from '@/views/Login'
@@ -58,8 +63,14 @@ const routes: Array<RouteRecordRaw> = addFirstVisitPrompts([
     children: [
       {
         path: '',
-        component: GuildsIndex,
+        component: CurrentGuilds,
         name: 'home',
+        meta: { noGoBackButton: true },
+      },
+      {
+        path: 'add-guild',
+        component: AvailableGuilds,
+        name: 'add-guild',
         meta: { noGoBackButton: true },
       },
       {

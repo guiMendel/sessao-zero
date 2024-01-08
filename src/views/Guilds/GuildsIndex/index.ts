@@ -1,1 +1,2 @@
-export { default as GuildsIndex } from './GuildsIndex.vue'
+export { default as CurrentGuilds } from './CurrentGuilds.vue'
+export { default as AvailableGuilds } from './AvailableGuilds.vue'

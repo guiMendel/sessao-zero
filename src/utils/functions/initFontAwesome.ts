@@ -28,6 +28,7 @@ import {
   faHandPointLeft,
   faHandPointRight,
   faHeart,
+  faMagnifyingGlassPlus,
   faPaperPlane,
   faPersonRays,
   faPersonRunning,
@@ -84,7 +85,8 @@ export const initFontAwesome = (): [
     faChevronDown,
     faChampagneGlasses,
     faUserGroup,
-    faScroll
+    faScroll,
+    faMagnifyingGlassPlus
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]

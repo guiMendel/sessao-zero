@@ -57,7 +57,7 @@ const newGuild = async () => {
           <div class="owner" v-if="toValue(guild.owner)">
             <font-awesome-icon :icon="['fas', 'crown']" />
             <Typography variant="paragraph-secondary">{{
-              getOwnerLabel(toValue(guild.owner))
+              getOwnerLabel(toValue(guild.owner)!)
             }}</Typography>
           </div>
 
@@ -110,7 +110,7 @@ const newGuild = async () => {
     background-color: var(--bg-main-light);
     min-height: var(--min-height);
 
-    @include bevel(var(--main-lighter));
+    @include bevel(var(--main));
     @include high-contrast-border;
 
     .data {
