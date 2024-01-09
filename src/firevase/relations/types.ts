@@ -81,7 +81,9 @@ export type RelationDefinitionFrom<
 /** Dado um path P, retorna suas relacoes (sem um ref) */
 export type Relations<C extends FirevaseClient, P extends PathsFrom<C>> = {
   [relation in keyof RelationsFrom<C>[P]]: RelationsFrom<C>[P][relation]['type'] extends 'has-one'
-    ? Resource<C, RelationsFrom<C>[P][relation]['targetResourcePath']>
+    ?
+        | Resource<C, RelationsFrom<C>[P][relation]['targetResourcePath']>
+        | undefined
     : Resource<C, RelationsFrom<C>[P][relation]['targetResourcePath']>[]
 }
 
@@ -91,7 +93,9 @@ export type HalfResourceRelations<
   P extends PathsFrom<C>
 > = {
   [relation in keyof RelationsFrom<C>[P]]: RelationsFrom<C>[P][relation]['type'] extends 'has-one'
-    ? HalfResource<C, RelationsFrom<C>[P][relation]['targetResourcePath']>
+    ?
+        | HalfResource<C, RelationsFrom<C>[P][relation]['targetResourcePath']>
+        | undefined
     : HalfResource<C, RelationsFrom<C>[P][relation]['targetResourcePath']>[]
 }
 

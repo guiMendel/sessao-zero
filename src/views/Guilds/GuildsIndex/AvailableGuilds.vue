@@ -16,11 +16,22 @@ const guilds = syncList()
 const availableGuilds = computed(() =>
   guilds.value.filter((guild) => !isMember(player.value, guild))
 )
+
+const showBackButton = computed(() => {
+  if (player.value == undefined || player.value.admin) return true
+
+  const currentGuilds = guilds.value.filter((guild) =>
+    isMember(player.value, guild)
+  )
+
+  // Nao mostra o botao se nao tiver nenhuma guilda atualmente E nao for admin
+  return currentGuilds.length != 0
+})
 </script>
 
 <template>
   <div v-if="player" class="guilds-index">
-    <BackButton />
+    <BackButton v-if="showBackButton" />
 
     <!-- Guildas disponiveis para entrar -->
     <template v-if="availableGuilds.length > 0">

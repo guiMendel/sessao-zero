@@ -2,7 +2,7 @@ import 'vue-router'
 import { createRouter, createWebHistory } from 'vue-router'
 import { navigationGuard } from './guard'
 import routes from './routes'
-import { setTitle } from './utils/setTitle'
+import { setTitleFromRoute } from './utils/setTitleFromRoute'
 
 // === TIPAGEM DO META
 
@@ -37,4 +37,4 @@ export const router = createRouter({
 // Apply the navigation guard
 router.beforeEach(navigationGuard)
 
-router.afterEach((to) => setTitle(to.meta.title as string | undefined))
+router.afterEach(setTitleFromRoute)

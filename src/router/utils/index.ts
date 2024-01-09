@@ -1,2 +1,2 @@
 export * from './findMeta'
-export * from './setTitle'
+export * from './setTitleFromRoute'

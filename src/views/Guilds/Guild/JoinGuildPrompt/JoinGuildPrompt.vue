@@ -20,13 +20,14 @@ const playerIsMember = computed(() => isMember(player.value, props.guild))
 const { getBooleanInput } = useInput()
 
 const join = () =>
+  player.value &&
   getBooleanInput({
     cancellable: true,
     messageHtml: `Tem certeza de que deseja se tornar membro da guilda <strong>${props.guild.name}</ strong>?`,
     trueButton: { buttonProps: { variant: 'colored' } },
   })
     .then(async (decision) => {
-      if (!decision) return
+      if (!decision || !player.value) return
 
       return addRelation(vase, player.value, 'guilds', [props.guild])
     })

@@ -2,8 +2,9 @@
 import { isMember, useCurrentGuild } from '@/api/guilds'
 import { useCurrentPlayer } from '@/api/players'
 import { BackButton, LoadingSpinner } from '@/components'
+import { setTitle } from '@/utils/functions'
 import { storeToRefs } from 'pinia'
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 import { GuildPanel } from './GuildPanel'
 import { JoinGuildPrompt } from './JoinGuildPrompt'
 
@@ -12,6 +13,9 @@ const { player } = storeToRefs(useCurrentPlayer())
 
 /** Quando o jogador nao eh membro nem dono da guilda */
 const isVisitor = computed(() => !isMember(player.value, guild.value))
+
+// TODO: ao entrar varias vezes na mesma guilda, isso para de funcionar
+watchEffect(() => setTitle(guild.value?.name))
 </script>
 
 <template>

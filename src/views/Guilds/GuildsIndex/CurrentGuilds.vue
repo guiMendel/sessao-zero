@@ -21,6 +21,11 @@ const joinedGuilds = computed(() =>
       )
 )
 
+// Se nao tiver nenhuma guilda, vai direto pra pagina de adicionar guildas
+// watch(joinedGuilds, (guilds) => {
+//   if (guilds.length == 0) addNewGuild()
+// })
+
 const router = useRouter()
 
 const addNewGuild = () => {

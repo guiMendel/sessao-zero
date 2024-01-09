@@ -17,6 +17,8 @@ const currentGuild = useCurrentGuild()
 const { guild } = storeToRefs(currentGuild)
 const { update, deleteForever } = currentGuild
 
+if (!guild.value) throw new Error('Falha ao encontrar guilda')
+
 const { fields } = useAutosaveForm({
   name: fieldRef('nome', {
     validator: (name) => (name.length > 2 ? true : 'Minimo de 3 caracteres'),
@@ -54,11 +56,12 @@ const { getStringInput } = useInput()
 
 const deleteGuild = () =>
   // Precisa de uma confirmaçao para excluir a guilda
+  guild.value &&
   getStringInput({
     cancellable: true,
     inputFieldName: 'nome da guilda',
     validator: (value) =>
-      value == guild.value.name ? true : 'nomes nao batem',
+      guild.value && value == guild.value.name ? true : 'nomes nao batem',
     submitButton: { label: 'destruir' },
     messageClass: 'guild-configurations__delete-confirmation',
     messageHtml: `\

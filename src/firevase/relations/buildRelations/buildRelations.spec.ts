@@ -856,10 +856,14 @@ describe('buildRelations', () => {
             return
           }
 
-          expect(toValue(knight.king)).toBeDefined()
+          const king = toValue(knight.king)
 
-          check(toValue(knight.king), remainingLayers - 1)
+          if (king == undefined) throw new Error('Database error')
+
+          check(king, remainingLayers - 1)
         }
+
+        if (relations.king.value == undefined) throw new Error('Database error')
 
         check(relations.king.value, layers)
       }
