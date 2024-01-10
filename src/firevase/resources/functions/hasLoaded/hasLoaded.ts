@@ -43,6 +43,8 @@ export const hasLoaded = <C extends FirevaseClient>(...args: Argument<C>[]) => {
     }
 
     // Access relations to generate vue dependencies
+    ref.value.forEach((instance) => toValue(instance[relation]))
+
     if (
       !ref.value.every((instance) => toRaw(instance)[relation].sync.hasLoaded)
     )
