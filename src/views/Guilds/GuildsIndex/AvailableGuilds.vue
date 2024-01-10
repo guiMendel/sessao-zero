@@ -48,14 +48,16 @@ const showBackButton = computed(() => {
     <!-- Se nao tem nenhuma guilda e nao pode criar guilda -->
     <template v-else-if="!player?.admin">
       <div class="no-guilds">
-        <Typography class="title" variant="subtitle">Sem guildas</Typography>
+        <Typography class="title" variant="subtitle">Sem guildas públicas</Typography>
 
         <Typography
-          >Oh não, você não tem acesso a nenhuma guilda! Solicite um convite a
+          >Solicite um convite a
           um mestre de guilda!</Typography
         >
 
-        <img class="sad-dragon" :src="sadDragonIllustration" />
+        <div class="sad-dragon">
+          <img :src="sadDragonIllustration" />
+        </div>
       </div>
     </template>
   </div>
@@ -85,7 +87,13 @@ const showBackButton = computed(() => {
     }
 
     .sad-dragon {
-      width: 9rem;
+      flex: 1;
+      flex-direction: column;
+      justify-content: center;
+
+      img {
+        width: 9rem;
+      }
     }
   }
 
