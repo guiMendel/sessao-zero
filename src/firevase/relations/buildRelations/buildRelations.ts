@@ -253,6 +253,13 @@ const createManyToManyRelation = <
     if (snapshot.empty) {
       // Remove o target
       targets.sync.updateTarget(undefined)
+
+      // Set the loaded flag to true
+      ;(targets.sync as any)._hasLoaded = true
+
+      // Trigger vue
+      targets.value = []
+
       return
     }
 

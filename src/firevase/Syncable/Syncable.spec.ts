@@ -150,6 +150,21 @@ describe('Syncable', () => {
       )
     })
 
+    it('updates hasLoaded flag', () => {
+      mockOnSnapshot.mockImplementation((_, listener) => {
+        listener()
+        return vi.fn()
+      })
+
+      const syncable = new Syncable(docTarget, vi.fn())
+
+      expect(syncable).toHaveProperty('hasLoaded', false)
+
+      syncable.triggerSync()
+
+      expect(syncable).toHaveProperty('hasLoaded', true)
+    })
+
     it('updates state to synced', () => {
       const syncable = new Syncable(docTarget, vi.fn())
 
@@ -238,6 +253,18 @@ describe('Syncable', () => {
       syncable.reset()
 
       expect(resetCallback).toHaveBeenCalledTimes(2)
+    })
+
+    it('updates hasLoaded flag', () => {
+      const syncable = new Syncable(docTarget, vi.fn())
+
+      ;(syncable as any)._hasLoaded = true
+
+      expect(syncable).toHaveProperty('hasLoaded', true)
+
+      syncable.reset()
+
+      expect(syncable).toHaveProperty('hasLoaded', false)
     })
   })
 })

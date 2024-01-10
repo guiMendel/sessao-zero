@@ -1,4 +1,4 @@
-import { mockFantasyDatabase } from '@/tests/mock/backend'
+import { createDatabase, mockFantasyDatabase } from '@/tests/mock/backend'
 
 import { FirevaseClient } from '@/firevase'
 import * as SyncableRefNamespace from '@/firevase/Syncable'
@@ -791,6 +791,45 @@ describe('buildRelations', () => {
         relations.supervisors.sync.dispose()
 
         expect(bridgeDispose).toHaveBeenCalledOnce()
+      })
+
+      it('should set hasLoaded flag and set value to empty array when bridge gets an empy snapshot', async () => {
+        const vase = fantasyVase.configureRelations(({ hasMany }) => ({
+          knights: {
+            supervisedLands: hasMany('lands', {
+              manyToManyTable: 'knightsLands',
+            }),
+          },
+        }))
+
+        const knightId = '1'
+
+        const { requireDatabaseValue } = createDatabase(vase).init({
+          knights: {
+            [knightId]: mockKnight('uploadable'),
+          },
+        })
+
+        const knight = await requireDatabaseValue('knights', knightId)
+
+        const relations = buildRelations({
+          cleanupManager: new CleanupManagerNamespace.CleanupManager(),
+          client: vase,
+          previousValues: {},
+          resourceLayersLimit: 1,
+          source: knight,
+        })
+
+        expect(relations.supervisedLands.sync).toHaveProperty(
+          'hasLoaded',
+          false
+        )
+
+        relations.supervisedLands.value = [undefined as any]
+        relations.supervisedLands.sync.triggerSync()
+
+        expect(relations.supervisedLands.sync).toHaveProperty('hasLoaded', true)
+        expect(relations.supervisedLands).toHaveProperty('value', [])
       })
     })
   })

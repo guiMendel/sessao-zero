@@ -37,6 +37,9 @@ export class Syncable<T extends DocumentReference | Query> {
   /** Callback para executar sempre que houver um novo snapshot para este sync */
   private onNext: OnNextCallback<T>
 
+  /** Whether this syncable has not received data from sync yet */
+  private _hasLoaded = false
+
   public get syncState() {
     // Para o publico, utilizamos o estado empty para indicar que nao ha target
     if (!this._target) return 'empty'
@@ -56,6 +59,10 @@ export class Syncable<T extends DocumentReference | Query> {
     this.cleanup.dispose()
 
     for (const listener of this.disposeListeners) listener()
+  }
+
+  public get hasLoaded() {
+    return this._hasLoaded
   }
 
   constructor(target: T | undefined, onNext: OnNextCallback<T>) {
@@ -79,11 +86,14 @@ export class Syncable<T extends DocumentReference | Query> {
 
     const cleanupListener = onSnapshot(
       this._target as any,
-      (snapshot: QuerySnapshot | DocumentSnapshot) =>
+      (snapshot: QuerySnapshot | DocumentSnapshot) => {
+        this._hasLoaded = true
+
         this.onNext(
           snapshot as T extends Query ? QuerySnapshot : DocumentSnapshot,
           this.cleanup
         )
+      }
     )
 
     this.cleanup.add(cleanupListener)
@@ -115,6 +125,8 @@ export class Syncable<T extends DocumentReference | Query> {
     this.updateTarget(undefined)
 
     this.state = 'ready-to-sync'
+
+    this._hasLoaded = false
 
     for (const listener of this.resetListeners) listener()
   }
