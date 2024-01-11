@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { isMember, useGuild } from '@/api/guilds'
-import { useCurrentPlayer } from '@/api/players'
+import { isGuildMaster, useCurrentPlayer } from '@/api/players'
 import { BackButton, Typography } from '@/components'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
@@ -18,7 +18,7 @@ const availableGuilds = computed(() =>
 )
 
 const showBackButton = computed(() => {
-  if (player.value == undefined || player.value.admin) return true
+  if (player.value == undefined || isGuildMaster(player.value)) return true
 
   const currentGuilds = guilds.value.filter((guild) =>
     isMember(player.value, guild)
@@ -46,14 +46,13 @@ const showBackButton = computed(() => {
     </template>
 
     <!-- Se nao tem nenhuma guilda e nao pode criar guilda -->
-    <template v-else-if="!player?.admin">
+    <template v-else>
       <div class="no-guilds">
-        <Typography class="title" variant="subtitle">Sem guildas públicas</Typography>
-
-        <Typography
-          >Solicite um convite a
-          um mestre de guilda!</Typography
+        <Typography class="title" variant="subtitle"
+          >Sem guildas públicas</Typography
         >
+
+        <Typography>Solicite um convite a um mestre de guilda!</Typography>
 
         <div class="sad-dragon">
           <img :src="sadDragonIllustration" />
@@ -81,6 +80,7 @@ const showBackButton = computed(() => {
     justify-content: center;
     gap: 1rem;
     text-align: justify;
+    margin-top: 1rem;
 
     .title {
       align-self: flex-start;

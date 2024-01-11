@@ -39,6 +39,7 @@ import {
   faScroll,
   faStreetView,
   faTrash,
+  faUser,
   faUserGroup,
   faUsers,
   faXmark,
@@ -86,7 +87,8 @@ export const initFontAwesome = (): [
     faChampagneGlasses,
     faUserGroup,
     faScroll,
-    faMagnifyingGlassPlus
+    faMagnifyingGlassPlus,
+    faUser
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]

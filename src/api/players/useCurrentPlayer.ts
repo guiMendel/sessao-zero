@@ -34,7 +34,8 @@ export const useCurrentPlayer = defineStore('current-player', () => {
     vase,
     'players',
     'empty-document',
-    cleanupManager
+    cleanupManager,
+    { resourceLayersLimit: 2 }
   )
 
   // Sync do player logado

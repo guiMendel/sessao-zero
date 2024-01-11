@@ -1,5 +1,3 @@
 <template>
-  <div>
-    <p>In AdvIndex</p>
-  </div>
+  <div></div>
 </template>

@@ -65,7 +65,7 @@ const computedClass = computed(() => ({
     }
 
     &.light {
-      background-color: var(--bg-gray-washed);
+      background-color: var(--bg-gray-lighter);
     }
 
     &.colored {

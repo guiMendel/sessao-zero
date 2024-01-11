@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { Vase } from '@/api'
-import { useGuild } from '@/api/guilds'
 import { useCurrentPlayer } from '@/api/players'
 import { LoadingSpinner, Typography } from '@/components'
-import { HalfResource, Resource } from '@/firevase/resources'
-import { useInput } from '@/stores'
+import { HalfResource, Resource, hasLoaded } from '@/firevase/resources'
 import { storeToRefs } from 'pinia'
 import { toValue } from 'vue'
 import { useRouter } from 'vue-router'
@@ -16,28 +14,12 @@ defineProps<{
 
 const { player } = storeToRefs(useCurrentPlayer())
 const router = useRouter()
-const { create } = useGuild()
-const { getStringInput } = useInput()
 
 const openGuildPage = (guild: HalfResource<Vase, 'guilds'>) =>
   router.push({ name: 'adventures', params: { guildId: guild.id } })
 
-const getOwnerLabel = (owner: HalfResource<Vase, 'players'>) =>
-  player.value?.id === toValue(owner).id ? 'Você' : toValue(owner).name
-
-const newGuild = async () => {
-  try {
-    const name = await getStringInput({
-      cancellable: true,
-      messageHtml: 'Qual será o nome da guilda?',
-      inputFieldName: 'nome',
-      validator: (name) => (name.length > 2 ? true : 'Mínimo de 2 caracteres'),
-      submitButton: { label: 'criar', buttonProps: { variant: 'colored' } },
-    })
-
-    create(name)
-  } catch {}
-}
+const isOwner = (guild: Resource<Vase, 'guilds'>) =>
+  player.value?.id === toValue(guild.owner)?.id
 </script>
 
 <template>
@@ -53,16 +35,16 @@ const newGuild = async () => {
         <Typography class="text">{{ guild.name }}</Typography>
 
         <div class="row">
+          <!-- Carregando -->
+          <LoadingSpinner v-if="!hasLoaded([guild, 'owner'])" class="spinner" />
+
           <!-- Dono -->
-          <div class="owner" v-if="toValue(guild.owner)">
+          <div class="owner" v-else-if="!isOwner(guild)">
             <font-awesome-icon :icon="['fas', 'crown']" />
             <Typography variant="paragraph-secondary">{{
-              getOwnerLabel(toValue(guild.owner)!)
+              toValue(guild.owner)?.name
             }}</Typography>
           </div>
-
-          <!-- Carregando -->
-          <LoadingSpinner v-else class="spinner" />
 
           <!-- Numero de membros -->
           <div class="count">
@@ -77,15 +59,6 @@ const newGuild = async () => {
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Criar guilda -->
-    <div
-      v-if="!hideNewButton && player?.admin"
-      class="add-guild"
-      @click="newGuild"
-    >
-      <font-awesome-icon :icon="['fas', 'plus']" />
     </div>
   </div>
 </template>
@@ -126,6 +99,7 @@ const newGuild = async () => {
 
       .row {
         align-items: center;
+        justify-content: flex-end;
         gap: 1rem;
 
         .spinner {

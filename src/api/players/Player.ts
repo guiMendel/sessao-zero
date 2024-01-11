@@ -15,5 +15,10 @@ export interface Player {
   /** Auto-descricao */
   about?: string
 
-  admin?: boolean
+  /** Nivel de acesso do jogador
+   * 0 — Padrão
+   * 1 — Mestre de guildas
+   * 2 — Engenheiro
+   */
+  accessLevel?: number
 }

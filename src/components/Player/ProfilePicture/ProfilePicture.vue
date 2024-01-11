@@ -41,7 +41,7 @@ const initials = computed(() =>
     font-family: 'Lilita One', monospace;
   }
 
-  aspect-ratio: 1/1;
+  width: 2.9rem;
+  height: 2.9rem;
 }
 </style>
-@/utils/types @/api/players

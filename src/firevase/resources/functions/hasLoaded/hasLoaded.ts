@@ -3,14 +3,19 @@ import { SyncableRef } from '@/firevase/Syncable'
 import { Relations } from '@/firevase/relations'
 import { PathsFrom } from '@/firevase/types'
 import { toRaw, toValue } from 'vue'
+import { Resource } from '../..'
 
 type RefWithRelation<C extends FirevaseClient> = {
-  [P in PathsFrom<C>]: [SyncableRef<C, P, any>, keyof Relations<C, P>]
+  [P in PathsFrom<C>]: [
+    SyncableRef<C, P, any> | Resource<C, P>,
+    keyof Relations<C, P>
+  ]
 }[PathsFrom<C>]
 
 type Argument<C extends FirevaseClient> =
   | SyncableRef<C, PathsFrom<C>, any>
   | RefWithRelation<C>
+  | undefined
 
 export const hasLoaded = <C extends FirevaseClient>(...args: Argument<C>[]) => {
   // We don't want to return early since that would kepe the funciton from generating vue
@@ -18,6 +23,8 @@ export const hasLoaded = <C extends FirevaseClient>(...args: Argument<C>[]) => {
   let result = true
 
   for (const arg of args) {
+    if (!arg) continue
+
     // Address no relation
     if (!Array.isArray(arg)) {
       if (arg.sync.hasLoaded === false) result = false
@@ -26,28 +33,27 @@ export const hasLoaded = <C extends FirevaseClient>(...args: Argument<C>[]) => {
 
     const [ref, relation] = arg
 
-    if (ref.sync.hasLoaded === false) result = false
+    if ('sync' in ref && ref.sync.hasLoaded === false) result = false
 
-    if (ref.value == undefined) continue
+    const value = toValue(ref)
+
+    if (value == undefined) continue
 
     // Address document ref
-    if (!Array.isArray(ref.value)) {
+    if (!Array.isArray(value)) {
       // Access relation to generate vue dependency
-      toValue(ref.value[relation as keyof typeof ref.value])
+      toValue(value[relation as keyof typeof value])
 
-      const relationSync = toRaw(ref.value)[relation as keyof typeof ref.value]
-        .sync
+      const relationSync = toRaw(value)[relation as keyof typeof value].sync
 
       if (relationSync.hasLoaded === false) result = false
       continue
     }
 
     // Access relations to generate vue dependencies
-    ref.value.forEach((instance) => toValue(instance[relation]))
+    value.forEach((instance) => toValue(instance[relation]))
 
-    if (
-      !ref.value.every((instance) => toRaw(instance)[relation].sync.hasLoaded)
-    )
+    if (!value.every((instance) => toRaw(instance)[relation].sync.hasLoaded))
       result = false
   }
 
