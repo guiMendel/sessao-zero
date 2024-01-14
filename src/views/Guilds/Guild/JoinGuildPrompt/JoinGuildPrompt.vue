@@ -42,7 +42,7 @@ const join = () =>
       <Typography class="main-text">apenas visualizando</Typography>
     </div>
 
-    <Typography variant="paragraph-secondary"
+    <Typography variant="paragraph-secondary" class="sub-heading"
       >você ainda não faz parte desta guilda!</Typography
     >
 
@@ -71,7 +71,12 @@ const join = () =>
 
   .main-text {
     font-weight: 600;
-    font-size: 1.06rem;
+    font-size: 1.1rem;
+  }
+
+  .sub-heading {
+    color: var(--tx-light-trans-75);
+    font-weight: 500;
   }
 
   .row {

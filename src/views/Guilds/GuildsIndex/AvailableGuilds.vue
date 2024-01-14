@@ -4,7 +4,7 @@ import { isGuildMaster, useCurrentPlayer } from '@/api/players'
 import { BackButton, Typography } from '@/components'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
-import sadDragonIllustration from '../../../assets/sad-dragon.png'
+import sadDragonIllustration from '../../../assets/crying-drake.png'
 import { GuildList } from './GuildList'
 
 const { syncList } = useGuild()
