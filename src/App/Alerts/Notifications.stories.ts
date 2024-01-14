@@ -1,15 +1,15 @@
 import { useAlert } from '@/stores'
 import { Meta, StoryFn } from '@storybook/vue3'
-import { Notifications } from '.'
+import { Alerts } from '.'
 
 const meta = {
   title: 'App/Notifications',
-  component: Notifications,
-} satisfies Meta<typeof Notifications>
+  component: Alerts,
+} satisfies Meta<typeof Alerts>
 
 export default meta
 
-const Template: StoryFn<typeof Notifications> = (args) => ({
+const Template: StoryFn<typeof Alerts> = (args) => ({
   setup: () => {
     const { alert: notify } = useAlert()
 
@@ -18,7 +18,7 @@ const Template: StoryFn<typeof Notifications> = (args) => ({
 
     return { args, showSuccess, showError }
   },
-  components: { Notifications },
+  components: { Notifications: Alerts },
   template: `
     <div :style="{
       flexDirection: 'column', gap: '1rem', color: 'white', height: '100vh', justifyContent: 'center'

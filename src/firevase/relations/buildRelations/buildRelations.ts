@@ -52,9 +52,7 @@ export const buildRelations = <
     )
 
   if (client.relationSettings?.[source.resourcePath] == undefined)
-    throw new Error(
-      `Impossible to build relations for ${source.resourcePath} — client has no relation settings`
-    )
+    return {} as RelationsRefs<C, P>
 
   // Se essa source estiver em previous values, reutiliza as relacoes do previous value
   if (source.id in previousValues) {

@@ -4,14 +4,13 @@ import { isGuildMaster, useCurrentPlayer } from '@/api/players'
 import { Typography } from '@/components'
 import { hasLoaded } from '@/firevase/resources'
 import { useInput } from '@/stores'
-import { unwrapStore } from '@/utils/functions'
 import { computed, toValue, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { GuildList } from './GuildList'
 
 const { syncList, create } = useGuild()
 
-const { player } = unwrapStore(useCurrentPlayer())
+const { player } = useCurrentPlayer()
 
 const guilds = syncList()
 
@@ -134,7 +133,7 @@ const createGuild = () =>
   }
 
   .sub-heading {
-    color: var(--tx-trans-45);
+    color: var(--tx-trans-3);
     font-weight: 500;
     margin-top: -0.7rem;
   }

@@ -2,6 +2,7 @@ import { auth } from '@/api/firebase'
 import { CleanupManager } from '@/firevase/CleanupManager'
 import { syncableRef } from '@/firevase/Syncable'
 import { Uploadable, useResource } from '@/firevase/resources'
+import { defineStore } from '@/stores/defineStore'
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -11,7 +12,6 @@ import {
   updateProfile,
 } from 'firebase/auth'
 import { DocumentReference } from 'firebase/firestore'
-import { defineStore } from 'pinia'
 import { onBeforeUnmount } from 'vue'
 import { Player } from '.'
 import { Vase, vase } from '..'

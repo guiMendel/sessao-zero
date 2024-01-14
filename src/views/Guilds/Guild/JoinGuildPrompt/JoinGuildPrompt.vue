@@ -4,14 +4,13 @@ import { isMember, useJoinGuild } from '@/api/guilds'
 import { useCurrentPlayer } from '@/api/players'
 import { Button, Typography } from '@/components'
 import { UnrefedResource } from '@/firevase/resources'
-import { unwrapStore } from '@/utils/functions'
 import { computed, toValue } from 'vue'
 
 const props = defineProps<{
   guild: UnrefedResource<Vase, 'guilds'>
 }>()
 
-const { player } = unwrapStore(useCurrentPlayer())
+const { player } = useCurrentPlayer()
 
 const playerIsMember = computed(() => isMember(player.value, props.guild))
 

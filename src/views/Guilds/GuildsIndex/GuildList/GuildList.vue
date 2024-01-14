@@ -3,7 +3,6 @@ import { Vase } from '@/api'
 import { useCurrentPlayer } from '@/api/players'
 import { LoadingSpinner, Typography } from '@/components'
 import { HalfResource, Resource, hasLoaded } from '@/firevase/resources'
-import { storeToRefs } from 'pinia'
 import { toValue } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -12,7 +11,7 @@ defineProps<{
   hideNewButton?: boolean
 }>()
 
-const { player } = storeToRefs(useCurrentPlayer())
+const { player } = useCurrentPlayer()
 const router = useRouter()
 
 const openGuildPage = (guild: HalfResource<Vase, 'guilds'>) =>

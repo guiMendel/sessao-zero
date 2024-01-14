@@ -3,10 +3,12 @@ import { HalfResource, Resource } from '@/firevase/resources'
 import { useAlert, useInput } from '@/stores'
 import { toValue } from 'vue'
 import { Vase, vase } from '../..'
+import { useNotification } from '@/api/notifications'
 
 export const useJoinGuild = () => {
   const { getBooleanInput } = useInput()
   const { alert } = useAlert()
+  const { notifyPlayer } = useNotification()
 
   return async (
     player: Resource<Vase, 'players'>,
@@ -34,6 +36,12 @@ export const useJoinGuild = () => {
                 return removeRelation(vase, player, 'admissionRequests', [
                   guild,
                 ])
+
+              // Envia uma notificacao ao dono
+              notifyPlayer(guild.ownerUid, {
+                type: 'admissionRequest',
+                params: { guild, player },
+              })
 
               return addRelation(vase, player, 'admissionRequests', [guild])
             }

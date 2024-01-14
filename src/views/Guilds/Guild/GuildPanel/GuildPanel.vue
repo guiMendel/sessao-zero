@@ -6,7 +6,6 @@ import { IconButton } from '@/components/IconButton'
 import { removeRelation } from '@/firevase/relations'
 import { HalfResource } from '@/firevase/resources'
 import { useInput } from '@/stores'
-import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -25,7 +24,7 @@ const configureGuild = () => {
   isOpen.value = false
 }
 
-const { player } = storeToRefs(useCurrentPlayer())
+const { player } = useCurrentPlayer()
 
 const { getBooleanInput } = useInput()
 

@@ -12,7 +12,7 @@ import {
 import GuildInvitation from '@/views/Guilds/GuildInvitation.vue'
 import { Home } from '@/views/Home'
 import { Login } from '@/views/Login'
-import { CreatePlayer } from '@/views/Players'
+import { CreatePlayer, NotificationIndex } from '@/views/Players'
 import Player from '@/views/Players/Player.vue'
 import { AccessibilityPrompt, BetaWelcome } from '@/views/Prompts'
 import { RouteRecordRaw } from 'vue-router'
@@ -118,9 +118,19 @@ const routes: Array<RouteRecordRaw> = addFirstVisitPrompts([
       },
       {
         path: 'player/:playerId',
-        component: Player,
-        name: 'player',
         meta: { title: 'Jogador' },
+        children: [
+          {
+            path: '',
+            component: Player,
+            name: 'player',
+          },
+          {
+            path: 'notifications',
+            component: NotificationIndex,
+            name: 'notifications',
+          },
+        ],
       },
       {
         path: 'configurations',

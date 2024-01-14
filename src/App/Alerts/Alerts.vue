@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { Alert, useAlert } from '@/stores'
-import { storeToRefs } from 'pinia'
 import { onBeforeUnmount, ref } from 'vue'
 
-const notificationStore = useAlert()
-const { notifications, timeout } = storeToRefs(notificationStore)
-const { erase } = notificationStore
+const { alerts, timeout, erase } = useAlert()
 
 // ===============
 // === COUNTDOWN
@@ -40,15 +37,15 @@ onBeforeUnmount(() => clearInterval(countdown))
   <div id="notifications">
     <span
       class="notification"
-      :class="notification.type"
-      v-for="notification in notifications"
-      :key="notification.timestamp.toJSON()"
-      @click="erase(notification.id)"
-      >{{ notification.message }}
+      :class="alert.type"
+      v-for="alert in alerts"
+      :key="alert.timestamp.toJSON()"
+      @click="erase(alert.id)"
+      >{{ alert.message }}
 
       <span
         class="countdown"
-        :style="{ width: `${getLifetime(notification) * 100}%` }"
+        :style="{ width: `${getLifetime(alert) * 100}%` }"
       ></span>
     </span>
   </div>

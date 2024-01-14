@@ -2,14 +2,13 @@
 import { isMember, useGuild } from '@/api/guilds'
 import { isGuildMaster, useCurrentPlayer } from '@/api/players'
 import { BackButton, Divisor, Typography } from '@/components'
-import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 import sadDragonIllustration from '../../../assets/crying-drake.png'
 import { GuildList } from './GuildList'
 
 const { syncList } = useGuild()
 
-const { player } = storeToRefs(useCurrentPlayer())
+const { player } = useCurrentPlayer()
 
 const allGuilds = syncList()
 

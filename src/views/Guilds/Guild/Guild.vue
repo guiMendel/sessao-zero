@@ -9,7 +9,7 @@ import { GuildPanel } from './GuildPanel'
 import { JoinGuildPrompt } from './JoinGuildPrompt'
 
 const { guild } = storeToRefs(useCurrentGuild())
-const { player } = storeToRefs(useCurrentPlayer())
+const { player } = useCurrentPlayer()
 
 /** Quando o jogador nao eh membro nem dono da guilda */
 const isVisitor = computed(() => !isMember(player.value, guild.value))
