@@ -7,7 +7,7 @@ import {
   ToggleField,
   Typography,
 } from '@/components'
-import { useInput, useNotification } from '@/stores'
+import { useInput, useAlert } from '@/stores'
 import { fieldRef } from '@/utils/functions'
 import { useAutosaveForm } from '@/utils/hooks'
 import { storeToRefs } from 'pinia'
@@ -50,7 +50,7 @@ const { fields } = useAutosaveForm({
 
 const router = useRouter()
 
-const { notify } = useNotification()
+const { alert: notify } = useAlert()
 
 const { getStringInput } = useInput()
 

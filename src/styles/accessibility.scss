@@ -46,6 +46,14 @@
   --error: var(--trans);
   --error-dark: var(--trans);
 
+  --warning-washed: var(--trans);
+  --warning-lighter: var(--trans);
+  --warning-light: var(--trans);
+  --warning: var(--trans);
+  --warning-dark: var(--trans);
+  --warning-darker: var(--trans);
+  --warning-blackish: var(--trans);
+
   --tx-trans-03: var(--accessibility-text);
   --tx-trans-1: var(--accessibility-text);
   --tx-trans-2: var(--accessibility-text);
@@ -80,6 +88,14 @@
   --tx-error: var(--accessibility-text);
   --tx-error-dark: var(--accessibility-text);
 
+  --tx-warning-washed: var(--accessibility-text);
+  --tx-warning-lighter: var(--accessibility-text);
+  --tx-warning-light: var(--accessibility-text);
+  --tx-warning: var(--accessibility-text);
+  --tx-warning-dark: var(--accessibility-text);
+  --tx-warning-darker: var(--accessibility-text);
+  --tx-warning-blackish: var(--accessibility-text);
+
   --bg-trans-03: var(--accessibility-background);
   --bg-trans-1: var(--accessibility-background);
   --bg-trans-2: var(--accessibility-background);
@@ -112,4 +128,12 @@
   --bg-error-light: var(--accessibility-background);
   --bg-error: var(--accessibility-background);
   --bg-error-dark: var(--accessibility-background);
+
+  --bg-warning-washed: var(--accessibility-background);
+  --bg-warning-lighter: var(--accessibility-background);
+  --bg-warning-light: var(--accessibility-background);
+  --bg-warning: var(--accessibility-background);
+  --bg-warning-dark: var(--accessibility-background);
+  --bg-warning-darker: var(--accessibility-background);
+  --bg-warning-blackish: var(--accessibility-background);
 }

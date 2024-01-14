@@ -5,7 +5,7 @@ import {
   usePlayerFields,
 } from '@/api/players'
 import { BackButton, Button, InputField, Logo, Typography } from '@/components'
-import { useNotification } from '@/stores'
+import { useAlert } from '@/stores'
 import { localStorageKeys } from '@/utils/config'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -48,7 +48,7 @@ const returnStep = () => (emailConfirmed.value = false)
 // PASSO 2 — FORNECER SENHA
 // ==============================
 
-const { notify } = useNotification()
+const { alert: notify } = useAlert()
 const { login } = useCurrentPlayer()
 
 // Acao de login

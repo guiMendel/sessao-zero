@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCurrentPlayer, usePlayerFields } from '@/api/players'
 import { Button, InputField, Typography } from '@/components'
-import { useNotification } from '@/stores'
+import { useAlert } from '@/stores'
 import { localStorageKeys } from '@/utils/config'
 import { eraseInStorage, isFieldValid } from '@/utils/functions'
 import { computed } from 'vue'
@@ -21,7 +21,7 @@ const {
   maybeInvalidateEmail,
 } = fields
 
-const { notify } = useNotification()
+const { alert: notify } = useAlert()
 const { create } = useCurrentPlayer()
 const router = useRouter()
 

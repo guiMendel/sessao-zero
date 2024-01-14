@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { Notification, useNotification } from '@/stores'
+import { Alert, useAlert } from '@/stores'
 import { storeToRefs } from 'pinia'
 import { onBeforeUnmount, ref } from 'vue'
 
-const notificationStore = useNotification()
+const notificationStore = useAlert()
 const { notifications, timeout } = storeToRefs(notificationStore)
 const { erase } = notificationStore
 
@@ -24,7 +24,7 @@ const countdown = setInterval(
 )
 
 // Get elapsed lifetime of a notification
-const getLifetime = (notification: Notification) => {
+const getLifetime = (notification: Alert) => {
   return Math.max(
     1 -
       (currentTime.value.getTime() - notification.timestamp.getTime()) /

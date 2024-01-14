@@ -1,4 +1,4 @@
-import { useNotification } from '@/stores'
+import { useAlert } from '@/stores'
 import { Meta, StoryFn } from '@storybook/vue3'
 import { Notifications } from '.'
 
@@ -11,7 +11,7 @@ export default meta
 
 const Template: StoryFn<typeof Notifications> = (args) => ({
   setup: () => {
-    const { notify } = useNotification()
+    const { alert: notify } = useAlert()
 
     const showSuccess = () => notify('success', 'Trago ótimas notícias!')
     const showError = () => notify('error', 'Algo terrível nos sucedeu.')
