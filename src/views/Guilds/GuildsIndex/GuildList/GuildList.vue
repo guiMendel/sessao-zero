@@ -29,10 +29,21 @@ const isOwner = (guild: Resource<Vase, 'guilds'>) =>
       v-for="guild in guilds"
       :key="guild.id"
       @click="openGuildPage(guild)"
+      :class="{
+        unavailable: !guild.open,
+        requireAdmission: guild.requireAdmission,
+      }"
     >
       <div class="data">
-        <!-- Nome -->
-        <Typography class="text">{{ guild.name }}</Typography>
+        <div class="row less-gap">
+          <!-- Cadeado -->
+          <div v-if="!guild.open" class="icon">
+            <font-awesome-icon :icon="['fas', 'lock']" />
+          </div>
+
+          <!-- Nome -->
+          <Typography class="text">{{ guild.name }}</Typography>
+        </div>
 
         <div class="row">
           <!-- Carregando -->
@@ -47,13 +58,13 @@ const isOwner = (guild: Resource<Vase, 'guilds'>) =>
           </div>
 
           <!-- Numero de membros -->
-          <div class="count">
+          <div class="icon">
             {{ toValue(guild.players).length }}
             <font-awesome-icon :icon="['fas', 'user-group']" />
           </div>
 
           <!-- Numero de aventuras -->
-          <div class="count">
+          <div class="icon">
             {{ 0 }}
             <font-awesome-icon :icon="['fas', 'scroll']" />
           </div>
@@ -86,21 +97,50 @@ const isOwner = (guild: Resource<Vase, 'guilds'>) =>
     @include bevel(var(--main));
     @include high-contrast-border;
 
+    &.unavailable {
+      background-color: var(--bg-gray-light);
+      @include bevel(var(--gray));
+
+      .data .row .owner {
+        p,
+        svg {
+          color: var(--tx-gray);
+        }
+      }
+    }
+
+    &.requireAdmission {
+      background-color: var(--bg-warning-dark);
+      @include bevel(var(--warning-darker));
+
+      .data .row .owner {
+        p,
+        svg {
+          color: var(--tx-warning-darker);
+        }
+      }
+    }
+
     .data {
       flex: 1;
       flex-direction: column;
       align-items: stretch;
       gap: 0.3rem;
 
-      .text {
-        color: var(--tx-white);
-        font-weight: 600;
-      }
-
       .row {
         align-items: center;
         justify-content: flex-end;
         gap: 1rem;
+
+        &.less-gap {
+          gap: 0.5rem;
+        }
+
+        .text {
+          color: var(--tx-white);
+          font-weight: 600;
+          margin-right: auto;
+        }
 
         .spinner {
           margin-right: auto;
@@ -127,7 +167,7 @@ const isOwner = (guild: Resource<Vase, 'guilds'>) =>
           }
         }
 
-        .count {
+        .icon {
           align-items: center;
           gap: 0.2rem;
 

@@ -116,6 +116,8 @@ $floating-icon-animation-duration: 400ms;
   --tx-warning-light: var(--warning-light);
   --tx-warning: var(--warning);
   --tx-warning-dark: var(--warning-dark);
+  --tx-warning-darker: var(--warning-darker);
+  --tx-warning-blackish: var(--warning-blackish);
 
   // === CORES DE BG
 
@@ -158,6 +160,8 @@ $floating-icon-animation-duration: 400ms;
   --bg-warning-light: var(--tx-warning-light);
   --bg-warning: var(--tx-warning);
   --bg-warning-dark: var(--tx-warning-dark);
+  --bg-warning-darker: var(--warning-darker);
+  --bg-warning-blackish: var(--warning-blackish);
 
   // === ACESSIBILIDADE
 

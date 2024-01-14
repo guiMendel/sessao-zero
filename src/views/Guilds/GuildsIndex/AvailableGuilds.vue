@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { isMember, useGuild } from '@/api/guilds'
 import { isGuildMaster, useCurrentPlayer } from '@/api/players'
-import { BackButton, Typography } from '@/components'
+import { BackButton, Divisor, Typography } from '@/components'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 import sadDragonIllustration from '../../../assets/crying-drake.png'
@@ -11,16 +11,32 @@ const { syncList } = useGuild()
 
 const { player } = storeToRefs(useCurrentPlayer())
 
-const guilds = syncList()
+const allGuilds = syncList()
 
-const availableGuilds = computed(() =>
-  guilds.value.filter((guild) => !isMember(player.value, guild))
-)
+const guilds = computed(() => {
+  const unjoined = allGuilds.value.filter(
+    (guild) => !isMember(player.value, guild)
+  )
+
+  const available: typeof unjoined = [],
+    unavailable: typeof unjoined = []
+
+  for (const guild of unjoined) {
+    if (guild.open) available.push(guild)
+    else unavailable.push(guild)
+  }
+
+  return {
+    unjoined,
+    available,
+    unavailable,
+  }
+})
 
 const showBackButton = computed(() => {
   if (player.value == undefined || isGuildMaster(player.value)) return true
 
-  const currentGuilds = guilds.value.filter((guild) =>
+  const currentGuilds = allGuilds.value.filter((guild) =>
     isMember(player.value, guild)
   )
 
@@ -34,10 +50,25 @@ const showBackButton = computed(() => {
     <BackButton v-if="showBackButton" />
 
     <!-- Guildas disponiveis para entrar -->
-    <template v-if="availableGuilds.length > 0">
+    <template v-if="guilds.unjoined.length > 0">
       <Typography variant="subtitle">Guildas disponíveis</Typography>
 
-      <GuildList hide-new-button :guilds="availableGuilds" />
+      <GuildList
+        v-if="guilds.available.length > 0"
+        hide-new-button
+        :guilds="guilds.available"
+      />
+
+      <Divisor
+        v-if="guilds.available.length > 0 && guilds.unavailable.length > 0"
+        class="divisor"
+      />
+
+      <GuildList
+        v-if="guilds.unavailable.length > 0"
+        hide-new-button
+        :guilds="guilds.unavailable"
+      />
 
       <Typography class="ask-for-invite-hint"
         >Não encontrou o que estava procurando? Peça um convite ao mestre da
@@ -71,6 +102,7 @@ const showBackButton = computed(() => {
   align-items: stretch;
   gap: 1rem;
   max-width: 100%;
+  margin-top: 1rem;
   padding: 0 1.5rem 2rem;
 
   .no-guilds {
@@ -95,6 +127,11 @@ const showBackButton = computed(() => {
         width: 9rem;
       }
     }
+  }
+
+  .divisor {
+    color: var(--tx-gray);
+    margin-block: 0.5rem;
   }
 
   .ask-for-invite-hint {

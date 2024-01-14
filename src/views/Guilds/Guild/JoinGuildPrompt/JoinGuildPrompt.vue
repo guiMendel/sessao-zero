@@ -26,11 +26,19 @@ const playerHasRequestedAdmission = computed(() =>
 )
 
 const heading = computed(() => {
+  if (!props.guild.open) return 'guilda trancada'
+
   if (!props.guild.requireAdmission) return 'apenas visualizando'
 
   if (playerHasRequestedAdmission.value) return 'solicitação enviada'
 
   return 'requer admissão'
+})
+
+const subheading = computed(() => {
+  if (!props.guild.open) return 'esta guilda não está aceitando novos membros'
+
+  return 'você ainda não faz parte desta guilda!'
 })
 
 const buttonLabel = computed(() => {
@@ -46,19 +54,20 @@ const buttonLabel = computed(() => {
   <div
     v-if="player && playerIsMember === false"
     class="join-guild-prompt"
-    :class="{ yellow: guild.requireAdmission }"
+    :class="{ yellow: guild.requireAdmission, gray: !guild.open }"
   >
     <div class="row">
-      <font-awesome-icon :icon="['fas', 'eye']" />
+      <font-awesome-icon :icon="['fas', guild.open ? 'eye' : 'lock']" />
 
       <Typography class="main-text">{{ heading }}</Typography>
     </div>
 
-    <Typography variant="paragraph-secondary" class="sub-heading"
-      >você ainda não faz parte desta guilda!</Typography
-    >
+    <Typography variant="paragraph-secondary" class="sub-heading">{{
+      subheading
+    }}</Typography>
 
     <Button
+      v-if="guild.open"
       class="button"
       @click="joinGuild(player, guild, playerHasRequestedAdmission)"
     >
@@ -91,6 +100,10 @@ const buttonLabel = computed(() => {
 
   &.yellow {
     background-color: var(--bg-warning-dark);
+  }
+
+  &.gray {
+    background-color: var(--bg-gray);
   }
 
   .main-text {

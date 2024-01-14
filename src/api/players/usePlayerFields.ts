@@ -100,7 +100,7 @@ export const usePlayerFields = (localStorageKey?: string) => {
     initialValue: '',
     validator: (newValue: string) => {
       if (newValue.length < 3) return 'Mínimo de 3 caracteres'
-      if (newValue.length > 100) return 'Muito longo'
+      if (newValue.length > 12) return 'Muito longo'
 
       return true
     },

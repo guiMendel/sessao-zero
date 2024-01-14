@@ -29,6 +29,8 @@ import {
   faHandPointLeft,
   faHandPointRight,
   faHeart,
+  faLock,
+  faDoorClosed,
   faMagnifyingGlassPlus,
   faPaperPlane,
   faPersonRays,
@@ -54,6 +56,8 @@ export const initFontAwesome = (): [
   library.add(
     faHandPointLeft,
     faBan,
+    faLock,
+    faDoorClosed,
     faHandPointRight,
     faPaperPlane,
     faRightToBracket,
