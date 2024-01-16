@@ -13,14 +13,19 @@ watchEffect(() =>
     if (notification.unread) readNotification(notification.id)
   })
 )
+
+const deleteAll = () =>
+  toValue(player.value?.notifications)?.forEach((notification) =>
+    deleteNotification(notification.id)
+  )
 </script>
 
 <template>
   <div v-if="player" class="notifications">
     <Typography class="heading" variant="subtitle">Notificações</Typography>
 
-    <Typography class="burn-it-all">
-      <font-awesome-icon :icon="['fas', 'fire']" /> limpar todas
+    <Typography class="burn-it-all" @click="deleteAll">
+      limpar todas <font-awesome-icon :icon="['fas', 'fire']" />
     </Typography>
 
     <div
@@ -33,6 +38,7 @@ watchEffect(() =>
         <font-awesome-icon
           :icon="['fas', 'xmark']"
           @click="deleteNotification(notification.id)"
+          class="close"
         />
       </div>
 
@@ -63,10 +69,11 @@ watchEffect(() =>
     gap: 0.4rem;
     align-items: center;
     justify-content: center;
-    color: var(--tx-trans-3);
-    background-color: var(--bg-trans-1);
-    padding: 0.5rem;
+    color: var(--tx-main);
+    background-color: var(--bg-main-lighter);
+    padding: 0.5rem 1rem;
     border-radius: $border-radius;
+    align-self: flex-end;
 
     svg {
       font-size: 0.9rem;
@@ -74,9 +81,9 @@ watchEffect(() =>
   }
 
   .notification {
-    background-color: var(--bg-main-lighter);
+    background-color: var(--bg-main-light);
     border-radius: $border-radius;
-    padding: 0.5rem 1rem 1rem;
+    padding: 0.4rem 1rem 1.2rem;
     flex-direction: column;
 
     .row {
@@ -87,6 +94,11 @@ watchEffect(() =>
     .body {
       display: inline;
       text-align: left;
+    }
+
+    .close {
+      margin-bottom: -0.4rem;
+      opacity: 0.5;
     }
   }
 }
