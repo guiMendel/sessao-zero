@@ -29,8 +29,6 @@ export const useJoinGuild = () => {
 
             // Se requer admissao, apenas solicita
             if (guild.requireAdmission) {
-              alert('success', 'Solicitação enviada!')
-
               // Se ja solicitou, cancela a solicitação
               if (playerHasRequestedAdmission)
                 return removeRelation(vase, player, 'admissionRequests', [
@@ -42,6 +40,8 @@ export const useJoinGuild = () => {
                 type: 'admissionRequest',
                 params: { guild, player },
               })
+
+              alert('success', 'Solicitação enviada!')
 
               return addRelation(vase, player, 'admissionRequests', [guild])
             }

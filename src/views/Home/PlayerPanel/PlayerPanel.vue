@@ -4,6 +4,7 @@ import {
   Button,
   Divisor,
   Drawer,
+  NotificationsBadge,
   PlayerPreview,
   ProfilePicture,
   Typography,
@@ -40,10 +41,9 @@ const unreadNotifications = computed(
   <template v-if="player != undefined">
     <div class="player-panel-toggle">
       <!-- Contagem de notificacoes -->
-      <div v-if="unreadNotifications" class="notification-count">
-        {{ unreadNotifications }}
-      </div>
+      <NotificationsBadge :count="unreadNotifications" />
 
+      <!-- Foto de perfil -->
       <ProfilePicture class="picture" :player="player" @click="isOpen = true" />
     </div>
 
@@ -55,6 +55,7 @@ const unreadNotifications = computed(
       <div class="menu">
         <!-- Notificações -->
         <Button variant="colored" @click="goToNotifications" class="option">
+          <NotificationsBadge :count="unreadNotifications" />
           <font-awesome-icon :icon="['fas', 'envelope']" />
           <Typography>notificações</Typography>
         </Button>
@@ -86,24 +87,6 @@ const unreadNotifications = computed(
 
   .picture {
     @include bevel(var(--tx-main-light));
-  }
-
-  .notification-count {
-    position: absolute;
-    left: -0.7rem;
-    top: -0.3rem;
-
-    background-color: var(--error-lighter);
-    width: 1.2rem;
-    height: 1.2rem;
-    border-radius: $border-radius;
-    align-items: center;
-    justify-content: center;
-
-    color: var(--tx-white);
-    @include high-contrast-border;
-    font-size: 0.7rem;
-    font-weight: 900;
   }
 }
 

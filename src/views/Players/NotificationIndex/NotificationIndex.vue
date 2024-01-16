@@ -3,6 +3,7 @@ import { useNotification } from '@/api/notifications'
 import { useCurrentPlayer } from '@/api/players'
 import { LoadingSpinner, Typography } from '@/components'
 import { toValue, watchEffect } from 'vue'
+import knightImage from '../../../assets/happy-knight-and-donkey.png'
 
 const { player } = useCurrentPlayer()
 const { deleteNotification, readNotification } = useNotification()
@@ -24,26 +25,34 @@ const deleteAll = () =>
   <div v-if="player" class="notifications">
     <Typography class="heading" variant="subtitle">Notificações</Typography>
 
-    <Typography class="burn-it-all" @click="deleteAll">
-      limpar todas <font-awesome-icon :icon="['fas', 'fire']" />
-    </Typography>
+    <template v-if="toValue(player.notifications).length > 0">
+      <Typography class="burn-it-all" @click="deleteAll">
+        limpar todas <font-awesome-icon :icon="['fas', 'fire']" />
+      </Typography>
 
-    <div
-      class="notification"
-      v-for="notification in toValue(player.notifications)"
-      :key="notification.id"
-    >
-      <div class="row">
-        <!-- Delete -->
-        <font-awesome-icon
-          :icon="['fas', 'xmark']"
-          @click="deleteNotification(notification.id)"
-          class="close"
-        />
+      <div
+        class="notification"
+        v-for="notification in toValue(player.notifications)"
+        :key="notification.id"
+      >
+        <div class="row">
+          <!-- Delete -->
+          <font-awesome-icon
+            :icon="['fas', 'xmark']"
+            @click="deleteNotification(notification.id)"
+            class="close"
+          />
+        </div>
+
+        <Typography class="body" v-html="notification.body" />
       </div>
+    </template>
 
-      <Typography class="body" v-html="notification.body" />
-    </div>
+    <template v-else>
+      <Typography>Tudo em ordem!</Typography>
+
+      <img class="knight-image" :src="knightImage" />
+    </template>
   </div>
 
   <LoadingSpinner v-else />
@@ -100,6 +109,12 @@ const deleteAll = () =>
       margin-bottom: -0.4rem;
       opacity: 0.5;
     }
+  }
+
+  .knight-image {
+    align-self: center;
+    margin-top: 3rem;
+    width: 75%;
   }
 }
 </style>
