@@ -3,12 +3,11 @@ import { isMember, useCurrentGuild } from '@/api/guilds'
 import { useCurrentPlayer } from '@/api/players'
 import { BackButton, LoadingSpinner } from '@/components'
 import { setTitle } from '@/utils/functions'
-import { storeToRefs } from 'pinia'
 import { computed, watchEffect } from 'vue'
 import { GuildPanel } from './GuildPanel'
 import { JoinGuildPrompt } from './JoinGuildPrompt'
 
-const { guild } = storeToRefs(useCurrentGuild())
+const { guild } = useCurrentGuild()
 const { player } = useCurrentPlayer()
 
 /** Quando o jogador nao eh membro nem dono da guilda */

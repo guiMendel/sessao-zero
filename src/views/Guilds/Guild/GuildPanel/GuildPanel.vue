@@ -43,6 +43,11 @@ const leaveGuild = () =>
       router.push({ name: 'home' })
     })
     .catch(() => {})
+
+const goToMembers = () => {
+  isOpen.value = false
+  router.push({ name: 'guild-members' })
+}
 </script>
 
 <template>
@@ -78,7 +83,7 @@ const leaveGuild = () =>
       >
 
       <!-- Ver membros -->
-      <Button variant="colored"
+      <Button variant="colored" @click="goToMembers"
         ><font-awesome-icon :icon="['fas', 'users']" /> membros</Button
       >
 

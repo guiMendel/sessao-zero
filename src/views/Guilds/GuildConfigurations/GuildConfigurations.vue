@@ -7,15 +7,12 @@ import {
   ToggleField,
   Typography,
 } from '@/components'
-import { useInput, useAlert } from '@/stores'
+import { useAlert, useInput } from '@/stores'
 import { fieldRef } from '@/utils/functions'
 import { useAutosaveForm } from '@/utils/hooks'
-import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 
-const currentGuild = useCurrentGuild()
-const { guild } = storeToRefs(currentGuild)
-const { update, deleteForever } = currentGuild
+const { guild, deleteForever, update } = useCurrentGuild()
 
 if (!guild.value) throw new Error('Falha ao encontrar guilda')
 

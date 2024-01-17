@@ -8,6 +8,7 @@ import {
   CurrentGuilds,
   Guild,
   GuildConfigurations,
+  GuildMembers,
 } from '@/views/Guilds'
 import GuildInvitation from '@/views/Guilds/GuildInvitation.vue'
 import { Home } from '@/views/Home'
@@ -113,6 +114,12 @@ const routes: Array<RouteRecordRaw> = addFirstVisitPrompts([
             name: 'guild-configurations',
             component: GuildConfigurations,
             meta: { mustOwnGuild: true, title: 'Configurações de guilda' },
+          },
+          {
+            path: 'members',
+            name: 'guild-members',
+            component: GuildMembers,
+            meta: { title: 'Membros da guilda' },
           },
         ],
       },

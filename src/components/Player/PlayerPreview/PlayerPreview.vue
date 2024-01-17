@@ -1,40 +1,59 @@
 <script setup lang="ts">
 import { Vase } from '@/api'
-import { Typography } from '@/components'
+import { LoadingSpinner, Typography } from '@/components'
 import { Resource } from '@/firevase/resources'
 import { useRouter } from 'vue-router'
 import { ProfilePicture } from '..'
 
-const props = defineProps<{
-  player: Resource<Vase, 'players'>
-}>()
+const props = withDefaults(
+  defineProps<{
+    player: Resource<Vase, 'players'> | undefined
+    background?: 'none' | 'main'
+    profileIcon?: string
+    showProfileButton?: boolean
+  }>(),
+  { background: 'none', showProfileButton: true }
+)
 
 const router = useRouter()
 
 const openProfilePage = () =>
+  props.player &&
   router.push({ name: 'player', params: { playerId: props.player.id } })
 </script>
 
 <template>
-  <div class="player-preview" @click="openProfilePage">
-    <!-- Profile picture -->
-    <ProfilePicture :player="player" />
+  <div
+    class="player-preview"
+    :class="`background-${background}`"
+    @click="openProfilePage"
+  >
+    <LoadingSpinner v-if="!player" />
 
-    <div class="text">
-      <!-- Nome -->
-      <Typography class="name">{{ player.name }}</Typography>
+    <template v-else>
+      <!-- Profile picture -->
+      <ProfilePicture
+        :background="background === 'main' ? 'main-washed' : 'main-lighter'"
+        :player="player"
+        :profile-icon="profileIcon"
+      />
 
-      <!-- Apelido -->
-      <Typography variant="paragraph-secondary" class="nickname"
-        >@{{ player.nickname }}</Typography
-      >
-    </div>
+      <div class="text">
+        <!-- Nome -->
+        <Typography class="name">{{ player.name }}</Typography>
 
-    <div class="see-profile">
-      <Typography variant="paragraph-secondary">perfil</Typography>
+        <!-- Apelido -->
+        <Typography variant="paragraph-secondary" class="nickname"
+          >@{{ player.nickname }}</Typography
+        >
+      </div>
 
-      <font-awesome-icon :icon="['fas', 'chevron-right']" />
-    </div>
+      <div v-if="showProfileButton" class="see-profile">
+        <Typography variant="paragraph-secondary">perfil</Typography>
+
+        <font-awesome-icon :icon="['fas', 'chevron-right']" />
+      </div>
+    </template>
   </div>
 </template>
 
@@ -44,6 +63,13 @@ const openProfilePage = () =>
 .player-preview {
   align-items: center;
   gap: 1rem;
+
+  &.background-main {
+    background-color: var(--bg-main-lighter);
+    border-radius: $border-radius;
+    padding: 0.5rem;
+    @include bevel(var(--main-light));
+  }
 
   .text {
     flex-direction: column;

@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+import { defineStore } from '@/stores/defineStore'
 import { watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Guild } from '.'

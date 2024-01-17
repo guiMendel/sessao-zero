@@ -2,7 +2,14 @@
 import { Player } from '@/api/players'
 import { computed } from 'vue'
 
-const props = defineProps<{ player: Player }>()
+const props = withDefaults(
+  defineProps<{
+    player: Player
+    background: 'main-lighter' | 'main-washed'
+    profileIcon?: string
+  }>(),
+  { background: 'main-lighter' }
+)
 
 // Get initials from name
 const initials = computed(() =>
@@ -15,8 +22,15 @@ const initials = computed(() =>
 </script>
 
 <template>
-  <div class="portrait">
+  <div class="portrait" :class="`background-${background}`">
     <span class="initials">{{ initials }}</span>
+
+    <!-- Icon -->
+    <font-awesome-icon
+      class="profile-icon"
+      v-if="profileIcon"
+      :icon="['fas', profileIcon]"
+    />
   </div>
 </template>
 
@@ -24,7 +38,6 @@ const initials = computed(() =>
 @import '@/styles/variables.scss';
 
 .portrait {
-  background-color: var(--bg-main-lighter);
   color: var(--tx-main);
 
   @include high-contrast-border;
@@ -37,11 +50,28 @@ const initials = computed(() =>
 
   padding: 0.4rem;
 
+  width: 2.9rem;
+  height: 2.9rem;
+  position: relative;
+
+  &.background-main-lighter {
+    background-color: var(--bg-main-lighter);
+  }
+
+  &.background-main-washed {
+    background-color: var(--bg-main-washed);
+  }
+
   .initials {
     font-family: 'Lilita One', monospace;
   }
 
-  width: 2.9rem;
-  height: 2.9rem;
+  .profile-icon {
+    position: absolute;
+    top: -0.3rem;
+    right: -0.3rem;
+    font-size: 1.2rem;
+    color: var(--tx-main-dark);
+  }
 }
 </style>
