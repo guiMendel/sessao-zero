@@ -1,14 +1,21 @@
 <script setup lang="ts">
 import { useCurrentGuild } from '@/api/guilds'
+import { useCurrentPlayer } from '@/api/players'
 import {
   Divisor,
+  DropdownIcon,
   LoadingSpinner,
   PlayerPreview,
   Typography,
 } from '@/components'
-import { toValue } from 'vue'
+import { computed, toValue } from 'vue'
 
 const { guild } = useCurrentGuild()
+const { player } = useCurrentPlayer()
+
+const isOwner = computed(
+  () => guild.value && guild.value?.ownerUid === player.value?.id
+)
 </script>
 
 <template>
@@ -36,13 +43,21 @@ const { guild } = useCurrentGuild()
       <template v-if="toValue(guild.players).length > 0">
         <Divisor class="divisor" />
 
-        <PlayerPreview
+        <div
+          class="player-wrapper"
           v-for="member in toValue(guild.players)"
-          :player="member"
           :key="member.id"
-          background="main"
-          :show-profile-button="false"
-        />
+        >
+          <PlayerPreview
+            :player="member"
+            background="main"
+            :show-profile-button="false"
+          />
+
+          <DropdownIcon v-if="isOwner" class="actions"
+            ><Typography>content goes here!</Typography></DropdownIcon
+          >
+        </div>
       </template>
     </div>
   </div>
@@ -80,6 +95,18 @@ const { guild } = useCurrentGuild()
 
     .divisor {
       color: var(--main-light);
+    }
+
+    .player-wrapper {
+      position: relative;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: center;
+
+      .actions {
+        position: absolute;
+        right: 1.5rem;
+      }
     }
   }
 }

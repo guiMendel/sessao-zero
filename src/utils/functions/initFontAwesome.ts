@@ -24,6 +24,7 @@ import {
   faDiceTwo,
   faDoorClosed,
   faDoorOpen,
+  faEllipsisVertical,
   faEnvelope,
   faEye,
   faEyeSlash,
@@ -98,7 +99,8 @@ export const initFontAwesome = (): [
     faUserGroup,
     faScroll,
     faMagnifyingGlassPlus,
-    faUser
+    faUser,
+    faEllipsisVertical
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]
