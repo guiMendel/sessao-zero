@@ -1,13 +1,23 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Dropdown } from '..'
+import { Dropdown, DropdownProps } from '../Dropdown'
 import { onClickOutside } from '@vueuse/core'
 
-withDefaults(defineProps<{ icon: string }>(), { icon: 'ellipsis-vertical' })
+withDefaults(
+  defineProps<
+    Pick<
+      DropdownProps,
+      'align' | 'marginX' | 'marginY' | 'boundingContainer'
+    > & { icon?: string }
+  >(),
+  {
+    icon: 'ellipsis-vertical',
+  }
+)
 
 const isOpen = ref(false)
 
-const target = ref(null)
+const target = ref<HTMLElement | null>(null)
 
 onClickOutside(target, () => (isOpen.value = false))
 </script>
@@ -15,9 +25,17 @@ onClickOutside(target, () => (isOpen.value = false))
 <template>
   <div class="dropdown-icon" @click="isOpen = !isOpen" ref="target">
     <font-awesome-icon :icon="['fas', icon]" />
-
-    <Dropdown :is-open="isOpen"><slot></slot></Dropdown>
   </div>
+
+  <Dropdown
+    :is-open="isOpen"
+    :anchor="target"
+    :align="align"
+    :margin-x="marginX"
+    :margin-y="marginY"
+    :bounding-container="boundingContainer"
+    ><slot></slot
+  ></Dropdown>
 </template>
 
 <style scoped lang="scss">
@@ -27,5 +45,6 @@ onClickOutside(target, () => (isOpen.value = false))
   font-size: 1.4rem;
   color: var(--tx-main-dark);
   border: 0.7rem solid var(--trans);
+  cursor: pointer;
 }
 </style>

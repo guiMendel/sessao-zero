@@ -54,9 +54,12 @@ const isOwner = computed(
             :show-profile-button="false"
           />
 
-          <DropdownIcon v-if="isOwner" class="actions"
-            ><Typography>content goes here!</Typography></DropdownIcon
-          >
+          <div class="actions">
+            <DropdownIcon v-if="isOwner">
+              <p>Option 1</p>
+              <p>Option 2</p>
+            </DropdownIcon>
+          </div>
         </div>
       </template>
     </div>
