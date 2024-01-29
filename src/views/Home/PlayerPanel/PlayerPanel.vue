@@ -44,7 +44,12 @@ const unreadNotifications = computed(
       <NotificationsBadge :count="unreadNotifications" />
 
       <!-- Foto de perfil -->
-      <ProfilePicture class="picture" :player="player" @click="isOpen = true" />
+      <ProfilePicture
+        background="main-lighter"
+        class="picture"
+        :player="player"
+        @click="isOpen = true"
+      />
     </div>
 
     <Drawer v-model="isOpen" class="player-panel">

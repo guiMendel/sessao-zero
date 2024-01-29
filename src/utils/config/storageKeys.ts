@@ -1,3 +1,5 @@
+// TODO: remover esses objetos e fazer as funcoes de storage serem strongly typed 
+
 /** Guarda as string que devem ser utilizadas como chaves quando for realizado o acesso ao session storage */
 export const sessionStorageKeys = {
   /** Chave para informacoes de convite para guilda */

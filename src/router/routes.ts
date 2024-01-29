@@ -1,4 +1,3 @@
-import { makeGuildInvitation } from '@/api/guilds'
 import Adventure from '@/views/Adventures/Adventure.vue'
 import AdventuresIndex from '@/views/Adventures/AdventuresIndex.vue'
 import CreateAdventure from '@/views/Adventures/CreateAdventure.vue'
@@ -18,6 +17,7 @@ import Player from '@/views/Players/Player.vue'
 import { AccessibilityPrompt, BetaWelcome } from '@/views/Prompts'
 import { RouteRecordRaw } from 'vue-router'
 import { addFirstVisitPrompts } from './firstVisitPrompts'
+import { generateLink } from '@/api/guilds'
 
 /** As rotas da aplicacao */
 const routes: Array<RouteRecordRaw> = addFirstVisitPrompts([
@@ -35,7 +35,10 @@ const routes: Array<RouteRecordRaw> = addFirstVisitPrompts([
   },
   {
     // Nessa rota, adiciona as informacoes de convite na session storage e redireciona para home
-    path: makeGuildInvitation(false),
+    path: generateLink(':guildId', {
+      fullPath: false,
+      overrideToken: ':token',
+    }),
     props: true,
     component: GuildInvitation,
     name: 'guild-invitation',

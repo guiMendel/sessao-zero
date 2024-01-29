@@ -33,6 +33,8 @@ import {
   faHandPointLeft,
   faHandPointRight,
   faHeart,
+  faKey,
+  faLink,
   faLock,
   faMagnifyingGlassPlus,
   faPaperPlane,
@@ -102,7 +104,9 @@ export const initFontAwesome = (): [
     faMagnifyingGlassPlus,
     faUser,
     faEllipsisVertical,
-    faUserLargeSlash
+    faUserLargeSlash,
+    faLink,
+    faKey
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]

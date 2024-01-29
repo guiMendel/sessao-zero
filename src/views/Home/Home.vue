@@ -1,5 +1,14 @@
 <script setup lang="ts">
+import { useGuildInvitation } from '@/api/guilds'
+import { useCurrentPlayer } from '@/api/players'
+import { watch } from 'vue'
 import { PlayerPanel } from './PlayerPanel'
+
+// Consome convites para guildas
+const { consumeLink } = useGuildInvitation()
+const { player } = useCurrentPlayer()
+
+watch(player, consumeLink, { immediate: true })
 </script>
 
 <template>

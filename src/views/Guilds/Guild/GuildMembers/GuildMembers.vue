@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Vase, vase } from '@/api'
-import { useCurrentGuild } from '@/api/guilds'
-import { useCurrentPlayer } from '@/api/players'
+import { generateLink, useCurrentGuild } from '@/api/guilds'
+import { isGuildMaster, useCurrentPlayer } from '@/api/players'
 import {
+  Button,
   Divisor,
   DropdownIcon,
   LoadingSpinner,
@@ -12,7 +13,7 @@ import {
 import { removeRelation } from '@/firevase/relations'
 import { HalfResource } from '@/firevase/resources'
 import { useAlert, useInput } from '@/stores'
-import { computed, toValue } from 'vue'
+import { computed, ref, toValue } from 'vue'
 
 const { guild } = useCurrentGuild()
 const { player } = useCurrentPlayer()
@@ -38,6 +39,23 @@ const kickPlayer = (player: HalfResource<Vase, 'players'>) =>
       alert('success', `${player.name} não é mais membro da guilda`)
     })
     .catch(() => {})
+
+const manualLinkOutput = ref('')
+
+const getInviteLink = () => {
+  if (!guild.value) return
+
+  const link = generateLink(guild.value.id, { fullPath: true })
+
+  navigator.clipboard
+    .writeText(link)
+    .then(() => alert('success', 'Link copiado!'))
+    .catch(() => {
+      manualLinkOutput.value = link
+
+      alert('error', 'Falha em copiar link. Copie manualmente, por favor')
+    })
+}
 </script>
 
 <template>
@@ -47,6 +65,26 @@ const kickPlayer = (player: HalfResource<Vase, 'players'>) =>
     <Typography variant="subtitle">Membros</Typography>
 
     <Typography class="sub-heading">{{ guild.name }}</Typography>
+
+    <div v-if="player && player.id === guild.ownerUid" class="master-actions">
+      <Button class="button" variant="colored" @click="getInviteLink">
+        <font-awesome-icon :icon="['fas', 'link']" />
+        convidar
+      </Button>
+
+      <Button class="button" variant="colored">
+        <font-awesome-icon :icon="['fas', 'key']" />
+        admitir
+      </Button>
+    </div>
+
+    <div class="manual-link-output" v-if="manualLinkOutput">
+      <Typography variant="paragraph-secondary" class="heading"
+        >link de convite:</Typography
+      >
+
+      <Typography class="link">{{ manualLinkOutput }}</Typography>
+    </div>
 
     <div class="members">
       <!-- Perfil do mestre -->
@@ -106,6 +144,19 @@ const kickPlayer = (player: HalfResource<Vase, 'players'>) =>
     color: var(--tx-trans-45);
   }
 
+  .manual-link-output {
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+
+    .link {
+      background-color: var(--bg-main-lighter);
+      word-break: break-all;
+      padding: 1rem;
+      border-radius: $border-radius;
+    }
+  }
+
   .members {
     margin-top: 1rem;
     gap: 1.5rem;
@@ -145,6 +196,18 @@ const kickPlayer = (player: HalfResource<Vase, 'players'>) =>
         }
       }
     }
+  }
+}
+</style>
+
+<style lang="scss">
+.guild-members .master-actions {
+  align-items: center;
+  gap: 0.5rem;
+
+  .button {
+    flex: 1;
+    min-width: unset;
   }
 }
 </style>
