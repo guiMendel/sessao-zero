@@ -47,6 +47,7 @@ import {
   faTrash,
   faUser,
   faUserGroup,
+  faUserLargeSlash,
   faUsers,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons'
@@ -100,7 +101,8 @@ export const initFontAwesome = (): [
     faScroll,
     faMagnifyingGlassPlus,
     faUser,
-    faEllipsisVertical
+    faEllipsisVertical,
+    faUserLargeSlash
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]

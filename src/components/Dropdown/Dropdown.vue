@@ -133,7 +133,7 @@ useResizeObserver(dropdown, adjustIntoScreen)
 
   background-color: var(--bg-main-washed);
   padding: 0.5rem;
-  border-radius: $border-radius / 2;
+  border-radius: calc($border-radius / 2);
   @include high-contrast-border;
 
   opacity: 0.9;
