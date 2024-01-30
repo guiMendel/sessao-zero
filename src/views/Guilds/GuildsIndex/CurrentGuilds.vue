@@ -8,19 +8,11 @@ import { computed, toValue, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { GuildList } from './GuildList'
 
-const { syncList, create } = useGuild()
+const { create } = useGuild()
 
 const { player } = useCurrentPlayer()
 
-const guilds = syncList()
-
-const joinedGuilds = computed(() =>
-  player.value == undefined
-    ? []
-    : guilds.value.filter((guild) =>
-        toValue(guild.players).some((member) => member.id === player.value!.id)
-      )
-)
+const joinedGuilds = computed(() => toValue(player.value?.guilds) ?? [])
 
 const router = useRouter()
 
@@ -36,31 +28,26 @@ watchEffect(() => {
   if (
     player.value == undefined ||
     isGuildMaster(player.value) ||
-    !hasLoaded(player, [guilds, 'players'])
+    !hasLoaded([player, 'guilds'])
   )
     return
 
   // Verifica se faz parte de alguma guilda
-  if (
-    guilds.value.filter((guild) =>
-      toValue(guild.players).some((member) => member.id === player.value!.id)
-    ).length == 0
-  )
-    addNewGuild()
+  if (joinedGuilds.value.length == 0) addNewGuild()
 })
 
 const { getStringInput } = useInput()
 
 const createGuild = () =>
   getStringInput({
-    cancellable: true,
+    cancelValue: '',
     messageHtml: 'Qual será o nome da guilda?',
     inputFieldName: 'nome',
     validator: (name) => (name.length > 2 ? true : 'Mínimo de 2 caracteres'),
     submitButton: { label: 'criar', buttonProps: { variant: 'colored' } },
+  }).then((name) => {
+    if (name) create(name)
   })
-    .then(create)
-    .catch(() => {})
 </script>
 
 <template>

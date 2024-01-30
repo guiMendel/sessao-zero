@@ -30,7 +30,7 @@ const { getBooleanInput } = useInput()
 
 const leaveGuild = () =>
   getBooleanInput({
-    cancellable: true,
+    cancelValue: false,
     messageHtml: `Tem certeza de que deseja abandonar a guilda <b>${props.guild.name}</b>?`,
     trueButton: { buttonProps: { variant: 'colored' }, label: 'abandonar' },
     falseButton: { label: 'cancelar' },

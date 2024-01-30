@@ -2,10 +2,9 @@
 import { Button, InputField } from '@/components'
 import { useInput } from '@/stores'
 import { fieldRef } from '@/utils/functions'
-import { storeToRefs } from 'pinia'
 import { onBeforeUnmount, watch } from 'vue'
 
-const { currentInput } = storeToRefs(useInput())
+const { currentInput } = useInput()
 
 const fields = {
   string: fieldRef<string>('resposta', {
@@ -27,23 +26,28 @@ const submitString = () => {
     currentInput.value!.resolve(fields.string.value)
 }
 
-const rejectOnEscape = ({ key }: KeyboardEvent) => {
-  if (key === 'Escape') currentInput.value?.reject?.()
+const cancel = () =>
+  currentInput.value?.cancelValue
+    ? currentInput.value.resolve(currentInput.value.cancelValue)
+    : undefined
+
+const cancelOnEscape = ({ key }: KeyboardEvent) => {
+  if (key === 'Escape') cancel()
 }
 
-window.addEventListener('keyup', rejectOnEscape)
+window.addEventListener('keyup', cancelOnEscape)
 
-onBeforeUnmount(() => window.removeEventListener('keyup', rejectOnEscape))
+onBeforeUnmount(() => window.removeEventListener('keyup', cancelOnEscape))
 </script>
 
 <template>
   <Transition name="transition">
-    <div v-if="currentInput" @click.self="currentInput.reject" class="backdrop">
+    <div v-if="currentInput" @click.self="cancel" class="backdrop">
       <div class="input-getter">
         <!-- Close button -->
         <div
-          v-if="currentInput.reject"
-          @click="currentInput.reject"
+          v-if="currentInput.cancelValue != undefined"
+          @click="cancel"
           class="close"
         >
           <font-awesome-icon :icon="['fas', 'xmark']" />

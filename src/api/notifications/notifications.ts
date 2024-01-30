@@ -11,6 +11,11 @@ export const notificationTypes = {
     makeBody: ({ guild, player }: { player: Player; guild: Guild }) =>
       `<b>${guild.name}</b>: ${player.name} solicitou admissão`,
   },
+
+  playerAcceptedInvitation: {
+    makeBody: ({ guild, player }: { player: Player; guild: Guild }) =>
+      `<b>${guild.name}</b>: ${player.name} entrou na guilda por convite`,
+  },
 } satisfies Record<string, NotificationType>
 
 export type NotificationTypes = typeof notificationTypes

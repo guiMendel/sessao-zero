@@ -7,19 +7,19 @@ type AllowedInputTypes = string | boolean
 
 type ButtonConfig = { label?: string; buttonProps?: ButtonProps }
 
-type GeneralGetter = {
+type GeneralGetter<T extends AllowedInputTypes> = {
   messageHtml: string
-  cancellable: boolean
+  cancelValue?: T
   messageClass?: string
 }
 
-type BooleanGetter = GeneralGetter & {
+type BooleanGetter = GeneralGetter<boolean> & {
   type: 'boolean'
   trueButton?: ButtonConfig
   falseButton?: ButtonConfig
 }
 
-type StringGetter = GeneralGetter & {
+type StringGetter = GeneralGetter<string> & {
   type: 'string'
   inputFieldName?: string
   initialValue?: string
@@ -29,14 +29,12 @@ type StringGetter = GeneralGetter & {
 
 type InputGetter = StringGetter | BooleanGetter
 
-export const cancelMessage = 'Usuario cancelou'
-
 export const useInput = defineStore('input', () => {
   /** Current input getter in action */
   const currentInput = ref<
     | {
         resolve: (value: AllowedInputTypes) => void
-        reject?: () => void
+        cancelValue?: AllowedInputTypes
         getter: InputGetter
       }
     | undefined
@@ -47,31 +45,23 @@ export const useInput = defineStore('input', () => {
     currentInput.value = undefined
   }
 
-  const makeReject = (cancellable: boolean, reject: (reason: string) => void) =>
-    cancellable
-      ? () => {
-          reject(cancelMessage)
-          currentInput.value = undefined
-        }
-      : undefined
-
   return {
     currentInput,
 
     getStringInput: (inputGetter: Omit<StringGetter, 'type'>) =>
-      new Promise<string>((resolve, reject) => {
+      new Promise<string>((resolve) => {
         currentInput.value = {
           resolve: makeResolve(resolve),
-          reject: makeReject(inputGetter.cancellable, reject),
+          cancelValue: inputGetter.cancelValue,
           getter: { ...inputGetter, type: 'string' },
         }
       }),
 
     getBooleanInput: (inputGetter: Omit<BooleanGetter, 'type'>) =>
-      new Promise<boolean>((resolve, reject) => {
+      new Promise<boolean>((resolve) => {
         currentInput.value = {
           resolve: makeResolve(resolve),
-          reject: makeReject(inputGetter.cancellable, reject),
+          cancelValue: inputGetter.cancelValue,
           getter: { ...inputGetter, type: 'boolean' },
         }
       }),

@@ -73,6 +73,7 @@ const openProfilePage = () =>
 
   .text {
     flex-direction: column;
+    text-align: left;
 
     .name {
       font-weight: 500;

@@ -48,7 +48,7 @@ export const Default: Story = (args) => ({
 
     const getBoolean = () =>
       getBooleanInput({
-        cancellable: args.cancellable,
+        cancelValue: false,
         messageHtml: 'Sim ou não?',
       })
         .then((value) => (result.value = value))
@@ -56,7 +56,7 @@ export const Default: Story = (args) => ({
 
     const getString = () =>
       getStringInput({
-        cancellable: args.cancellable,
+        cancelValue: '',
         messageHtml: 'Deixa um cometario',
       })
         .then((value) => (result.value = value))
@@ -73,7 +73,7 @@ export const String: Story = (args) => ({
 
     const initialize = () => {
       getStringInput({
-        cancellable: args.cancellable,
+        cancelValue: '',
         messageHtml: 'Escreva algo aqui',
       })
         .then(initialize)
@@ -91,7 +91,7 @@ export const Boolean: Story = (args) => ({
 
     const initialize = () => {
       getBooleanInput({
-        cancellable: args.cancellable,
+        cancelValue: false,
         messageHtml: 'Vai dizer?',
       })
         .then(initialize)

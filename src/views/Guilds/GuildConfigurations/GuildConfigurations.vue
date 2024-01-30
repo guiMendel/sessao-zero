@@ -55,7 +55,7 @@ const deleteGuild = () =>
   // Precisa de uma confirmaçao para excluir a guilda
   guild.value &&
   getStringInput({
-    cancellable: true,
+    cancelValue: '',
     inputFieldName: 'nome da guilda',
     validator: (value) =>
       guild.value && value == guild.value.name ? true : 'nomes nao batem',
@@ -66,7 +66,9 @@ Tem certeza de que deseja deletar a guilda permanentemente?\
 <br />\
 Digite <code>${guild.value.name}</code> para confirmar.`,
   })
-    .then(() =>
+    .then((name) => {
+      if (!name) return
+
       deleteForever()
         .then(() => router.push({ name: 'home' }))
         .catch((error) => {
@@ -74,7 +76,7 @@ Digite <code>${guild.value.name}</code> para confirmar.`,
 
           notify('error', 'Algo deu errado, tente novamente mais tarde')
         })
-    )
+    })
     .catch(() => {})
 </script>
 

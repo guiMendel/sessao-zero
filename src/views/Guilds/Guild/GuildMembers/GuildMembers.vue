@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Vase, vase } from '@/api'
 import { generateLink, useCurrentGuild } from '@/api/guilds'
-import { isGuildMaster, useCurrentPlayer } from '@/api/players'
+import { useCurrentPlayer } from '@/api/players'
 import {
   Button,
   Divisor,
@@ -27,18 +27,16 @@ const isOwner = computed(
 
 const kickPlayer = (player: HalfResource<Vase, 'players'>) =>
   getBooleanInput({
-    cancellable: true,
+    cancelValue: false,
     messageHtml: `Deseja expulsar o jogador <b>${player.name}</b>?`,
     trueButton: { buttonProps: { variant: 'colored' } },
+  }).then(async (decision) => {
+    if (!decision || !guild.value) return
+
+    await removeRelation(vase, guild.value, 'players', [player])
+
+    alert('success', `${player.name} não é mais membro da guilda`)
   })
-    .then(async (decision) => {
-      if (!decision || !guild.value) return
-
-      await removeRelation(vase, guild.value, 'players', [player])
-
-      alert('success', `${player.name} não é mais membro da guilda`)
-    })
-    .catch(() => {})
 
 const manualLinkOutput = ref('')
 

@@ -1,12 +1,12 @@
+import { useNotification } from '@/api/notifications'
 import { useCurrentPlayer } from '@/api/players'
+import { useAlert } from '@/stores'
 import { sessionStorageKeys } from '@/utils/config'
 import { eraseInStorage, getFromStorage, setInStorage } from '@/utils/functions'
-import { encrypt } from '@/utils/functions/encryption'
-import { useRoute } from 'vue-router'
-import { useGuild } from '..'
-import { useAlert, useInput } from '@/stores'
-import { addRelation } from '@/firevase/relations'
-import { vase } from '@/api'
+import { decrypt, encrypt } from '@/utils/functions/encryption'
+import { toValue } from 'vue'
+import { useRouter } from 'vue-router'
+import { isMember, useGuild, useJoinGuild } from '..'
 
 /** Por quanto tempo os convites devem ser validos */
 const invitationLifetimeDays = 2
@@ -26,22 +26,26 @@ export const generateLink = (
   guildId: string,
   { fullPath, overrideToken }: { fullPath: boolean; overrideToken?: string }
 ) => {
-  const today = new Date()
+  const expiration = new Date()
+
+  expiration.setDate(expiration.getDate() + invitationLifetimeDays)
 
   return `${fullPath ? window.location.origin : ''}/${guildId}/${
-    overrideToken ??
-    encrypt(today.setDate(today.getDate() + invitationLifetimeDays).toString())
+    overrideToken ?? encrypt(expiration.toString())
   }`
 }
 
 export const useGuildInvitation = () => {
-  const route = useRoute()
+  const router = useRouter()
   const { player } = useCurrentPlayer()
   const { get: getGuild } = useGuild()
-  const { getBooleanInput } = useInput()
   const { alert } = useAlert()
+  const { notifyPlayer } = useNotification()
+  const joinGuild = useJoinGuild()
 
   const storeLink = () => {
+    const route = router.currentRoute.value
+
     if (route.name !== 'guild-invitation') return
 
     const token = route.params['token'] as string
@@ -54,50 +58,66 @@ export const useGuildInvitation = () => {
     )
   }
 
-  const consumeLink = async () => {
-    if (!player.value) return
+  /** Retorna verdadeiro caso tenha cosneguido entrar na guilda */
+  const consumeLink = async (): Promise<boolean> => {
+    if (!player.value) return false
 
     const invitation = getFromStorage<Invitation>(
       sessionStorageKeys.guildInvitation,
       'session'
     )
 
-    if (!invitation) return
+    if (!invitation) return false
 
     eraseInStorage(sessionStorageKeys.guildInvitation, 'session')
 
     const { guildId, token } = invitation
 
     // Valida o token
-    const tokenValidty = new Date(token)
+    const tokenValidty = new Date(decrypt(token))
 
     // Pega as informacoes
     const guild = await getGuild(guildId)
 
     if (!isValidDate(tokenValidty) || !guild) {
       alert('error', 'Convite de guilda inválido')
-      return
+      return false
     }
 
     if (new Date() > tokenValidty) {
       alert('error', 'Convite expirado')
-      return
+      return false
     }
 
-    // Verificar se jogador aceita entrar
+    // Ignora se o jogador ja esta na guilda
+    if (isMember(player.value, guild)) {
+      router.push({ name: 'adventures', params: { guildId: guild.id } })
+
+      alert('success', 'Já é membro desta guilda')
+
+      return false
+    }
+
+    router.push({ name: 'adventures', params: { guildId: guild.id } })
+
+    const admissionRequested = toValue(player.value?.admissionRequests)?.some(
+      (requestedGuild) => requestedGuild.id === guild.id
+    )
+
     try {
-      const decision = await getBooleanInput({
-        cancellable: true,
-        messageHtml: `Deseja aceitar o convite para a guilda <b>${guild.name}</b>?`,
-        trueButton: { buttonProps: { variant: 'colored' } },
-      })
+      const joined = await joinGuild(player.value, guild, admissionRequested)
 
-      if (!decision) return
-    } catch {
-      return
+      if (!joined) return false
+    } catch (error) {
+      alert('error', error as string)
     }
 
-    if (player.value) addRelation(vase, guild, 'players', [player.value])
+    notifyPlayer(guild.ownerUid, {
+      type: 'playerAcceptedInvitation',
+      params: { guild, player: player.value },
+    })
+
+    return true
   }
 
   return { storeLink, consumeLink }
