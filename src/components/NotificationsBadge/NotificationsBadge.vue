@@ -17,6 +17,7 @@ defineProps<{
   position: absolute;
   left: -0.7rem;
   top: -0.3rem;
+  z-index: 100;
 
   background-color: var(--bg-warning);
   color: var(--tx-warning-darker);

@@ -13,7 +13,9 @@ import {
   faChevronDown,
   faChevronRight,
   faCircle,
+  faCircleCheck,
   faCircleUser,
+  faCircleXmark,
   faCompass,
   faCrown,
   faDiceFive,
@@ -106,7 +108,9 @@ export const initFontAwesome = (): [
     faEllipsisVertical,
     faUserLargeSlash,
     faLink,
-    faKey
+    faKey,
+    faCircleXmark,
+    faCircleCheck
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]

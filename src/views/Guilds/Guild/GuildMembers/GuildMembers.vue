@@ -7,6 +7,7 @@ import {
   Divisor,
   DropdownIcon,
   LoadingSpinner,
+  NotificationsBadge,
   PlayerPreview,
   Typography,
 } from '@/components'
@@ -14,6 +15,7 @@ import { removeRelation } from '@/firevase/relations'
 import { HalfResource } from '@/firevase/resources'
 import { useAlert, useInput } from '@/stores'
 import { computed, ref, toValue } from 'vue'
+import { AdmissionRequests } from './AdmissionRequests'
 
 const { guild } = useCurrentGuild()
 const { player } = useCurrentPlayer()
@@ -54,6 +56,9 @@ const getInviteLink = () => {
       alert('error', 'Falha em copiar link. Copie manualmente, por favor')
     })
 }
+
+/** Se mostra ou nao a aba de solicitacoes de entrada */
+const showAdmissionRequests = ref(false)
 </script>
 
 <template>
@@ -70,7 +75,14 @@ const getInviteLink = () => {
         convidar
       </Button>
 
-      <Button class="button" variant="colored">
+      <Button
+        v-if="guild.requireAdmission || toValue(guild.admissionRequests).length"
+        class="button"
+        variant="colored"
+        @click="showAdmissionRequests = true"
+      >
+        <NotificationsBadge :count="toValue(guild.admissionRequests).length" />
+
         <font-awesome-icon :icon="['fas', 'key']" />
         admitir
       </Button>
@@ -90,7 +102,6 @@ const getInviteLink = () => {
         :player="toValue(guild.owner)"
         background="main"
         profile-icon="crown"
-        :show-profile-button="false"
       />
 
       <Typography class="label" variant="paragraph-secondary"
@@ -101,29 +112,24 @@ const getInviteLink = () => {
       <template v-if="toValue(guild.players).length > 0">
         <Divisor class="divisor" />
 
-        <div
-          class="player-wrapper"
+        <PlayerPreview
           v-for="member in toValue(guild.players)"
           :key="member.id"
+          :player="member"
+          background="main"
         >
-          <PlayerPreview
-            :player="member"
-            background="main"
-            :show-profile-button="false"
-          />
-
-          <div class="actions">
-            <DropdownIcon v-if="isOwner">
-              <div class="option" @click="kickPlayer(member)">
-                <font-awesome-icon :icon="['fas', 'user-large-slash']" />
-                expulsar
-              </div>
-            </DropdownIcon>
-          </div>
-        </div>
+          <DropdownIcon @click.stop class="actions" v-if="isOwner">
+            <div class="option" @click="kickPlayer(member)">
+              <font-awesome-icon :icon="['fas', 'user-large-slash']" />
+              expulsar
+            </div>
+          </DropdownIcon>
+        </PlayerPreview>
       </template>
     </div>
   </div>
+
+  <AdmissionRequests v-model="showAdmissionRequests" :guild="guild" />
 </template>
 
 <style lang="scss" scoped>
@@ -173,24 +179,16 @@ const getInviteLink = () => {
       color: var(--main-light);
     }
 
-    .player-wrapper {
-      position: relative;
-      flex-direction: column;
-      align-items: stretch;
-      justify-content: center;
+    .actions {
+      margin-inline: auto 0.5rem;
 
-      .actions {
-        position: absolute;
-        right: 1.5rem;
+      .option {
+        padding: 0.5rem;
+        gap: 0.3rem;
+        align-items: center;
 
-        .option {
-          padding: 0.5rem;
-          gap: 0.3rem;
-          align-items: center;
-
-          svg {
-            font-size: 0.9rem;
-          }
+        svg {
+          font-size: 0.9rem;
         }
       }
     }

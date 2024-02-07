@@ -26,10 +26,7 @@ const submitString = () => {
     currentInput.value!.resolve(fields.string.value)
 }
 
-const cancel = () =>
-  currentInput.value?.cancelValue
-    ? currentInput.value.resolve(currentInput.value.cancelValue)
-    : undefined
+const cancel = () => currentInput.value?.resolve(currentInput.value.cancelValue)
 
 const cancelOnEscape = ({ key }: KeyboardEvent) => {
   if (key === 'Escape') cancel()

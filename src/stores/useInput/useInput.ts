@@ -34,7 +34,7 @@ export const useInput = defineStore('input', () => {
   const currentInput = ref<
     | {
         resolve: (value: AllowedInputTypes) => void
-        cancelValue?: AllowedInputTypes
+        cancelValue: AllowedInputTypes
         getter: InputGetter
       }
     | undefined
@@ -52,7 +52,7 @@ export const useInput = defineStore('input', () => {
       new Promise<string>((resolve) => {
         currentInput.value = {
           resolve: makeResolve(resolve),
-          cancelValue: inputGetter.cancelValue,
+          cancelValue: inputGetter.cancelValue ?? '',
           getter: { ...inputGetter, type: 'string' },
         }
       }),
@@ -61,7 +61,7 @@ export const useInput = defineStore('input', () => {
       new Promise<boolean>((resolve) => {
         currentInput.value = {
           resolve: makeResolve(resolve),
-          cancelValue: inputGetter.cancelValue,
+          cancelValue: inputGetter.cancelValue ?? false,
           getter: { ...inputGetter, type: 'boolean' },
         }
       }),

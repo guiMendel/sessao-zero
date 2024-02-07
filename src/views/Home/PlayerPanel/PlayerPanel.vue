@@ -53,7 +53,13 @@ const unreadNotifications = computed(
     </div>
 
     <Drawer v-model="isOpen" class="player-panel">
-      <PlayerPreview :player="player" @click="isOpen = false" />
+      <PlayerPreview :player="player" @click="isOpen = false">
+        <div class="see-profile">
+          <Typography variant="paragraph-secondary">perfil</Typography>
+
+          <font-awesome-icon :icon="['fas', 'chevron-right']" />
+        </div>
+      </PlayerPreview>
 
       <Divisor class="divisor" />
 
@@ -96,6 +102,21 @@ const unreadNotifications = computed(
 }
 
 .player-panel {
+  .see-profile {
+    color: var(--tx-main);
+    gap: 0.5rem;
+    align-items: center;
+    margin-left: auto;
+
+    background-color: var(--bg-main-lighter);
+    padding: 0.3rem 0.8rem;
+    border-radius: $border-radius;
+
+    svg {
+      font-size: 0.7rem;
+    }
+  }
+
   .divisor {
     color: var(--tx-main-light);
   }

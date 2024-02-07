@@ -23,28 +23,34 @@ onClickOutside(target, () => (isOpen.value = false))
 </script>
 
 <template>
-  <div class="dropdown-icon" @click="isOpen = !isOpen" ref="target">
-    <font-awesome-icon :icon="['fas', icon]" />
-  </div>
+  <div class="dropdown-container">
+    <div class="dropdown-icon" @click="isOpen = !isOpen" ref="target">
+      <font-awesome-icon :icon="['fas', icon]" />
+    </div>
 
-  <Dropdown
-    :is-open="isOpen"
-    :anchor="target"
-    :align="align"
-    :margin-x="marginX"
-    :margin-y="marginY"
-    :bounding-container="boundingContainer"
-    ><slot></slot
-  ></Dropdown>
+    <Dropdown
+      :is-open="isOpen"
+      :anchor="target"
+      :align="align"
+      :margin-x="marginX"
+      :margin-y="marginY"
+      :bounding-container="boundingContainer"
+      ><slot></slot
+    ></Dropdown>
+  </div>
 </template>
 
 <style scoped lang="scss">
 @import '@/styles/variables.scss';
 
-.dropdown-icon {
-  font-size: 1.4rem;
-  color: var(--tx-main-dark);
-  border: 0.7rem solid var(--trans);
-  cursor: pointer;
+.dropdown-container {
+  position: relative;
+
+  .dropdown-icon {
+    font-size: 1.4rem;
+    color: var(--tx-main-dark);
+    border: 0.7rem solid var(--trans);
+    cursor: pointer;
+  }
 }
 </style>
