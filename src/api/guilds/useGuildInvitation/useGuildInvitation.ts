@@ -100,7 +100,7 @@ export const useGuildInvitation = () => {
 
     router.push({ name: 'adventures', params: { guildId: guild.id } })
 
-    const admissionRequested = toValue(player.value?.admissionRequests)?.some(
+    const admissionRequested = toValue(player.value?.guildAdmissionRequests)?.some(
       (requestedGuild) => requestedGuild.id === guild.id
     )
 

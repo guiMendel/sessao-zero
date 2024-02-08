@@ -18,7 +18,7 @@ const joinGuild = useJoinGuild()
 
 const playerHasRequestedAdmission = computed(() =>
   Boolean(
-    toValue(player.value?.admissionRequests)?.find(
+    toValue(player.value?.guildAdmissionRequests)?.find(
       (requestedGuild) => requestedGuild.id === props.guild.id
     )
   )

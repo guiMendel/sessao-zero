@@ -4,8 +4,14 @@ export interface Adventure {
 
   description: string
 
+  guildId: string
+
+  /** Numero maximo de jogadores */
   playerLimit: number
 
-  /** Link da imagem da aventura */
-  // pictureUrl: string
+  /** Permite a entrada de novos jogadores na aventura */
+  open: boolean
+
+  /** Quando ativado, jogadores nao podem entrar diretamente — eles enviam uma solicitaçao de admissão */
+  requireAdmission: boolean
 }

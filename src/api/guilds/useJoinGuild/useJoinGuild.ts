@@ -35,7 +35,7 @@ export const useJoinGuild = () => {
     if (guild.requireAdmission) {
       // Se ja solicitou, cancela a solicitação
       if (playerHasRequestedAdmission)
-        return removeRelation(vase, player, 'admissionRequests', [guild])
+        return removeRelation(vase, player, 'guildAdmissionRequests', [guild])
 
       // Envia uma notificacao ao dono
       notifyPlayer(guild.ownerUid, {
@@ -45,7 +45,7 @@ export const useJoinGuild = () => {
 
       alert('success', 'Solicitação enviada!')
 
-      return addRelation(vase, player, 'admissionRequests', [guild])
+      return addRelation(vase, player, 'guildAdmissionRequests', [guild])
     }
 
     // Adiciona na guilda diretamente
@@ -57,7 +57,7 @@ export const useJoinGuild = () => {
     if (playerHasRequestedAdmission)
       return Promise.all([
         promise,
-        removeRelation(vase, player, 'admissionRequests', [guild]),
+        removeRelation(vase, player, 'guildAdmissionRequests', [guild]),
       ])
 
     return promise
