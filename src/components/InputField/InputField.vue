@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { FieldRef, splitCamelCase } from '@/utils/functions'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, toValue, watch, watchEffect } from 'vue'
 import { IconButton, Typography } from '..'
 import { inferFieldProperties } from './inferFieldProperties'
 
 const props = defineProps<{
-  field: FieldRef<string>
+  field: FieldRef<string> | FieldRef<number>
   autoFocus?: boolean
   multiline?: boolean
   autocomplete?: HTMLInputElement['autocomplete']
   message?: string
+  max?: number
+  min?: number
 }>()
 
 // ================================
@@ -17,15 +19,60 @@ const props = defineProps<{
 // ================================
 
 /** Infere o tipo e o autocomplete a partir do nome */
-const inferred = computed(() => inferFieldProperties(props.field.name))
+const inferred = computed(() =>
+  inferFieldProperties(props.field.name, props.field.value)
+)
 
 // ================================
 // INPUT HANDLING
 // ================================
 
+const isNumberInRange = (value: number) =>
+  (props.max == undefined || value <= props.max) &&
+  (props.min == undefined || value >= props.min)
+
 /** Lida com cada input do usuario */
-const handleInput = (event: Event) =>
-  (props.field.value = (event.target as HTMLInputElement).value)
+const handleInput = (event: Event) => {
+  const { value } = event.target as HTMLInputElement
+
+  if (fieldType.value === 'number') {
+    const number = parseFloat(value)
+
+    if (!isNumberInRange(number)) return
+  }
+
+  props.field.value = value
+}
+
+const canIncrement = computed(
+  () =>
+    typeof props.field.value === 'number' &&
+    isNumberInRange(props.field.value + 1)
+)
+
+const canDecrement = computed(
+  () =>
+    typeof props.field.value === 'number' &&
+    isNumberInRange(props.field.value - 1)
+)
+
+const increment = () => {
+  if (!canIncrement.value) return
+
+  showErrors.value = true
+
+  // @ts-ignore
+  props.field.value = props.field.value + 1
+}
+
+const decrement = () => {
+  if (!canDecrement.value) return
+
+  showErrors.value = true
+
+  // @ts-ignore
+  props.field.value = props.field.value - 1
+}
 
 // ================================
 // ERROR HANDLING
@@ -35,6 +82,7 @@ const handleInput = (event: Event) =>
 const showErrors = ref(false)
 
 /** Mensagem de erro */
+// @ts-ignore
 const errorMessage = computed(() => props.field.validate(props.field.value))
 
 // ================================
@@ -94,7 +142,9 @@ const autocompleteValue = computed(
 /** Se a label deveria estar levantada */
 const raiseLabel = computed(
   () =>
-    props.multiline || props.field.value != '' || inferred.value.type == 'color'
+    props.multiline ||
+    props.field.value !== '' ||
+    inferred.value.type == 'color'
 )
 </script>
 
@@ -102,6 +152,7 @@ const raiseLabel = computed(
   <div
     class="input-field"
     :class="{
+      // @ts-ignore
       error: showErrors && field.validate(field.value) != true,
       password: inferred.type === 'password' && !multiline,
     }"
@@ -142,12 +193,32 @@ const raiseLabel = computed(
         />
       </div>
 
-      <!-- Opcao de revelar senha -->
-      <IconButton
-        class="password-reveal"
-        @click="togglePasswordReveal"
-        :icon="revealPassword ? 'eye' : 'eye-slash'"
-      />
+      <div class="icon-actions">
+        <!-- Aumentar o numero -->
+        <IconButton
+          v-if="fieldType === 'number'"
+          class="action"
+          @click="increment"
+          icon="plus"
+          :disabled="!canIncrement"
+        />
+
+        <!-- Reduzir o numero -->
+        <IconButton
+          v-if="fieldType === 'number'"
+          class="action"
+          @click="decrement"
+          icon="minus"
+          :disabled="!canDecrement"
+        />
+
+        <!-- Opcao de revelar senha -->
+        <IconButton
+          class="password-reveal action"
+          @click="togglePasswordReveal"
+          :icon="revealPassword ? 'eye' : 'eye-slash'"
+        />
+      </div>
     </div>
 
     <!-- Mensagem de Erro -->
@@ -266,15 +337,21 @@ const raiseLabel = computed(
       resize: none;
     }
 
-    .password-reveal {
+    .icon-actions {
       position: absolute;
+      gap: 0.5rem;
+      align-items: center;
       font-size: 1.2rem;
       right: 1.2rem;
       color: var(--tx-main);
 
-      --shadow-color: var(--trans-03);
+      .action {
+        --shadow-color: var(--trans-03);
+      }
 
-      display: none;
+      .password-reveal {
+        display: none;
+      }
     }
   }
 

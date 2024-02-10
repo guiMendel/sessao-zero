@@ -12,7 +12,7 @@ watch(player, consumeLink, { immediate: true })
 </script>
 
 <template>
-  <div class="home preset-grid-background">
+  <div class="home">
     <PlayerPanel />
 
     <RouterView />
@@ -28,6 +28,7 @@ watch(player, consumeLink, { immediate: true })
   width: 100%;
   max-width: 100%;
   min-height: 100vh;
+  background-color: var(--bg-main-washed);
 
   @include high-contrast {
     background: none;

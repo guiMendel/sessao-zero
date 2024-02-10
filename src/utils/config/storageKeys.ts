@@ -16,4 +16,7 @@ export const localStorageKeys = {
 
   /** Campos de login e criar jogador */
   loginFields: 'login-fields',
+
+  /** Campos de criar aventura */
+  createAdventureFields: 'create-adventure-fields',
 }

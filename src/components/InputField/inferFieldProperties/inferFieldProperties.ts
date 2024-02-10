@@ -48,7 +48,8 @@ export const fieldPropertyNameRelations: PropertyNameRelation[] = [
 
 /** Infere o tipo e o autocomplete do campo a partir do seu nome */
 export const inferFieldProperties = (
-  fieldName: string
+  fieldName: string,
+  fieldValue: string | number
 ): { type: string; autocomplete: string; display: string } => {
   for (const relation of fieldPropertyNameRelations) {
     if (
@@ -63,6 +64,9 @@ export const inferFieldProperties = (
         ...relation,
       }
   }
+
+  if (typeof fieldValue === 'number')
+    return { type: 'number', display: fieldName, autocomplete: 'off' }
 
   return { type: 'text', autocomplete: 'on', display: fieldName }
 }

@@ -9,6 +9,7 @@ withDefaults(
     variant?: 'plain'
     /** Alteram a cor do icone e de sua sombra */
     color?: 'default' | 'main-light'
+    disabled?: boolean
   }>(),
   { style: 'fas', color: 'default' }
 )
@@ -17,7 +18,10 @@ withDefaults(
 <template>
   <font-awesome-icon
     class="button-icon"
-    :class="`color--${color}`"
+    :class="{
+      [`color--${color}`]: true,
+      disabled,
+    }"
     :icon="[style, icon]"
   />
 </template>
@@ -31,11 +35,6 @@ withDefaults(
   cursor: pointer;
 
   transition: all 100ms;
-
-  &:hover {
-    translate: 0 -1px;
-    filter: drop-shadow(0 3px 0 var(--shadow-color));
-  }
 
   &:active {
     translate: 0 1px;
@@ -51,6 +50,13 @@ withDefaults(
       color: var(--tx-main-light);
       --shadow-color: var(--main-lighter);
     }
+  }
+
+  &.disabled {
+    filter: none;
+    color: var(--tx-gray);
+    translate: 0;
+    cursor: default;
   }
 }
 </style>
