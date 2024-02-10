@@ -1,6 +1,5 @@
 import { GetListMethod, Resource, SyncListMethod } from '@/firevase/resources'
 import { where } from 'firebase/firestore'
-import { storeToRefs } from 'pinia'
 import { Vase, vase } from '..'
 import { useResource } from '../../firevase/resources/hooks/useResource'
 import { useCurrentPlayer } from '../players'
@@ -9,7 +8,7 @@ export const useGuild = () => {
   const api = useResource(vase, 'guilds')
 
   /** Consome o player atual */
-  const { player } = storeToRefs(useCurrentPlayer())
+  const { player } = useCurrentPlayer()
 
   /** Cria uma nova guilda e define o jogador logado como owner */
   const createGuild = (name: string) => {
@@ -36,6 +35,8 @@ export const useGuild = () => {
       [...(filters ?? []), where('listingBehavior', '==', 'public')],
       existingRef
     )
+
+  // TODO: adicionar metodos de add e remove player pra encapsular aquela funcao useJoinGuild
 
   return { ...api, create: createGuild, getList, syncList }
 }

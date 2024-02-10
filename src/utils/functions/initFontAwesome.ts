@@ -40,6 +40,7 @@ import {
   faLock,
   faMagnifyingGlassPlus,
   faPaperPlane,
+  faPenRuler,
   faPersonRays,
   faPersonRunning,
   faPlus,
@@ -110,7 +111,8 @@ export const initFontAwesome = (): [
     faLink,
     faKey,
     faCircleXmark,
-    faCircleCheck
+    faCircleCheck,
+    faPenRuler
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]

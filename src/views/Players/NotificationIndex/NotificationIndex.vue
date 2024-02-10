@@ -8,6 +8,8 @@ import knightImage from '../../../assets/happy-knight-and-donkey.png'
 const { player } = useCurrentPlayer()
 const { deleteNotification, readNotification } = useNotification()
 
+// TODO: isso deveria ser um Drawer que vem debaixo em vez de uma pagina propria
+
 // Marca todas as notificacoes como lidas
 watchEffect(() =>
   toValue(player.value?.notifications)?.forEach((notification) => {

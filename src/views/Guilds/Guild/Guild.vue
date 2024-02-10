@@ -14,6 +14,7 @@ const { player } = useCurrentPlayer()
 const isVisitor = computed(() => !isMember(player.value, guild.value))
 
 // TODO: ao entrar varias vezes na mesma guilda, isso para de funcionar
+// TODO: retirar o background quadrilhado de algumas views, e deixar se em umas especificas. Ele eh bonito, mas n funciona sempre. Ex: 
 watchEffect(() => setTitle(guild.value?.name))
 </script>
 

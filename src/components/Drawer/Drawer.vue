@@ -4,7 +4,7 @@ defineOptions({ inheritAttrs: false })
 withDefaults(
   defineProps<{
     modelValue: boolean
-    drawDirection: 'top' | 'bottom'
+    drawDirection?: 'top' | 'bottom'
   }>(),
   { drawDirection: 'top' }
 )

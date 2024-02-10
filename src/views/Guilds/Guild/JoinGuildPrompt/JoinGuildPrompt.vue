@@ -3,11 +3,11 @@ import { Vase } from '@/api'
 import { isMember, useJoinGuild } from '@/api/guilds'
 import { useCurrentPlayer } from '@/api/players'
 import { Button, Typography } from '@/components'
-import { UnrefedResource } from '@/firevase/resources'
+import { Resource } from '@/firevase/resources'
 import { computed, toValue } from 'vue'
 
 const props = defineProps<{
-  guild: UnrefedResource<Vase, 'guilds'>
+  guild: Resource<Vase, 'guilds'>
 }>()
 
 const { player } = useCurrentPlayer()

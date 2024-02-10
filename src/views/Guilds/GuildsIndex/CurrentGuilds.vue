@@ -146,7 +146,7 @@ const createGuild = () =>
     color: var(--tx-main);
     gap: 0.3rem;
     align-items: center;
-    margin-left: auto;
+    align-self: flex-end;
 
     background-color: var(--bg-main-lighter);
     padding: 0.5rem 1rem;

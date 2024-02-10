@@ -1,6 +1,6 @@
+import { generateLink } from '@/api/guilds'
+import { AdventuresIndex, CreateAdventure } from '@/views/Adventures'
 import Adventure from '@/views/Adventures/Adventure.vue'
-import AdventuresIndex from '@/views/Adventures/AdventuresIndex.vue'
-import CreateAdventure from '@/views/Adventures/CreateAdventure.vue'
 import { Configurations } from '@/views/Configurations'
 import {
   AvailableGuilds,
@@ -17,7 +17,6 @@ import Player from '@/views/Players/Player.vue'
 import { AccessibilityPrompt, BetaWelcome } from '@/views/Prompts'
 import { RouteRecordRaw } from 'vue-router'
 import { addFirstVisitPrompts } from './firstVisitPrompts'
-import { generateLink } from '@/api/guilds'
 
 /** As rotas da aplicacao */
 const routes: Array<RouteRecordRaw> = addFirstVisitPrompts([
