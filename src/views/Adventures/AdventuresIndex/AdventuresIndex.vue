@@ -10,6 +10,7 @@ import { useRouter } from 'vue-router'
 import monkImage from '../../../assets/consfused-monk.png'
 import cricketImage from '../../../assets/cricket.png'
 import { AdventurePreview } from './AdventurePreview'
+import { Tabs } from '@/components/Tabs'
 
 const { guild } = useCurrentGuild()
 
@@ -46,30 +47,64 @@ const activeViewMode = useLocalStorage<'narrate' | 'play'>(
 <template>
   <LoadingSpinner v-if="!guild" />
 
-  <div v-else class="adventures-index">
-    <div
-      class="view-mode-tabs"
-      @click="
-        activeViewMode = activeViewMode === 'narrate' ? 'play' : 'narrate'
-      "
-      :class="`mode-${activeViewMode}`"
-    >
-      <div class="tab play">
-        <Typography>jogar</Typography>
-        <Typography class="count">{{ othersAdventures.length }}</Typography>
-      </div>
+  <div v-else class="adventures-index" :key="guild.id">
+    <Tabs :tabs="['play', 'narrate']" v-model="activeViewMode">
+      <template #play:option>
+        <div class="tab" :class="{ active: activeViewMode === 'play' }">
+          <Typography>jogar</Typography>
+          <Typography class="count">{{ othersAdventures.length }}</Typography>
+        </div>
+      </template>
 
-      <div class="tab narrate">
-        <Typography>narrar</Typography>
-        <Typography class="count">{{ narratingAdventures.length }}</Typography>
-      </div>
+      <template #narrate:option>
+        <div class="tab" :class="{ active: activeViewMode === 'narrate' }">
+          <Typography>narrar</Typography>
+          <Typography class="count">{{
+            narratingAdventures.length
+          }}</Typography>
+        </div>
+      </template>
 
-      <div class="selection-border"></div>
-    </div>
+      <template #narrate>
+        <div class="column">
+          <template v-if="narratingAdventures.length === 0">
+            <Typography variant="paragraph" class="no-adventures-text"
+              >Você ainda não narra nenhuma aventura por aqui!</Typography
+            >
 
-    <div class="adventures">
-      <Transition name="play-transition">
-        <div class="column" v-if="activeViewMode === 'play'">
+            <img :src="monkImage" alt="papel em branco" class="monk-image" />
+
+            <Button
+              v-if="isPlayerMember"
+              @click="createNewAdventure"
+              variant="colored"
+            >
+              <font-awesome-icon :icon="['fas', 'pen-ruler']" /> criar primeira
+              aventura!</Button
+            >
+          </template>
+
+          <template v-else>
+            <!-- Aventuras da guilda -->
+            <AdventurePreview
+              v-for="adventure in narratingAdventures"
+              :adventure-id="adventure.id"
+            />
+
+            <Typography
+              v-if="isPlayerMember"
+              @click="createNewAdventure"
+              class="create-adventure"
+            >
+              criar nova
+              <font-awesome-icon :icon="['fas', 'pen-ruler']" />
+            </Typography>
+          </template>
+        </div>
+      </template>
+
+      <template #play>
+        <div class="column">
           <template v-if="othersAdventures.length === 0">
             <Typography variant="paragraph" class="no-adventures-text"
               >(vazio)</Typography
@@ -105,46 +140,8 @@ const activeViewMode = useLocalStorage<'narrate' | 'play'>(
             :adventure-id="adventure.id"
           />
         </div>
-      </Transition>
-
-      <Transition name="narrate-transition">
-        <div class="column" v-if="activeViewMode === 'narrate'">
-          <template v-if="narratingAdventures.length === 0">
-            <Typography variant="paragraph" class="no-adventures-text"
-              >Você ainda não narra nenhuma aventura por aqui!</Typography
-            >
-
-            <img :src="monkImage" alt="papel em branco" class="monk-image" />
-
-            <Button
-              v-if="isPlayerMember"
-              @click="createNewAdventure"
-              variant="colored"
-            >
-              <font-awesome-icon :icon="['fas', 'pen-ruler']" /> criar primeira
-              aventura!</Button
-            >
-          </template>
-
-          <template v-else>
-            <!-- Aventuras da guilda -->
-            <AdventurePreview
-              v-for="adventure in narratingAdventures"
-              :adventure-id="adventure.id"
-            />
-
-            <Typography
-              v-if="isPlayerMember"
-              @click="createNewAdventure"
-              class="create-adventure"
-            >
-              criar nova
-              <font-awesome-icon :icon="['fas', 'pen-ruler']" />
-            </Typography>
-          </template>
-        </div>
-      </Transition>
-    </div>
+      </template>
+    </Tabs>
   </div>
 </template>
 
@@ -155,29 +152,28 @@ const activeViewMode = useLocalStorage<'narrate' | 'play'>(
   flex-direction: column;
   align-items: stretch;
   gap: 1rem;
-  padding-top: 1rem;
+  padding-inline: 1.5rem;
 
-  .view-mode-tabs {
-    align-items: stretch;
-    border-bottom: 3px solid var(--tx-trans-1);
-    position: relative;
+  .tab {
+    color: var(--tx-trans-45);
+    transition: all 200ms;
+    align-items: center;
+    gap: 0.3rem;
 
-    &.mode-narrate {
-      .selection-border {
-        left: 50%;
-      }
-
-      .narrate {
-        color: var(--tx-main);
-
-        .count {
-          background-color: var(--main-light);
-          color: var(--tx-main-dark);
-        }
-      }
+    .count {
+      width: 1.2rem;
+      height: 1.2rem;
+      background-color: var(--bg-trans-2);
+      color: var(--tx-trans-3);
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 800;
+      border-radius: 50%;
+      transition: 200ms all;
     }
 
-    &.mode-play .play {
+    &.active {
       color: var(--tx-main);
 
       .count {
@@ -185,101 +181,16 @@ const activeViewMode = useLocalStorage<'narrate' | 'play'>(
         color: var(--tx-main-dark);
       }
     }
-
-    .selection-border {
-      width: 50%;
-      top: 0;
-      left: 0;
-      bottom: -3px;
-      position: absolute;
-      background-color: var(--bg-main-lighter);
-      border-radius: 6px 6px 0 0;
-      border-bottom: 3px solid var(--tx-main);
-      transition: all 200ms ease-out;
-    }
-
-    .tab {
-      z-index: 10;
-      flex: 1;
-      padding-block: 0.5rem;
-      color: var(--tx-trans-45);
-      transition: all 200ms;
-      font-weight: 500;
-      text-align: center;
-      justify-content: center;
-      align-items: center;
-      gap: 0.3rem;
-
-      .count {
-        width: 1.2rem;
-        height: 1.2rem;
-        background-color: var(--bg-trans-2);
-        color: var(--tx-trans-3);
-        align-items: center;
-        justify-content: center;
-        font-size: 0.7rem;
-        font-weight: 800;
-        border-radius: 50%;
-        transition: 200ms all;
-      }
-    }
   }
 
-  .adventures {
+  .column {
+    top: 0;
+    left: 0;
+    right: 0;
     flex-direction: column;
     align-items: stretch;
-    position: relative;
-
-    .play-transition-enter-active {
-      position: absolute;
-      animation: slide-left 200ms ease-out reverse;
-    }
-
-    .play-transition-leave-active {
-      animation: slide-left 200ms ease-out;
-    }
-
-    @keyframes slide-left {
-      from {
-        opacity: 1;
-        translate: 0 0;
-      }
-
-      to {
-        opacity: 0;
-        translate: -60% 0;
-      }
-    }
-
-    .narrate-transition-enter-active {
-      position: absolute;
-      animation: slide-right 200ms ease-out reverse;
-    }
-
-    .narrate-transition-leave-active {
-      animation: slide-right 200ms ease-out;
-    }
-
-    @keyframes slide-right {
-      from {
-        opacity: 1;
-        translate: 0 0;
-      }
-
-      to {
-        opacity: 0;
-        translate: 60% 0;
-      }
-    }
-
-    .column {
-      top: 0;
-      left: 0;
-      right: 0;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 1rem;
-    }
+    gap: 1rem;
+    padding-top: 1rem;
   }
 
   .no-adventures-text {
@@ -310,6 +221,7 @@ const activeViewMode = useLocalStorage<'narrate' | 'play'>(
     border-radius: $border-radius;
 
     font-weight: 500;
+    @include high-contrast-border;
 
     svg {
       font-size: 0.9rem;

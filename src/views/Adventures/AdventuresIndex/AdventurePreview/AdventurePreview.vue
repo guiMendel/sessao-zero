@@ -2,7 +2,7 @@
 import { useAdventure } from '@/api/adventures'
 import genericBanner from '@/assets/rpg-table.png'
 import { LoadingSpinner, Typography } from '@/components'
-import { toValue, watch } from 'vue'
+import { computed, ref, toValue, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 const props = defineProps<{ adventureId: string }>()
@@ -18,6 +18,31 @@ const router = useRouter()
 
 const open = () =>
   router.push({ name: 'adventure', params: { adventureId: props.adventureId } })
+
+// ========================================
+// DESCRIPTION CROPPING
+// ========================================
+
+/** Quantidade de caracteres a partir da qual dar crop na descricao */
+const descriptionCropLength = 200
+
+const shouldCropDescription = computed(() =>
+  Boolean(
+    adventure.value &&
+      adventure.value.description.length > descriptionCropLength &&
+      shouldExpandDescription.value === false
+  )
+)
+
+const shouldExpandDescription = ref(false)
+
+const expandDescription = (event: Event) => {
+  if (shouldCropDescription.value == false) return
+
+  shouldExpandDescription.value = true
+
+  event.stopPropagation()
+}
 </script>
 
 <template>
@@ -63,7 +88,24 @@ const open = () =>
       </div>
 
       <!-- Descricao -->
-      <Typography class="description">{{ adventure.description }}</Typography>
+      <Typography
+        class="description"
+        :class="{ cropped: shouldCropDescription }"
+        @click="expandDescription"
+        >{{
+          shouldCropDescription
+            ? adventure.description.slice(0, descriptionCropLength).trim() + '…'
+            : adventure.description
+        }}</Typography
+      >
+
+      <div
+        v-if="shouldCropDescription"
+        @click="expandDescription"
+        class="expand-button"
+      >
+        expandir
+      </div>
     </template>
   </div>
 </template>
@@ -78,6 +120,8 @@ const open = () =>
   background-color: var(--bg-main-light);
   overflow: hidden;
   @include bevel(var(--main));
+  @include high-contrast-border;
+  position: relative;
 
   .narrator-loading {
     font-size: 0.8rem;
@@ -127,6 +171,46 @@ const open = () =>
     text-align: left;
     padding-inline: 0.8rem;
     padding-bottom: 0.8rem;
+    position: relative;
+    white-space: pre-wrap;
+
+    &.cropped {
+      white-space: normal;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: 0;
+        z-index: 20;
+
+        background: linear-gradient(
+          180deg,
+          var(--trans) 0%,
+          var(--bg-main-light) 70%
+        );
+      }
+    }
+  }
+
+  .expand-button {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    translate: -50% 0;
+
+    font-size: 0.9rem;
+    z-index: 50;
+    background-color: var(--main-lighter);
+    padding: 0.3rem;
+    min-width: 7rem;
+    justify-content: center;
+    border-radius: $border-radius;
+    font-weight: 500;
+    color: var(--tx-main);
+    @include high-contrast-border;
   }
 }
 </style>

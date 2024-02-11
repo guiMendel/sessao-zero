@@ -44,8 +44,7 @@ watchEffect(() => setTitle(guild.value?.name))
   flex-direction: column;
   width: 100%;
   flex: 1;
-  padding: 0 1.5rem 2rem;
-  // overflow-x: hidden;
+  padding-block: 1rem 2rem;
 }
 
 .join-prompt {
