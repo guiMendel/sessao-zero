@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useResizeObserver } from '@vueuse/core';
-import { reactive, ref, watch } from 'vue';
-import { DropdownProps } from '.';
+import { useResizeObserver } from '@vueuse/core'
+import { reactive, ref, watch } from 'vue'
+import { DropdownProps } from '.'
 
 const props = withDefaults(defineProps<DropdownProps>(), {
   align: 'right',
@@ -72,12 +72,6 @@ const adjustIntoScreen = () => {
   if (!dropdown.value) return
 
   const { width, height } = dropdown.value.getBoundingClientRect()
-
-  console.log({
-    width,
-    height,
-    screenDistances: `${boundingDistances.x}, ${boundingDistances.y}`,
-  })
 
   // Adjust vertically
   if (height > boundingDistances.y) {

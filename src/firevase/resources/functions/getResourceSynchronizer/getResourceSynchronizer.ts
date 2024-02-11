@@ -17,12 +17,18 @@ import {
 
 export type SyncListMethod<C extends FirevaseClient, P extends PathsFrom<C>> = (
   filters?: QueryFieldFilterConstraint[],
-  existingRef?: SyncableRef<C, P, Query>
+  options?: {
+    existingRef?: SyncableRef<C, P, Query>
+    resourceLayersLimit?: number
+  }
 ) => SyncableRef<C, P, Query>
 
 export type SyncMethod<C extends FirevaseClient, P extends PathsFrom<C>> = (
   id: string,
-  existingRef?: SyncableRef<C, P, DocumentReference>
+  options?: {
+    existingRef?: SyncableRef<C, P, DocumentReference>
+    resourceLayersLimit?: number
+  }
 ) => SyncableRef<C, P, DocumentReference>
 
 // ====================================
@@ -47,13 +53,16 @@ export const getResourceSynchronizer = <
   /** Gera um sync em doc ou query */
   const makeSync = <M extends DocumentReference | Query>(
     target?: M,
-    existingRef?: SyncableRef<C, P, M>
+    options?: {
+      existingRef?: SyncableRef<C, P, M>
+      resourceLayersLimit?: number
+    }
   ) => {
     // Se recebemos um ref, basta mudar seu target
-    if (existingRef != undefined) {
-      existingRef.sync.updateTarget(target)
+    if (options?.existingRef != undefined) {
+      options.existingRef.sync.updateTarget(target)
 
-      return existingRef
+      return options.existingRef
     }
 
     // Cria um novo syncable
@@ -61,7 +70,10 @@ export const getResourceSynchronizer = <
       client,
       resourcePath,
       target ?? 'empty-document',
-      cleanupManager
+      cleanupManager,
+      options?.resourceLayersLimit
+        ? { resourceLayersLimit: options?.resourceLayersLimit }
+        : undefined
     )
   }
 
@@ -70,11 +82,11 @@ export const getResourceSynchronizer = <
      * @param id O id do recurso alvo
      * @param existingRef Um ref para utilizar na sincronizacao
      */
-    sync: (id, existingRef) => makeSync(docWithId(id), existingRef),
+    sync: (id, options) => makeSync(docWithId(id), options),
 
     /** Obtem uma lista dos recursos, filtrados */
-    syncList: (filters = [], existingRef) =>
-      makeSync(query(resourceCollection, ...filters), existingRef),
+    syncList: (filters = [], options) =>
+      makeSync(query(resourceCollection, ...filters), options),
   }
 }
 

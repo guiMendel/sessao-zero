@@ -8,10 +8,13 @@ export const useCurrentGuild = defineStore('current-guild', () => {
   const { sync, get, deleteForever, update } = useGuild()
   const route = useRoute()
 
-  const guild = sync(route?.params.guildId as string)
+  const guild = sync(route?.params.guildId as string, {
+    resourceLayersLimit: 2,
+  })
 
   watch(route, ({ params }) => {
-    if (params.guildId != undefined) sync(params.guildId as string, guild)
+    if (params.guildId != undefined)
+      sync(params.guildId as string, { existingRef: guild })
   })
 
   return {

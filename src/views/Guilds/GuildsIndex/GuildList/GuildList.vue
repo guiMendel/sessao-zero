@@ -64,7 +64,7 @@ const isOwner = (guild: Resource<Vase, 'guilds'>) =>
 
           <!-- Numero de aventuras -->
           <div class="icon">
-            {{ 0 }}
+            {{ toValue(guild.adventures).length }}
             <font-awesome-icon :icon="['fas', 'scroll']" />
           </div>
         </div>

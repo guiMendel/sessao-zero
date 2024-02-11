@@ -1,4 +1,4 @@
-// TODO: remover esses objetos e fazer as funcoes de storage serem strongly typed 
+// TODO: remover esses objetos e fazer as funcoes de storage serem strongly typed
 
 /** Guarda as string que devem ser utilizadas como chaves quando for realizado o acesso ao session storage */
 export const sessionStorageKeys = {
@@ -19,4 +19,7 @@ export const localStorageKeys = {
 
   /** Campos de criar aventura */
   createAdventureFields: 'create-adventure-fields',
+
+  /** Se esta vendo aventuras que narra ou as aventuras que nao narra */
+  adventureViewMode: 'adventure-view-mode',
 }

@@ -1,6 +1,5 @@
 import { generateLink } from '@/api/guilds'
-import { AdventuresIndex, CreateAdventure } from '@/views/Adventures'
-import Adventure from '@/views/Adventures/Adventure.vue'
+import { Adventure, AdventuresIndex, CreateAdventure } from '@/views/Adventures'
 import { Configurations } from '@/views/Configurations'
 import {
   AvailableGuilds,
@@ -122,6 +121,12 @@ const routes: Array<RouteRecordRaw> = addFirstVisitPrompts([
             name: 'guild-members',
             component: GuildMembers,
             meta: { title: 'Membros da guilda' },
+          },
+          {
+            path: 'adventure/:adventureId',
+            name: 'adventure',
+            component: Adventure,
+            meta: { title: 'Aventura' },
           },
         ],
       },

@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import {
   faBan,
   faBars,
+  faBookOpen,
   faChampagneGlasses,
   faCheck,
   faChevronDown,
@@ -116,7 +117,8 @@ export const initFontAwesome = (): [
     faCircleCheck,
     faPenRuler,
     faSignature,
-    faMinus
+    faMinus,
+    faBookOpen
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]
