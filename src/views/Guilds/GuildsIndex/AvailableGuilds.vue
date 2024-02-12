@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { isMember, useGuild } from '@/api/guilds'
+import { useGuild } from '@/api/guilds'
+import { isMember } from '@/api/isMember'
 import { isGuildMaster, useCurrentPlayer } from '@/api/players'
 import { BackButton, Divisor, Typography } from '@/components'
 import { computed } from 'vue'

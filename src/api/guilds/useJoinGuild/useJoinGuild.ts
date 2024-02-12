@@ -39,7 +39,7 @@ export const useJoinGuild = () => {
 
       // Envia uma notificacao ao dono
       notifyPlayer(guild.ownerUid, {
-        type: 'admissionRequest',
+        type: 'guildAdmissionRequest',
         params: { guild, player },
       })
 

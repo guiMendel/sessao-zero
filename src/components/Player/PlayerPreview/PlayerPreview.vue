@@ -4,10 +4,12 @@ import { LoadingSpinner, Typography } from '@/components'
 import { Resource } from '@/firevase/resources'
 import { useRouter } from 'vue-router'
 import { ProfilePicture } from '..'
+import { computed } from 'vue'
 
 const props = withDefaults(
   defineProps<{
     player: Resource<Vase, 'players'> | undefined
+    showUndefinedAsEmpty?: boolean
     background?: 'none' | 'main'
     profileIcon?: string
   }>(),
@@ -19,32 +21,47 @@ const router = useRouter()
 const openProfilePage = () =>
   props.player &&
   router.push({ name: 'player', params: { playerId: props.player.id } })
+
+const pictureBackground = computed(() => {
+  if (!props.player && props.showUndefinedAsEmpty) return 'gray-washed'
+
+  if (props.background === 'main') return 'main-washed'
+
+  return 'main-lighter'
+})
 </script>
 
 <template>
   <div
     class="player-preview"
-    :class="`background-${background}`"
+    :class="{
+      [`background-${background}`]: true,
+      empty: !player && showUndefinedAsEmpty,
+    }"
     @click="openProfilePage"
   >
-    <LoadingSpinner v-if="!player" />
+    <LoadingSpinner v-if="!player && !showUndefinedAsEmpty" />
 
     <template v-else>
       <!-- Profile picture -->
       <ProfilePicture
-        :background="background === 'main' ? 'main-washed' : 'main-lighter'"
+        :background="pictureBackground"
         :player="player"
         :profile-icon="profileIcon"
       />
 
       <div class="text">
-        <!-- Nome -->
-        <Typography class="name">{{ player.name }}</Typography>
+        <template v-if="player">
+          <!-- Nome -->
+          <Typography class="name">{{ player.name }}</Typography>
 
-        <!-- Apelido -->
-        <Typography variant="paragraph-secondary" class="nickname"
-          >@{{ player.nickname }}</Typography
-        >
+          <!-- Apelido -->
+          <Typography variant="paragraph-secondary" class="nickname"
+            >@{{ player.nickname }}</Typography
+          >
+        </template>
+
+        <Typography v-else class="empty-player">vazio</Typography>
       </div>
 
       <slot></slot>
@@ -64,6 +81,15 @@ const openProfilePage = () =>
     border-radius: $border-radius;
     padding: 0.5rem;
     @include bevel(var(--main-light));
+
+    &.empty {
+      background-color: var(--bg-gray-lighter);
+      @include bevel(var(--gray-light));
+    }
+  }
+
+  &.empty {
+    color: var(--tx-gray-dark);
   }
 
   .text {
@@ -78,6 +104,10 @@ const openProfilePage = () =>
     .nickname {
       color: var(--tx-main-dark);
       opacity: 0.7;
+    }
+
+    .empty-player {
+      font-style: italic;
     }
   }
 }

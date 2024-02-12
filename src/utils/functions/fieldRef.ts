@@ -1,4 +1,4 @@
-import { useLocalStorage } from '@vueuse/core'
+import { useLocalStorage, useSessionStorage } from '@vueuse/core'
 import { Ref, ref } from 'vue'
 
 /** Tipos aceitos pelo field */
@@ -21,6 +21,7 @@ type FieldOptions<T extends AllowedFieldTypes> = {
 
   /** Se fornecido, utiliza a chave de LS `${localStoragePrefix}_${name}` para armazenar o valor */
   localStoragePrefix?: string
+  sessionStoragePrefix?: string
 
   /** Uma funçao que salva o valor atual deste ref no backend e retorna uma promessa do resultado */
   persist?: (value: T) => Promise<void>
@@ -42,18 +43,29 @@ export function fieldRef<T extends AllowedFieldTypes>(
   name: string,
   options: FieldOptions<T>
 ): FieldRef<T> {
-  const { initialValue, localStoragePrefix, validator, persist } = {
+  const {
+    initialValue,
+    localStoragePrefix,
+    sessionStoragePrefix,
+    validator,
+    persist,
+  } = {
     validator: () => true as const,
     localStoragePrefix: undefined,
     persist: undefined,
     ...options,
   }
 
-  const valueRef = (
-    localStoragePrefix != undefined
-      ? useLocalStorage<T>(`${localStoragePrefix}_${name}`, initialValue)
-      : ref<T>(initialValue)
-  ) as Ref<T>
+  let valueRef: Ref<T>
+
+  if (localStoragePrefix != undefined)
+    valueRef = useLocalStorage<T>(`${localStoragePrefix}_${name}`, initialValue)
+  else if (sessionStoragePrefix != undefined)
+    valueRef = useSessionStorage<T>(
+      `${sessionStoragePrefix}_${name}`,
+      initialValue
+    )
+  else valueRef = ref<T>(initialValue) as Ref<T>
 
   const fieldRef: FieldRef<T> = Object.assign(valueRef, {
     name,

@@ -4,20 +4,21 @@ import { computed } from 'vue'
 
 const props = withDefaults(
   defineProps<{
-    player: Player
-    background: 'main-lighter' | 'main-washed'
+    player: Player | undefined
+    background: 'main-lighter' | 'main-washed' | 'gray-washed'
     profileIcon?: string
   }>(),
   { background: 'main-lighter' }
 )
 
 // Get initials from name
-const initials = computed(() =>
-  props.player.name
-    .split(' ')
-    .slice(0, 2)
-    .map((name) => name.charAt(0).toUpperCase())
-    .join('')
+const initials = computed(
+  () =>
+    props.player?.name
+      .split(' ')
+      .slice(0, 2)
+      .map((name) => name.charAt(0).toUpperCase())
+      .join('') ?? ''
 )
 </script>
 
@@ -60,6 +61,10 @@ const initials = computed(() =>
 
   &.background-main-washed {
     background-color: var(--bg-main-washed);
+  }
+
+  &.background-gray-washed {
+    background-color: var(--bg-gray-washed);
   }
 
   .initials {

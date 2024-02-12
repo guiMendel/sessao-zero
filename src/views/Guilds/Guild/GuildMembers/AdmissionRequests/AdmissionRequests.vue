@@ -23,8 +23,8 @@ const acceptPlayer = async (player: HalfResource<Vase, 'players'>) => {
   if (!props.guild) return
 
   notifyPlayer(player.id, {
-    type: 'admissionRequestAccepted',
-    params: { guild: props.guild, player },
+    type: 'guildAdmissionRequestAccepted',
+    params: { guild: props.guild },
   })
 
   return Promise.all([

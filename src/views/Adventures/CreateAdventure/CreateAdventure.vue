@@ -3,13 +3,13 @@ import { useAdventureFields } from '@/api/adventures'
 import { useAdventure } from '@/api/adventures/useAdventure'
 import { Button, InputField, ToggleField, Typography } from '@/components'
 import { useAlert } from '@/stores'
-import { localStorageKeys } from '@/utils/config'
+import { sessionStorageKeys } from '@/utils/config'
 import { eraseInStorage, isFieldValid } from '@/utils/functions'
 import { computed, ref } from 'vue'
 import magicalPenPicture from '../../../assets/magical-pen.png'
 
 // Campos de login
-const fields = useAdventureFields(localStorageKeys.createAdventureFields)
+const fields = useAdventureFields(sessionStorageKeys.createAdventureFields)
 
 const { description, name, playerLimit, open, requireAdmission } = fields
 
@@ -39,7 +39,7 @@ const tryCreate = () => {
       // await router.push({ name: 'home' })
 
       // Limpa os campos armazenados localmente
-      eraseInStorage(new RegExp(localStorageKeys.createAdventureFields))
+      eraseInStorage(new RegExp(sessionStorageKeys.createAdventureFields))
     })
     // Handle errors
     .catch((error) => {

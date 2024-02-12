@@ -6,13 +6,13 @@ import {
 } from '@/api/players'
 import { BackButton, Button, InputField, Logo, Typography } from '@/components'
 import { useAlert } from '@/stores'
-import { localStorageKeys } from '@/utils/config'
+import { sessionStorageKeys } from '@/utils/config'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import illustration from '../../assets/illustration.png'
 
 // Campos de login
-const fields = usePlayerFields(localStorageKeys.loginFields)
+const fields = usePlayerFields(sessionStorageKeys.loginFields)
 
 const { email, password, getErrorForCode } = fields
 

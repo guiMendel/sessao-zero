@@ -3,7 +3,7 @@ import { fieldRef } from '@/utils/functions'
 /** Retorna uma colecao de campos uteis para coletar dados do jogador
  * @param localStorageKey se fornecido, persiste os campos em localstorage
  */
-export const useAdventureFields = (localStoragePrefix?: string) => {
+export const useAdventureFields = (sessionStoragePrefix?: string) => {
   /** Campo de nome */
   const name = fieldRef<string>('name', {
     initialValue: '',
@@ -13,13 +13,13 @@ export const useAdventureFields = (localStoragePrefix?: string) => {
 
       return true
     },
-    localStoragePrefix,
+    sessionStoragePrefix,
   })
 
   /** Campo de descrição */
   const description = fieldRef<string>('descrição', {
     initialValue: '',
-    localStoragePrefix,
+    sessionStoragePrefix,
     validator: (newValue: string) =>
       newValue.length > 400 ? 'Muito longo' : true,
   })
@@ -27,7 +27,7 @@ export const useAdventureFields = (localStoragePrefix?: string) => {
   /** Limite de jogadores */
   const playerLimit = fieldRef<number>('limite de jogadores', {
     initialValue: 5,
-    localStoragePrefix,
+    sessionStoragePrefix,
     validator: (newValue: number) =>
       newValue <= 0 ? 'Para impedir novas entradas, tranque a aventura' : true,
   })
@@ -35,13 +35,13 @@ export const useAdventureFields = (localStoragePrefix?: string) => {
   /** Se a aventura aceita novos jogadores */
   const open = fieldRef<boolean>('aceita inscrições', {
     initialValue: true,
-    localStoragePrefix,
+    sessionStoragePrefix,
   })
 
   /** Se a aventura requer admissão */
   const requireAdmission = fieldRef<boolean>('requer admissão', {
     initialValue: false,
-    localStoragePrefix,
+    sessionStoragePrefix,
   })
 
   return {

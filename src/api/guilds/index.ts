@@ -1,5 +1,4 @@
 export * from './Guild'
-export * from './isMember'
 export * from './useCurrentGuild'
 export * from './useGuild'
 export * from './useGuildInvitation'

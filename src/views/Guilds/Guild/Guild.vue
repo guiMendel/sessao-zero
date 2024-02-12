@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { isMember, useCurrentGuild } from '@/api/guilds'
+import { useCurrentGuild } from '@/api/guilds'
+import { isMember } from '@/api/isMember'
 import { useCurrentPlayer } from '@/api/players'
 import { BackButton, LoadingSpinner } from '@/components'
 import { setTitle } from '@/utils/functions'

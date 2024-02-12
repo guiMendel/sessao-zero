@@ -1,3 +1,4 @@
+import { isMember } from '@/api/isMember'
 import { useNotification } from '@/api/notifications'
 import { useCurrentPlayer } from '@/api/players'
 import { useAlert } from '@/stores'
@@ -6,7 +7,7 @@ import { eraseInStorage, getFromStorage, setInStorage } from '@/utils/functions'
 import { decrypt, encrypt } from '@/utils/functions/encryption'
 import { toValue } from 'vue'
 import { useRouter } from 'vue-router'
-import { isMember, useGuild, useJoinGuild } from '..'
+import { useGuild, useJoinGuild } from '..'
 
 /** Por quanto tempo os convites devem ser validos */
 const invitationLifetimeDays = 2
@@ -100,9 +101,9 @@ export const useGuildInvitation = () => {
 
     router.push({ name: 'adventures', params: { guildId: guild.id } })
 
-    const admissionRequested = toValue(player.value?.guildAdmissionRequests)?.some(
-      (requestedGuild) => requestedGuild.id === guild.id
-    )
+    const admissionRequested = toValue(
+      player.value?.guildAdmissionRequests
+    )?.some((requestedGuild) => requestedGuild.id === guild.id)
 
     try {
       const joined = await joinGuild(player.value, guild, admissionRequested)
@@ -113,7 +114,7 @@ export const useGuildInvitation = () => {
     }
 
     notifyPlayer(guild.ownerUid, {
-      type: 'playerAcceptedInvitation',
+      type: 'playerAcceptedGuildInvitation',
       params: { guild, player: player.value },
     })
 

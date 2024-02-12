@@ -2,7 +2,7 @@ import { useResource } from '@/firevase/resources'
 import { vase } from '..'
 import { NotificationTypes, notificationTypes } from '.'
 
-type NotificationParams<K extends keyof NotificationTypes> = {
+export type NotificationParams<K extends keyof NotificationTypes> = {
   type: K
   params: Parameters<NotificationTypes[K]['makeBody']>[0]
 }

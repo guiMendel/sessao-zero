@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Vase } from '@/api'
-import { isMember, useJoinGuild } from '@/api/guilds'
+import { useJoinGuild } from '@/api/guilds'
+import { isMember } from '@/api/isMember'
 import { useCurrentPlayer } from '@/api/players'
 import { Button, Typography } from '@/components'
 import { Resource } from '@/firevase/resources'

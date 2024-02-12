@@ -11,6 +11,7 @@ import {
   faBookOpen,
   faChampagneGlasses,
   faCheck,
+  faChessPawn,
   faChevronDown,
   faChevronRight,
   faCircle,
@@ -27,6 +28,7 @@ import {
   faDiceTwo,
   faDoorClosed,
   faDoorOpen,
+  faDungeon,
   faEllipsisVertical,
   faEnvelope,
   faEye,
@@ -118,7 +120,9 @@ export const initFontAwesome = (): [
     faPenRuler,
     faSignature,
     faMinus,
-    faBookOpen
+    faBookOpen,
+    faChessPawn,
+    faDungeon
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]

@@ -1,7 +1,7 @@
 <script setup lang="ts" generic="T extends string">
-import { computed, ref, watch } from 'vue'
-import { Typography } from '..'
 import { usePrevious } from '@vueuse/core'
+import { computed } from 'vue'
+import { Typography } from '..'
 
 const props = defineProps<{
   tabs: T[]
@@ -129,6 +129,8 @@ const selectedTransition = computed(() => `slide-${selectedDirection.value}`)
 
     .slide-right-enter-active {
       position: absolute;
+      left: 0;
+      right: 0;
       animation: slide-right 200ms ease-in-out reverse;
     }
 
@@ -138,6 +140,8 @@ const selectedTransition = computed(() => `slide-${selectedDirection.value}`)
 
     .slide-left-enter-active {
       position: absolute;
+      left: 0;
+      right: 0;
       animation: slide-left 200ms ease-in-out reverse;
     }
 
@@ -147,13 +151,11 @@ const selectedTransition = computed(() => `slide-${selectedDirection.value}`)
 
     @keyframes slide-right {
       from {
-        position: absolute;
         opacity: 1;
         translate: 0 0;
       }
 
       to {
-        position: absolute;
         opacity: 0;
         translate: -60% 0;
       }
@@ -161,13 +163,11 @@ const selectedTransition = computed(() => `slide-${selectedDirection.value}`)
 
     @keyframes slide-left {
       from {
-        position: absolute;
         opacity: 1;
         translate: 0 0;
       }
 
       to {
-        position: absolute;
         opacity: 0;
         translate: 60% 0;
       }
