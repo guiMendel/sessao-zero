@@ -5,7 +5,10 @@ import { useCurrentGuild } from '@/api/guilds'
 import { isMember } from '@/api/isMember'
 import { NotificationParams, useNotification } from '@/api/notifications'
 import { useCurrentPlayer } from '@/api/players'
+import emptyRoomPicture from '@/assets/empty-room.png'
 import genericBanner from '@/assets/rpg-table.png'
+import stopKnightPicture from '@/assets/stop-knight.png'
+import tooManyWizardsPicture from '@/assets/too-many-wizards.png'
 import {
   Button,
   Divisor,
@@ -20,7 +23,6 @@ import { sessionStorageKeys } from '@/utils/config'
 import { useSessionStorage } from '@vueuse/core'
 import { computed, toValue } from 'vue'
 import { useRoute } from 'vue-router'
-import emptyRoomPicture from '@/assets/empty-room.png'
 
 const { adventure } = useCurrentAdventure()
 const { player } = useCurrentPlayer()
@@ -49,15 +51,19 @@ const spots = computed(() =>
 const showEnter = computed(
   () =>
     player.value &&
-    adventure.value &&
+    adventure.value?.open &&
     isMember(player.value, guild.value) &&
-    !isMember(player.value, adventure.value)
+    !isMember(player.value, adventure.value) &&
+    (adventure.value.playerLimit < 0 ||
+      adventure.value.playerLimit > toValue(adventure.value.players).length)
 )
 
 /** Se esta mostrando a tela de "parece vazio aqui..." com um prompt para entrar */
 const showEmptyRoomPrompt = computed(
   () =>
-    tab.value === 'jogadores' && toValue(adventure.value?.players)?.length === 0
+    tab.value === 'jogadores' &&
+    adventure.value?.open &&
+    toValue(adventure.value.players)?.length === 0
 )
 
 const { getBooleanInput } = useInput()
@@ -205,7 +211,14 @@ const leave = async () => {
               </PlayerPreview>
 
               <!-- Vagas disponiveis -->
-              <template v-if="adventure.playerLimit > 0">
+              <template
+                v-if="
+                  player &&
+                  adventure.playerLimit > 0 &&
+                  adventure.open &&
+                  !isMember(player, adventure)
+                "
+              >
                 <PlayerPreview
                   v-for="spotIndex in spots"
                   :player="undefined"
@@ -213,7 +226,39 @@ const leave = async () => {
                   :key="spotIndex"
                   background="main"
                 />
+
+                <!-- Nao ha mais vagas -->
+                <template
+                  v-if="
+                    toValue(adventure.players).length >= adventure.playerLimit
+                  "
+                >
+                  <img
+                    :src="tooManyWizardsPicture"
+                    alt="leao de chacara emburrado"
+                    class="uncomfortable-wizards"
+                  />
+
+                  <Typography
+                    >me desculpe, está bem lotado aqui... não caberia mais
+                    ninguém!</Typography
+                  >
+                </template>
               </template>
+            </template>
+
+            <!-- Aventura fechada -->
+            <template v-if="!adventure.open">
+              <img
+                :src="stopKnightPicture"
+                alt="leao de chacara emburrado"
+                class="stop-knight"
+              />
+
+              <Typography
+                >parado ai aventureiro! Esta aventura está de portas
+                fechadas</Typography
+              >
             </template>
           </div>
         </template>
@@ -243,6 +288,7 @@ const leave = async () => {
   .title {
     color: var(--tx-main);
     margin-bottom: 1rem;
+    text-align: left;
   }
 
   .subheader {
@@ -309,6 +355,11 @@ const leave = async () => {
     .narrators {
       font-weight: 700;
     }
+  }
+
+  .stop-knight {
+    width: 70%;
+    align-self: center;
   }
 
   .players {

@@ -7,6 +7,7 @@ import { sessionStorageKeys } from '@/utils/config'
 import { eraseInStorage, isFieldValid } from '@/utils/functions'
 import { computed, ref } from 'vue'
 import magicalPenPicture from '../../../assets/magical-pen.png'
+import { useRouter } from 'vue-router'
 
 // Campos de login
 const fields = useAdventureFields(sessionStorageKeys.createAdventureFields)
@@ -21,6 +22,8 @@ const { create } = useAdventure()
 /** Se os campos estao validos */
 const formValid = computed(() => isFieldValid(name, description, playerLimit))
 
+const router = useRouter()
+
 // Acao de criar aventura
 const tryCreate = () => {
   // Valida os campos
@@ -34,9 +37,9 @@ const tryCreate = () => {
     playerLimit: enablePlayerLimit.value ? playerLimit.value : -1,
     requireAdmission: requireAdmission.value,
   })
-    .then(async () => {
+    .then(async (adventureId) => {
       // Redirect to home
-      // await router.push({ name: 'home' })
+      await router.push({ name: 'adventure', params: { adventureId } })
 
       // Limpa os campos armazenados localmente
       eraseInStorage(new RegExp(sessionStorageKeys.createAdventureFields))
@@ -122,6 +125,7 @@ form {
   flex-direction: column;
   align-items: stretch;
   gap: 1rem;
+  padding-inline: 1.5rem;
 
   .title {
     align-self: center;

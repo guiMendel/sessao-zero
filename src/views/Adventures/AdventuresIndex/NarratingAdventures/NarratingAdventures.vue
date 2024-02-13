@@ -69,8 +69,8 @@ const createNewAdventure = () => router.push({ name: 'create-adventure' })
   right: 0;
   flex-direction: column;
   align-items: stretch;
-  gap: 1rem;
-  padding-top: 1rem;
+  gap: 2rem;
+  padding-top: 2rem;
 
   .no-adventures-text {
     align-self: center;
@@ -88,7 +88,7 @@ const createNewAdventure = () => router.push({ name: 'create-adventure' })
     gap: 0.3rem;
     align-items: center;
     align-self: flex-end;
-    margin-top: 0.5rem;
+    margin-top: -0.5rem;
 
     background-color: var(--bg-main-lighter);
     padding: 0.5rem 1rem;

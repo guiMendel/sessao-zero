@@ -21,7 +21,7 @@ export const useAdventureFields = (sessionStoragePrefix?: string) => {
     initialValue: '',
     sessionStoragePrefix,
     validator: (newValue: string) =>
-      newValue.length > 400 ? 'Muito longo' : true,
+      newValue.length > 800 ? 'Muito longo' : true,
   })
 
   /** Limite de jogadores */

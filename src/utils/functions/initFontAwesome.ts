@@ -122,7 +122,8 @@ export const initFontAwesome = (): [
     faMinus,
     faBookOpen,
     faChessPawn,
-    faDungeon
+    faDungeon,
+    faCircleCheck
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]

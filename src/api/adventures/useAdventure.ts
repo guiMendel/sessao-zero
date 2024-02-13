@@ -33,9 +33,11 @@ export const useAdventure = () => {
     // TODO: mudar os relation add, set & remove para
     // 1. Nao precisar mais receber o primeiro parametro, que pode ser derivado do segundo
     // 2. Receber os ids dos targets somente, sem precisar de um HalfResource
-    return addRelation(vase, player.value, 'narratorAdventures', [
+    await addRelation(vase, player.value, 'narratorAdventures', [
       { id } as HalfResource<Vase, 'adventures'>,
     ])
+
+    return id
   }
 
   return { ...api, create: createAdventure }

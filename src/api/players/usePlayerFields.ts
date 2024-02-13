@@ -2,9 +2,9 @@ import { fieldRef } from '@/utils/functions'
 import { ref } from 'vue'
 
 /** Retorna uma colecao de campos uteis para coletar dados do jogador
- * @param sessionStorageKey se fornecido, persiste os campos em localstorage
+ * @param storageKey se fornecido, persiste os campos em localstorage
  */
-export const usePlayerFields = (sessionStorageKey?: string) => {
+export const usePlayerFields = (storageKey?: string) => {
   /** Categorias de email invalidos */
   type invalidEmailsType = {
     invalid: string[]
@@ -53,9 +53,7 @@ export const usePlayerFields = (sessionStorageKey?: string) => {
   /** Campo de email */
   const email = fieldRef<string>('email', {
     initialValue: '',
-    sessionStoragePrefix: sessionStorageKey
-      ? `${sessionStorageKey}__email`
-      : undefined,
+    localStoragePrefix: storageKey ? `${storageKey}__email` : undefined,
     validator: (newValue: string) => {
       if (/.+@.+\..+/.test(newValue) == false) return 'Email inválido'
       if (newValue.length > 100) return 'Muito longo'

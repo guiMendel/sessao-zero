@@ -48,6 +48,11 @@ const goToMembers = () => {
   isOpen.value = false
   router.push({ name: 'guild-members' })
 }
+
+const gotToAdventures = () => {
+  isOpen.value = false
+  router.push({ name: 'adventures' })
+}
 </script>
 
 <template>
@@ -77,9 +82,8 @@ const goToMembers = () => {
       >
 
       <!-- Trocar -->
-      <Button variant="colored" @click="switchGuild"
-        ><font-awesome-icon :icon="['fas', 'repeat']" /> trocar de
-        guilda</Button
+      <Button variant="colored" @click="gotToAdventures"
+        ><font-awesome-icon :icon="['fas', 'scroll']" /> aventuras</Button
       >
 
       <!-- Ver membros -->
@@ -87,8 +91,14 @@ const goToMembers = () => {
         ><font-awesome-icon :icon="['fas', 'users']" /> membros</Button
       >
 
+      <!-- Trocar -->
+      <Button @click="switchGuild"
+        ><font-awesome-icon :icon="['fas', 'repeat']" /> trocar de
+        guilda</Button
+      >
+
       <!-- Deixar guilda -->
-      <Button @click="leaveGuild"
+      <Button @click="leaveGuild" v-if="guild.ownerUid !== player.id"
         ><font-awesome-icon :icon="['fas', 'person-running']" /> deixar
         guilda</Button
       >
