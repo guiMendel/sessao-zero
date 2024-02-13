@@ -79,7 +79,7 @@ const createNewAdventure = () => router.push({ name: 'create-adventure' })
         :adventure-id="adventure.id"
       />
 
-      <Divisor class="active-divisor" />
+      <Divisor v-if="otherAdventures.length > 0" class="active-divisor" />
     </template>
 
     <!-- Aventuras da guilda -->

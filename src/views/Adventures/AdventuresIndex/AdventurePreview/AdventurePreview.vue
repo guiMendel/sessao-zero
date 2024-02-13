@@ -74,7 +74,7 @@ const isClosed = computed(
         "
       >
         <font-awesome-icon :icon="['fas', 'circle-check']" />
-        membro
+        jogando
       </Typography>
 
       <img class="cover" :src="genericBanner" alt="capa da aventura" />

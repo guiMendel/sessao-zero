@@ -165,7 +165,7 @@ Digite <code>${guild.value.name}</code> para confirmar.`,
 @import '@/styles/variables.scss';
 
 .guild-configurations {
-  width: 100%;
+  padding-inline: 1.5rem;
   flex-direction: column;
   align-items: stretch;
   gap: 3rem;

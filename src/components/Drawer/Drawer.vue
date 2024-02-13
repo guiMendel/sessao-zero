@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { Button } from '..'
+
 defineOptions({ inheritAttrs: false })
 
 withDefaults(
@@ -10,21 +12,25 @@ withDefaults(
 )
 
 const emit = defineEmits(['update:modelValue'])
+
+const close = () => emit('update:modelValue', false)
 </script>
 
 <template>
   <Transition name="slide">
-    <div
-      class="shadow"
-      v-if="modelValue"
-      @click.self="emit('update:modelValue', false)"
-    >
+    <div class="shadow" v-if="modelValue" @click.self="close">
       <div
         class="panel"
         :class="`draw-direction-${drawDirection}`"
         v-bind="$attrs"
       >
-        <slot></slot>
+        <Button class="close-button" @click="close">
+          <font-awesome-icon :icon="['fas', 'xmark']" />
+        </Button>
+
+        <div class="content">
+          <slot></slot>
+        </div>
       </div>
     </div>
   </Transition>
@@ -52,25 +58,55 @@ const emit = defineEmits(['update:modelValue'])
     left: 0;
     right: 0;
     background-color: var(--bg-main-washed);
-    padding-inline: 1rem;
+    border-block: 1rem solid var(--tx-main-lighter);
 
     box-shadow: 0 0 100px 0 var(--bg-main-dark);
 
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1.5rem;
     @include high-contrast-border;
 
     &.draw-direction-top {
       top: -2rem;
       border-radius: 0 0 $border-radius $border-radius;
-      padding-block: 4rem 3rem;
+
+      .content {
+        padding-block: 4rem 3rem;
+      }
+
+      .close-button {
+        bottom: -4rem;
+      }
     }
 
     &.draw-direction-bottom {
       bottom: -2rem;
       border-radius: $border-radius $border-radius 0 0;
-      padding-block: 3rem 4rem;
+
+      .content {
+        padding-block: 3rem 4rem;
+      }
+
+      .close-button {
+        top: -4rem;
+      }
+    }
+
+    .close-button {
+      position: absolute;
+      left: 50%;
+      translate: -50% 0;
+
+      z-index: 200;
+    }
+
+    .content {
+      max-height: 90vh;
+      overflow: scroll;
+      padding-inline: 1rem;
+      min-width: 100%;
+
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1.5rem;
     }
   }
 }
@@ -145,5 +181,21 @@ const emit = defineEmits(['update:modelValue'])
     opacity: 1;
     transform: translateY(0);
   }
+}
+</style>
+
+<style lang="scss">
+@import '@/styles/variables.scss';
+
+.shadow .panel .close-button.button-wrapper button {
+  padding: 0;
+  min-width: unset;
+  min-height: unset;
+  width: 2rem;
+  height: 2rem;
+  color: var(--tx-main-dark);
+
+  background-color: var(--bg-main-lighter);
+  @include bevel(var(--main-light));
 }
 </style>

@@ -1,20 +1,21 @@
 <script setup lang="ts">
 import { useAdventureFields } from '@/api/adventures'
 import { useAdventure } from '@/api/adventures/useAdventure'
-import { Button, InputField, ToggleField, Typography } from '@/components'
+import { Button, Typography } from '@/components'
+import { Fields } from '@/components/Fields'
 import { useAlert } from '@/stores'
 import { sessionStorageKeys } from '@/utils/config'
 import { eraseInStorage, isFieldValid } from '@/utils/functions'
-import { computed, ref } from 'vue'
-import magicalPenPicture from '../../../assets/magical-pen.png'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import magicalPenPicture from '../../../assets/magical-pen.png'
 
 // Campos de login
-const fields = useAdventureFields(sessionStorageKeys.createAdventureFields)
+const fields = useAdventureFields({
+  sessionStoragePrefix: sessionStorageKeys.createAdventureFields,
+})
 
 const { description, name, playerLimit, open, requireAdmission } = fields
-
-const enablePlayerLimit = ref(false)
 
 const { alert } = useAlert()
 const { create } = useAdventure()
@@ -34,7 +35,7 @@ const tryCreate = () => {
     description: description.value,
     name: name.value,
     open: open.value,
-    playerLimit: enablePlayerLimit.value ? playerLimit.value : -1,
+    playerLimit: fields.shouldLimitPlayers.value ? playerLimit.value : -1,
     requireAdmission: requireAdmission.value,
   })
     .then(async (adventureId) => {
@@ -42,7 +43,10 @@ const tryCreate = () => {
       await router.push({ name: 'adventure', params: { adventureId } })
 
       // Limpa os campos armazenados localmente
-      eraseInStorage(new RegExp(sessionStorageKeys.createAdventureFields))
+      eraseInStorage(
+        new RegExp(sessionStorageKeys.createAdventureFields),
+        'session'
+      )
     })
     // Handle errors
     .catch((error) => {
@@ -51,9 +55,6 @@ const tryCreate = () => {
       alert('error', 'Ocorreu um erro, tente novamente mais tarde')
     })
 }
-
-// TODO: consertar aquele erro no input com numero
-// TODO: fazer aparecer setas no input de numero
 </script>
 
 <template>
@@ -67,46 +68,17 @@ const tryCreate = () => {
       >você poderá alterar essas configurações depois</Typography
     >
 
-    <!-- Nome -->
-    <InputField autoFocus class="input" :field="fields.name" />
-
-    <!-- Descrição -->
-    <InputField
-      class="input"
-      :field="fields.description"
-      multiline
-      message="apresente e torne sua aventura interessante!"
-    />
-
-    <ToggleField
-      v-model="fields.open.value"
-      :message="
-        fields.open.value
-          ? 'sua aventura aceitará novos jogadores'
-          : 'sua aventurá não aceitará jogadores ainda'
-      "
-      >aberta</ToggleField
-    >
-
-    <ToggleField
-      v-model="fields.requireAdmission.value"
-      :message="
-        fields.requireAdmission.value
-          ? 'jogadores enviam solicitações para entrar na aventura'
-          : 'jogadores podem entrar diretamente'
-      "
-      >requer admissão</ToggleField
-    >
-
-    <ToggleField v-model="enablePlayerLimit">limitar jogadores</ToggleField>
-
-    <!-- Descrição -->
-    <InputField
-      v-if="enablePlayerLimit"
-      class="input"
-      :field="fields.playerLimit"
-      message="quando atingir o limite, novos jogadores não poderão entrar"
-      :min="1"
+    <Fields
+      class="fields"
+      :fields="[
+        fields.name,
+        fields.description,
+        fields.open,
+        fields.requireAdmission,
+        fields.shouldLimitPlayers,
+        fields.shouldLimitPlayers.value && fields.playerLimit,
+      ]"
+      autoFocus="name"
     />
 
     <!-- Submit -->
@@ -134,6 +106,12 @@ form {
   .illustration {
     width: 10rem;
     align-self: center;
+  }
+
+  .fields {
+    flex-direction: column;
+    gap: 1.3rem;
+    align-items: stretch;
   }
 
   .submit {

@@ -76,7 +76,7 @@ const style = computed(() =>
 
 <style lang="scss" scoped>
 .autosave-notification {
-  z-index: 100;
+  z-index: 500;
   position: fixed;
   bottom: 0;
   left: 0;

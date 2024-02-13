@@ -30,14 +30,14 @@ const isOwner = computed(
 const kickPlayer = (player: HalfResource<Vase, 'players'>) =>
   getBooleanInput({
     cancelValue: false,
-    messageHtml: `Deseja expulsar o jogador <b>${player.name}</b>?`,
+    messageHtml: `Deseja expulsar o jogador <b>${player.nickname}</b>?`,
     trueButton: { buttonProps: { variant: 'colored' } },
   }).then(async (decision) => {
     if (!decision || !guild.value) return
 
     await removeRelation(vase, guild.value, 'players', [player])
 
-    alert('success', `${player.name} não é mais membro da guilda`)
+    alert('success', `${player.nickname} não é mais membro da guilda`)
   })
 
 const manualLinkOutput = ref('')

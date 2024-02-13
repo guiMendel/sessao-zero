@@ -118,11 +118,14 @@ export const usePlayerFields = (storageKey?: string) => {
   })
 
   /** Campo de sobre */
-  const about = fieldRef<string>('sobre', {
-    initialValue: '',
-    validator: (newValue: string) =>
-      newValue.length > 400 ? 'Muito longo' : true,
-  })
+  const about = fieldRef<string>(
+    { name: 'sobre', type: 'multi-line' },
+    {
+      initialValue: '',
+      validator: (newValue: string) =>
+        newValue.length > 400 ? 'Muito longo' : true,
+    }
+  )
 
   return {
     email,

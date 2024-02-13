@@ -1,6 +1,6 @@
 import { AutosaveStatus, useAutosaveStatus } from '@/stores'
 import { FieldRef } from '@/utils/functions'
-import { watch } from 'vue'
+import { onBeforeUnmount, watch } from 'vue'
 
 type AutosaveFormOptions = {
   /** Quantos ms deve fazer throttle nas chamadas de fieldRef.persist */
@@ -94,18 +94,24 @@ export const useAutosaveForm = <T extends Record<string, FieldRef<any>>>(
     })
   }
 
+  const cleanup = () => {
+    if (cleanedUp) return
+
+    cleanedUp = true
+
+    // Esquece todas as promessas
+    for (const fieldName in fields) forgetPromise(getFieldId(fieldName))
+
+    // Cancela todas as atualizaçoes agendadas
+    for (const props of Object.values(fieldMap))
+      if (props?.timeout != undefined) clearTimeout(props.timeout)
+  }
+
+  onBeforeUnmount(cleanup)
+
   return {
     fields,
 
-    cleanup: () => {
-      cleanedUp = true
-
-      // Esquece todas as promessas
-      for (const fieldName in fields) forgetPromise(getFieldId(fieldName))
-
-      // Cancela todas as atualizaçoes agendadas
-      for (const props of Object.values(fieldMap))
-        if (props?.timeout != undefined) clearTimeout(props.timeout)
-    },
+    cleanup,
   }
 }

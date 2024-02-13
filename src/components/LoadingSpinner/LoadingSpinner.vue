@@ -46,6 +46,7 @@ onBeforeUnmount(() => clearInterval(intervalKey))
   display: flex;
   align-items: center;
   justify-content: center;
+  align-self: center;
 
   width: min-content;
 

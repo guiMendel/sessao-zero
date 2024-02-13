@@ -10,6 +10,7 @@ import { computed, toValue } from 'vue'
 import { NarratingAdventures } from './NarratingAdventures'
 import { PlayingAdventures } from './PlayingAdventures'
 import { isMember } from '@/api/isMember'
+import { hasLoaded } from '@/firevase/resources'
 
 const { guild } = useCurrentGuild()
 
@@ -38,7 +39,7 @@ const activeViewMode = useLocalStorage<'narrate' | 'play'>(
 </script>
 
 <template>
-  <LoadingSpinner v-if="!guild" />
+  <LoadingSpinner class="loading-spinner" v-if="!guild" />
 
   <div v-else class="adventures-index" :key="guild.id">
     <!-- Se nao eh membro da guilda, so visualiza as aventuras que ja existem -->
@@ -66,11 +67,22 @@ const activeViewMode = useLocalStorage<'narrate' | 'play'>(
       </template>
 
       <template #narrate>
-        <NarratingAdventures :adventures="narratingAdventures" />
+        <LoadingSpinner
+          class="loading-spinner inner"
+          v-if="!hasLoaded([guild, 'adventures'])"
+        />
+
+        <NarratingAdventures v-else :adventures="narratingAdventures" />
       </template>
 
       <template #play>
+        <LoadingSpinner
+          class="loading-spinner inner"
+          v-if="!hasLoaded([guild, 'adventures'])"
+        />
+
         <PlayingAdventures
+          v-else
           :adventures="othersAdventures"
           :is-narrator="narratingAdventures.length > 0"
           @request-narration="activeViewMode = 'narrate'"
@@ -82,6 +94,14 @@ const activeViewMode = useLocalStorage<'narrate' | 'play'>(
 
 <style scoped lang="scss">
 @import '@/styles/variables.scss';
+
+.loading-spinner {
+  font-size: 1.8rem;
+
+  &.inner {
+    margin-top: 3rem;
+  }
+}
 
 .adventures-index {
   flex-direction: column;

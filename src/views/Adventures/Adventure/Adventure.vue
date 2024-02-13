@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { vase } from '@/api'
+import { Vase, vase } from '@/api'
+import { isNarrator } from '@/api/adventures'
 import { useCurrentAdventure } from '@/api/adventures/useCurrentAdventure'
 import { useCurrentGuild } from '@/api/guilds'
 import { isMember } from '@/api/isMember'
@@ -12,19 +13,23 @@ import tooManyWizardsPicture from '@/assets/too-many-wizards.png'
 import {
   Button,
   Divisor,
+  DropdownIcon,
   LoadingSpinner,
   PlayerPreview,
   Typography,
 } from '@/components'
 import { Tabs } from '@/components/Tabs'
 import { addRelation, removeRelation } from '@/firevase/relations'
-import { useInput } from '@/stores'
+import { HalfResource } from '@/firevase/resources'
+import { useAlert, useInput } from '@/stores'
 import { sessionStorageKeys } from '@/utils/config'
 import { useSessionStorage } from '@vueuse/core'
-import { computed, toValue } from 'vue'
+import { computed, ref, toValue } from 'vue'
 import { useRoute } from 'vue-router'
+import { EditAdventure } from './EditAdventure'
+import { router } from '@/router'
 
-const { adventure } = useCurrentAdventure()
+const { adventure, deleteForever } = useCurrentAdventure()
 const { player } = useCurrentPlayer()
 const { guild } = useCurrentGuild()
 
@@ -37,6 +42,10 @@ const tab = useSessionStorage<Tab>(
   `${sessionStorageKeys.adventurePageTab}-${route.params.adventureId}`,
   'detalhes'
 )
+
+// =================================================================
+// JOGADOR
+// =================================================================
 
 const spots = computed(() =>
   adventure.value && adventure.value.playerLimit > 0
@@ -66,7 +75,7 @@ const showEmptyRoomPrompt = computed(
     toValue(adventure.value.players)?.length === 0
 )
 
-const { getBooleanInput } = useInput()
+const { getBooleanInput, getStringInput } = useInput()
 const { notifyPlayer } = useNotification()
 
 const enter = async () => {
@@ -111,10 +120,80 @@ const leave = async () => {
 
   return removeRelation(vase, adventure.value, 'players', [player.value])
 }
+
+// =================================================================
+// NARRADOR
+// =================================================================
+
+const { alert } = useAlert()
+
+const kickPlayer = async (targetPlayer: HalfResource<Vase, 'players'>) => {
+  if (
+    !player.value ||
+    !adventure.value ||
+    !isNarrator(player.value.id, adventure.value)
+  )
+    return
+
+  const kick = await getBooleanInput({
+    cancelValue: false,
+    messageHtml: `Deseja expulsar o jogador <b>${targetPlayer.nickname}</b>?`,
+    trueButton: { buttonProps: { variant: 'colored' } },
+  })
+
+  if (!kick || !adventure.value) return
+
+  await removeRelation(vase, adventure.value, 'players', [targetPlayer])
+
+  alert('success', `${targetPlayer.nickname} não é mais membro da adventura`)
+}
+
+const showEditPanel = ref(false)
+
+const startEdit = () => {
+  if (
+    !player.value ||
+    !adventure.value ||
+    !isNarrator(player.value.id, adventure.value)
+  )
+    return
+
+  showEditPanel.value = true
+}
+
+const destroy = async () => {
+  if (
+    !player.value ||
+    !adventure.value ||
+    !isNarrator(player.value.id, adventure.value)
+  )
+    return
+
+  const confirmDestruction = await getStringInput({
+    cancelValue: '',
+    inputFieldName: 'nome da aventura',
+    validator: (value) =>
+      adventure.value && value === adventure.value.name
+        ? true
+        : 'nomes nao batem',
+    submitButton: { label: 'destruir' },
+    messageClass: 'guild-configurations__delete-confirmation',
+    messageHtml: `\
+Tem certeza de que deseja destruir a aventura permanentemente?\
+<br />\
+Digite <code>${adventure.value.name}</code> para confirmar.`,
+  })
+
+  if (!confirmDestruction || !adventure.value) return
+
+  await deleteForever()
+
+  router.push({ name: 'home' })
+}
 </script>
 
 <template>
-  <LoadingSpinner v-if="!adventure" />
+  <LoadingSpinner class="loading" v-if="!adventure || !player" />
 
   <div
     v-else
@@ -157,12 +236,14 @@ const leave = async () => {
 
         <template #detalhes>
           <div class="details">
+            <!-- Descricao -->
             <Typography class="description">{{
               adventure.description
             }}</Typography>
 
             <Divisor class="divisor" />
 
+            <!-- Narradores -->
             <Typography variant="paragraph-secondary" class="narrators-label"
               >narrado por</Typography
             >
@@ -172,6 +253,30 @@ const leave = async () => {
                 .map((narrator) => narrator.nickname)
                 .join(', ')
             }}</Typography>
+
+            <!-- Acoes de narrador -->
+            <div class="narrator-actions">
+              <!-- Editar -->
+              <Button
+                variant="colored"
+                class="edit-button"
+                v-if="isNarrator(player.id, adventure)"
+                @click="startEdit"
+              >
+                <font-awesome-icon
+                  :icon="['fas', 'feather-pointed']"
+                />editar</Button
+              >
+
+              <!-- Deletar -->
+              <Button
+                class="delete-button"
+                v-if="isNarrator(player.id, adventure)"
+                @click="destroy"
+              >
+                <font-awesome-icon :icon="['fas', 'fire']" />excluir</Button
+              >
+            </div>
           </div>
         </template>
 
@@ -208,16 +313,22 @@ const leave = async () => {
                 >
                   <font-awesome-icon :icon="['fas', 'person-running']" />sair
                 </div>
+
+                <DropdownIcon
+                  @click.stop
+                  class="actions"
+                  v-if="player && isNarrator(player.id, adventure)"
+                >
+                  <div class="option" @click="kickPlayer(iterationPlayer)">
+                    <font-awesome-icon :icon="['fas', 'user-large-slash']" />
+                    expulsar
+                  </div>
+                </DropdownIcon>
               </PlayerPreview>
 
               <!-- Vagas disponiveis -->
               <template
-                v-if="
-                  player &&
-                  adventure.playerLimit > 0 &&
-                  adventure.open &&
-                  !isMember(player, adventure)
-                "
+                v-if="player && adventure.playerLimit > 0 && adventure.open"
               >
                 <PlayerPreview
                   v-for="spotIndex in spots"
@@ -265,10 +376,21 @@ const leave = async () => {
       </Tabs>
     </div>
   </div>
+
+  <EditAdventure
+    v-if="adventure"
+    :key="adventure.id"
+    :adventure="adventure"
+    v-model="showEditPanel"
+  />
 </template>
 
 <style scoped lang="scss">
 @import '@/styles/variables.scss';
+
+.loading {
+  align-self: center;
+}
 
 .adventure {
   flex-direction: column;
@@ -355,6 +477,13 @@ const leave = async () => {
     .narrators {
       font-weight: 700;
     }
+
+    .narrator-actions {
+      margin-top: 0.5rem;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1.5rem;
+    }
   }
 
   .stop-knight {
@@ -376,6 +505,20 @@ const leave = async () => {
       margin-left: auto;
       border-radius: $border-radius;
       padding: 0.2rem 0.6rem;
+    }
+
+    .actions {
+      margin-inline: auto 0.5rem;
+
+      .option {
+        padding: 0.5rem;
+        gap: 0.3rem;
+        align-items: center;
+
+        svg {
+          font-size: 0.9rem;
+        }
+      }
     }
   }
 }

@@ -33,6 +33,7 @@ import {
   faEnvelope,
   faEye,
   faEyeSlash,
+  faFeatherPointed,
   faFire,
   faHammer,
   faHandPointLeft,
@@ -123,7 +124,8 @@ export const initFontAwesome = (): [
     faBookOpen,
     faChessPawn,
     faDungeon,
-    faCircleCheck
+    faCircleCheck,
+    faFeatherPointed
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]
