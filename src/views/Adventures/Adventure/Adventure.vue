@@ -19,17 +19,17 @@ import {
   Typography,
 } from '@/components'
 import { Tabs } from '@/components/Tabs'
-import { addRelation, removeRelation } from '@/firevase/relations'
+import { removeRelation } from '@/firevase/relations'
 import { HalfResource } from '@/firevase/resources'
+import { router } from '@/router'
 import { useAlert, useInput } from '@/stores'
 import { sessionStorageKeys } from '@/utils/config'
 import { useSessionStorage } from '@vueuse/core'
-import { computed, ref, toValue } from 'vue'
+import { computed, ref, toValue, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { EditAdventure } from './EditAdventure'
-import { router } from '@/router'
 
-const { adventure, deleteForever } = useCurrentAdventure()
+const { adventure, deleteForever, addPlayer } = useCurrentAdventure()
 const { player } = useCurrentPlayer()
 const { guild } = useCurrentGuild()
 
@@ -57,8 +57,16 @@ const spots = computed(() =>
     : []
 )
 
+const playerHasRequestedAdmission = computed(() =>
+  toValue(player.value?.adventureAdmissionRequests)?.some(
+    (requestedAdventure) =>
+      adventure.value && requestedAdventure.id === adventure.value.id
+  )
+)
+
 const showEnter = computed(
   () =>
+    !playerHasRequestedAdmission.value &&
     player.value &&
     adventure.value?.open &&
     isMember(player.value, guild.value) &&
@@ -78,26 +86,7 @@ const showEmptyRoomPrompt = computed(
 const { getBooleanInput, getStringInput } = useInput()
 const { notifyPlayer } = useNotification()
 
-const enter = async () => {
-  if (!adventure.value || !player.value) return
-
-  const enter = await getBooleanInput({
-    messageHtml: `Quer mesmo entrar na aventura <b>${adventure.value.name}</b>?`,
-    trueButton: { buttonProps: { variant: 'colored' } },
-  })
-
-  if (!enter) return
-
-  const notification: NotificationParams<'playerJoinedAdventure'> = {
-    type: 'playerJoinedAdventure',
-    params: { adventure: adventure.value, player: player.value },
-  }
-
-  for (const narrator of toValue(adventure.value.narrators))
-    notifyPlayer(narrator.id, notification)
-
-  return addRelation(vase, adventure.value, 'players', [player.value])
-}
+const enter = () => player.value && addPlayer(player.value)
 
 const leave = async () => {
   if (!adventure.value || !player.value) return
@@ -120,6 +109,10 @@ const leave = async () => {
 
   return removeRelation(vase, adventure.value, 'players', [player.value])
 }
+
+const joinLabel = adventure.value?.requireAdmission
+  ? 'solicitar entrada'
+  : 'entrar'
 
 // =================================================================
 // NARRADOR
@@ -215,7 +208,7 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
         variant="colored"
         class="enter-guild-button"
         @click="enter"
-        ><font-awesome-icon :icon="['fas', 'dungeon']" />entrar</Button
+        ><font-awesome-icon :icon="['fas', 'dungeon']" />{{ joinLabel }}</Button
       >
 
       <Tabs :tabs="allTabs" v-model="tab">
@@ -282,6 +275,22 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
 
         <template #jogadores>
           <div class="players">
+            <!-- Mensagem de solicitaçao enviada -->
+            <div
+              v-if="playerHasRequestedAdmission"
+              class="admission-request-sent"
+            >
+              <div class="row">
+                <font-awesome-icon
+                  class="hourglass"
+                  :icon="['fas', 'hourglass-half']"
+                />
+                <Typography>entrada solicitada!</Typography>
+              </div>
+
+              <Button @click="enter" class="cancel">cancelar</Button>
+            </div>
+
             <!-- Mensagem de "sem jogadores" -->
             <template v-if="showEmptyRoomPrompt">
               <img :src="emptyRoomPicture" alt="sala vazia" />
@@ -293,7 +302,9 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
                 variant="colored"
                 class="empty-room-enter-prompt"
                 @click="enter"
-                ><font-awesome-icon :icon="['fas', 'dungeon']" />entrar</Button
+                ><font-awesome-icon :icon="['fas', 'dungeon']" />{{
+                  joinLabel
+                }}</Button
               >
             </template>
 
@@ -497,6 +508,30 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
     align-items: stretch;
     gap: 1rem;
 
+    .admission-request-sent {
+      background-color: var(--bg-main-lighter);
+      padding: 0.5rem 0.8rem;
+      border-radius: $border-radius;
+      align-items: stretch;
+      flex-direction: column;
+      grid-auto-flow: 0.8rem;
+      gap: 0.4rem;
+
+      .row {
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+
+        .hourglass {
+          font-size: 1.1em;
+        }
+      }
+
+      .cancel {
+        margin-bottom: 0.2rem;
+      }
+    }
+
     .leave-adventure {
       align-items: center;
       background-color: var(--bg-trans-1);
@@ -534,5 +569,17 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
   button {
     min-width: unset;
   }
+}
+</style>
+
+<style lang="scss">
+.adventure .players .admission-request-sent .cancel button {
+  min-width: unset;
+  min-height: unset;
+  align-self: center;
+  padding: 0.4rem 0.9rem;
+
+  background-color: var(--bg-trans-1);
+  font-size: 0.9rem;
 }
 </style>

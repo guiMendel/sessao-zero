@@ -18,7 +18,7 @@ type Argument<C extends FirevaseClient> =
   | undefined
 
 export const hasLoaded = <C extends FirevaseClient>(...args: Argument<C>[]) => {
-  // We don't want to return early since that would kepe the funciton from generating vue
+  // We don't want to return early since that would keep the function from generating vue
   // dependencies for all variables and relations
   let result = true
 
@@ -27,6 +27,9 @@ export const hasLoaded = <C extends FirevaseClient>(...args: Argument<C>[]) => {
 
     // Address no relation
     if (!Array.isArray(arg)) {
+      // Generate vue dependency
+      toValue(arg)
+
       if (arg.sync.hasLoaded === false) result = false
       continue
     }

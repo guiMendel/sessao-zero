@@ -48,6 +48,14 @@ const buttonLabel = computed(() => {
 
   return 'solicitar admissão'
 })
+
+const icon = computed(() => {
+  if (!props.guild.open) return 'lock'
+
+  if (props.guild.requireAdmission) return 'envelope'
+
+  return 'eye'
+})
 </script>
 
 <template>
@@ -57,7 +65,7 @@ const buttonLabel = computed(() => {
     :class="{ yellow: guild.requireAdmission, gray: !guild.open }"
   >
     <div class="row">
-      <font-awesome-icon :icon="['fas', guild.open ? 'eye' : 'lock']" />
+      <font-awesome-icon :icon="['fas', icon]" />
 
       <Typography class="main-text">{{ heading }}</Typography>
     </div>

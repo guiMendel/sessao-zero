@@ -30,7 +30,6 @@ const isOwner = (guild: Resource<Vase, 'guilds'>) =>
       @click="openGuildPage(guild)"
       :class="{
         unavailable: !guild.open,
-        requireAdmission: guild.requireAdmission,
       }"
     >
       <div class="data">
@@ -54,6 +53,11 @@ const isOwner = (guild: Resource<Vase, 'guilds'>) =>
             <Typography variant="paragraph-secondary">{{
               toValue(guild.owner)?.name
             }}</Typography>
+          </div>
+
+          <!-- Indicador de requer admissao -->
+          <div class="icon warning" v-if="guild.requireAdmission">
+            <font-awesome-icon :icon="['fas', 'envelope']" />
           </div>
 
           <!-- Numero de membros -->
@@ -107,18 +111,7 @@ const isOwner = (guild: Resource<Vase, 'guilds'>) =>
         }
       }
     }
-
-    &.requireAdmission {
-      background-color: var(--bg-warning-dark);
-      @include bevel(var(--warning-darker));
-
-      .data .row .owner {
-        p,
-        svg {
-          color: var(--tx-warning-darker);
-        }
-      }
-    }
+    
 
     .data {
       flex: 1;
@@ -173,6 +166,17 @@ const isOwner = (guild: Resource<Vase, 'guilds'>) =>
           font-size: 0.9rem;
           font-weight: 500;
           color: var(--tx-trans-3);
+
+          &.warning {
+            background-color: var(--bg-warning);
+            width: 1.7rem;
+            height: 1.7rem;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            
+            color: var(--tx-warning-darker)
+          }
         }
       }
     }

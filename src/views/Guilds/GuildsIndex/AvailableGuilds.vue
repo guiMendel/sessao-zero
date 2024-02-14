@@ -2,10 +2,11 @@
 import { useGuild } from '@/api/guilds'
 import { isMember } from '@/api/isMember'
 import { isGuildMaster, useCurrentPlayer } from '@/api/players'
-import { BackButton, Divisor, Typography } from '@/components'
+import { BackButton, Divisor, LoadingSpinner, Typography } from '@/components'
 import { computed } from 'vue'
 import sadDragonIllustration from '../../../assets/crying-drake.png'
 import { GuildList } from './GuildList'
+import { hasLoaded } from '@/firevase/resources'
 
 const { syncList } = useGuild()
 
@@ -13,10 +14,20 @@ const { player } = useCurrentPlayer()
 
 const allGuilds = syncList()
 
+const isAllLoaded = computed(() => {
+  const loaded = hasLoaded(allGuilds, player)
+
+  console.log({ loaded })
+
+  return loaded
+})
+
 const guilds = computed(() => {
   const unjoined = allGuilds.value.filter(
     (guild) => !isMember(player.value, guild)
   )
+
+  console.log({ unjoined })
 
   const available: typeof unjoined = [],
     unavailable: typeof unjoined = []
@@ -49,8 +60,10 @@ const showBackButton = computed(() => {
   <div v-if="player" class="guilds-index">
     <BackButton v-if="showBackButton" />
 
+    <LoadingSpinner class="loading-spinner" v-if="!isAllLoaded" />
+
     <!-- Guildas disponiveis para entrar -->
-    <template v-if="guilds.unjoined.length > 0">
+    <template v-else-if="guilds.unjoined.length > 0">
       <Typography variant="subtitle">Guildas disponíveis</Typography>
 
       <GuildList
@@ -104,6 +117,11 @@ const showBackButton = computed(() => {
   max-width: 100%;
   margin-top: 1rem;
   padding: 0 1.5rem 2rem;
+
+  .loading-spinner {
+    margin-top: 4rem;
+    font-size: 1.9rem;
+  }
 
   .no-guilds {
     flex: 1;

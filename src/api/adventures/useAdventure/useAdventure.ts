@@ -1,10 +1,11 @@
 import { addRelation } from '@/firevase/relations'
 import { HalfResource } from '@/firevase/resources'
-import { Adventure } from '.'
-import { Vase, vase } from '..'
-import { useResource } from '../../firevase/resources/hooks/useResource'
-import { useCurrentGuild } from '../guilds'
-import { useCurrentPlayer } from '../players'
+import { Adventure } from '..'
+import { Vase, vase } from '../..'
+import { useResource } from '../../../firevase/resources/hooks/useResource'
+import { useCurrentGuild } from '../../guilds'
+import { useCurrentPlayer } from '../../players'
+import { useAddPlayer } from './useAddPlayer'
 
 export const useAdventure = () => {
   const api = useResource(vase, 'adventures')
@@ -40,5 +41,5 @@ export const useAdventure = () => {
     return id
   }
 
-  return { ...api, create: createAdventure }
+  return { ...api, create: createAdventure, addPlayer: useAddPlayer() }
 }

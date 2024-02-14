@@ -39,6 +39,7 @@ import {
   faHandPointLeft,
   faHandPointRight,
   faHeart,
+  faHourglassHalf,
   faKey,
   faLink,
   faLock,
@@ -125,7 +126,8 @@ export const initFontAwesome = (): [
     faChessPawn,
     faDungeon,
     faCircleCheck,
-    faFeatherPointed
+    faFeatherPointed,
+    faHourglassHalf
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]

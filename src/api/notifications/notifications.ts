@@ -11,12 +11,12 @@ export const notificationTypes = {
   // Guilds
   guildAdmissionRequest: {
     makeBody: ({ guild, player }: { player: Player; guild: Guild }) =>
-      `<b>${guild.name}</b>: ${player.name} solicitou admissão`,
+      `<b>${guild.name}</b>: <b>${player.nickname}</b> solicitou admissão`,
   },
 
   playerAcceptedGuildInvitation: {
     makeBody: ({ guild, player }: { player: Player; guild: Guild }) =>
-      `<b>${guild.name}</b>: ${player.name} entrou na guilda por convite`,
+      `<b>${guild.name}</b>: <b>${player.nickname}</b> entrou na guilda por convite`,
   },
 
   guildAdmissionRequestAccepted: {
@@ -45,6 +45,22 @@ export const notificationTypes = {
       adventure: Adventure
     }) =>
       `Adeus! <b>${player.nickname}</b> deixou sua aventura <b>${adventure.name}</b>`,
+  },
+
+  adventureAdmissionRequest: {
+    makeBody: ({
+      adventure,
+      player,
+    }: {
+      player: Player
+      adventure: Adventure
+    }) =>
+      `<b>${player.nickname}</b> solicitou entrada na aventura <b>${adventure.name}</b>`,
+  },
+
+  adventureAdmissionRequestAccepted: {
+    makeBody: ({ adventure }: { adventure: Adventure }) =>
+      `Um narrador permitiu sua entrada na aventura <b>${adventure.name}</b>!`,
   },
 } satisfies Record<string, NotificationType>
 

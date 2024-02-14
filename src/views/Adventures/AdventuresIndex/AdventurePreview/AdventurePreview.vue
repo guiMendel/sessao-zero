@@ -107,6 +107,11 @@ const isClosed = computed(
             class="padlock"
           />
 
+          <!-- Indicador de requer admissao -->
+          <div class="require-admission" v-if="adventure.requireAdmission">
+            <font-awesome-icon :icon="['fas', 'envelope']" />
+          </div>
+
           <!-- Numero de jogadores -->
           <div class="players">
             <Typography class="count">{{
@@ -227,6 +232,17 @@ const isClosed = computed(
 
       .padlock {
         color: var(--tx-main-darker);
+      }
+
+      .require-admission {
+        background-color: var(--bg-warning);
+        width: 1.7rem;
+        height: 1.7rem;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+
+        color: var(--tx-warning-darker);
       }
 
       .players {

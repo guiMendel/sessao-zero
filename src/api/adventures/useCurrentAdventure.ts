@@ -3,9 +3,11 @@ import { watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Adventure } from '.'
 import { useAdventure } from './useAdventure'
+import { Resource } from '@/firevase/resources'
+import { Vase } from '..'
 
 export const useCurrentAdventure = defineStore('current-adventure', () => {
-  const { sync, get, deleteForever, update } = useAdventure()
+  const { sync, get, deleteForever, update, addPlayer } = useAdventure()
   const route = useRoute()
 
   const adventure = sync(route?.params.adventureId as string)
@@ -32,5 +34,8 @@ export const useCurrentAdventure = defineStore('current-adventure', () => {
       route?.params.adventureId != undefined
         ? get(route.params.adventureId as string)
         : undefined,
+
+    addPlayer: async (player: Resource<Vase, 'players'>) =>
+      adventure.value && addPlayer(player, adventure.value),
   }
 })
