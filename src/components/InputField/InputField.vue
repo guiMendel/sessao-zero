@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FieldRef, splitCamelCase } from '@/utils/functions'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, toValue, watch, watchEffect } from 'vue'
 import { IconButton, Typography } from '..'
 import { inferFieldProperties } from './inferFieldProperties'
 
@@ -146,6 +146,17 @@ const raiseLabel = computed(
     props.field.value !== '' ||
     inferred.value.type == 'color'
 )
+
+// Reajusta o tamanho baseado no conteudo
+watchEffect(() => {
+  if (props.field.type !== 'multi-line' || !fieldElement.value) return
+
+  // Gera dependencia
+  toValue(props.field)
+
+  fieldElement.value.style.height = 'auto'
+  fieldElement.value.style.height = fieldElement.value.scrollHeight + 'px'
+})
 </script>
 
 <template>
@@ -333,7 +344,7 @@ const raiseLabel = computed(
     }
 
     textarea {
-      height: 7rem;
+      min-height: 6rem;
       resize: none;
     }
 
