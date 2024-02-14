@@ -14,20 +14,12 @@ const { player } = useCurrentPlayer()
 
 const allGuilds = syncList()
 
-const isAllLoaded = computed(() => {
-  const loaded = hasLoaded(allGuilds, player)
-
-  console.log({ loaded })
-
-  return loaded
-})
+const isAllLoaded = computed(() => hasLoaded(allGuilds, player))
 
 const guilds = computed(() => {
   const unjoined = allGuilds.value.filter(
     (guild) => !isMember(player.value, guild)
   )
-
-  console.log({ unjoined })
 
   const available: typeof unjoined = [],
     unavailable: typeof unjoined = []

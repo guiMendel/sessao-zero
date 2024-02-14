@@ -25,12 +25,6 @@ export const useAddPlayer = () => {
       player.adventureAdmissionRequests
     )?.some((requestedAdventure) => requestedAdventure.id === adventure.id)
 
-    console.log({
-      playerHasRequestedAdmission,
-      player: JSON.parse(JSON.stringify(player)),
-      adventure,
-    })
-
     const decision = await getBooleanInput({
       cancelValue: false,
       messageHtml: playerHasRequestedAdmission

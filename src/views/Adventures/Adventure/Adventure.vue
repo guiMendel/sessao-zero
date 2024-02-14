@@ -25,9 +25,10 @@ import { router } from '@/router'
 import { useAlert, useInput } from '@/stores'
 import { sessionStorageKeys } from '@/utils/config'
 import { useSessionStorage } from '@vueuse/core'
-import { computed, ref, toValue, watchEffect } from 'vue'
+import { computed, ref, toValue } from 'vue'
 import { useRoute } from 'vue-router'
 import { EditAdventure } from './EditAdventure'
+import { AdmissionRequests } from './AdmissionRequests'
 
 const { adventure, deleteForever, addPlayer } = useCurrentAdventure()
 const { player } = useCurrentPlayer()
@@ -275,21 +276,11 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
 
         <template #jogadores>
           <div class="players">
-            <!-- Mensagem de solicitaçao enviada -->
-            <div
-              v-if="playerHasRequestedAdmission"
-              class="admission-request-sent"
-            >
-              <div class="row">
-                <font-awesome-icon
-                  class="hourglass"
-                  :icon="['fas', 'hourglass-half']"
-                />
-                <Typography>entrada solicitada!</Typography>
-              </div>
-
-              <Button @click="enter" class="cancel">cancelar</Button>
-            </div>
+            <AdmissionRequests
+              :player="player"
+              :adventure="adventure"
+              @cancel-request="enter"
+            />
 
             <!-- Mensagem de "sem jogadores" -->
             <template v-if="showEmptyRoomPrompt">
@@ -352,6 +343,7 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
                 <!-- Nao ha mais vagas -->
                 <template
                   v-if="
+                    !isMember(player, adventure) &&
                     toValue(adventure.players).length >= adventure.playerLimit
                   "
                 >
@@ -410,6 +402,11 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
 
   &.extra-bottom-padding {
     padding-bottom: 4rem;
+  }
+
+  .divisor {
+    color: var(--tx-main-light);
+    margin-block: 0.8rem;
   }
 
   .content {
@@ -474,11 +471,6 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
     text-align: left;
     white-space: pre-wrap;
 
-    .divisor {
-      color: var(--tx-main-light);
-      margin-block: 0.8rem;
-    }
-
     .narrators-label {
       color: var(--tx-main-light);
       font-weight: 500;
@@ -507,30 +499,6 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
-
-    .admission-request-sent {
-      background-color: var(--bg-main-lighter);
-      padding: 0.5rem 0.8rem;
-      border-radius: $border-radius;
-      align-items: stretch;
-      flex-direction: column;
-      grid-auto-flow: 0.8rem;
-      gap: 0.4rem;
-
-      .row {
-        align-items: center;
-        justify-content: center;
-        gap: 0.6rem;
-
-        .hourglass {
-          font-size: 1.1em;
-        }
-      }
-
-      .cancel {
-        margin-bottom: 0.2rem;
-      }
-    }
 
     .leave-adventure {
       align-items: center;
