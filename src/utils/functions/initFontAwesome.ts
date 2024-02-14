@@ -20,6 +20,7 @@ import {
   faCircleUser,
   faCircleXmark,
   faCompass,
+  faCropSimple,
   faCrown,
   faDiceFive,
   faDiceFour,
@@ -136,7 +137,8 @@ export const initFontAwesome = (): [
     faFileArrowUp,
     faArrowUpFromBracket,
     faFile,
-    faFileRegular
+    faFileRegular,
+    faCropSimple
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]

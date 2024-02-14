@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref, watch, watchEffect } from 'vue'
+import { useImageCropper } from '@/stores'
+import { onBeforeUnmount, ref, watch } from 'vue'
 import { Typography } from '..'
 import { getId } from '../../utils/functions/getId'
-import { useImageCropper } from '@/stores'
 
 const props = defineProps<{
   /** The file to be acted upon by the field */
@@ -23,12 +23,6 @@ const emit = defineEmits(['update:modelValue'])
 
 const { cropImage } = useImageCropper()
 
-const handleFile = async (file: File) => {
-  const cropped = await cropImage(file, [1600, 900])
-
-  emit('update:modelValue', cropped)
-}
-
 const validImageTypes = [
   'image/png',
   'image/jpg',
@@ -38,20 +32,52 @@ const validImageTypes = [
 ]
 
 // ====================================
+// IMAGE ACTIONS
+// ====================================
+
+let originalFile: File | undefined = undefined
+
+const handleFile = async (file: File) => {
+  originalFile = file
+
+  return recrop()
+}
+
+const recrop = async () => {
+  if (!originalFile) return
+
+  const cropped = await cropImage(originalFile, [1600, 900])
+
+  emit('update:modelValue', cropped)
+}
+
+const clear = () => {
+  originalFile = undefined
+
+  emit('update:modelValue', undefined)
+}
+
+// ====================================
 // IMAGE PREVIEW
 // ====================================
 
 const image = ref<HTMLImageElement | null>(null)
 
-watchEffect(() => {
+const hasImage = ref(false)
+
+watch(props, ({ modelValue }) => {
   if (!image.value) return
 
-  if (image.value.src) URL.revokeObjectURL(image.value.src)
+  const currentImage = image.value
 
-  if (props.modelValue) image.value.src = URL.createObjectURL(props.modelValue)
+  if (image.value.src) URL.revokeObjectURL(currentImage.src)
+
+  currentImage.src = modelValue ? URL.createObjectURL(modelValue) : ''
+
+  hasImage.value = Boolean(modelValue)
+
+  image.value = { ...currentImage }
 })
-
-watchEffect(() => console.log(image.value?.src))
 
 // ====================================
 // HANDLING FILE INPUT ELEMENT
@@ -154,10 +180,25 @@ onBeforeUnmount(() => {
 
       <label class="default-view" :for="inputId">
         <!-- Preview do arquivo -->
-        <div class="file-preview" :class="{ 'has-image': Boolean(image?.src) }">
+        <div class="file-preview" :class="{ 'has-image': hasImage }">
+          <!-- Imagem -->
           <img alt="preview do arquivo" ref="image" />
 
+          <!-- Icone de quando vazio -->
           <font-awesome-icon :icon="['far', 'file']" class="no-file-icon" />
+
+          <!-- Botoes de acao -->
+          <div class="actions">
+            <!-- Recortar novamente -->
+            <div class="action" @click.stop.prevent="recrop">
+              <font-awesome-icon :icon="['fas', 'crop-simple']" />
+            </div>
+
+            <!-- Excluir imagem -->
+            <div class="action" @click.stop.prevent="clear">
+              <font-awesome-icon :icon="['fas', 'fire']" />
+            </div>
+          </div>
         </div>
 
         <!-- Input -->
@@ -266,35 +307,64 @@ onBeforeUnmount(() => {
 
       .file-preview {
         width: 100%;
-        border-radius: $border-radius;
-        overflow: hidden;
         position: relative;
         align-items: center;
         justify-content: center;
         min-height: 3rem;
+        border-radius: $border-radius;
 
         background-color: var(--bg-main-washed);
 
         &.has-image {
           img {
             opacity: 1;
+            transition: all 200ms;
           }
 
           .no-file-icon {
             opacity: 0;
+          }
+
+          .actions {
+            opacity: 1;
+            pointer-events: unset;
+            bottom: -1rem;
           }
         }
 
         img {
           opacity: 0;
           width: 100%;
-          transition: all 200ms;
+          border-radius: $border-radius;
         }
 
         .no-file-icon {
           position: absolute;
           transition: all 200ms;
           color: var(--tx-trans-3);
+        }
+
+        .actions {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          transition: all 200ms;
+          pointer-events: none;
+          opacity: 0;
+
+          align-items: center;
+          justify-content: center;
+          gap: 1rem;
+
+          .action {
+            @include button;
+            @include circle;
+
+            background-color: var(--bg-main-light);
+            @include bevel(var(--main));
+            color: var(--tx-main-dark);
+          }
         }
       }
 

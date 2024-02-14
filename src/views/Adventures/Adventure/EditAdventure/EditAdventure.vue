@@ -5,7 +5,7 @@ import { Drawer, FileField, Typography } from '@/components'
 import { Fields } from '@/components/Fields'
 import { HalfResource } from '@/firevase/resources'
 import { useAutosaveForm } from '@/utils/hooks'
-import { ref, watchEffect } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps<{
   modelValue: boolean
@@ -16,8 +16,6 @@ const emit = defineEmits(['update:modelValue'])
 const { update } = useAdventure()
 
 const selectedFile = ref<File | undefined>(undefined)
-
-watchEffect(() => console.log('selected', selectedFile.value?.name))
 
 // Campos de login
 const { fields } = useAutosaveForm(
