@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import genericBanner from '@/assets/green-table.png'
-import { onBeforeUnmount, ref, watch } from 'vue'
+import { onBeforeUnmount, ref, watch, watchEffect } from 'vue'
 import { Typography } from '..'
 import { getId } from '../../utils/functions/getId'
 import { useImageCropper } from '@/stores'
 
-defineProps<{
+const props = defineProps<{
   /** The file to be acted upon by the field */
   modelValue: File | undefined
 
@@ -25,10 +24,34 @@ const emit = defineEmits(['update:modelValue'])
 const { cropImage } = useImageCropper()
 
 const handleFile = async (file: File) => {
-  const cropped = await cropImage(file, [16, 9])
+  const cropped = await cropImage(file, [1600, 900])
 
   emit('update:modelValue', cropped)
 }
+
+const validImageTypes = [
+  'image/png',
+  'image/jpg',
+  'image/jpeg',
+  'image/webp',
+  'image/svg',
+]
+
+// ====================================
+// IMAGE PREVIEW
+// ====================================
+
+const image = ref<HTMLImageElement | null>(null)
+
+watchEffect(() => {
+  if (!image.value) return
+
+  if (image.value.src) URL.revokeObjectURL(image.value.src)
+
+  if (props.modelValue) image.value.src = URL.createObjectURL(props.modelValue)
+})
+
+watchEffect(() => console.log(image.value?.src))
 
 // ====================================
 // HANDLING FILE INPUT ELEMENT
@@ -73,13 +96,15 @@ const handleDrop = (event: DragEvent) => {
   event.stopPropagation()
   event.preventDefault()
 
+  isDraggingOverZone.value = false
+
   if (!event.dataTransfer) return
 
-  const { files } = event.dataTransfer
+  const file = event.dataTransfer.files.item(0)
 
-  if (files.length > 0) handleFile(files[0])
+  if (!file || !validImageTypes.includes(file?.type)) return
 
-  isDraggingOverZone.value = false
+  handleFile(file)
 }
 
 const handleDragLeave = () => (isDraggingOverZone.value = false)
@@ -111,7 +136,7 @@ onBeforeUnmount(() => {
       @change="handleInputEvent"
       class="hidden-input"
       :id="inputId"
-      accept="image/png,image/jpg,image/jpeg"
+      :accept="validImageTypes.join(',')"
     />
 
     <div
@@ -129,11 +154,11 @@ onBeforeUnmount(() => {
 
       <label class="default-view" :for="inputId">
         <!-- Preview do arquivo -->
-        <img
-          :src="genericBanner"
-          alt="preview do arquivo"
-          class="file-preview"
-        />
+        <div class="file-preview" :class="{ 'has-image': Boolean(image?.src) }">
+          <img alt="preview do arquivo" ref="image" />
+
+          <font-awesome-icon :icon="['far', 'file']" class="no-file-icon" />
+        </div>
 
         <!-- Input -->
         <div class="input-area">
@@ -236,12 +261,41 @@ onBeforeUnmount(() => {
       grid-template-columns: 1fr 1fr;
       gap: 0.5rem;
       align-items: center;
-      min-height: $field-height;
       transition: all 200ms;
+      width: 100%;
 
       .file-preview {
         width: 100%;
         border-radius: $border-radius;
+        overflow: hidden;
+        position: relative;
+        align-items: center;
+        justify-content: center;
+        min-height: 3rem;
+
+        background-color: var(--bg-main-washed);
+
+        &.has-image {
+          img {
+            opacity: 1;
+          }
+
+          .no-file-icon {
+            opacity: 0;
+          }
+        }
+
+        img {
+          opacity: 0;
+          width: 100%;
+          transition: all 200ms;
+        }
+
+        .no-file-icon {
+          position: absolute;
+          transition: all 200ms;
+          color: var(--tx-trans-3);
+        }
       }
 
       .input-area {

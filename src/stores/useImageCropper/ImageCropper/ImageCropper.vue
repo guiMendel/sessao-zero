@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { Button, Modal } from '@/components'
-import { useFileAsImage } from '@/utils/hooks'
+import { Slider } from '@/components/Slider'
 import { computed, ref } from 'vue'
 import { useImageCropper } from '..'
 import { useAcceptAndCancel } from './useAcceptAndCancel'
 import { useCanvasResizer } from './useCanvasResizer'
 import { useDrawOnCanvas } from './useDrawOnCanvas'
+import { useFileAsImage } from './useFileAsImage'
 import { usePan } from './usePan'
-import { Slider } from '@/components/Slider'
 
 const {
   resolve,

@@ -35,6 +35,7 @@ import {
   faEye,
   faEyeSlash,
   faFeatherPointed,
+  faFile,
   faFileArrowUp,
   faFire,
   faHammer,
@@ -65,6 +66,8 @@ import {
   faUsers,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons'
+
+import { faFile as faFileRegular } from '@fortawesome/free-regular-svg-icons'
 
 export const initFontAwesome = (): [
   'font-awesome-icon',
@@ -131,7 +134,9 @@ export const initFontAwesome = (): [
     faFeatherPointed,
     faHourglassHalf,
     faFileArrowUp,
-    faArrowUpFromBracket
+    faArrowUpFromBracket,
+    faFile,
+    faFileRegular
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]

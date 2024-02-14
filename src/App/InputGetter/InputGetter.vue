@@ -96,6 +96,7 @@ onBeforeUnmount(() => window.removeEventListener('keyup', cancelOnEscape))
 
 #app .input-getter {
   padding: 1rem 1rem 1.5rem;
+  gap: 1rem;
 
   .message-wrapper {
     display: inline;
