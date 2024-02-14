@@ -133,7 +133,7 @@
   }
 
   &:not(.disabled):not(:disabled):active {
-    translate: 0 3px;
+    transform: translateY(3px);
     box-shadow: 0 0 0 0 var(--trans-3);
   }
 

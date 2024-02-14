@@ -4,6 +4,8 @@ import { computed, ref, toValue, watch, watchEffect } from 'vue'
 import { IconButton, Typography } from '..'
 import { inferFieldProperties } from './inferFieldProperties'
 
+defineOptions({ inheritAttrs: false })
+
 const props = defineProps<{
   field: FieldRef<string> | FieldRef<number>
   autoFocus?: boolean
@@ -316,8 +318,6 @@ watchEffect(() => {
       translate: 0 calc(-100% - 0.3rem);
 
       @include field-label;
-
-      opacity: 1;
     }
 
     input,

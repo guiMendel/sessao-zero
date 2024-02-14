@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Vase } from '@/api'
 import { useAdventure, useAdventureFields } from '@/api/adventures'
-import { Drawer, Typography } from '@/components'
+import { Drawer, FileField, Typography } from '@/components'
 import { Fields } from '@/components/Fields'
 import { HalfResource } from '@/firevase/resources'
 import { useAutosaveForm } from '@/utils/hooks'
+import { ref, watchEffect } from 'vue'
 
 const props = defineProps<{
   modelValue: boolean
@@ -13,6 +14,10 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue'])
 const { update } = useAdventure()
+
+const selectedFile = ref<File | undefined>(undefined)
+
+watchEffect(() => console.log('selected', selectedFile.value?.name))
 
 // Campos de login
 const { fields } = useAutosaveForm(
@@ -32,6 +37,8 @@ const { fields } = useAutosaveForm(
     <form class="edit-adventure">
       <!-- Titulo da pagina -->
       <Typography variant="subtitle" class="title">Editar aventura</Typography>
+
+      <FileField v-model="selectedFile" type="image" label="capa" />
 
       <Fields
         class="fields"

@@ -96,6 +96,16 @@ const close = () => emit('update:modelValue', false)
       translate: -50% 0;
 
       z-index: 200;
+
+      padding: 0;
+      min-width: unset;
+      min-height: unset;
+      width: 2rem;
+      height: 2rem;
+      color: var(--tx-main-dark);
+
+      background-color: var(--bg-main-lighter);
+      @include bevel(var(--main-light));
     }
 
     .content {
@@ -181,21 +191,5 @@ const close = () => emit('update:modelValue', false)
     opacity: 1;
     transform: translateY(0);
   }
-}
-</style>
-
-<style lang="scss">
-@import '@/styles/variables.scss';
-
-.shadow .panel .close-button.button-wrapper button {
-  padding: 0;
-  min-width: unset;
-  min-height: unset;
-  width: 2rem;
-  height: 2rem;
-  color: var(--tx-main-dark);
-
-  background-color: var(--bg-main-lighter);
-  @include bevel(var(--main-light));
 }
 </style>

@@ -2,7 +2,7 @@
 import { isNarrator, useAdventure } from '@/api/adventures'
 import { isMember } from '@/api/isMember'
 import { useCurrentPlayer } from '@/api/players'
-import genericBanner from '@/assets/rpg-table.png'
+import genericBanner from '@/assets/green-table.png'
 import { LoadingSpinner, Typography } from '@/components'
 import { computed, ref, toValue, watch } from 'vue'
 import { useRouter } from 'vue-router'

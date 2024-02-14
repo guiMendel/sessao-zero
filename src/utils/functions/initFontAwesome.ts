@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 /* import specific icons */
 import {
+  faArrowUpFromBracket,
   faBan,
   faBars,
   faBookOpen,
@@ -34,6 +35,7 @@ import {
   faEye,
   faEyeSlash,
   faFeatherPointed,
+  faFileArrowUp,
   faFire,
   faHammer,
   faHandPointLeft,
@@ -127,7 +129,9 @@ export const initFontAwesome = (): [
     faDungeon,
     faCircleCheck,
     faFeatherPointed,
-    faHourglassHalf
+    faHourglassHalf,
+    faFileArrowUp,
+    faArrowUpFromBracket
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]

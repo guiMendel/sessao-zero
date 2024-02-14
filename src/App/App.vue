@@ -2,7 +2,7 @@
 import { BackButton } from '@/components'
 import { authenticationGuard } from '@/router/guard/authenticationGuard'
 import { findMeta } from '@/router/utils'
-import { useAccessibility, useCurrentAuth } from '@/stores/'
+import { ImageCropper, useAccessibility, useCurrentAuth } from '@/stores/'
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Alerts } from './Alerts'
@@ -63,6 +63,9 @@ const accessibilityClass = computed(() => ({
 
     <!-- Botao de voltar de pagina -->
     <BackButton v-if="!hideBackButton" class="back-button" />
+
+    <!-- Permite recortar imagens -->
+    <ImageCropper />
 
     <!-- Pagina carregada -->
     <RouterView />

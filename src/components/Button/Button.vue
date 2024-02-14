@@ -1,85 +1,52 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { ButtonProps, Typography } from '..'
+import { ButtonProps } from '..'
 
-const props = withDefaults(defineProps<ButtonProps>(), { variant: 'default' })
-
-const computedClass = computed(() => ({
-  [props.variant]: true,
-  disabled: props.disabled,
-}))
+withDefaults(defineProps<ButtonProps>(), { variant: 'default' })
 </script>
 
 <template>
-  <div class="button-wrapper" :class="computedClass">
-    <button class="button" :class="computedClass">
-      <slot></slot>
-    </button>
-
-    <Typography class="message" :class="messageClass" v-if="message">
-      {{ message }}
-    </Typography>
-  </div>
+  <button class="button" :class="{ [variant]: true, disabled }">
+    <slot></slot>
+  </button>
 </template>
 
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
 
-.button-wrapper {
-  flex-direction: column;
-  gap: 0.3rem;
+.button {
+  @include button;
+
+  min-width: 15rem;
+  min-height: $field-height;
+  font-weight: 800;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &.default {
+    background-color: var(--bg-trans-03);
     color: var(--tx-gray-darker);
   }
 
   &.dark {
+    background-color: var(--bg-trans-2);
     color: var(--tx-gray-darker);
   }
 
   &.light {
+    background-color: var(--bg-gray-lighter);
     color: var(--tx-gray-darker);
   }
 
   &.colored {
+    background-color: var(--bg-main-light);
     color: var(--tx-main-dark);
+    @include bevel(var(--bg-main));
   }
 
-  .button {
-    @include button;
-
-    min-width: 15rem;
-    min-height: $field-height;
-    font-weight: 800;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    &.default {
-      background-color: var(--bg-trans-03);
-    }
-
-    &.dark {
-      background-color: var(--bg-trans-2);
-    }
-
-    &.light {
-      background-color: var(--bg-gray-lighter);
-    }
-
-    &.colored {
-      background-color: var(--bg-main-light);
-      @include bevel(var(--bg-main));
-    }
-
-    &.disabled {
-      @include disabled;
-    }
-  }
-
-  .message {
-    @include field-message;
+  &.disabled {
+    @include disabled;
   }
 }
 </style>

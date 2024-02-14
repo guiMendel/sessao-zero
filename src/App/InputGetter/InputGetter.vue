@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Button, InputField } from '@/components'
+import { Button, InputField, Modal } from '@/components'
 import { useInput } from '@/stores'
 import { fieldRef } from '@/utils/functions'
 import { onBeforeUnmount, watch } from 'vue'
@@ -38,182 +38,77 @@ onBeforeUnmount(() => window.removeEventListener('keyup', cancelOnEscape))
 </script>
 
 <template>
-  <Transition name="transition">
-    <div v-if="currentInput" @click.self="cancel" class="backdrop">
-      <div class="input-getter">
-        <!-- Close button -->
-        <div
-          v-if="currentInput.cancelValue != undefined"
-          @click="cancel"
-          class="close"
+  <Modal
+    :model-value="Boolean(currentInput)"
+    @update:model-value="cancel"
+    :hide-close-button="currentInput?.cancelValue == undefined"
+    class="input-getter"
+  >
+    <template v-if="currentInput">
+      <!-- Message -->
+      <div
+        v-html="currentInput.getter.messageHtml"
+        class="message-wrapper"
+        :class="currentInput.getter.messageClass"
+      ></div>
+
+      <!-- BOOLEAN TYPE -->
+      <template v-if="currentInput.getter.type === 'boolean'">
+        <!-- true -->
+        <Button
+          @click="currentInput.resolve(true)"
+          v-bind="currentInput.getter.trueButton?.buttonProps"
         >
-          <font-awesome-icon :icon="['fas', 'xmark']" />
-        </div>
+          {{ currentInput.getter.trueButton?.label ?? 'Sim' }}
+        </Button>
 
-        <!-- Message -->
-        <div
-          v-html="currentInput.getter.messageHtml"
-          class="message-wrapper"
-          :class="currentInput.getter.messageClass"
-        ></div>
-
-        <!-- BOOLEAN TYPE -->
-        <template v-if="currentInput.getter.type === 'boolean'">
-          <!-- true -->
-          <Button
-            @click="currentInput.resolve(true)"
-            v-bind="currentInput.getter.trueButton?.buttonProps"
-          >
-            {{ currentInput.getter.trueButton?.label ?? 'Sim' }}
-          </Button>
-
-          <!-- false -->
-          <Button
-            @click="currentInput.resolve(false)"
-            v-bind="currentInput.getter.falseButton?.buttonProps"
-          >
-            {{ currentInput.getter.falseButton?.label ?? 'Não' }}
-          </Button>
-        </template>
-
-        <!-- STRING TYPE -->
-        <form
-          v-else-if="currentInput.getter.type === 'string'"
-          @submit.prevent="submitString"
+        <!-- false -->
+        <Button
+          @click="currentInput.resolve(false)"
+          v-bind="currentInput.getter.falseButton?.buttonProps"
         >
-          <!-- Input -->
-          <InputField :field="fields.string" class="input" auto-focus />
+          {{ currentInput.getter.falseButton?.label ?? 'Não' }}
+        </Button>
+      </template>
 
-          <!-- Confirma -->
-          <Button
-            v-bind="currentInput.getter.submitButton?.buttonProps"
-            :disabled="fields.string.validate(fields.string.value) != true"
-          >
-            {{ currentInput.getter.submitButton?.label ?? 'Enviar' }}
-          </Button>
-        </form>
-      </div>
-    </div>
-  </Transition>
+      <!-- STRING TYPE -->
+      <form
+        v-else-if="currentInput.getter.type === 'string'"
+        @submit.prevent="submitString"
+      >
+        <!-- Input -->
+        <InputField :field="fields.string" class="input" auto-focus />
+
+        <!-- Confirma -->
+        <Button
+          v-bind="currentInput.getter.submitButton?.buttonProps"
+          :disabled="fields.string.validate(fields.string.value) != true"
+        >
+          {{ currentInput.getter.submitButton?.label ?? 'Enviar' }}
+        </Button>
+      </form>
+    </template>
+  </Modal>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss">
 @import '@/styles/variables.scss';
 
-#app .backdrop {
-  z-index: 130;
+#app .input-getter {
+  padding: 1rem 1rem 1.5rem;
 
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-
-  backdrop-filter: blur(3px);
-
-  align-items: center;
-  justify-content: center;
-
-  @include high-contrast {
-    background-color: black;
+  .message-wrapper {
+    display: inline;
   }
 
-  .input-getter {
+  form {
+    display: flex;
     flex-direction: column;
-    background-color: var(--main-lighter);
-    padding: 1rem 1rem 1.5rem;
-    border-radius: $border-radius;
-    gap: 1rem;
-    max-width: 92vw;
-    max-height: 96vh;
+    gap: inherit;
 
-    position: relative;
-
-    @include bevel(var(--main-light));
-    filter: drop-shadow(0 0 100px var(--bg-main-dark));
-
-    .close {
-      position: absolute;
-      top: -1rem;
-      right: -0.2rem;
-
-      @include circle;
-      background-color: var(--bg-main-light);
-      color: var(--tx-main);
-
-      cursor: pointer;
-      font-size: 1.2rem;
-
-      transition: 100ms;
-
-      @include bevel(var(--main));
-
-      &:hover {
-        filter: brightness(1.02);
-      }
+    .input {
+      filter: brightness(0.98);
     }
-
-    .message-wrapper {
-      display: inline;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: inherit;
-
-      .input {
-        filter: brightness(0.98);
-        margin-top: 0.8rem;
-      }
-    }
-  }
-}
-
-.transition-enter-active {
-  &.backdrop {
-    animation: backdrop-fade 300ms;
-
-    .input-getter {
-      animation: panel-slide 300ms;
-    }
-  }
-}
-
-.transition-leave-active {
-  &.backdrop {
-    animation: backdrop-fade 200ms reverse;
-
-    .input-getter {
-      animation: panel-slide 200ms reverse;
-    }
-  }
-}
-
-@keyframes backdrop-fade {
-  from {
-    backdrop-filter: blur(0);
-  }
-
-  to {
-    backdrop-filter: blur(3px);
-  }
-}
-
-@keyframes panel-slide {
-  from {
-    opacity: 0;
-    transform: translateY(-5rem);
-  }
-
-  50% {
-    opacity: 1;
-    transform: translateY(0.8rem);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 </style>

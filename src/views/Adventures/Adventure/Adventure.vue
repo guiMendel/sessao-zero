@@ -7,7 +7,7 @@ import { isMember } from '@/api/isMember'
 import { NotificationParams, useNotification } from '@/api/notifications'
 import { useCurrentPlayer } from '@/api/players'
 import emptyRoomPicture from '@/assets/empty-room.png'
-import genericBanner from '@/assets/rpg-table.png'
+import genericBanner from '@/assets/green-table.png'
 import stopKnightPicture from '@/assets/stop-knight.png'
 import tooManyWizardsPicture from '@/assets/too-many-wizards.png'
 import {
