@@ -31,6 +31,10 @@ export type ConstrainRelationSettings<
   >
 }>
 
+/** Valid data structure for definition of files per resource */
+export type ConstrainFileSettings<Properties extends ConstrainProperties> =
+  Record<keyof Properties, string[]>
+
 // ======================================================
 // ACCESSORS
 // ======================================================

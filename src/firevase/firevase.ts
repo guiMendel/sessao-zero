@@ -5,6 +5,7 @@ import { firevaseEvents } from './events'
 import { deleteResourceRelations } from './events/listeners/deleteResourceRelations'
 import { makeHasMany, makeHasOne } from './relations'
 import {
+  ConstrainFileSettings,
   ConstrainManyToManySettings,
   ConstrainProperties,
   ConstrainRelationSettings,
@@ -12,6 +13,7 @@ import {
 
 export type FirevaseClient<
   Properties extends ConstrainProperties = any,
+  FileSettings extends ConstrainFileSettings<Properties> | undefined = any,
   ManyToManySettings extends
     | ConstrainManyToManySettings<Properties>
     | undefined = any,
@@ -28,11 +30,24 @@ export type FirevaseClient<
   /** The resource paths to be managed by firevase */
   paths: (keyof Properties)[]
 
+  /** Indicates which files can be stored for each resource */
+  fileSettings: FileSettings
+
   /** The many to many tables mapped to which paths they are comprised of */
   manyToManySettings: ManyToManySettings
 
   /** The settings of the relations between all the paths */
   relationSettings: RelationSettings
+
+  /** Allows extending the client with file per resource access capabilities */
+  configureFiles: <NewSettings extends ConstrainFileSettings<Properties>>(
+    newSettings: NewSettings
+  ) => FirevaseClient<
+    Properties,
+    NewSettings,
+    ManyToManySettings,
+    RelationSettings
+  >
 
   /** Returns a new firevase client configured with the provided many to many settings */
   configureManyToMany: <
@@ -40,7 +55,7 @@ export type FirevaseClient<
   >(
     newSettings: NewSettings
     // @ts-ignore
-  ) => FirevaseClient<Properties, NewSettings, RelationSettings>
+  ) => FirevaseClient<Properties, FileSettings, NewSettings, RelationSettings>
 
   /** Allows extending this firevase definition with relation capabilities */
   configureRelations: <
@@ -53,7 +68,7 @@ export type FirevaseClient<
       hasOne: ReturnType<typeof makeHasOne<Properties>>
       hasMany: ReturnType<typeof makeHasMany<Properties, ManyToManySettings>>
     }) => NewSettings
-  ) => FirevaseClient<Properties, ManyToManySettings, NewSettings>
+  ) => FirevaseClient<Properties, FileSettings, ManyToManySettings, NewSettings>
 
   /** An anchor only used to keep track of the provided ts types
    * @private
@@ -77,9 +92,19 @@ export const fillFirevase = <
 
   paths,
 
+  fileSettings: undefined,
+
   manyToManySettings: undefined,
 
   relationSettings: undefined,
+
+  // @ts-ignore
+  configureFiles(fileSettings) {
+    return {
+      ...this,
+      fileSettings,
+    }
+  },
 
   // @ts-ignore
   configureManyToMany(manyToManySettings) {
