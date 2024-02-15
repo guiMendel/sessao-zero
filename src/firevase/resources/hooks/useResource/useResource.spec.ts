@@ -1,7 +1,7 @@
 import { mockCollection, mockFantasyDatabase } from '@/tests/mock/backend'
 
 import { FirevaseClient } from '@/firevase'
-import { CleanupManager } from '@/firevase/CleanupManager'
+import { CleanupManager } from '@/firevase/classes/CleanupManager'
 import { mockDb } from '@/tests/mock/firebase'
 import { collection, doc } from 'firebase/firestore'
 import { Mock } from 'vitest'
@@ -17,7 +17,7 @@ import {
 
 vi.mock('vue')
 vi.mock('../../functions')
-vi.mock('@/firevase/CleanupManager')
+vi.mock('@/firevase/classes/CleanupManager')
 
 const mockClient = { db: mockDb } as FirevaseClient
 

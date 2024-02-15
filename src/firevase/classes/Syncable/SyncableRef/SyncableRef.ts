@@ -1,16 +1,16 @@
-import { CleanupManager } from '@/firevase/CleanupManager'
+import { CleanupManager } from '@/firevase/classes/CleanupManager'
 import { WithDisposeFlag } from '@/firevase/relations'
 import { makeResource } from '@/firevase/resources/functions/makeResource'
 import { DocumentReference, Query } from 'firebase/firestore'
 import { Ref, ref, toRaw } from 'vue'
-import { FirevaseClient } from '../..'
-import { Resource } from '../../resources'
+import { FirevaseClient } from '../../..'
+import { Resource } from '../../../resources'
 import {
   ConstrainRelationSettings,
   ManyToManyFrom,
   PathsFrom,
   PropertiesFrom,
-} from '../../types'
+} from '../../../types'
 import { Syncable } from '../Syncable'
 
 // ===========================

@@ -1,5 +1,5 @@
 import { DocumentReference, Query } from 'firebase/firestore'
-import { SyncableRef } from '../Syncable'
+import { SyncableRef } from '../classes/Syncable'
 import { FirevaseClient } from '../firevase'
 import { HalfResource, Resource } from '../resources'
 import {

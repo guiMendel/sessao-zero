@@ -1,9 +1,9 @@
 import { mockFantasyDatabase } from '@/tests/mock/backend'
 
-import { syncableRef } from '@/firevase/Syncable'
+import { syncableRef } from '@/firevase/classes/Syncable'
 import { hasLoaded } from '.'
 import { fantasyVase, mockKnight } from '@/tests/mock/fantasyVase'
-import { CleanupManager } from '@/firevase/CleanupManager'
+import { CleanupManager } from '@/firevase/classes/CleanupManager'
 import { collection, doc, query } from 'firebase/firestore'
 import { db } from '@/api/firebase'
 import { toRaw } from 'vue'

@@ -1,4 +1,4 @@
-import { CleanupManager } from '@/firevase/CleanupManager'
+import { CleanupManager } from '@/firevase/classes/CleanupManager'
 
 const ogCleanupManager = CleanupManager
 

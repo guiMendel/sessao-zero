@@ -1,5 +1,5 @@
 import { FirevaseClient } from '@/firevase'
-import { CleanupManager } from '@/firevase/CleanupManager'
+import { CleanupManager } from '@/firevase/classes/CleanupManager'
 import { PathsFrom } from '@/firevase/types'
 import { DocumentSnapshot, QuerySnapshot } from 'firebase/firestore'
 import { buildRelations } from '../../../relations/buildRelations'

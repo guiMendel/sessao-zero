@@ -1,7 +1,7 @@
 import { createDatabase, mockFantasyDatabase } from '@/tests/mock/backend'
 
 import { FirevaseClient } from '@/firevase'
-import * as SyncableRefNamespace from '@/firevase/Syncable'
+import * as SyncableRefNamespace from '@/firevase/classes/Syncable'
 import { HalfResource, Resource } from '@/firevase/resources'
 import {
   cleanupManagerInterceptor,
@@ -14,7 +14,7 @@ import {
   mockKnight,
   mockLand,
 } from '@/tests/mock/fantasyVase'
-import * as CleanupManagerNamespace from '@/firevase/CleanupManager'
+import * as CleanupManagerNamespace from '@/firevase/classes/CleanupManager'
 import { toValue } from 'vue'
 import { buildRelations } from '.'
 

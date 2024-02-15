@@ -1,6 +1,6 @@
 import { mockFantasyDatabase } from '@/tests/mock/backend'
 
-import { CleanupManager } from '@/firevase/CleanupManager'
+import { CleanupManager } from '@/firevase/classes/CleanupManager'
 import {
   fantasyVase,
   mockKing,

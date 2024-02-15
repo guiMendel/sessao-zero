@@ -1,6 +1,6 @@
 import { FirevaseClient } from '@/firevase'
-import { CleanupManager } from '@/firevase/CleanupManager'
-import { syncableRef } from '@/firevase/Syncable'
+import { CleanupManager } from '@/firevase/classes/CleanupManager'
+import { syncableRef } from '@/firevase/classes/Syncable'
 import { RelationDefinitionFrom, RelationsRefs } from '@/firevase/relations'
 import {
   HalfResource,

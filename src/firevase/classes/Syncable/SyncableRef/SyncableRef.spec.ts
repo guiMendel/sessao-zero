@@ -1,6 +1,6 @@
 import { createDatabase, mockFantasyDatabase } from '@/tests/mock/backend'
 
-import { CleanupManager } from '@/firevase/CleanupManager'
+import { CleanupManager } from '@/firevase/classes/CleanupManager'
 import * as BuildRelationNamespace from '@/firevase/relations/buildRelations'
 import { Resource } from '@/firevase/resources'
 import {

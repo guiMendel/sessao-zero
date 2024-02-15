@@ -1,5 +1,5 @@
 import { FirevaseClient } from '@/firevase'
-import { SyncableRef } from '@/firevase/Syncable'
+import { SyncableRef } from '@/firevase/classes/Syncable'
 import { Relations } from '@/firevase/relations'
 import { PathsFrom } from '@/firevase/types'
 import { toRaw, toValue } from 'vue'

@@ -1,5 +1,5 @@
 import { FirevaseClient } from '@/firevase'
-import { CleanupManager } from '@/firevase/CleanupManager'
+import { CleanupManager } from '@/firevase/classes/CleanupManager'
 import { buildRelations } from '@/firevase/relations/buildRelations'
 import { DocumentSnapshot } from 'firebase/firestore'
 import { Mock } from 'vitest'

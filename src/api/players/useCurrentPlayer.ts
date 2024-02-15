@@ -1,6 +1,6 @@
 import { auth } from '@/api/firebase'
-import { CleanupManager } from '@/firevase/CleanupManager'
-import { syncableRef } from '@/firevase/Syncable'
+import { CleanupManager } from '@/firevase/classes/CleanupManager'
+import { syncableRef } from '@/firevase/classes/Syncable'
 import { Uploadable, useResource } from '@/firevase/resources'
 import { defineStore } from '@/stores/defineStore'
 import {
