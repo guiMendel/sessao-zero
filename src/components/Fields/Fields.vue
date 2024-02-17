@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="F extends FieldRef<any>">
 import { FieldRef } from '@/utils/functions'
-import { InputField, SelectField, ToggleField } from '..'
+import { FileField, InputField, SelectField, ToggleField } from '..'
 
 defineProps<{
   fields: (F | undefined | null | false)[]
@@ -12,6 +12,15 @@ defineProps<{
   <div class="fields">
     <template v-for="field in fields">
       <template v-if="!field"></template>
+
+      <!-- Campos de arquivo -->
+      <FileField
+        v-else-if="field.type === 'file'"
+        :model-value="field.value"
+        @update:model-value="(newFile) => (field.value = newFile)"
+        type="image"
+        :label="field.name"
+      />
 
       <!-- Campos de texto single e multi line -->
       <InputField

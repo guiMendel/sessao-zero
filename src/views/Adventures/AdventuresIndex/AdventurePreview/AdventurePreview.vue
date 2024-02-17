@@ -77,7 +77,11 @@ const isClosed = computed(
         jogando
       </Typography>
 
-      <img class="cover" :src="genericBanner" alt="capa da aventura" />
+      <img
+        class="cover"
+        :src="toValue(adventure.banner) ?? genericBanner"
+        alt="capa da aventura"
+      />
 
       <!-- Narrators -->
       <LoadingSpinner

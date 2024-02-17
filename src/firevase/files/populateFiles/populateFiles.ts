@@ -1,11 +1,9 @@
 import { FirevaseClient } from '@/firevase'
-import { FilesRefs } from '../types'
-import { PathsFrom } from '@/firevase/types'
-import { fileRef } from '@/firevase/classes/FileFetcher'
 import { CleanupManager } from '@/firevase/classes/CleanupManager'
-import { getStorage, ref } from 'firebase/storage'
-
-const storage = getStorage()
+import { fileRef } from '@/firevase/classes/FileFetcher'
+import { PathsFrom } from '@/firevase/types'
+import { getFileRef } from '../getFileRef'
+import { FilesRefs } from '../types'
 
 type PopulateFilesParams<C extends FirevaseClient, P extends PathsFrom<C>> = {
   client: C
@@ -25,13 +23,11 @@ export const populateFiles = <
 }: PopulateFilesParams<C, P>): FilesRefs<C, P> => {
   const fileNames = client.fileSettings?.[resourcePath] as string[] | undefined
 
-  console.log({ resourcePath, fileNames })
-
   if (!fileNames) return {} as FilesRefs<C, P>
 
   /** Gets the target for a fiven file name */
   const getFileTarget = (fileName: string) =>
-    ref(storage, `${resourcePath as string}/${resourceId}/${fileName}`)
+    getFileRef({ fileName, resourceId, resourcePath: resourcePath as string })
 
   return fileNames.reduce(
     (files, fileName) => ({

@@ -27,6 +27,8 @@ export class FileFetcher extends Fetcher<StorageReference, string> {
   }
 
   private handleError = (error: { code: string }) => {
-    console.error('Error', { error })
+    if (error.code === 'storage/object-not-found') return
+
+    console.error(error)
   }
 }

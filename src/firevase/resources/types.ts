@@ -1,4 +1,3 @@
-import { Vase } from '@/api'
 import { FilesRefs } from '../files/types'
 import { FirevaseClient } from '../firevase'
 import { Relations, RelationsRefs } from '../relations'

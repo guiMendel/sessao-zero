@@ -76,7 +76,12 @@ export const useAutosaveForm = <T extends Record<string, FieldRef<any>>>(
 
     // Sempre que mudar, executamos o persist
     watch(field, () => {
-      if (cleanedUp || field.validate(field.value) != true) return
+      if (
+        cleanedUp ||
+        field.validate(field.value) != true ||
+        field.loaded == false
+      )
+        return
 
       if (throttleAmount == 0) {
         persist(field, fieldNameUntyped)

@@ -44,11 +44,14 @@ const handleFile = async (file: File) => {
 }
 
 const recrop = async () => {
-  if (!originalFile) return
+  if (!originalFile && !props.modelValue) return
 
-  const cropped = await cropImage(originalFile, [1600, 900])
+  const cropped = await cropImage(
+    (originalFile ?? props.modelValue) as File,
+    [1600, 900]
+  )
 
-  emit('update:modelValue', cropped)
+  if (cropped) emit('update:modelValue', cropped)
 }
 
 const clear = () => {
@@ -65,19 +68,19 @@ const image = ref<HTMLImageElement | null>(null)
 
 const hasImage = ref(false)
 
-watch(props, ({ modelValue }) => {
-  if (!image.value) return
+watch(
+  [props, image],
+  ([{ modelValue }, image]) => {
+    if (!image) return
 
-  const currentImage = image.value
+    if (image.src) URL.revokeObjectURL(image.src)
 
-  if (image.value.src) URL.revokeObjectURL(currentImage.src)
+    image.src = modelValue ? URL.createObjectURL(modelValue) : ''
 
-  currentImage.src = modelValue ? URL.createObjectURL(modelValue) : ''
-
-  hasImage.value = Boolean(modelValue)
-
-  image.value = { ...currentImage }
-})
+    hasImage.value = Boolean(modelValue)
+  },
+  { immediate: true }
+)
 
 // ====================================
 // HANDLING FILE INPUT ELEMENT

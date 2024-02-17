@@ -1,4 +1,3 @@
-import { Vase } from '@/api'
 import { FirevaseClient } from './firevase'
 import { RelationDefinition, RelationType } from './relations'
 

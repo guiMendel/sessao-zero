@@ -1,9 +1,12 @@
-import { fieldRef } from '@/utils/functions'
+import { fieldRef, fileFieldRef } from '@/utils/functions'
 import { Adventure } from '.'
+import { HalfResource } from '@/firevase/resources'
+import { Vase } from '..'
+import { deleteFile, downloadFile, setFile } from '@/firevase/files'
 
 type UseAdventureFieldsOptions = {
   sessionStoragePrefix?: string
-  initializeWith?: Adventure
+  initializeWith?: HalfResource<Vase, 'adventures'>
   /** Method that we can use to update an adventure with */
   update?: (newValue: Partial<Adventure>) => Promise<void>
 }
@@ -12,13 +15,13 @@ type UseAdventureFieldsOptions = {
  * @param localStorageKey se fornecido, persiste os campos em localstorage
  */
 export const useAdventureFields = ({
-  initializeWith,
+  initializeWith: initialAdventure,
   sessionStoragePrefix,
   update,
 }: UseAdventureFieldsOptions) => {
   /** Campo de nome */
   const name = fieldRef<string>('name', {
-    initialValue: initializeWith?.name ?? '',
+    initialValue: initialAdventure?.name ?? '',
     validator: (newValue: string) => {
       if (newValue.length < 3) return 'Mínimo de 3 caracteres'
       if (newValue.length > 100) return 'Muito longo'
@@ -33,7 +36,7 @@ export const useAdventureFields = ({
   const description = fieldRef<string>(
     { name: 'descrição', type: 'multi-line' },
     {
-      initialValue: initializeWith?.description ?? '',
+      initialValue: initialAdventure?.description ?? '',
       sessionStoragePrefix,
       validator: (newValue: string) =>
         newValue.length > 800 ? 'Muito longo' : true,
@@ -42,10 +45,31 @@ export const useAdventureFields = ({
     }
   )
 
+  /** Tamanho maximo de arquivos, em bytes */
+  const maxFileSize = 200 * 1000
+
+  /** Imagem da aventura */
+  const banner = fileFieldRef('capa', {
+    initializer: initialAdventure
+      ? downloadFile(initialAdventure, 'banner')
+      : undefined,
+    validator: (newFile) =>
+      newFile && newFile.size > maxFileSize ? 'Muito grande' : true,
+    persist:
+      initialAdventure &&
+      update &&
+      (async (newValue) => {
+        newValue
+          ? setFile(initialAdventure, 'banner', newValue)
+          : deleteFile(initialAdventure, 'banner')
+      }),
+  })
+
   const shouldLimitPlayers = fieldRef<boolean>(
     { name: 'limitar vagas', type: 'toggle' },
     {
-      initialValue: (initializeWith && initializeWith.playerLimit > 0) ?? false,
+      initialValue:
+        (initialAdventure && initialAdventure.playerLimit > 0) ?? false,
       sessionStoragePrefix,
       persist:
         update &&
@@ -58,7 +82,7 @@ export const useAdventureFields = ({
   const playerLimit = fieldRef<number>(
     { name: 'limite de jogadores', type: 'number', min: 1 },
     {
-      initialValue: initializeWith?.playerLimit ?? 5,
+      initialValue: initialAdventure?.playerLimit ?? 5,
       sessionStoragePrefix,
       validator: (newValue: number) =>
         newValue <= 0
@@ -74,7 +98,7 @@ export const useAdventureFields = ({
   const open = fieldRef<boolean>(
     { name: 'aceita inscrições', type: 'toggle' },
     {
-      initialValue: initializeWith?.open ?? true,
+      initialValue: initialAdventure?.open ?? true,
       sessionStoragePrefix,
       describe: (value) =>
         value
@@ -88,7 +112,7 @@ export const useAdventureFields = ({
   const requireAdmission = fieldRef<boolean>(
     { name: 'requer admissão', type: 'toggle' },
     {
-      initialValue: initializeWith?.requireAdmission ?? false,
+      initialValue: initialAdventure?.requireAdmission ?? false,
       sessionStoragePrefix,
       describe: (value) =>
         value
@@ -105,5 +129,6 @@ export const useAdventureFields = ({
     open,
     requireAdmission,
     shouldLimitPlayers,
+    banner,
   }
 }
