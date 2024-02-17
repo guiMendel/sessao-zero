@@ -3,6 +3,7 @@ import { HalfResource } from '@/firevase/resources'
 import { FilesFrom, PathsFrom } from '@/firevase/types'
 import { uploadBytes } from 'firebase/storage'
 import { getFileRef } from '../getFileRef'
+import { firevaseEvents } from '@/firevase/events'
 
 export const setFile = <C extends FirevaseClient, P extends PathsFrom<C>>(
   source: HalfResource<C, P>,
@@ -15,5 +16,9 @@ export const setFile = <C extends FirevaseClient, P extends PathsFrom<C>>(
     resourcePath: source.resourcePath,
   })
 
-  return uploadBytes(storageRef, file)
+  const promise = uploadBytes(storageRef, file)
+
+  promise.then(() => firevaseEvents.emit('fileUploaded', storageRef, file))
+
+  return promise
 }

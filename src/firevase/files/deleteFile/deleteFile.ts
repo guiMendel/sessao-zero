@@ -3,6 +3,7 @@ import { HalfResource } from '@/firevase/resources'
 import { FilesFrom, PathsFrom } from '@/firevase/types'
 import { deleteObject } from 'firebase/storage'
 import { getFileRef } from '../getFileRef'
+import { firevaseEvents } from '@/firevase/events'
 
 export const deleteFile = <C extends FirevaseClient, P extends PathsFrom<C>>(
   source: HalfResource<C, P>,
@@ -14,8 +15,9 @@ export const deleteFile = <C extends FirevaseClient, P extends PathsFrom<C>>(
     resourcePath: source.resourcePath,
   })
 
-  return deleteObject(storageRef)
-}
+  const promise = deleteObject(storageRef)
 
-// declare const test: HalfResource<Vase, 'adventures'>
-// setFile(test, 'banner', )
+  promise.then(() => firevaseEvents.emit('fileUploaded', storageRef, undefined))
+
+  return promise
+}

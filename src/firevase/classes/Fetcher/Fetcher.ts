@@ -4,7 +4,7 @@ const compareTargets = <T>(target1: T | undefined, target2: T | undefined) =>
   typeof target1 === typeof target2 &&
   JSON.stringify(target1) === JSON.stringify(target2)
 
-type OnFetch<V> = (snapshot: V, cleanupManager: CleanupManager) => void
+export type OnFetch<V> = (snapshot: V, cleanupManager: CleanupManager) => void
 
 export abstract class Fetcher<T, V> {
   private disposeListeners: Array<() => void> = []
@@ -52,9 +52,9 @@ export abstract class Fetcher<T, V> {
     return this._hasLoaded
   }
 
-  constructor(target: T | undefined, onNext: OnFetch<V>) {
+  constructor(target: T | undefined, onFetch: OnFetch<V>) {
     this._target = target
-    this.onFetch = onNext
+    this.onFetch = onFetch
 
     this.cleanup.onDispose(() => (this.state = 'disposed'))
   }

@@ -1,6 +1,7 @@
 import EventEmitter from 'eventemitter3'
 import { FirevaseClient } from '..'
 import { PathsFrom } from '../types'
+import { StorageReference } from 'firebase/storage'
 
 /** Maps event names to their listeners */
 export type FirevaseEvents = {
@@ -10,6 +11,9 @@ export type FirevaseEvents = {
     resourcePath: P,
     id: string
   ) => void
+
+  /** Triggered when a file is successfully uploaded */
+  fileUploaded: (storageRef: StorageReference, file: File | undefined) => void
 }
 
 export const firevaseEvents = new EventEmitter<FirevaseEvents>()
