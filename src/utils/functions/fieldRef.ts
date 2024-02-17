@@ -161,6 +161,8 @@ export function fileFieldRef(
 
   if (initializer) {
     initializer.then((file) => {
+      console.log('intializing with', file)
+      
       valueRef.value = file
 
       setTimeout(() => (fieldRef.loaded = true), 50)

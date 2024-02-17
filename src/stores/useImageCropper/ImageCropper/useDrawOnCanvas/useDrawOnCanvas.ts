@@ -3,7 +3,11 @@ import { ComputedRef, Ref, ref, watch } from 'vue'
 type DrawnOnCanvasParams = {
   image: Ref<HTMLImageElement | null>
   canvas: Ref<HTMLCanvasElement | null>
-  cropPadding: ComputedRef<number>
+  cropPadding: Ref<{
+    x: number
+    y: number
+  }>
+
   pan: Ref<{
     x: number
     y: number
@@ -46,8 +50,8 @@ export const useDrawOnCanvas = ({
 
     sizeRatio.value =
       image.value.width < image.value.height
-        ? (canvas.value.width - cropPadding.value * 2) / image.value.width
-        : (canvas.value.height - cropPadding.value * 2) / image.value.height
+        ? (canvas.value.width - cropPadding.value.x * 2) / image.value.width
+        : (canvas.value.height - cropPadding.value.y * 2) / image.value.height
 
     if (oldRatio != 0) {
       const change = sizeRatio.value / oldRatio
@@ -91,11 +95,11 @@ export const useDrawOnCanvas = ({
 
     // Limita o pan baseado no tamanho da imagem
     const maxPanX = Math.max(
-      (correctedWidth - (canvas.width - cropPadding.value * 2)) / 2,
+      (correctedWidth - (canvas.width - cropPadding.value.x * 2)) / 2,
       0
     )
     const maxPanY = Math.max(
-      (correctedHeight - (canvas.height - cropPadding.value * 2)) / 2,
+      (correctedHeight - (canvas.height - cropPadding.value.y * 2)) / 2,
       0
     )
 
@@ -125,8 +129,6 @@ export const useDrawOnCanvas = ({
 
   /** Desenha as bordas escuras que indicam a area de recorte */
   const drawCropBorders = (canvas: HTMLCanvasElement) => {
-    if (cropPadding.value == 0) return
-
     // Tamanho das linhas delimitadoras, em proporcao total da largura
     const delimiterProportion = 0.2
 
@@ -136,133 +138,140 @@ export const useDrawOnCanvas = ({
     // Pega o preto meio transparente
     context.fillStyle = 'rgba(0,0,0,0.3)'
 
-    // Tira superior
-    context.fillRect(0, 0, canvas.width, cropPadding.value)
-    // Inferior
-    context.fillRect(
-      0,
-      canvas.height - cropPadding.value,
-      canvas.width,
-      cropPadding.value
-    )
-    // Esquerda
-    context.fillRect(
-      0,
-      cropPadding.value - 0.1,
-      cropPadding.value,
-      canvas.height - cropPadding.value * 2 + 0.2
-    )
-    // Direita
-    context.fillRect(
-      canvas.width - cropPadding.value,
-      cropPadding.value - 0.1,
-      cropPadding.value,
-      canvas.height - cropPadding.value * 2 + 0.2
-    )
+    if (cropPadding.value.y) {
+      // Tira superior
+      context.fillRect(0, 0, canvas.width, cropPadding.value.y)
+
+      // Inferior
+      context.fillRect(
+        0,
+        canvas.height - cropPadding.value.y,
+        canvas.width,
+        cropPadding.value.y
+      )
+    }
+
+    if (cropPadding.value.x) {
+      // Esquerda
+      context.fillRect(
+        0,
+        cropPadding.value.y - 0.1,
+        cropPadding.value.x,
+        canvas.height - cropPadding.value.y * 2 + 0.2
+      )
+
+      // Direita
+      context.fillRect(
+        canvas.width - cropPadding.value.x,
+        cropPadding.value.y - 0.1,
+        cropPadding.value.x,
+        canvas.height - cropPadding.value.y * 2 + 0.2
+      )
+    }
 
     // Pega um cinza escuro
     context.strokeStyle = 'rgb(0,0,0)'
 
-    const frameWidth = canvas.width - cropPadding.value * 2
-    const frameHeight = canvas.height - cropPadding.value * 2
+    const frameWidth = canvas.width - cropPadding.value.x * 2
+    const frameHeight = canvas.height - cropPadding.value.y * 2
 
     // Desenha os trastejados
     context.lineWidth = 1
     dashLine(
       context,
-      cropPadding.value - context.lineWidth,
+      cropPadding.value.x - context.lineWidth,
       0,
-      cropPadding.value - context.lineWidth,
+      cropPadding.value.x - context.lineWidth,
       canvas.height
     )
     dashLine(
       context,
-      cropPadding.value + frameWidth + context.lineWidth,
+      cropPadding.value.x + frameWidth + context.lineWidth,
       0,
-      cropPadding.value + frameWidth + context.lineWidth,
+      cropPadding.value.x + frameWidth + context.lineWidth,
       canvas.height
     )
     dashLine(
       context,
       0,
-      cropPadding.value - context.lineWidth,
+      cropPadding.value.y - context.lineWidth,
       canvas.width,
-      cropPadding.value - context.lineWidth
+      cropPadding.value.y - context.lineWidth
     )
     dashLine(
       context,
       0,
-      cropPadding.value + frameHeight + context.lineWidth,
+      cropPadding.value.y + frameHeight + context.lineWidth,
       canvas.width,
-      cropPadding.value + frameHeight + context.lineWidth
+      cropPadding.value.y + frameHeight + context.lineWidth
     )
 
     context.lineWidth = 2
 
     const delimiterSize =
-      (delimiterProportion / 2) * (canvas.width - cropPadding.value * 2)
+      (delimiterProportion / 2) * (canvas.width - cropPadding.value.x * 2)
 
     // Desenha umas linhas delimitadoras nos cantos
     const topLeft = new Path2D()
     topLeft.moveTo(
-      cropPadding.value + delimiterSize - context.lineWidth / 2,
-      cropPadding.value - context.lineWidth / 2
+      cropPadding.value.x + delimiterSize - context.lineWidth / 2,
+      cropPadding.value.y - context.lineWidth / 2
     )
     topLeft.lineTo(
-      cropPadding.value - context.lineWidth / 2,
-      cropPadding.value - context.lineWidth / 2
+      cropPadding.value.x - context.lineWidth / 2,
+      cropPadding.value.y - context.lineWidth / 2
     )
     topLeft.lineTo(
-      cropPadding.value - context.lineWidth / 2,
-      cropPadding.value + delimiterSize - context.lineWidth / 2
+      cropPadding.value.x - context.lineWidth / 2,
+      cropPadding.value.y + delimiterSize - context.lineWidth / 2
     )
 
     context.stroke(topLeft)
 
     const bottomLeft = new Path2D()
     bottomLeft.moveTo(
-      cropPadding.value + delimiterSize - context.lineWidth / 2,
-      cropPadding.value + frameHeight + context.lineWidth / 2
+      cropPadding.value.x + delimiterSize - context.lineWidth / 2,
+      cropPadding.value.y + frameHeight + context.lineWidth / 2
     )
     bottomLeft.lineTo(
-      cropPadding.value - context.lineWidth / 2,
-      cropPadding.value + frameHeight + context.lineWidth / 2
+      cropPadding.value.x - context.lineWidth / 2,
+      cropPadding.value.y + frameHeight + context.lineWidth / 2
     )
     bottomLeft.lineTo(
-      cropPadding.value - context.lineWidth / 2,
-      cropPadding.value - delimiterSize + frameHeight + context.lineWidth / 2
+      cropPadding.value.x - context.lineWidth / 2,
+      cropPadding.value.y - delimiterSize + frameHeight + context.lineWidth / 2
     )
 
     context.stroke(bottomLeft)
 
     const bottomRight = new Path2D()
     bottomRight.moveTo(
-      cropPadding.value + frameWidth - delimiterSize + context.lineWidth / 2,
-      cropPadding.value + frameHeight + context.lineWidth / 2
+      cropPadding.value.x + frameWidth - delimiterSize + context.lineWidth / 2,
+      cropPadding.value.y + frameHeight + context.lineWidth / 2
     )
     bottomRight.lineTo(
-      cropPadding.value + frameWidth + context.lineWidth / 2,
-      cropPadding.value + frameHeight + context.lineWidth / 2
+      cropPadding.value.x + frameWidth + context.lineWidth / 2,
+      cropPadding.value.y + frameHeight + context.lineWidth / 2
     )
     bottomRight.lineTo(
-      cropPadding.value + frameWidth + context.lineWidth / 2,
-      cropPadding.value + frameHeight - delimiterSize + context.lineWidth / 2
+      cropPadding.value.x + frameWidth + context.lineWidth / 2,
+      cropPadding.value.y + frameHeight - delimiterSize + context.lineWidth / 2
     )
 
     context.stroke(bottomRight)
 
     const topRight = new Path2D()
     topRight.moveTo(
-      cropPadding.value + frameWidth - delimiterSize + context.lineWidth / 2,
-      cropPadding.value - context.lineWidth / 2
+      cropPadding.value.x + frameWidth - delimiterSize + context.lineWidth / 2,
+      cropPadding.value.y - context.lineWidth / 2
     )
     topRight.lineTo(
-      cropPadding.value + frameWidth + context.lineWidth / 2,
-      cropPadding.value - context.lineWidth / 2
+      cropPadding.value.x + frameWidth + context.lineWidth / 2,
+      cropPadding.value.y - context.lineWidth / 2
     )
     topRight.lineTo(
-      cropPadding.value + frameWidth + context.lineWidth / 2,
-      cropPadding.value + delimiterSize - context.lineWidth / 2
+      cropPadding.value.x + frameWidth + context.lineWidth / 2,
+      cropPadding.value.y + delimiterSize - context.lineWidth / 2
     )
 
     context.stroke(topRight)
@@ -340,7 +349,7 @@ export const useDrawOnCanvas = ({
   }
 
   // Atualiza quando mudar o canvas tambem (mudanca de magem ja atualiza)
-  watch(canvas, updateCanvas)
+  watch([canvas, cropPadding], updateCanvas)
 
   return { updateCanvas }
 }

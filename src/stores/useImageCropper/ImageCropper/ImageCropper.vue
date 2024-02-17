@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button, Modal } from '@/components'
 import { Slider } from '@/components/Slider'
-import { computed, ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useImageCropper } from '..'
 import { useAcceptAndCancel } from './useAcceptAndCancel'
 import { useCanvasResizer } from './useCanvasResizer'
@@ -32,10 +32,27 @@ const pan = ref({ x: 0, y: 0 })
  */
 const cropPaddingProportion = ref(0.15)
 
-const cropPadding = computed(() =>
-  canvasContainer.value
-    ? canvasContainer.value?.offsetWidth * cropPaddingProportion.value
-    : 0
+const cropPadding = ref({ x: 0, y: 0 })
+
+watch(
+  [canvasContainer, cropPaddingProportion],
+  ([canvasContainer, cropPaddingProportion]) => {
+    if (cropPaddingProportion === 0) {
+      cropPadding.value = { x: 0, y: 0 }
+
+      return
+    }
+
+    if (!canvasContainer) return
+
+    // Espera o height ser calculado
+    setTimeout(() => {
+      cropPadding.value = {
+        x: canvasContainer.offsetWidth * cropPaddingProportion,
+        y: canvasContainer.offsetHeight * cropPaddingProportion,
+      }
+    }, 30)
+  }
 )
 
 /** Zoom aplicado no editor. 1 eh sem zoom, 5 eh o maximo */

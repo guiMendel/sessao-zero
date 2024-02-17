@@ -43,35 +43,39 @@ export const useAcceptAndCancel = ({
     updateCanvas()
 
     // Gera o arquivo
-    canvas.value.toBlob(
-      (blob) => {
-        if (!resolve.value) return
+    setTimeout(() => {
+      if (canvas.value == null) return
 
-        // Retorna o crop padding
-        cropPaddingProportion.value = paddingBefore
+      canvas.value.toBlob(
+        (blob) => {
+          if (!resolve.value) return
 
-        // Recalcula o canvas
-        recalculateCanvasSize()
+          // Retorna o crop padding
+          cropPaddingProportion.value = paddingBefore
 
-        if (blob == null) {
-          alert('error', 'Falha ao gerar imagem recortada')
+          // Recalcula o canvas
+          recalculateCanvasSize()
 
-          cancel()
+          if (blob == null) {
+            alert('error', 'Falha ao gerar imagem recortada')
 
-          return
-        }
+            cancel()
 
-        // Gera o arquivo
-        const file = new File([blob], 'croppedImage.png', blob)
+            return
+          }
 
-        // Resolve a promessa
-        resolve.value(file)
+          // Gera o arquivo
+          const file = new File([blob], 'croppedImage.png', blob)
 
-        clearStore()
-      },
-      'image/jpeg',
-      0.5
-    )
+          // Resolve a promessa
+          resolve.value(file)
+
+          clearStore()
+        },
+        'image/jpeg',
+        0.5
+      )
+    }, 20)
   }
 
   const cancel = () => {
