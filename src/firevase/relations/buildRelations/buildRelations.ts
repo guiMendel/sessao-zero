@@ -198,7 +198,7 @@ const createHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
   )
 
   // Ligamos sync e dispose do syncable ref ao sync bridge
-  target.sync.onBeforeSyncTrigger(() => bridgeSync.triggerSync())
+  target.sync.onBeforeFetchTrigger(() => bridgeSync.trigger())
   target.sync.onDispose(() => bridgeSync.dispose())
 
   return target
@@ -288,7 +288,7 @@ const createManyToManyRelation = <
   )
 
   // Ligamos sync e dispose do syncable ref ao sync bridge
-  targets.sync.onBeforeSyncTrigger(() => bridgeSync.triggerSync())
+  targets.sync.onBeforeFetchTrigger(() => bridgeSync.trigger())
   targets.sync.onDispose(() => bridgeSync.dispose())
 
   return targets

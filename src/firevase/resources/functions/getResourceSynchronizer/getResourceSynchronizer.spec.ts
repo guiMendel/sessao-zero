@@ -56,7 +56,7 @@ describe('getResourceSynchronizer', () => {
 
       await updateDatabaseValue('knights', id, { gold: 5000 })
 
-      // Ensures it synced properly
+      // Ensures it fetched properly
       expect(instance.value).toStrictEqual(
         await requireDatabaseValue('knights', id)
       )
@@ -94,7 +94,7 @@ describe('getResourceSynchronizer', () => {
 
       await updateDatabaseValue('knights', id, { gold: 5000 })
 
-      // Ensures it synced properly
+      // Ensures it fetched properly
       expect(instanceRef.value).toStrictEqual(
         await requireDatabaseValue('knights', id)
       )
@@ -189,7 +189,7 @@ describe('getResourceSynchronizer', () => {
       expect(listRef.value).toStrictEqual(await indexDatabaseValues('knights'))
     })
 
-    it('should filter list to match query and keep filter synced', async () => {
+    it('should filter list to match query and keep filter fetched', async () => {
       const { indexDatabaseValues } = mockFantasyDatabase({
         knights: {
           '1': mockKnight('uploadable', { name: 'Lancelot' }),

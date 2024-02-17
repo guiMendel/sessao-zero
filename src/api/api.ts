@@ -12,6 +12,8 @@ export const vase = fillFirevase<{
   notifications: Notification
   adventures: Adventure
 }>(firebaseApp, ['guilds', 'players', 'notifications', 'adventures'])
+  .configureFiles({ adventures: ['banner'] as const })
+
   .configureManyToMany({
     /** As guildas das quais os jogadores sao membros */
     playersGuilds: ['guilds', 'players'],
@@ -28,6 +30,7 @@ export const vase = fillFirevase<{
     /** As aventuras para as quais os jogadores solicitaram admissao */
     adventureAdmissionRequests: ['adventures', 'players'],
   })
+
   .configureRelations(({ hasMany, hasOne }) => ({
     guilds: {
       // Adventures

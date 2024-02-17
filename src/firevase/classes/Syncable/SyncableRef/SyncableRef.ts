@@ -138,7 +138,7 @@ export const syncableRef = <
   return new Proxy(syncedRef, {
     get: (currentState, property) => {
       if (property === 'value') {
-        currentState.sync.triggerSync()
+        currentState.sync.trigger()
       }
 
       return currentState[property as keyof typeof currentState]

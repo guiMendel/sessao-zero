@@ -28,7 +28,7 @@ describe('SyncableRef', () => {
         onReset: vi.fn(),
         onDispose: vi.fn(),
         onUpdateTarget: vi.fn(),
-        onBeforeSyncTrigger: vi.fn(),
+        onBeforeFetchTrigger: vi.fn(),
         getCleanupManager: () => new CleanupManager(),
       })
 
@@ -57,7 +57,7 @@ describe('SyncableRef', () => {
 
         return {
           ...syncable,
-          triggerSync: vi.fn(),
+          trigger: vi.fn(),
         }
       }) as any)
 
@@ -180,7 +180,7 @@ describe('SyncableRef', () => {
         onReset: vi.fn(),
         onDispose: vi.fn(),
         onUpdateTarget: vi.fn(),
-        onBeforeSyncTrigger: vi.fn(),
+        onBeforeFetchTrigger: vi.fn(),
         getCleanupManager: () => new CleanupManager(),
       })
 
@@ -209,15 +209,15 @@ describe('SyncableRef', () => {
         new CleanupManager()
       )
 
-      expect(knight.sync.syncState).not.toBe('synced')
+      expect(knight.sync.fetchState).not.toBe('fetched')
 
       knight.sync.getTarget()
 
-      expect(knight.sync.syncState).not.toBe('synced')
+      expect(knight.sync.fetchState).not.toBe('fetched')
 
       knight.value
 
-      expect(knight.sync.syncState).toBe('synced')
+      expect(knight.sync.fetchState).toBe('fetched')
     })
 
     describe('for documents', () => {

@@ -2,6 +2,7 @@ import { FirevaseClient } from '@/firevase'
 import { CleanupManager } from '@/firevase/classes/CleanupManager'
 import { PathsFrom } from '@/firevase/types'
 import { DocumentSnapshot, QuerySnapshot } from 'firebase/firestore'
+import { populateFiles } from '../../../files/populateFiles'
 import { buildRelations } from '../../../relations/buildRelations'
 import { makeHalfResource } from '../../functions/makeHalfResource'
 import { Resource } from '../../types'
@@ -50,6 +51,12 @@ export const makeResource = <C extends FirevaseClient, P extends PathsFrom<C>>(
           source: extractedResource,
           client,
           resourceLayersLimit,
+        }),
+        ...populateFiles({
+          client,
+          resourcePath,
+          cleanupManager,
+          resourceId: extractedResource.id,
         }),
       }
   )

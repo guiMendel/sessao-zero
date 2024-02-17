@@ -1,3 +1,4 @@
+import { Vase } from '@/api'
 import { FirevaseClient } from './firevase'
 import { RelationDefinition, RelationType } from './relations'
 
@@ -33,7 +34,7 @@ export type ConstrainRelationSettings<
 
 /** Valid data structure for definition of files per resource */
 export type ConstrainFileSettings<Properties extends ConstrainProperties> =
-  Record<keyof Properties, string[]>
+  Partial<Record<keyof Properties, string[]>>
 
 // ======================================================
 // ACCESSORS
@@ -50,3 +51,6 @@ export type ManyToManyFrom<C extends FirevaseClient> = C['manyToManySettings']
 
 /** Gets the relation settings from a client */
 export type RelationsFrom<C extends FirevaseClient> = C['relationSettings']
+
+/** Gets the file settings from a client */
+export type FilesFrom<C extends FirevaseClient> = C['fileSettings']

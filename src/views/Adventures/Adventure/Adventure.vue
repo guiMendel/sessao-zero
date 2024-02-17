@@ -194,7 +194,10 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
     class="adventure"
     :class="{ 'extra-bottom-padding': showEnter && !showEmptyRoomPrompt }"
   >
-    <img :src="genericBanner" alt="capa da aventura" />
+    <img
+      :src="toValue(adventure.banner) ?? genericBanner"
+      alt="capa da aventura"
+    />
 
     <div class="content">
       <Typography class="subheader">aventura</Typography>

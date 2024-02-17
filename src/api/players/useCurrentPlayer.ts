@@ -45,7 +45,7 @@ export const useCurrentPlayer = defineStore('current-player', () => {
     // Atualiza para o novo usuario
     else {
       player.sync.updateTarget(docWithId(newUser.uid))
-      player.sync.triggerSync()
+      player.sync.trigger()
     }
   })
 

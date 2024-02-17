@@ -199,7 +199,7 @@ describe('buildRelations', () => {
             getCleanupManager: () =>
               new CleanupManagerNamespace.CleanupManager(),
             onDispose: vi.fn(),
-            onBeforeSyncTrigger: vi.fn(),
+            onBeforeFetchTrigger: vi.fn(),
           },
         })
 
@@ -450,7 +450,7 @@ describe('buildRelations', () => {
             onDispose: vi.fn(),
             getCleanupManager: () =>
               new CleanupManagerNamespace.CleanupManager(),
-            onBeforeSyncTrigger: vi.fn(),
+            onBeforeFetchTrigger: vi.fn(),
           },
         })
 
@@ -664,7 +664,7 @@ describe('buildRelations', () => {
             onDispose: vi.fn(),
             getCleanupManager: () =>
               new CleanupManagerNamespace.CleanupManager(),
-            onBeforeSyncTrigger: vi.fn(),
+            onBeforeFetchTrigger: vi.fn(),
           },
         })
 
@@ -826,7 +826,7 @@ describe('buildRelations', () => {
         )
 
         relations.supervisedLands.value = [undefined as any]
-        relations.supervisedLands.sync.triggerSync()
+        relations.supervisedLands.sync.trigger()
 
         expect(relations.supervisedLands.sync).toHaveProperty('hasLoaded', true)
         expect(relations.supervisedLands).toHaveProperty('value', [])

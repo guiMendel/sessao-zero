@@ -34,11 +34,11 @@ describe('Syncable', () => {
     it('should update state to disposed after calling dispose', () => {
       const syncable = new Syncable(docTarget, vi.fn())
 
-      expect(syncable.syncState).toBe('ready-to-sync')
+      expect(syncable.fetchState).toBe('ready-to-fetch')
 
       syncable.dispose()
 
-      expect(syncable.syncState).toBe('disposed')
+      expect(syncable.fetchState).toBe('disposed')
     })
 
     it('should trigger listeners', () => {
@@ -79,19 +79,19 @@ describe('Syncable', () => {
       expect(disposeCallback).toHaveBeenCalledOnce()
     })
 
-    it.each(['ready-to-sync', 'synced', 'disposed'] as const)(
+    it.each(['ready-to-fetch', 'fetched', 'disposed'] as const)(
       'preserves %s state',
       (state) => {
         const syncable = new Syncable(docTarget, vi.fn())
 
-        if (state === 'synced') syncable.triggerSync()
+        if (state === 'fetched') syncable.trigger()
         else if (state === 'disposed') syncable.dispose()
 
-        expect(syncable.syncState).toBe(state)
+        expect(syncable.fetchState).toBe(state)
 
         syncable.updateTarget('new-target' as unknown as DocumentReference)
 
-        expect(syncable.syncState).toBe(state)
+        expect(syncable.fetchState).toBe(state)
       }
     )
 
@@ -118,13 +118,13 @@ describe('Syncable', () => {
     it('gives empty state when there is no target', () => {
       const syncable = new Syncable(undefined, () => {})
 
-      expect(syncable.syncState).toBe('empty')
+      expect(syncable.fetchState).toBe('empty')
     })
 
-    it('ignores triggerSync when there is no target', () => {
+    it('ignores trigger when there is no target', () => {
       const syncable = new Syncable(undefined, () => {})
 
-      syncable.triggerSync()
+      syncable.trigger()
 
       expect(mockOnSnapshot).not.toHaveBeenCalled()
     })
@@ -141,7 +141,7 @@ describe('Syncable', () => {
 
       const syncable = new Syncable(docTarget, mockOnNext)
 
-      syncable.triggerSync()
+      syncable.trigger()
 
       expect(mockOnSnapshot).toHaveBeenCalledWith(docTarget, expect.anything())
       expect(mockOnNext).toHaveBeenCalledWith(
@@ -160,27 +160,27 @@ describe('Syncable', () => {
 
       expect(syncable).toHaveProperty('hasLoaded', false)
 
-      syncable.triggerSync()
+      syncable.trigger()
 
       expect(syncable).toHaveProperty('hasLoaded', true)
     })
 
-    it('updates state to synced', () => {
+    it('updates state to fetched', () => {
       const syncable = new Syncable(docTarget, vi.fn())
 
-      syncable.triggerSync()
+      syncable.trigger()
 
-      expect(syncable.syncState).toBe('synced')
+      expect(syncable.fetchState).toBe('fetched')
     })
 
-    it('ignores triggerSync when already synced', () => {
+    it('ignores trigger when already fetched', () => {
       const syncable = new Syncable(docTarget, vi.fn())
 
-      syncable.triggerSync()
+      syncable.trigger()
 
       expect(mockOnSnapshot).toHaveBeenCalledOnce()
 
-      syncable.triggerSync()
+      syncable.trigger()
 
       expect(mockOnSnapshot).toHaveBeenCalledOnce()
     })
@@ -192,7 +192,7 @@ describe('Syncable', () => {
 
       const syncable = new Syncable(docTarget, vi.fn())
 
-      syncable.triggerSync()
+      syncable.trigger()
 
       expect(mockCleanup).not.toHaveBeenCalled()
 
@@ -206,11 +206,11 @@ describe('Syncable', () => {
 
       const syncable = new Syncable(docTarget, vi.fn())
 
-      syncable.onBeforeSyncTrigger(listener)
+      syncable.onBeforeFetchTrigger(listener)
 
       expect(listener).not.toHaveBeenCalled()
 
-      syncable.triggerSync()
+      syncable.trigger()
 
       expect(listener).toHaveBeenCalledOnce()
     })

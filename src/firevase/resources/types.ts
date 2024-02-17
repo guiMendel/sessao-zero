@@ -1,3 +1,5 @@
+import { Vase } from '@/api'
+import { FilesRefs } from '../files/types'
 import { FirevaseClient } from '../firevase'
 import { Relations, RelationsRefs } from '../relations'
 import { PathsFrom, PropertiesFrom } from '../types'
@@ -17,11 +19,11 @@ export type HalfResource<
   resourcePath: P
 }
 
-/** Has the properties, metadata and relations of a resource */
+/** Has the properties, metadata, relations and files of a resource */
 export type Resource<
   C extends FirevaseClient,
   P extends PathsFrom<C>
-> = HalfResource<C, P> & RelationsRefs<C, P>
+> = HalfResource<C, P> & RelationsRefs<C, P> & FilesRefs<C, P>
 
 /** Has the properties, metadata and relations of a resource */
 export type UnrefedResource<
@@ -29,7 +31,7 @@ export type UnrefedResource<
   P extends PathsFrom<C>
 > = HalfResource<C, P> & Relations<C, P>
 
-// declare const test: HalfResource<Vase, 'guilds'>
+// declare const test: Resource<Vase, 'adventures'>
 // test.
 
 /** How a resource's data is stored on firestore */

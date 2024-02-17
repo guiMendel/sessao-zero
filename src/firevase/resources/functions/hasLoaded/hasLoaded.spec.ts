@@ -53,7 +53,7 @@ describe('hasLoaded', () => {
 
     if (!knight.value) throw new Error('Database error')
 
-    toRaw(knight.value).king.sync.triggerSync()
+    toRaw(knight.value).king.sync.trigger()
 
     expect(hasLoaded([knight, 'king'])).toBe(true)
   })
@@ -78,8 +78,8 @@ describe('hasLoaded', () => {
 
     expect(hasLoaded([knights, 'king'])).toBe(false)
 
-    knights.sync.triggerSync()
-    knights.value.forEach((knight) => toRaw(knight).king.sync.triggerSync())
+    knights.sync.trigger()
+    knights.value.forEach((knight) => toRaw(knight).king.sync.trigger())
 
     expect(hasLoaded([knights, 'king'])).toBe(true)
   })
