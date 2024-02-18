@@ -73,6 +73,7 @@ export const useCurrentPlayer = defineStore('current-player', () => {
           nickname,
           createdAt: date,
           modifiedAt: date,
+          preferredGuildId: null,
         }
 
         // Set its database entry

@@ -355,7 +355,7 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
                   <img
                     :src="tooManyWizardsPicture"
                     alt="leao de chacara emburrado"
-                    class="uncomfortable-wizards"
+                    class="too-many-wizards"
                   />
 
                   <Typography
@@ -504,6 +504,10 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+
+    .too-many-wizards {
+      margin-inline: -1.5rem;
+    }
 
     .leave-adventure {
       align-items: center;

@@ -9,6 +9,9 @@ export interface Player {
   /** Como ele sera apresentado */
   nickname: string
 
+  /** Id da ultima guilda acessada pelo jogador */
+  preferredGuildId: string | null
+
   /** Sua senha, se estiver disponivel para acesso */
   password?: string
 

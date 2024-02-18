@@ -9,13 +9,25 @@ import { GuildPanel } from './GuildPanel'
 import { JoinGuildPrompt } from './JoinGuildPrompt'
 
 const { guild } = useCurrentGuild()
-const { player } = useCurrentPlayer()
+const { player, update } = useCurrentPlayer()
 
 /** Quando o jogador nao eh membro nem dono da guilda */
 const isVisitor = computed(() => !isMember(player.value, guild.value))
 
+// Seta essa guilda como a preferida do jogador
+watchEffect(() => {
+  if (
+    !player.value ||
+    isVisitor.value ||
+    !guild.value ||
+    player.value.preferredGuildId === guild.value.id
+  )
+    return
+
+  update({ preferredGuildId: guild.value.id })
+})
+
 // TODO: ao entrar varias vezes na mesma guilda, isso para de funcionar
-// TODO: retirar o background quadrilhado de algumas views, e deixar se em umas especificas. Ele eh bonito, mas n funciona sempre. Ex:
 watchEffect(() => setTitle(guild.value?.name))
 </script>
 

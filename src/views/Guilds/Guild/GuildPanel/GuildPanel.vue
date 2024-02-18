@@ -13,11 +13,17 @@ const props = defineProps<{
   guild: HalfResource<Vase, 'guilds'>
 }>()
 
+const { update } = useCurrentPlayer()
+
 const router = useRouter()
 
 const isOpen = ref(false)
 
-const switchGuild = () => router.push({ name: 'home' })
+const switchGuild = () => {
+  update({ preferredGuildId: null })
+
+  router.push({ name: 'home' })
+}
 
 const configureGuild = () => {
   router.push({ name: 'guild-configurations' })
