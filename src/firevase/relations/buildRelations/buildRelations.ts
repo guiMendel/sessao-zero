@@ -178,7 +178,7 @@ const createHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
       )
 
       // Atualiza o query dos targets
-      target.sync.updateTarget(targetDoc)
+      target.fetcher.updateTarget(targetDoc)
     }
   )
 
@@ -198,8 +198,8 @@ const createHasOneRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
   )
 
   // Ligamos sync e dispose do syncable ref ao sync bridge
-  target.sync.onBeforeFetchTrigger(() => bridgeSync.trigger())
-  target.sync.onDispose(() => bridgeSync.dispose())
+  target.fetcher.onBeforeFetchTrigger(() => bridgeSync.trigger())
+  target.fetcher.onDispose(() => bridgeSync.dispose())
 
   return target
 }
@@ -250,10 +250,10 @@ const createManyToManyRelation = <
   const bridgeSync = new Syncable(bridgeQuery, (snapshot) => {
     if (snapshot.empty) {
       // Remove o target
-      targets.sync.updateTarget(undefined)
+      targets.fetcher.updateTarget(undefined)
 
       // Set the loaded flag to true
-      ;(targets.sync as any)._hasLoaded = true
+      ;(targets.fetcher as any)._hasLoaded = true
 
       // Trigger vue
       targets.value = []
@@ -272,7 +272,7 @@ const createManyToManyRelation = <
     )
 
     // Atualiza o query dos targets
-    targets.sync.updateTarget(targetsQuery)
+    targets.fetcher.updateTarget(targetsQuery)
   })
 
   // Associamos o cleanup pai ao bridgeSync
@@ -288,8 +288,8 @@ const createManyToManyRelation = <
   )
 
   // Ligamos sync e dispose do syncable ref ao sync bridge
-  targets.sync.onBeforeFetchTrigger(() => bridgeSync.trigger())
-  targets.sync.onDispose(() => bridgeSync.dispose())
+  targets.fetcher.onBeforeFetchTrigger(() => bridgeSync.trigger())
+  targets.fetcher.onDispose(() => bridgeSync.dispose())
 
   return targets
 }

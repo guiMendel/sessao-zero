@@ -195,7 +195,7 @@ describe('buildRelations', () => {
 
       it('should pass the correct params to syncable ref', () => {
         const mockSyncableRef = vi.fn().mockReturnValue({
-          sync: {
+          fetcher: {
             getCleanupManager: () =>
               new CleanupManagerNamespace.CleanupManager(),
             onDispose: vi.fn(),
@@ -319,7 +319,7 @@ describe('buildRelations', () => {
 
         expect(bridgeDispose).toHaveBeenCalledTimes(0)
 
-        relations.king.sync.dispose()
+        relations.king.fetcher.dispose()
 
         expect(bridgeDispose).toHaveBeenCalledOnce()
       })
@@ -446,7 +446,7 @@ describe('buildRelations', () => {
 
       it('should pass the correct params to syncable ref', () => {
         const mockSyncableRef = vi.fn().mockReturnValue({
-          sync: {
+          fetcher: {
             onDispose: vi.fn(),
             getCleanupManager: () =>
               new CleanupManagerNamespace.CleanupManager(),
@@ -660,7 +660,7 @@ describe('buildRelations', () => {
 
       it('should pass the correct params to syncable ref', () => {
         const mockSyncableRef = vi.fn().mockReturnValue({
-          sync: {
+          fetcher: {
             onDispose: vi.fn(),
             getCleanupManager: () =>
               new CleanupManagerNamespace.CleanupManager(),
@@ -788,7 +788,7 @@ describe('buildRelations', () => {
 
         expect(bridgeDispose).toHaveBeenCalledTimes(0)
 
-        relations.supervisors.sync.dispose()
+        relations.supervisors.fetcher.dispose()
 
         expect(bridgeDispose).toHaveBeenCalledOnce()
       })
@@ -820,15 +820,15 @@ describe('buildRelations', () => {
           source: knight,
         })
 
-        expect(relations.supervisedLands.sync).toHaveProperty(
+        expect(relations.supervisedLands.fetcher).toHaveProperty(
           'hasLoaded',
           false
         )
 
         relations.supervisedLands.value = [undefined as any]
-        relations.supervisedLands.sync.trigger()
+        relations.supervisedLands.fetcher.trigger()
 
-        expect(relations.supervisedLands.sync).toHaveProperty('hasLoaded', true)
+        expect(relations.supervisedLands.fetcher).toHaveProperty('hasLoaded', true)
         expect(relations.supervisedLands).toHaveProperty('value', [])
       })
     })

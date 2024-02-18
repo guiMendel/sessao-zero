@@ -25,10 +25,10 @@ describe('hasLoaded', () => {
     )
 
     expect(hasLoaded(ref1, ref2)).toBe(false)
-    ;(ref2.sync as any)._hasLoaded = true
+    ;(ref2.fetcher as any)._hasLoaded = true
 
     expect(hasLoaded(ref1, ref2)).toBe(false)
-    ;(ref1.sync as any)._hasLoaded = true
+    ;(ref1.fetcher as any)._hasLoaded = true
 
     expect(hasLoaded(ref1, ref2)).toBe(true)
   })
@@ -53,7 +53,7 @@ describe('hasLoaded', () => {
 
     if (!knight.value) throw new Error('Database error')
 
-    toRaw(knight.value).king.sync.trigger()
+    toRaw(knight.value).king.fetcher.trigger()
 
     expect(hasLoaded([knight, 'king'])).toBe(true)
   })
@@ -78,8 +78,8 @@ describe('hasLoaded', () => {
 
     expect(hasLoaded([knights, 'king'])).toBe(false)
 
-    knights.sync.trigger()
-    knights.value.forEach((knight) => toRaw(knight).king.sync.trigger())
+    knights.fetcher.trigger()
+    knights.value.forEach((knight) => toRaw(knight).king.fetcher.trigger())
 
     expect(hasLoaded([knights, 'king'])).toBe(true)
   })

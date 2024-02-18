@@ -60,7 +60,7 @@ export const getResourceSynchronizer = <
   ) => {
     // Se recebemos um ref, basta mudar seu target
     if (options?.existingRef != undefined) {
-      options.existingRef.sync.updateTarget(target)
+      options.existingRef.fetcher.updateTarget(target)
 
       return options.existingRef
     }

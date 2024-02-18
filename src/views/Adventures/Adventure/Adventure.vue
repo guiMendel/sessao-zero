@@ -14,21 +14,22 @@ import {
   Button,
   Divisor,
   DropdownIcon,
+  Image,
   LoadingSpinner,
   PlayerPreview,
   Typography,
 } from '@/components'
 import { Tabs } from '@/components/Tabs'
 import { removeRelation } from '@/firevase/relations'
-import { HalfResource } from '@/firevase/resources'
+import { HalfResource, hasLoaded } from '@/firevase/resources'
 import { router } from '@/router'
 import { useAlert, useInput } from '@/stores'
 import { sessionStorageKeys } from '@/utils/config'
 import { useSessionStorage } from '@vueuse/core'
 import { computed, ref, toValue } from 'vue'
 import { useRoute } from 'vue-router'
-import { EditAdventure } from './EditAdventure'
 import { AdmissionRequests } from './AdmissionRequests'
+import { EditAdventure } from './EditAdventure'
 
 const { adventure, deleteForever, addPlayer } = useCurrentAdventure()
 const { player } = useCurrentPlayer()
@@ -194,9 +195,10 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
     class="adventure"
     :class="{ 'extra-bottom-padding': showEnter && !showEmptyRoomPrompt }"
   >
-    <img
-      :src="toValue(adventure.banner) ?? genericBanner"
-      alt="capa da aventura"
+    <Image
+      :src="toValue(adventure.banner)"
+      :backup-src="genericBanner"
+      :has-loaded="hasLoaded([adventure, 'banner'])"
     />
 
     <div class="content">

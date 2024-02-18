@@ -1,20 +1,20 @@
 import { FirevaseClient } from '@/firevase'
 import { SyncableRef } from '@/firevase/classes/Syncable'
 import { Relations } from '@/firevase/relations'
-import { PathsFrom } from '@/firevase/types'
+import { FilesFrom, PathsFrom } from '@/firevase/types'
 import { toRaw, toValue } from 'vue'
 import { Resource } from '../..'
 
-type RefWithRelation<C extends FirevaseClient> = {
+type RefWithLoadable<C extends FirevaseClient> = {
   [P in PathsFrom<C>]: [
     SyncableRef<C, P, any> | Resource<C, P>,
-    keyof Relations<C, P>
+    keyof Relations<C, P> | FilesFrom<C>[P][number]
   ]
 }[PathsFrom<C>]
 
 type Argument<C extends FirevaseClient> =
   | SyncableRef<C, PathsFrom<C>, any>
-  | RefWithRelation<C>
+  | RefWithLoadable<C>
   | undefined
 
 export const hasLoaded = <C extends FirevaseClient>(...args: Argument<C>[]) => {
@@ -30,13 +30,13 @@ export const hasLoaded = <C extends FirevaseClient>(...args: Argument<C>[]) => {
       // Generate vue dependency
       toValue(arg)
 
-      if (arg.sync.hasLoaded === false) result = false
+      if (arg.fetcher.hasLoaded === false) result = false
       continue
     }
 
-    const [ref, relation] = arg
+    const [ref, loadable] = arg
 
-    if ('sync' in ref && ref.sync.hasLoaded === false) result = false
+    if ('fetcher' in ref && ref.fetcher.hasLoaded === false) result = false
 
     const value = toValue(ref)
 
@@ -44,19 +44,19 @@ export const hasLoaded = <C extends FirevaseClient>(...args: Argument<C>[]) => {
 
     // Address document ref
     if (!Array.isArray(value)) {
-      // Access relation to generate vue dependency
-      toValue(value[relation as keyof typeof value])
+      // Access loadable to generate vue dependency
+      toValue(value[loadable as keyof typeof value])
 
-      const relationSync = toRaw(value)[relation as keyof typeof value].sync
+      const loadableSync = toRaw(value)[loadable as keyof typeof value].fetcher
 
-      if (relationSync.hasLoaded === false) result = false
+      if (loadableSync.hasLoaded === false) result = false
       continue
     }
 
-    // Access relations to generate vue dependencies
-    value.forEach((instance) => toValue(instance[relation]))
+    // Access loadables to generate vue dependencies
+    value.forEach((instance) => toValue(instance[loadable]))
 
-    if (!value.every((instance) => toRaw(instance)[relation].sync.hasLoaded))
+    if (!value.every((instance) => toRaw(instance)[loadable].fetcher.hasLoaded))
       result = false
   }
 

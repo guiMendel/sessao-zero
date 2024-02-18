@@ -41,11 +41,11 @@ export const useCurrentPlayer = defineStore('current-player', () => {
   // Sync do player logado
   listenToAuthChange(async (newUser) => {
     // Reset user
-    if (newUser == null) player.sync.reset()
+    if (newUser == null) player.fetcher.reset()
     // Atualiza para o novo usuario
     else {
-      player.sync.updateTarget(docWithId(newUser.uid))
-      player.sync.trigger()
+      player.fetcher.updateTarget(docWithId(newUser.uid))
+      player.fetcher.trigger()
     }
   })
 

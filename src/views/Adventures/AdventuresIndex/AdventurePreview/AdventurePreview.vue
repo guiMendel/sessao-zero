@@ -3,7 +3,8 @@ import { isNarrator, useAdventure } from '@/api/adventures'
 import { isMember } from '@/api/isMember'
 import { useCurrentPlayer } from '@/api/players'
 import genericBanner from '@/assets/green-table.png'
-import { LoadingSpinner, Typography } from '@/components'
+import { Image, LoadingSpinner, Typography } from '@/components'
+import { hasLoaded } from '@/firevase/resources'
 import { computed, ref, toValue, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -77,10 +78,11 @@ const isClosed = computed(
         jogando
       </Typography>
 
-      <img
+      <Image
+        :src="toValue(adventure.banner)"
+        :backup-src="genericBanner"
+        :has-loaded="hasLoaded([adventure, 'banner'])"
         class="cover"
-        :src="toValue(adventure.banner) ?? genericBanner"
-        alt="capa da aventura"
       />
 
       <!-- Narrators -->
@@ -197,6 +199,7 @@ const isClosed = computed(
     position: absolute;
     top: -0.8rem;
     left: 1rem;
+    z-index: 10;
 
     align-items: center;
     gap: 0.3rem;

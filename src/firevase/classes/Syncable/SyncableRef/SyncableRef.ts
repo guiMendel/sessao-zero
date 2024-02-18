@@ -22,7 +22,7 @@ export type SyncableRef<
   P extends PathsFrom<C>,
   M extends Query | DocumentReference
 > = Ref<M extends Query ? Resource<C, P>[] : Resource<C, P> | undefined> & {
-  sync: Syncable<M>
+  fetcher: Syncable<M>
 }
 
 export const isQueryTarget = (
@@ -113,7 +113,7 @@ export const syncableRef = <
         // Need to use vue's toRaw due to their ref.value unpacking antics
         for (const relation in relations) {
           if (relation in previousValue) {
-            toRaw(previousValue)[relation].sync.dispose()
+            toRaw(previousValue)[relation].fetcher.dispose()
           }
         }
       }
@@ -122,23 +122,23 @@ export const syncableRef = <
 
   /** O SyncableRef deste recurso */
   const syncedRef = Object.assign(valueRef, {
-    sync: syncable,
+    fetcher: syncable,
   }) as unknown as SyncableRef<C, P, M>
 
-  syncedRef.sync.onReset(() => (valueRef.value = emptyValue))
+  syncedRef.fetcher.onReset(() => (valueRef.value = emptyValue))
 
   // Associa o cleanup manager
-  parentCleanupManager.link('propagate-to', syncedRef.sync.getCleanupManager())
+  parentCleanupManager.link('propagate-to', syncedRef.fetcher.getCleanupManager())
 
   // Quando limpar o target do sync, limpa o valor do ref
-  syncedRef.sync.onUpdateTarget((newTarget) => {
+  syncedRef.fetcher.onUpdateTarget((newTarget) => {
     if (newTarget == undefined) syncedRef.value = emptyValue as any
   })
 
   return new Proxy(syncedRef, {
     get: (currentState, property) => {
       if (property === 'value') {
-        currentState.sync.trigger()
+        currentState.fetcher.trigger()
       }
 
       return currentState[property as keyof typeof currentState]

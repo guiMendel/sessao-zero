@@ -85,7 +85,7 @@ describe('SyncableRef', () => {
 
       const onDispose = vi.fn()
 
-      ref.sync.getCleanupManager().onDispose(onDispose)
+      ref.fetcher.getCleanupManager().onDispose(onDispose)
 
       expect(onDispose).not.toHaveBeenCalled()
 
@@ -118,13 +118,13 @@ describe('SyncableRef', () => {
 
       const onChildDispose = vi.fn()
 
-      const kingCleanup = toRaw(knight.value).king.sync.getCleanupManager()
+      const kingCleanup = toRaw(knight.value).king.fetcher.getCleanupManager()
 
       kingCleanup.onDispose(onChildDispose)
 
       expect(onChildDispose).not.toHaveBeenCalled()
 
-      knight.sync.dispose()
+      knight.fetcher.dispose()
 
       expect(onChildDispose).toHaveBeenCalledOnce()
     })
@@ -147,7 +147,7 @@ describe('SyncableRef', () => {
 
       expect(knight.value).toBeDefined()
 
-      knight.sync.reset()
+      knight.fetcher.reset()
 
       expect(knight.value).toBeUndefined()
     })
@@ -168,7 +168,7 @@ describe('SyncableRef', () => {
 
       expect(knights.value).not.toStrictEqual([])
 
-      knights.sync.reset()
+      knights.fetcher.reset()
 
       expect(knights.value).toStrictEqual([])
     })
@@ -209,15 +209,15 @@ describe('SyncableRef', () => {
         new CleanupManager()
       )
 
-      expect(knight.sync.fetchState).not.toBe('fetched')
+      expect(knight.fetcher.fetchState).not.toBe('fetched')
 
-      knight.sync.getTarget()
+      knight.fetcher.getTarget()
 
-      expect(knight.sync.fetchState).not.toBe('fetched')
+      expect(knight.fetcher.fetchState).not.toBe('fetched')
 
       knight.value
 
-      expect(knight.sync.fetchState).toBe('fetched')
+      expect(knight.fetcher.fetchState).toBe('fetched')
     })
 
     describe('for documents', () => {
@@ -452,7 +452,7 @@ describe('SyncableRef', () => {
 
         const onDispose = vi.fn()
 
-        toRaw(knights.value)[1].king.sync.onDispose(onDispose)
+        toRaw(knights.value)[1].king.fetcher.onDispose(onDispose)
 
         expect(onDispose).not.toHaveBeenCalled()
 

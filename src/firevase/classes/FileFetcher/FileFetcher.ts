@@ -14,6 +14,10 @@ export class FileFetcher extends Fetcher<StorageReference, string> {
 
         this.onFetch(url, this.cleanup)
       } catch (error) {
+        this._hasLoaded = true
+
+        this.onFetch('', this.cleanup)
+
         this.handleError(error as any)
       }
     }
