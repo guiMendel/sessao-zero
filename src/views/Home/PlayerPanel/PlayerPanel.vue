@@ -9,6 +9,7 @@ import {
   ProfilePicture,
   Typography,
 } from '@/components'
+import { findMeta } from '@/router/utils'
 import { computed, ref, toValue } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -16,6 +17,10 @@ const { player, logout } = useCurrentPlayer()
 const router = useRouter()
 
 const isOpen = ref(false)
+
+const picturePositionAbsolute = computed(() =>
+  Boolean(findMeta(router.currentRoute.value, 'playerPanelPositionAbsolute'))
+)
 
 const goToConfigurations = () => {
   router.push({ name: 'configurations' })
@@ -39,7 +44,10 @@ const unreadNotifications = computed(
 
 <template>
   <template v-if="player != undefined">
-    <div class="player-panel-toggle">
+    <div
+      class="player-panel-toggle"
+      :class="{ absolute: picturePositionAbsolute }"
+    >
       <!-- Contagem de notificacoes -->
       <NotificationsBadge :count="unreadNotifications" />
 
@@ -95,6 +103,10 @@ const unreadNotifications = computed(
 
   margin: 0.5rem 1rem 0;
   position: relative;
+
+  &.absolute {
+    position: fixed;
+  }
 
   .picture {
     @include bevel(var(--tx-main-light));

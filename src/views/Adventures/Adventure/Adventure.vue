@@ -45,6 +45,10 @@ const tab = useSessionStorage<Tab>(
   'detalhes'
 )
 
+const guildDisallowsSubscription = computed(
+  () => !guild.value?.allowAdventureSubscription
+)
+
 // =================================================================
 // JOGADOR
 // =================================================================
@@ -335,7 +339,12 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
 
               <!-- Vagas disponiveis -->
               <template
-                v-if="player && adventure.playerLimit > 0 && adventure.open"
+                v-if="
+                  player &&
+                  adventure.playerLimit > 0 &&
+                  adventure.open &&
+                  !guildDisallowsSubscription
+                "
               >
                 <PlayerPreview
                   v-for="spotIndex in spots"
@@ -367,7 +376,7 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
             </template>
 
             <!-- Aventura fechada -->
-            <template v-if="!adventure.open">
+            <template v-if="!adventure.open || guildDisallowsSubscription">
               <img
                 :src="stopKnightPicture"
                 alt="leao de chacara emburrado"
@@ -375,9 +384,16 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
               />
 
               <Typography
-                >parado ai aventureiro! Esta aventura está de portas
-                fechadas</Typography
-              >
+                >parado ai aventureiro!
+
+                <template v-if="guildDisallowsSubscription">
+                  Esta guilda não está aceitando inscrições nas aventuras ainda
+                </template>
+
+                <template v-else>
+                  Esta aventura está de portas fechadas
+                </template>
+              </Typography>
             </template>
           </div>
         </template>

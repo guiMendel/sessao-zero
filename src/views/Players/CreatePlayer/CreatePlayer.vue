@@ -1,27 +1,22 @@
 <script setup lang="ts">
 import { useCurrentPlayer, usePlayerFields } from '@/api/players'
-import { Button, InputField, Typography } from '@/components'
+import { Button, Typography } from '@/components'
+import { Fields } from '@/components/Fields'
 import { useAlert } from '@/stores'
-import { localStorageKeys } from '@/utils/config'
+import { sessionStorageKeys } from '@/utils/config'
 import { eraseInStorage, isFieldValid } from '@/utils/functions'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import newPlayerArt from '../../../assets/new-player.png'
 
 // Campos de login
-const fields = usePlayerFields(localStorageKeys.loginFields)
+const { fields, getErrorForCode, maybeInvalidateEmail } = usePlayerFields({
+  storageKey: sessionStorageKeys.loginFields,
+})
 
-const {
-  email,
-  password,
-  name,
-  nickname,
-  passwordConfirmation,
-  getErrorForCode,
-  maybeInvalidateEmail,
-} = fields
+const { email, password, name, nickname, passwordConfirmation } = fields
 
-const { alert: notify } = useAlert()
+const { alert } = useAlert()
 const { create } = useCurrentPlayer()
 const router = useRouter()
 
@@ -43,19 +38,20 @@ const tryCreate = () => {
     password: password.value,
     name: name.value,
     nickname: nickname.value,
+    preferredGuildId: null,
   })
     .then(async () => {
       // Redirect to home
       await router.push({ name: 'home' })
 
       // Limpa os campos armazenados localmente
-      eraseInStorage(new RegExp(localStorageKeys.loginFields))
+      eraseInStorage(new RegExp(sessionStorageKeys.loginFields))
     })
     // Handle errors
     .catch(({ code, message }) => {
       console.error('Player creation failed!', message)
 
-      notify('error', getErrorForCode(code))
+      alert('error', getErrorForCode(code))
 
       maybeInvalidateEmail(emailValue, code)
     })
@@ -67,33 +63,19 @@ const tryCreate = () => {
     <img :src="newPlayerArt" class="illustration" />
 
     <!-- Titulo -->
-    <Typography variant="title" color="white">Criar Jogador</Typography>
+    <Typography class="heading" variant="title" color="white"
+      >Criar Jogador</Typography
+    >
 
-    <!-- Nome -->
-    <InputField
-      class="input"
-      :field="fields.name"
-      message="Como você se chama"
-    />
-
-    <!-- Apelido -->
-    <InputField
-      class="input"
-      :field="fields.nickname"
-      message="Como seu perfil aparecerá aos outros"
-    />
-
-    <!-- Email -->
-    <InputField class="input" :field="fields.email" />
-
-    <!-- Senha -->
-    <InputField class="input" :field="fields.password" isNewPassword />
-
-    <!-- Confirmacao de senha -->
-    <InputField
-      class="input"
-      :field="fields.passwordConfirmation"
-      isNewPassword
+    <Fields
+      class="fields"
+      :fields="[
+        fields.name,
+        fields.nickname,
+        fields.email,
+        fields.password,
+        fields.passwordConfirmation,
+      ]"
     />
 
     <!-- Submit -->
@@ -115,15 +97,26 @@ form {
   background-color: var(--bg-main-washed);
 
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   padding: 2rem;
   gap: 1rem;
 
   max-width: 100%;
 
+  .fields {
+    flex-direction: column;
+    gap: inherit;
+    align-items: stretch;
+  }
+
+  .heading {
+    align-self: center;
+  }
+
   .illustration {
     width: 10rem;
+    align-self: center;
   }
 
   .submit {

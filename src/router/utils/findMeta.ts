@@ -6,10 +6,10 @@ import type { RouteMetas } from '..'
  * @param targetMeta o meta a procurar
  * @returns o valor do encontrado. Se nao encontrar, undefined
  */
-export function findMeta(
+export function findMeta<M extends keyof RouteMetas>(
   { matched }: RouteLocationNormalized,
-  targetMeta: keyof RouteMetas
-) {
+  targetMeta: M
+): RouteMetas[M] {
   return matched.find(({ meta }) => meta[targetMeta] != undefined)?.meta[
     targetMeta
   ]

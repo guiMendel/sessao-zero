@@ -21,6 +21,9 @@ export interface RouteMetas {
 
   /** Se o jogador deve ser dono da guilda atualmente selecionada */
   mustOwnGuild?: boolean
+
+  /** Se o player profile icon deve ter position absolute */
+  playerPanelPositionAbsolute?: boolean
 }
 
 declare module 'vue-router' {

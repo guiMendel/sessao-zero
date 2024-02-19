@@ -54,6 +54,7 @@ const isClosed = computed(
     player.value &&
     !isMember(player.value, adventure.value) &&
     (!adventure.value.open ||
+      !toValue(adventure.value.guild)?.allowAdventureSubscription ||
       (adventure.value.playerLimit > 0 &&
         adventure.value.playerLimit <= toValue(adventure.value.players).length))
 )

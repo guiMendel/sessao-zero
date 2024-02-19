@@ -45,18 +45,18 @@ const initials = computed(
 
   border-radius: 50%;
 
-  font-size: 1.6rem;
   align-items: center;
   justify-content: center;
 
-  padding: 0.4rem;
+  padding: 0.4em;
 
-  width: 2.9rem;
-  height: 2.9rem;
+  width: 2.9em;
+  height: 2.9em;
   position: relative;
 
   &.background-main-lighter {
     background-color: var(--bg-main-lighter);
+    filter: brightness(1.04);
   }
 
   &.background-main-washed {
@@ -69,13 +69,14 @@ const initials = computed(
 
   .initials {
     font-family: 'Lilita One', monospace;
+    font-size: 1.6em;
   }
 
   .profile-icon {
     position: absolute;
-    top: -0.3rem;
-    right: -0.3rem;
-    font-size: 1.2rem;
+    top: -0.3em;
+    right: -0.3em;
+    font-size: 1.2em;
     color: var(--tx-main-dark);
   }
 }

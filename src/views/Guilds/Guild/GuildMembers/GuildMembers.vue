@@ -137,6 +137,7 @@ const showAdmissionRequests = ref(false)
 
 .guild-members {
   margin-top: 1rem;
+  padding-inline: 1.5rem;
   flex-direction: column;
   gap: 1rem;
 

@@ -15,10 +15,15 @@ export const fieldPropertyNameRelations: PropertyNameRelation[] = [
     display: 'confirmar senha',
   },
   {
-    matchNames: ['password'],
+    matchNames: ['password', 'currentPassword'],
     type: 'password',
     autocomplete: 'current-password',
     display: 'senha',
+  },
+  {
+    matchNames: ['senha atual'],
+    type: 'password',
+    autocomplete: 'current-password',
   },
   {
     matchNames: ['color'],

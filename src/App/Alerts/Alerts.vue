@@ -65,7 +65,7 @@ onBeforeUnmount(() => clearInterval(countdown))
   align-items: center;
   gap: 0.5rem;
 
-  z-index: 20;
+  z-index: 500;
 
   .notification {
     border-radius: 5px;

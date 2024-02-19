@@ -12,9 +12,11 @@ import { useRouter } from 'vue-router'
 import illustration from '../../assets/illustration.png'
 
 // Campos de login
-const fields = usePlayerFields(sessionStorageKeys.loginFields)
+const { fields, getErrorForCode } = usePlayerFields({
+  storageKey: sessionStorageKeys.loginFields,
+})
 
-const { email, password, getErrorForCode } = fields
+const { email, password } = fields
 
 // Nao valida formato da senha em login
 password.validate = () => true

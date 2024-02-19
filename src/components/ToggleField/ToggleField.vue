@@ -41,7 +41,7 @@ const toggle = () => emit('update:modelValue', !props.modelValue)
 
   .label {
     @include field-label;
-  cursor: pointer;
+    cursor: pointer;
   }
 
   .message {
