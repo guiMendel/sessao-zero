@@ -12,11 +12,13 @@ import {
 import { findMeta } from '@/router/utils'
 import { computed, ref, toValue } from 'vue'
 import { useRouter } from 'vue-router'
+import { Notifications } from './Notifications'
 
 const { player, logout } = useCurrentPlayer()
 const router = useRouter()
 
-const isOpen = ref(false)
+type Panel = 'player' | 'notifications' | 'feedback'
+const openPanel = ref<Panel | undefined>(undefined)
 
 const picturePositionAbsolute = computed(() =>
   Boolean(findMeta(router.currentRoute.value, 'playerPanelPositionAbsolute'))
@@ -24,14 +26,7 @@ const picturePositionAbsolute = computed(() =>
 
 const goToConfigurations = () => {
   router.push({ name: 'configurations' })
-  isOpen.value = false
-}
-
-const goToNotifications = () => {
-  if (!player.value) return
-
-  router.push({ name: 'notifications', params: { playerId: player.value.id } })
-  isOpen.value = false
+  openPanel.value = undefined
 }
 
 const unreadNotifications = computed(
@@ -56,12 +51,21 @@ const unreadNotifications = computed(
         background="main-lighter"
         class="picture"
         :player="player"
-        @click="isOpen = true"
+        @click="openPanel = 'player'"
       />
     </div>
 
-    <Drawer v-model="isOpen" class="player-panel">
-      <PlayerPreview :player="player" @click="isOpen = false">
+    <Notifications
+      :model-value="openPanel === 'notifications'"
+      @update:model-value="openPanel = undefined"
+    />
+
+    <Drawer
+      :model-value="openPanel === 'player'"
+      @update:model-value="openPanel = undefined"
+      class="player-panel"
+    >
+      <PlayerPreview :player="player" @click="openPanel = undefined">
         <div class="see-profile">
           <Typography variant="paragraph-secondary">perfil</Typography>
 
@@ -73,7 +77,11 @@ const unreadNotifications = computed(
 
       <div class="menu">
         <!-- Notificações -->
-        <Button variant="colored" @click="goToNotifications" class="option">
+        <Button
+          variant="colored"
+          @click="openPanel = 'notifications'"
+          class="option"
+        >
           <NotificationsBadge :count="unreadNotifications" />
           <font-awesome-icon :icon="['fas', 'envelope']" />
           <Typography>notificações</Typography>
@@ -83,6 +91,16 @@ const unreadNotifications = computed(
         <Button variant="colored" @click="goToConfigurations" class="option">
           <font-awesome-icon :icon="['fas', 'screwdriver-wrench']" />
           <Typography>configurações</Typography>
+        </Button>
+
+        <!-- Feedback / bug report -->
+        <Button
+          variant="colored"
+          @click="openPanel = 'feedback'"
+          class="option"
+        >
+          <font-awesome-icon :icon="['fas', 'envelope-open-text']" />
+          <Typography>feedback</Typography>
         </Button>
 
         <!-- Logout -->

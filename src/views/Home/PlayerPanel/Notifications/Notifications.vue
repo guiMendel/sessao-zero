@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { useNotification } from '@/api/notifications'
 import { useCurrentPlayer } from '@/api/players'
-import { LoadingSpinner, Typography } from '@/components'
+import knightImage from '@/assets/happy-knight-and-donkey.png'
+import { Drawer, LoadingSpinner, Typography } from '@/components'
 import { toValue, watchEffect } from 'vue'
-import knightImage from '../../../assets/happy-knight-and-donkey.png'
+
+defineProps<{ modelValue: boolean }>()
+
+const emit = defineEmits(['update:modelValue'])
 
 const { player } = useCurrentPlayer()
 const { deleteNotification, readNotification } = useNotification()
-
-// TODO: isso deveria ser um Drawer que vem debaixo em vez de uma pagina propria
 
 // Marca todas as notificacoes como lidas
 watchEffect(() =>
@@ -24,7 +26,13 @@ const deleteAll = () =>
 </script>
 
 <template>
-  <div v-if="player" class="notifications">
+  <Drawer
+    :model-value="modelValue"
+    @update:model-value="(value) => emit('update:modelValue', value)"
+    v-if="player"
+    class="notifications"
+    draw-direction="bottom"
+  >
     <Typography class="heading" variant="subtitle">Notificações</Typography>
 
     <template v-if="toValue(player.notifications).length > 0">
@@ -55,22 +63,19 @@ const deleteAll = () =>
 
       <img class="knight-image" :src="knightImage" />
     </template>
-  </div>
+  </Drawer>
 
   <LoadingSpinner v-else />
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import '@/styles/variables.scss';
 
 #app .notifications {
-  width: 100%;
-  padding: 1.5rem 1.5rem 2rem;
-
   flex-direction: column;
   align-items: stretch;
   gap: 1rem;
-  flex: 1;
+  padding-top: 2rem;
 
   .heading {
     color: var(--tx-main-dark);
@@ -96,6 +101,7 @@ const deleteAll = () =>
     border-radius: $border-radius;
     padding: 0.4rem 1rem 1.2rem;
     flex-direction: column;
+    @include high-contrast-border;
 
     .row {
       justify-content: flex-end;

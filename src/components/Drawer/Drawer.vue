@@ -19,16 +19,12 @@ const close = () => emit('update:modelValue', false)
 <template>
   <Transition name="slide">
     <div class="shadow" v-if="modelValue" @click.self="close">
-      <div
-        class="panel"
-        :class="`draw-direction-${drawDirection}`"
-        v-bind="$attrs"
-      >
+      <div class="panel" :class="`draw-direction-${drawDirection}`">
         <Button class="close-button" @click="close">
           <font-awesome-icon :icon="['fas', 'xmark']" />
         </Button>
 
-        <div class="content">
+        <div class="content" v-bind="$attrs">
           <slot></slot>
         </div>
       </div>

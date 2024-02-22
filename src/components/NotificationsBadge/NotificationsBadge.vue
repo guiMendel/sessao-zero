@@ -17,7 +17,7 @@ defineProps<{
   position: absolute;
   left: -0.7rem;
   top: -0.3rem;
-  z-index: 100;
+  z-index: 20;
 
   background-color: var(--bg-warning);
   color: var(--tx-warning-darker);
@@ -30,5 +30,12 @@ defineProps<{
   @include high-contrast-border;
   font-size: 0.7rem;
   font-weight: 900;
+
+  @include high-contrast {
+    font-size: 1rem;
+
+    width: 1.6rem;
+    height: 1.6rem;
+  }
 }
 </style>

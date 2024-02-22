@@ -126,6 +126,10 @@ const activeViewMode = useLocalStorage<'narrate' | 'play'>(
       font-weight: 800;
       border-radius: 50%;
       transition: 200ms all;
+
+      @include high-contrast {
+        font-size: 1rem;
+      }
     }
 
     &.active {

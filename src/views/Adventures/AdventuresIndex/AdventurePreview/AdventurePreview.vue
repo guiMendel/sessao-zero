@@ -187,7 +187,7 @@ const isClosed = computed(
     }
 
     .expand-button {
-      background-color: var(--tx-gray-light);
+      background-color: var(--bg-gray-light);
       color: var(--tx-gray-dark);
     }
   }
@@ -211,6 +211,11 @@ const isClosed = computed(
     @include bevel(var(--main-dark));
     border-radius: $border-radius;
     padding: 0.3rem 0.6rem;
+
+    @include high-contrast-border;
+    @include high-contrast {
+      font-size: 1.1rem;
+    }
   }
 
   .narrator-loading {

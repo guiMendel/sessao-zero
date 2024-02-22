@@ -188,6 +188,10 @@ Digite <code>${player.value.nickname}</code> para confirmar.`,
             @include field-label;
             font-size: 0.8rem;
             opacity: 0.6;
+
+            @include high-contrast {
+              opacity: 1;
+            }
           }
 
           .content {
