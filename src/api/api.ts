@@ -4,6 +4,9 @@ import { Guild } from './guilds'
 import { Notification } from './notifications'
 import { Player } from './players'
 import { Adventure } from './adventures'
+import { Feedback } from './feedback'
+
+console.log(navigator, screen.width, screen.height, window.devicePixelRatio)
 
 /** Cliente firevase do sessao zero */
 export const vase = fillFirevase<{
@@ -11,7 +14,14 @@ export const vase = fillFirevase<{
   players: Player
   notifications: Notification
   adventures: Adventure
-}>(firebaseApp, ['guilds', 'players', 'notifications', 'adventures'])
+  feedback: Feedback
+}>(firebaseApp, [
+  'guilds',
+  'players',
+  'notifications',
+  'adventures',
+  'feedback',
+])
   .configureFiles({ adventures: ['banner'] as const })
 
   .configureManyToMany({

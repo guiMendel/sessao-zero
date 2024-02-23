@@ -3,6 +3,7 @@ import { BackButton } from '@/components'
 import { authenticationGuard } from '@/router/guard/authenticationGuard'
 import { findMeta } from '@/router/utils'
 import { ImageCropper, useAccessibility, useCurrentAuth } from '@/stores/'
+import { useTrackErrors } from '@/stores/useTrackErrors'
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Alerts } from './Alerts'
@@ -10,6 +11,8 @@ import { AutosaveNotification } from './AutosaveNotification'
 import { InputGetter } from './InputGetter'
 
 const router = useRouter()
+
+useTrackErrors()
 
 // const consumeGuildInvitation = useGuildInvitationConsumer()
 

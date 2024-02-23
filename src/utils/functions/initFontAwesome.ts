@@ -10,6 +10,7 @@ import {
   faBan,
   faBars,
   faBookOpen,
+  faBug,
   faChampagneGlasses,
   faCheck,
   faChessPawn,
@@ -140,7 +141,8 @@ export const initFontAwesome = (): [
     faFile,
     faFileRegular,
     faCropSimple,
-    faEnvelopeOpenText
+    faEnvelopeOpenText,
+    faBug
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]

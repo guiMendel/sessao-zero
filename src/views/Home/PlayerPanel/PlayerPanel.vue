@@ -12,12 +12,13 @@ import {
 import { findMeta } from '@/router/utils'
 import { computed, ref, toValue } from 'vue'
 import { useRouter } from 'vue-router'
+import { Feedback } from './Feedback'
 import { Notifications } from './Notifications'
 
 const { player, logout } = useCurrentPlayer()
 const router = useRouter()
 
-type Panel = 'player' | 'notifications' | 'feedback'
+type Panel = 'player' | 'notifications' | 'feedback' | 'bug'
 const openPanel = ref<Panel | undefined>(undefined)
 
 const picturePositionAbsolute = computed(() =>
@@ -34,6 +35,12 @@ const unreadNotifications = computed(
     toValue(player.value?.notifications)?.filter(
       (notification) => notification.unread
     ).length ?? 0
+)
+
+const panelAsFeedback = computed(() =>
+  openPanel.value === 'feedback' || openPanel.value === 'bug'
+    ? openPanel.value
+    : undefined
 )
 </script>
 
@@ -58,6 +65,12 @@ const unreadNotifications = computed(
     <Notifications
       :model-value="openPanel === 'notifications'"
       @update:model-value="openPanel = undefined"
+    />
+
+    <Feedback
+      :model-value="panelAsFeedback !== undefined"
+      @update:model-value="openPanel = undefined"
+      :type="panelAsFeedback"
     />
 
     <Drawer
@@ -93,7 +106,13 @@ const unreadNotifications = computed(
           <Typography>configurações</Typography>
         </Button>
 
-        <!-- Feedback / bug report -->
+        <!-- Bug report -->
+        <Button variant="colored" @click="openPanel = 'bug'" class="option">
+          <font-awesome-icon :icon="['fas', 'bug']" />
+          <Typography>relatar bug</Typography>
+        </Button>
+
+        <!-- Feedback -->
         <Button
           variant="colored"
           @click="openPanel = 'feedback'"
