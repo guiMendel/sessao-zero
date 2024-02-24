@@ -72,6 +72,13 @@ const createNewAdventure = () => router.push({ name: 'create-adventure' })
   gap: 2rem;
   padding-top: 2rem;
 
+  @media (min-width: 700px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+  }
+
   .no-adventures-text {
     align-self: center;
     font-size: 1.1rem;
@@ -96,6 +103,13 @@ const createNewAdventure = () => router.push({ name: 'create-adventure' })
 
     font-weight: 500;
     @include high-contrast-border;
+
+    cursor: pointer;
+    transition: all 200ms;
+
+    &:hover {
+      filter: brightness(0.96);
+    }
 
     svg {
       font-size: 0.9rem;

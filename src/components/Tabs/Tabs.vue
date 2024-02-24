@@ -97,6 +97,20 @@ const selectedTransition = computed(() => `slide-${selectedDirection.value}`)
       text-align: center;
       justify-content: center;
       align-items: center;
+      cursor: pointer;
+      border-radius: 6px 6px 0 0;
+
+      &:hover {
+        background-color: var(--trans-03);
+      }
+
+      @media (min-width: 700px) {
+        padding-block: 0.8rem;
+
+        .default-text {
+          font-size: 1.1rem;
+        }
+      }
 
       .default-text {
         color: var(--tx-trans-45);

@@ -149,7 +149,7 @@ const panelAsFeedback = computed(() =>
   }
 
   &:hover {
-    filter: brightness(1.05)
+    filter: brightness(0.97)
   }
 
   .picture {

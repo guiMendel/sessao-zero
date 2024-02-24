@@ -167,6 +167,14 @@ const isClosed = computed(
   @include bevel(var(--main));
   @include high-contrast-border;
   position: relative;
+  max-width: min(100%, 20rem);
+  cursor: pointer;
+
+  transition: all 200ms;
+
+  &:hover {
+    filter: brightness(0.95);
+  }
 
   --crop-overlay: var(--bg-main-light);
 

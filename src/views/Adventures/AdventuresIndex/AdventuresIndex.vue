@@ -52,14 +52,14 @@ const activeViewMode = useLocalStorage<'narrate' | 'play'>(
     <Tabs v-else :tabs="['play', 'narrate']" v-model="activeViewMode">
       <template #play:option>
         <div class="tab" :class="{ active: activeViewMode === 'play' }">
-          <Typography>jogar</Typography>
+          <Typography class="text">jogar</Typography>
           <Typography class="count">{{ othersAdventures.length }}</Typography>
         </div>
       </template>
 
       <template #narrate:option>
         <div class="tab" :class="{ active: activeViewMode === 'narrate' }">
-          <Typography>narrar</Typography>
+          <Typography class="text">narrar</Typography>
           <Typography class="count">{{
             narratingAdventures.length
           }}</Typography>
@@ -109,6 +109,10 @@ const activeViewMode = useLocalStorage<'narrate' | 'play'>(
   gap: 1rem;
   padding-inline: 1.5rem;
 
+  @media (min-width: 700px) {
+    padding-inline: 3rem;
+  }
+
   .tab {
     color: var(--tx-trans-45);
     transition: all 200ms;
@@ -129,6 +133,18 @@ const activeViewMode = useLocalStorage<'narrate' | 'play'>(
 
       @include high-contrast {
         font-size: 1rem;
+      }
+    }
+
+    @media (min-width: 700px) {
+      .text {
+        font-size: 1.1rem;
+      }
+
+      .count {
+        width: 1.3rem;
+        height: 1.3rem;
+        font-size: 0.85rem;
       }
     }
 

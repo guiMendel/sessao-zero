@@ -3,12 +3,12 @@ import { Vase } from '@/api'
 import { useCurrentGuild } from '@/api/guilds'
 import { isMember } from '@/api/isMember'
 import { useCurrentPlayer } from '@/api/players'
-import { Button, Divisor, Typography } from '@/components'
+import cricketImage from '@/assets/cricket.png'
+import { Button, Typography } from '@/components'
 import { Resource } from '@/firevase/resources'
 import { computed, toValue } from 'vue'
 import { useRouter } from 'vue-router'
 import { AdventurePreview } from '../AdventurePreview'
-import cricketImage from '@/assets/cricket.png'
 
 const props = defineProps<{
   adventures: Resource<Vase, 'adventures'>[]
@@ -20,28 +20,32 @@ const emit = defineEmits(['request-narration'])
 const { guild } = useCurrentGuild()
 const { player } = useCurrentPlayer()
 
-/** As aventuras das quais o jogador faz parte */
-const activeAdventures = computed(() =>
-  props.adventures.filter((adventure) => isMember(player.value, adventure))
-)
+/**
+ * Retorna a prioridade de uma aventura em aparecer primeiro.
+ * Numeros menores tem maior prioridade
+ */
+const adventureSortPriority = (adventure: Resource<Vase, 'adventures'>) => {
+  // If member, highest priority
+  if (isMember(player.value, adventure)) return 0
+
+  // If it's enterable
+  if (
+    adventure.open &&
+    (adventure.playerLimit < 0 ||
+      adventure.playerLimit > toValue(adventure.players).length)
+  )
+    return 1
+
+  // If it's not enterable
+  return 2
+}
 
 /** As aventuras das quais o jogador não faz parte */
-const otherAdventures = computed(() =>
-  props.adventures
-    .filter((adventure) => !isMember(player.value, adventure))
-    .sort((adventureA, adventureB) => {
-      const aOpen =
-        adventureA.open &&
-        (adventureA.playerLimit < 0 ||
-          adventureA.playerLimit > toValue(adventureA.players).length)
-      const bOpen =
-        adventureB.open &&
-        (adventureB.playerLimit < 0 ||
-          adventureB.playerLimit > toValue(adventureB.players).length)
-
-      if (aOpen === bOpen) return 0
-      return aOpen ? -1 : 1
-    })
+const sortedAdventures = computed(() =>
+  props.adventures.sort(
+    (adventureA, adventureB) =>
+      adventureSortPriority(adventureA) - adventureSortPriority(adventureB)
+  )
 )
 
 const isPlayerMember = computed(() => isMember(player.value, guild.value))
@@ -73,18 +77,9 @@ const createNewAdventure = () => router.push({ name: 'create-adventure' })
       >
     </template>
 
-    <template v-if="activeAdventures.length > 0">
-      <AdventurePreview
-        v-for="adventure in activeAdventures"
-        :adventure-id="adventure.id"
-      />
-
-      <Divisor v-if="otherAdventures.length > 0" class="active-divisor" />
-    </template>
-
     <!-- Aventuras da guilda -->
     <AdventurePreview
-      v-for="adventure in otherAdventures"
+      v-for="adventure in sortedAdventures"
       :adventure-id="adventure.id"
     />
   </div>
@@ -100,11 +95,23 @@ const createNewAdventure = () => router.push({ name: 'create-adventure' })
   flex-direction: column;
   align-items: stretch;
   gap: 2rem;
-  padding-top: 1rem;
+  padding-top: 2rem;
+
+  @media (min-width: 700px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+  }
 
   .active-divisor {
     color: var(--tx-main);
     margin-block: 0.8rem;
+
+    @media (min-width: 700px) {
+      margin-block: 1rem;
+      font-size: 0.6rem;
+    }
   }
 
   .cricket-image {
