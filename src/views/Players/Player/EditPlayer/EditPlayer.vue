@@ -5,7 +5,7 @@ import { Button, Divisor, Drawer, Typography } from '@/components'
 import { Fields } from '@/components/Fields'
 import { HalfResource } from '@/firevase/resources'
 import { useAlert } from '@/stores'
-import { CodeError, errorCodeToMessage, intoCodeError } from '@/utils/classes'
+import { intoCodeError } from '@/utils/classes'
 import { fieldRef } from '@/utils/functions'
 import { useAutosaveForm } from '@/utils/hooks'
 import {

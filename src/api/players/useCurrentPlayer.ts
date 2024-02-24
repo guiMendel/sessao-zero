@@ -125,8 +125,15 @@ export const useCurrentPlayer = defineStore('current-player', () => {
     }
   })
 
+  // Quando o login eh feito por auth, um player nao eh criado automaticamente.
+  // Guardamos os dados recebidos pelo oauth para utilizar caso detectemos que nao existe
+  // um jogador para o usuario logado.
+  const authProviderData = ref<undefined | Partial<Player>>(undefined)
+
   // Sync do player logado
   listenToAuthChange(async (newUser) => {
+    authProviderData.value = undefined
+
     // Reset user
     if (newUser == null) player.fetcher.reset()
     // Atualiza para o novo usuario
@@ -135,11 +142,6 @@ export const useCurrentPlayer = defineStore('current-player', () => {
       player.fetcher.trigger()
     }
   })
-
-  // Quando o login eh feito por auth, um player nao eh criado automaticamente.
-  // Guardamos os dados recebidos pelo oauth para utilizar caso detectemos que nao existe
-  // um jogador para o usuario logado.
-  const authProviderData = ref<undefined | Partial<Player>>(undefined)
 
   /** Realiza login do jogador */
   const login = async (email: string, password: string) =>
@@ -220,7 +222,11 @@ export const useCurrentPlayer = defineStore('current-player', () => {
   }
 
   /** Realiza logout do jogador */
-  const logout = async () => signOut(auth)
+  const logout = async () => {
+    authProviderData.value = undefined
+
+    signOut(auth)
+  }
 
   onBeforeUnmount(() => cleanupManager.dispose())
 

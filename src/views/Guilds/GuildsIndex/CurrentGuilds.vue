@@ -53,7 +53,7 @@ const createGuild = () =>
 <template>
   <div v-if="player" class="guilds-index">
     <!-- Guildas que eh dono -->
-    <template v-if="isGuildMaster(player)">
+    <div class="group" v-if="isGuildMaster(player)">
       <Typography class="heading" variant="subtitle">
         <font-awesome-icon :icon="['fas', 'crown']" />
         Mestre</Typography
@@ -72,30 +72,35 @@ const createGuild = () =>
         criar
         <font-awesome-icon :icon="['fas', 'plus']" />
       </Typography>
-    </template>
+    </div>
 
     <!-- Guildas que ja faz parte -->
-    <Typography variant="subtitle" class="heading" v-if="isGuildMaster(player)"
-      ><font-awesome-icon :icon="['fas', 'user']" /> Membro</Typography
-    >
+    <div class="group">
+      <Typography
+        variant="subtitle"
+        class="heading"
+        v-if="isGuildMaster(player)"
+        ><font-awesome-icon :icon="['fas', 'user']" /> Membro</Typography
+      >
 
-    <Typography variant="subtitle" class="heading" v-else
-      >Suas guildas</Typography
-    >
+      <Typography variant="subtitle" class="heading" v-else
+        >Suas guildas</Typography
+      >
 
-    <Typography
-      v-if="isGuildMaster(player)"
-      class="sub-heading"
-      variant="paragraph-secondary"
-      >Guildas de outros mestres</Typography
-    >
+      <Typography
+        v-if="isGuildMaster(player)"
+        class="sub-heading"
+        variant="paragraph-secondary"
+        >Guildas de outros mestres</Typography
+      >
 
-    <GuildList v-if="joinedGuilds.length > 0" :guilds="joinedGuilds" />
+      <GuildList v-if="joinedGuilds.length > 0" :guilds="joinedGuilds" />
 
-    <Typography @click="addNewGuild" class="add-guild">
-      {{ isGuildMaster(player) ? 'entrar' : 'adicionar' }}
-      <font-awesome-icon :icon="['fas', 'chevron-right']" />
-    </Typography>
+      <Typography @click="addNewGuild" class="add-guild">
+        {{ isGuildMaster(player) ? 'entrar' : 'adicionar' }}
+        <font-awesome-icon :icon="['fas', 'chevron-right']" />
+      </Typography>
+    </div>
   </div>
 </template>
 
@@ -109,6 +114,26 @@ const createGuild = () =>
   gap: 1rem;
   width: 100%;
   padding: 0 1.5rem 2rem;
+
+  @media (min-width: 700px) {
+    flex-direction: row;
+    justify-content: center;
+
+    padding-block: 1rem;
+
+    .group {
+      flex: 1;
+      padding-inline: 1.5rem;
+    }
+  }
+
+  .group {
+    flex-direction: column;
+    gap: inherit;
+    align-items: stretch;
+
+    max-width: 40rem;
+  }
 
   .heading {
     gap: 0.7rem;
@@ -147,12 +172,18 @@ const createGuild = () =>
     gap: 0.3rem;
     align-items: center;
     align-self: flex-end;
+    cursor: pointer;
 
     background-color: var(--bg-main-lighter);
     padding: 0.5rem 1rem;
     border-radius: $border-radius;
+    transition: all 100ms;
 
     font-weight: 500;
+
+    &:hover {
+      filter: brightness(1.02);
+    }
 
     svg {
       font-size: 0.9rem;

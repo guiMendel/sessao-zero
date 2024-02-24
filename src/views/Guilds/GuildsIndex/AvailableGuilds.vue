@@ -106,9 +106,11 @@ const showBackButton = computed(() => {
   flex-direction: column;
   align-items: stretch;
   gap: 1rem;
-  max-width: 100%;
   margin-top: 1rem;
   padding: 0 1.5rem 2rem;
+
+  width: 100%;
+  max-width: 40rem;
 
   .loading-spinner {
     margin-top: 4rem;

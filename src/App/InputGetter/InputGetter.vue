@@ -174,6 +174,11 @@ const submitString = () => {
   padding: 1rem 1rem 1.5rem;
   gap: 1rem;
 
+  @media (min-width: 700px) {
+    padding: 1.4rem 1.4rem 1.7rem;
+
+  }
+
   .message-wrapper {
     display: inline;
   }

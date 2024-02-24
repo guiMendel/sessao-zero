@@ -85,7 +85,7 @@ const isOwner = (guild: Resource<Vase, 'guilds'>) =>
   align-items: stretch;
   gap: 1rem;
 
-  width: 50rem;
+  // width: 50rem;
   max-width: 100%;
 
   --min-height: 4rem;
@@ -96,6 +96,12 @@ const isOwner = (guild: Resource<Vase, 'guilds'>) =>
     padding: 0.5rem 1rem;
     background-color: var(--bg-main-light);
     min-height: var(--min-height);
+    cursor: pointer;
+    transition: all 200ms;
+
+    &:hover {
+      filter: brightness(1.04)
+    }
 
     @include bevel(var(--main));
     @include high-contrast-border;

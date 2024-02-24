@@ -20,10 +20,12 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 // import { useSignInWithGoogle } from '@/utils/hooks'
 import { useSignInWithGoogle } from '@/utils/hooks'
-import illustration from '../../assets/illustration.png'
+import mobileIllustration from '../../assets/illustration.png'
+import desktopIllustration from '../../assets/login-art.png'
+import { intoCodeError } from '@/utils/classes'
 
 // Campos de login
-const { fields, getErrorForCode } = usePlayerFields({
+const { fields } = usePlayerFields({
   storageKey: sessionStorageKeys.loginFields,
 })
 
@@ -74,7 +76,7 @@ const returnStep = () => (emailConfirmed.value = false)
 // PASSO 2 — FORNECER SENHA
 // ==============================
 
-const { alert: notify } = useAlert()
+const { alert } = useAlert()
 const { login } = useCurrentPlayer()
 
 // Acao de login
@@ -86,10 +88,12 @@ const tryLogin = () => {
     // Redirect to home
     .then(() => router.push({ name: 'home' }))
     // Handle errors
-    .catch(({ code, message }) => {
-      console.error('Login failed!', message)
+    .catch((error) => {
+      const codeError = intoCodeError(error)
 
-      notify('error', getErrorForCode(code))
+      alert('error', codeError.message)
+
+      if (codeError.code === 'local/unknown') console.error(error)
     })
 }
 
@@ -104,8 +108,6 @@ const submit = () => {
   if (emailConfirmed.value) tryLogin()
   else submitEmail()
 }
-
-const { alert } = useAlert()
 
 const resetPassword = async () => {
   if (!email.value) return
@@ -122,12 +124,18 @@ const resetPassword = async () => {
 
 <template>
   <div class="login" :class="{ confirmed: emailConfirmed }">
-    <!-- Back button -->
-    <BackButton :behavior="returnStep" class="back-button" />
-
-    <img class="illustration" :src="illustration" />
+    <div
+      class="illustration"
+      :style="{
+        '--mobile-image': `url(${mobileIllustration})`,
+        '--desktop-image': `url(${desktopIllustration})`,
+      }"
+    ></div>
 
     <form>
+      <!-- Back button -->
+      <BackButton :behavior="returnStep" class="back-button" />
+
       <!-- Title -->
       <Logo class="logo" />
 
@@ -200,7 +208,7 @@ const resetPassword = async () => {
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
 
-.login {
+#app .login {
   box-shadow: inset 0 0 100px 0 var(--trans-1);
 
   align-items: center;
@@ -209,17 +217,45 @@ const resetPassword = async () => {
 
   width: 100%;
   height: 100vh;
+  max-height: 100vh;
 
   background-color: var(--bg-main-washed);
+
+  @media (min-width: 750px) {
+    flex-direction: row;
+    gap: 2rem;
+
+    padding: 2rem 10%;
+  }
 
   form {
     padding: 2rem;
     max-width: 100%;
-    position: relative;
 
     flex-direction: column;
     align-items: center;
     gap: 1rem;
+
+    @media (min-width: 750px) {
+      position: relative;
+      flex: 0.4;
+      padding: 0;
+
+      max-width: 30rem;
+
+      .back-button {
+        top: -3rem;
+      }
+    }
+
+    .back-button {
+      transition: all 300ms ease-out;
+
+      opacity: 0;
+      translate: -2rem 0;
+      pointer-events: none;
+      // scale: 20%;
+    }
 
     .logo {
       font-size: 2.5rem;
@@ -252,13 +288,13 @@ const resetPassword = async () => {
       background-color: var(--bg-main-lighter);
       color: var(--tx-main);
       border-radius: $border-radius;
-      transition: 100ms;
+      transition: all 100ms;
       cursor: pointer;
 
       margin-bottom: -0.5rem;
 
       &:hover {
-        background-color: var(--bg-trans-3);
+        filter: brightness(0.98)
       }
 
       @include high-contrast-border;
@@ -268,20 +304,33 @@ const resetPassword = async () => {
       margin-top: 0.5rem;
       font-weight: 500;
       opacity: 0.8;
+      transition: all 100ms;
+
+
+      &:hover {
+        background-color: var(--bg-main-lighter);
+      }
     }
-  }
-
-  .back-button {
-    transition: all 300ms ease-out;
-
-    opacity: 0;
-    translate: -2rem 0;
-    pointer-events: none;
-    // scale: 20%;
   }
 
   .illustration {
     width: 80%;
+    height: 100%;
+
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+
+    background-image: var(--mobile-image);
+
+    @media (min-width: 750px) {
+      width: 100%;
+      max-width: 60rem;
+
+      flex: 0.6;
+
+      background-image: var(--desktop-image);
+    }
   }
 
   &.confirmed {
@@ -293,7 +342,6 @@ const resetPassword = async () => {
       opacity: 1;
       translate: 0 0;
       pointer-events: initial;
-      // scale: 100%;
     }
   }
 }

@@ -141,12 +141,23 @@ const panelAsFeedback = computed(() =>
   margin: 0.5rem 1rem 0;
   position: relative;
 
+  cursor: pointer;
+  transition: all 100ms;
+
   &.absolute {
     position: fixed;
   }
 
+  &:hover {
+    filter: brightness(1.05)
+  }
+
   .picture {
     @include bevel(var(--tx-main-light));
+
+    @media (min-width: 700px) {
+      font-size: 1.3rem;
+    }
   }
 }
 

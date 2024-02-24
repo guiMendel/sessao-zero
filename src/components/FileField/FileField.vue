@@ -300,7 +300,6 @@ onBeforeUnmount(() => {
     }
 
     .default-view {
-      display: flex;
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0.5rem;
