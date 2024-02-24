@@ -1,9 +1,16 @@
-import { AutosaveStatus, useAutosaveStatus } from '@/stores'
+import { AutosaveResult, AutosaveStatus, useAutosaveStatus } from '@/stores'
+import { CodeError } from '@/utils/classes'
 import { FieldRef } from '@/utils/functions'
 import { onBeforeUnmount, watch } from 'vue'
 
 /** Quanto tempo multiplicar o delay a cada tentativa */
 const retryMultiplier = 2
+
+export type HandleAutosaveError = (
+  error: CodeError,
+  field: FieldRef<any>,
+  currentFieldValue: any
+) => AutosaveResult | 'retry'
 
 type AutosaveFormOptions = {
   /** Quantos ms deve fazer throttle nas chamadas de fieldRef.persist */
@@ -15,11 +22,7 @@ type AutosaveFormOptions = {
   /** Permite lidar com o erro. Deve retornar true se lidou, false do contrario. Se retornar false,
    * o persist tentara novamente
    */
-  handleError?: (
-    error: any,
-    field: FieldRef<any>,
-    currentFieldValue: any
-  ) => boolean
+  handleError?: HandleAutosaveError
 }
 
 export const useAutosaveForm = <T extends Record<string, FieldRef<any>>>(
@@ -29,7 +32,7 @@ export const useAutosaveForm = <T extends Record<string, FieldRef<any>>>(
   const {
     retryDelay = 10000,
     throttleAmount = 1000,
-    handleError = () => false,
+    handleError = () => 'retry' as const,
   } = options ?? {}
 
   const { getId, forgetPromise, trackPromise } = useAutosaveStatus()
@@ -66,9 +69,12 @@ export const useAutosaveForm = <T extends Record<string, FieldRef<any>>>(
 
     const promise = field
       .persist()
+      .then(() => 'success' as const)
       // Na falha, atualiza o status para retrying e tenta novamente
       .catch((error) => {
-        if (handleError(error, field, fieldValue)) return
+        const result = handleError(error, field, fieldValue)
+
+        if (result !== 'retry') return result
 
         console.error(
           `Falha ao atualizar campo ${fieldName as string} para ${fieldValue}`,
@@ -84,6 +90,8 @@ export const useAutosaveForm = <T extends Record<string, FieldRef<any>>>(
               recursionRetryDelay * retryMultiplier
             )
         }, recursionRetryDelay)
+
+        throw error
       })
 
     trackPromise(promise, fieldId, status)

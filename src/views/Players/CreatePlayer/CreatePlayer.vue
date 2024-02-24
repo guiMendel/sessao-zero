@@ -3,6 +3,7 @@ import { useCurrentPlayer, usePlayerFields } from '@/api/players'
 import { Button, Typography } from '@/components'
 import { Fields } from '@/components/Fields'
 import { useAlert } from '@/stores'
+import { intoCodeError } from '@/utils/classes'
 import { sessionStorageKeys } from '@/utils/config'
 import { eraseInStorage, isFieldValid } from '@/utils/functions'
 import { computed } from 'vue'
@@ -10,9 +11,10 @@ import { useRouter } from 'vue-router'
 import newPlayerArt from '../../../assets/new-player.png'
 
 // Campos de login
-const { fields, getErrorForCode, maybeInvalidateEmail } = usePlayerFields({
-  storageKey: sessionStorageKeys.loginFields,
-})
+const { fields, maybeInvalidateEmail, maybeInvalidateNickname } =
+  usePlayerFields({
+    storageKey: sessionStorageKeys.loginFields,
+  })
 
 const { email, password, name, nickname, passwordConfirmation } = fields
 
@@ -31,13 +33,14 @@ const tryCreate = () => {
   if (formValid.value == false) return
 
   const emailValue = email.value
+  const nicknameValue = nickname.value
 
   // Tentativa
   create({
     email: emailValue,
     password: password.value,
     name: name.value,
-    nickname: nickname.value,
+    nickname: nicknameValue,
     preferredGuildId: null,
   })
     .then(async () => {
@@ -48,12 +51,19 @@ const tryCreate = () => {
       eraseInStorage(new RegExp(sessionStorageKeys.loginFields))
     })
     // Handle errors
-    .catch(({ code, message }) => {
-      console.error('Player creation failed!', message)
+    .catch((error) => {
+      const codeError = intoCodeError(error)
 
-      alert('error', getErrorForCode(code))
+      alert('error', codeError.message)
 
-      maybeInvalidateEmail(emailValue, code)
+      if (codeError.code === 'local/unknown') {
+        console.error(error)
+
+        return
+      }
+
+      maybeInvalidateEmail(emailValue, codeError.code)
+      maybeInvalidateNickname(nicknameValue, codeError.code)
     })
 }
 </script>

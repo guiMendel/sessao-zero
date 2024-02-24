@@ -46,7 +46,6 @@ export const useInput = defineStore('input', () => {
         resolve: (value: any) => void
         cancelValue: any
         getter: InputGetter
-        onSubmit?: (value: any, resolve: (value: any) => void) => void
       }
     | undefined
   >(undefined)

@@ -10,10 +10,9 @@ import {
   Logo,
   Typography,
 } from '@/components'
-import { useAlert, useInput } from '@/stores'
+import { useAlert } from '@/stores'
 import { sessionStorageKeys } from '@/utils/config'
 import {
-  confirmPasswordReset,
   fetchSignInMethodsForEmail,
   sendPasswordResetEmail,
 } from 'firebase/auth'
@@ -22,7 +21,6 @@ import { useRouter } from 'vue-router'
 // import { useSignInWithGoogle } from '@/utils/hooks'
 import { useSignInWithGoogle } from '@/utils/hooks'
 import illustration from '../../assets/illustration.png'
-import { fieldRef } from '@/utils/functions'
 
 // Campos de login
 const { fields, getErrorForCode } = usePlayerFields({

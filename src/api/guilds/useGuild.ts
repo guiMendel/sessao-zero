@@ -3,6 +3,7 @@ import { where } from 'firebase/firestore'
 import { Vase, vase } from '..'
 import { useResource } from '../../firevase/resources/hooks/useResource'
 import { useCurrentPlayer } from '../players'
+import { CodeError } from '@/utils/classes'
 
 export const useGuild = () => {
   const api = useResource(vase, 'guilds')
@@ -12,8 +13,7 @@ export const useGuild = () => {
 
   /** Cria uma nova guilda e define o jogador logado como owner */
   const createGuild = (name: string) => {
-    if (player.value == null)
-      throw new Error('Impossivel criar guilda sem estar logado')
+    if (player.value == null) throw new CodeError('local/require-auth')
 
     return api.create({
       ownerUid: player.value.id,

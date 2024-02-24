@@ -5,6 +5,7 @@ import { Button, Divisor, Drawer, Typography } from '@/components'
 import { Fields } from '@/components/Fields'
 import { HalfResource } from '@/firevase/resources'
 import { useAlert } from '@/stores'
+import { CodeError, errorCodeToMessage, intoCodeError } from '@/utils/classes'
 import { fieldRef } from '@/utils/functions'
 import { useAutosaveForm } from '@/utils/hooks'
 import {
@@ -25,8 +26,8 @@ const { alert } = useAlert()
 
 const {
   fields: rawFields,
-  getErrorForCode,
   maybeInvalidateEmail,
+  handleAutosaveError,
 } = usePlayerFields({ initializeWith: props.player, update })
 
 // Campos de login
@@ -34,23 +35,15 @@ const { fields } = useAutosaveForm(
   {
     name: rawFields.name,
     nickname: rawFields.nickname,
-    email: rawFields.email,
     about: rawFields.about,
   },
   {
-    handleError: (error, { name }, emailValue) => {
-      if (name !== 'email') return false
-
-      const { code } = error
-
-      alert('error', getErrorForCode(code))
-
-      maybeInvalidateEmail(emailValue, code)
-
-      return true
-    },
+    handleError: handleAutosaveError,
   }
 )
+
+rawFields.password.name = 'senha nova'
+rawFields.email.describe = () => ''
 
 // ====================================================================================
 // ALTERAR SENHA
@@ -59,28 +52,28 @@ const { fields } = useAutosaveForm(
 const extraFields = {
   currentPassword: fieldRef('senha atual', {
     initialValue: '',
-    describe: () =>
-      'se quiser alterar sua senha, precisamos confirmar sua senha atual',
     validator: (value) => (value.length <= 2 ? 'senha muito pequena' : true),
   }),
 }
 
-const disablePasswordChange = computed(
+const disableSensitiveSubmit = computed(
   () =>
     extraFields.currentPassword.validate(extraFields.currentPassword.value) !==
       true ||
-    rawFields.password.validate(rawFields.password.value) !== true ||
-    rawFields.passwordConfirmation.validate(
-      rawFields.passwordConfirmation.value
-    ) !== true
+    ((rawFields.password.validate(rawFields.password.value) !== true ||
+      rawFields.passwordConfirmation.validate(
+        rawFields.passwordConfirmation.value
+      ) !== true) &&
+      rawFields.email.validate(rawFields.email.value) !== true)
 )
 
 const auth = getAuth()
 
-const changePassword = async () => {
-  if (disablePasswordChange.value) return
+const submitSensitiveData = async () => {
+  if (disableSensitiveSubmit.value) return
 
   const newPassword = rawFields.password.value
+  const newEmail = rawFields.email.value
 
   const user = auth.currentUser
 
@@ -104,11 +97,23 @@ const changePassword = async () => {
   }
 
   try {
-    await update({ password: newPassword })
+    if (newPassword) await update({ password: newPassword })
 
-    alert('success', 'senha alterada com sucesso!')
-  } catch {
-    alert('error', 'falha ao atualizar sua senha')
+    if (newEmail) await update({ email: newEmail })
+
+    alert('success', 'dados alterados com sucesso!')
+  } catch (error) {
+    const codeError = intoCodeError(error)
+
+    alert('error', codeError.message)
+
+    if (codeError.code === 'local/unknown') {
+      console.error(error)
+
+      return
+    }
+
+    maybeInvalidateEmail(newEmail, codeError.code)
   }
 }
 </script>
@@ -125,25 +130,32 @@ const changePassword = async () => {
 
       <Fields
         class="fields"
-        :fields="[fields.name, fields.nickname, fields.email, fields.about]"
+        :fields="[fields.name, fields.nickname, fields.about]"
       />
 
+      <Typography variant="paragraph-secondary"
+        >os campos acima são salvos automaticamente</Typography
+      >
+
       <Divisor class="divisor" />
+
+      <Typography>para estes dados, precisaremos da sua senha atual</Typography>
 
       <Fields
         class="fields"
         :fields="[
           extraFields.currentPassword,
+          rawFields.email,
           rawFields.password,
           rawFields.passwordConfirmation,
         ]"
       />
 
       <Button
-        @click.prevent="changePassword"
+        @click.prevent="submitSensitiveData"
         class="change-password-button"
-        :disabled="disablePasswordChange"
-        >alterar senha</Button
+        :disabled="disableSensitiveSubmit"
+        >alterar</Button
       >
     </form>
   </Drawer>

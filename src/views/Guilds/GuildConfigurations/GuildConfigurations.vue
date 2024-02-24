@@ -8,13 +8,14 @@ import {
   Typography,
 } from '@/components'
 import { useAlert, useInput } from '@/stores'
+import { CodeError } from '@/utils/classes'
 import { fieldRef } from '@/utils/functions'
 import { useAutosaveForm } from '@/utils/hooks'
 import { useRouter } from 'vue-router'
 
 const { guild, deleteForever, update } = useCurrentGuild()
 
-if (!guild.value) throw new Error('Falha ao encontrar guilda')
+if (!guild.value) throw new CodeError('local/require-guild')
 
 const { fields } = useAutosaveForm({
   name: fieldRef('nome', {

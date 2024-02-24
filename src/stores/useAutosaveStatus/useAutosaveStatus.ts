@@ -13,6 +13,13 @@ export enum AutosaveStatus {
   Success = 'success',
 }
 
+export type AutosaveResult = 'success' | 'aborted'
+
+// TODO: testar isso aqui. Parece que quando da error ele mostra mensagem de sucesso
+// Fazer todos os campos darem erro (coloca um throw no update) pra debugar isso
+// Depois precisamos fazer um sistema parecido com o invalidateEmail do plaerFields, so que para nickname
+// E tambem um jeito de fazer o o autosave nao ficar tentando novamente se for um nickname repetido
+
 export const useAutosaveStatus = defineStore('autosave-status', () => {
   /** Quantos ms deve manter o estado de sucesos antes de voltar para idle */
   const successStatusDuration = ref(3000)
@@ -70,7 +77,7 @@ export const useAutosaveStatus = defineStore('autosave-status', () => {
 
     /** Adiciona essa promessa a lista de promessas utilizadas para calcular o status */
     trackPromise: (
-      promise: Promise<unknown>,
+      promise: Promise<AutosaveResult>,
       promiseId: string,
       status = AutosaveStatus.Persisting
     ) => {
@@ -92,7 +99,12 @@ export const useAutosaveStatus = defineStore('autosave-status', () => {
 
       promise
         // No sucesso, atualiza o status para sucesso pela duraçao configrada e entao remove essa promessa
-        .then(() => {
+        .then((result) => {
+          if (result === 'aborted') {
+            updatePromiseStatus(null)
+            return
+          }
+
           updatePromiseStatus(AutosaveStatus.Success)
 
           setTimeout(
@@ -101,7 +113,9 @@ export const useAutosaveStatus = defineStore('autosave-status', () => {
           )
         })
         // Na falha, atualiza o status para retrying
-        .catch(() => updatePromiseStatus(AutosaveStatus.Retrying))
+        .catch(() => {
+          updatePromiseStatus(AutosaveStatus.Retrying)
+        })
     },
   }
 })

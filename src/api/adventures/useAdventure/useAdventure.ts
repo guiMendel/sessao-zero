@@ -6,6 +6,7 @@ import { useResource } from '../../../firevase/resources/hooks/useResource'
 import { useCurrentGuild } from '../../guilds'
 import { useCurrentPlayer } from '../../players'
 import { useAddPlayer } from './useAddPlayer'
+import { CodeError } from '@/utils/classes'
 
 export const useAdventure = () => {
   const api = useResource(vase, 'adventures')
@@ -18,11 +19,11 @@ export const useAdventure = () => {
 
   /** Cria uma nova adventurea e define o jogador logado como narrador */
   const createAdventure = async (params: Omit<Adventure, 'guildId'>) => {
-    if (player.value == null)
-      throw new Error('Impossivel criar aventura sem estar logado')
+    if (player.value == null) throw new CodeError('local/require-auth')
 
     if (guild.value == null)
-      throw new Error(
+      throw new CodeError(
+        'local/require-guild',
         'Impossivel criar aventura sem ter uma guilda selecionada'
       )
 

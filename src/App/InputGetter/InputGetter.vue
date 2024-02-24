@@ -24,8 +24,8 @@ onBeforeUnmount(() => window.removeEventListener('keyup', cancelOnEscape))
 const submitBoolean = (value: boolean) => {
   if (currentInput.value?.getter.type !== 'boolean') return
 
-  if (currentInput.value.onSubmit)
-    currentInput.value.onSubmit(value, currentInput.value.resolve)
+  if (currentInput.value.getter.onSubmit)
+    currentInput.value.getter.onSubmit(value, currentInput.value.resolve)
   else currentInput.value.resolve(value)
 }
 
@@ -50,8 +50,8 @@ const submitFields = () => {
     {} as Record<string, any>
   )
 
-  if (currentInput.value.onSubmit)
-    currentInput.value.onSubmit(fields, currentInput.value.resolve)
+  if (currentInput.value.getter.onSubmit)
+    currentInput.value.getter.onSubmit(fields, currentInput.value.resolve)
   else currentInput.value.resolve(fields)
 }
 
@@ -76,13 +76,13 @@ watch(currentInput, (currentInput) => {
 
 const submitString = () => {
   if (
-    !currentInput.value ||
+    currentInput.value?.getter.type !== 'string' ||
     stringFields.string.validate(stringFields.string.value) !== true
   )
     return
 
-  if (currentInput.value.onSubmit)
-    currentInput.value.onSubmit(
+  if (currentInput.value.getter.onSubmit)
+    currentInput.value.getter.onSubmit(
       stringFields.string.value,
       currentInput.value.resolve
     )
@@ -143,7 +143,7 @@ const submitString = () => {
         </Button>
       </form>
 
-      <!-- STRING TYPE -->
+      <!-- FIELDS TYPE -->
       <form
         v-else-if="currentInput.getter.type === 'fields'"
         @submit.prevent="submitFields"

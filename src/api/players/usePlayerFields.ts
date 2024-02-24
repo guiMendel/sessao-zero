@@ -1,4 +1,7 @@
+import { useAlert } from '@/stores'
+import { CodeErrorTypes, errorCodeToMessage } from '@/utils/classes'
 import { fieldRef } from '@/utils/functions'
+import { HandleAutosaveError } from '@/utils/hooks'
 import { ref } from 'vue'
 import { Player } from '.'
 
@@ -17,49 +20,35 @@ export const usePlayerFields = ({
   storageKey,
   update,
 }: UsePlayerFieldsOptions) => {
-  /** Categorias de email invalidos */
-  type invalidEmailsType = {
-    invalid: string[]
-    inUse: string[]
-    inexistent: string[]
-  }
-
-  /** Converte error do firebase para uma mensagem legivel */
-  const getErrorForCode = (code: string) => {
-    if (code == 'auth/invalid-email') return 'Email inválido'
-    if (code == 'auth/user-disabled') return 'Esta conta está bloqueada'
-    if (code == 'auth/user-not-found') return 'Email não encontrado'
-    if (code == 'auth/email-already-in-use') return 'Email indisponível'
-    if (code == 'auth/invalid-password') return 'Senha incorreta'
-    return 'Inválido'
-  }
-
-  /** Mensagens de error para email invalido */
-  const emailErrorFor = {
-    invalid: getErrorForCode('auth/invalid-email'),
-    inUse: getErrorForCode('auth/email-already-in-use'),
-    inexistent: getErrorForCode('auth/user-not-found'),
-  }
-
   /** Emails que ja foram tentados e registrados como invalidos */
-  const invalidEmails = ref<invalidEmailsType>({
-    invalid: [],
-    inUse: [],
-    inexistent: [],
+  const invalidEmails = ref<
+    Record<
+      Extract<
+        CodeErrorTypes,
+        | 'auth/invalid-email'
+        | 'auth/user-not-found'
+        | 'auth/email-already-in-use'
+      >,
+      string[]
+    >
+  >({
+    'auth/email-already-in-use': [],
+    'auth/invalid-email': [],
+    'auth/user-not-found': [],
   })
-
-  /** Faz com que o campo de email fique invalido se tiver esse email */
-  const invalidateEmail = (email: string, reason: keyof invalidEmailsType) => {
-    invalidEmails.value[reason].push(email)
-
-    return emailErrorFor[reason]
-  }
 
   /** Se o codigo indicar um email invalido, chama invalidateEmail com o email fornecido */
   const maybeInvalidateEmail = (email: string, code: string) => {
-    if (code == 'auth/invalid-email') invalidateEmail(email, 'invalid')
-    if (code == 'auth/user-not-found') invalidateEmail(email, 'inexistent')
-    if (code == 'auth/email-already-in-use') invalidateEmail(email, 'inUse')
+    if (
+      code == 'auth/invalid-email' ||
+      code == 'auth/user-not-found' ||
+      code == 'auth/email-already-in-use'
+    ) {
+      invalidEmails.value[code].push(email)
+      return true
+    }
+
+    return false
   }
 
   /** Campo de email */
@@ -70,13 +59,12 @@ export const usePlayerFields = ({
       if (/.+@.+\..+/.test(newValue) == false) return 'Email inválido'
       if (newValue.length > 100) return 'Muito longo'
 
-      for (const reason in invalidEmails.value)
-        if (
-          invalidEmails.value[reason as keyof invalidEmailsType].includes(
-            newValue
-          )
-        )
-          return emailErrorFor[reason as keyof invalidEmailsType]
+      for (const reason in invalidEmails.value) {
+        const code = reason as keyof (typeof invalidEmails)['value']
+
+        if (invalidEmails.value[code].includes(newValue))
+          return errorCodeToMessage[code]
+      }
 
       return true
     },
@@ -85,11 +73,33 @@ export const usePlayerFields = ({
     persist: update && ((email) => update?.({ email })),
   })
 
-  // TODO: continuar atualizando os campos aqui para usar update e initialPlayer
-  // - usar esse novo form no CreatePlayer e no EditPlayer
-  // - usar o EditPlayer no Player
-  // - restringir para so mostrar o botao de editar e destruir se for o jogador logado
-  // - implementar destruir o jogador
+  /** Apelidos em uso */
+  const invalidNicknames = ref<string[]>([])
+
+  /** Adiciona um apelido a lista de apelidos invalidos por estarem em uso */
+  const maybeInvalidateNickname = (nickname: string, code: string) => {
+    if (code === 'local/nickname-taken') {
+      invalidNicknames.value.push(nickname)
+      return true
+    }
+
+    return false
+  }
+
+  /** Campo de apelido */
+  const nickname = fieldRef<string>('nickname', {
+    initialValue: initialPlayer?.nickname ?? '',
+    validator: (newValue: string) => {
+      if (newValue.length < 3) return 'Mínimo de 3 caracteres'
+      if (newValue.length > 12) return 'Muito longo'
+      if (invalidNicknames.value.includes(newValue)) return 'Apelido em uso'
+
+      return true
+    },
+    describe: () => 'como seu perfil aparecerá aos outros',
+
+    persist: update && ((nickname) => update({ nickname })),
+  })
 
   /** Campo de senha */
   const password = fieldRef<string>('password', {
@@ -114,20 +124,6 @@ export const usePlayerFields = ({
   const passwordConfirmation = fieldRef<string>('passwordConfirmation', {
     initialValue: '',
     validator: matchesPassword,
-  })
-
-  /** Campo de apelido */
-  const nickname = fieldRef<string>('nickname', {
-    initialValue: initialPlayer?.nickname ?? '',
-    validator: (newValue: string) => {
-      if (newValue.length < 3) return 'Mínimo de 3 caracteres'
-      if (newValue.length > 12) return 'Muito longo'
-
-      return true
-    },
-    describe: () => 'como seu perfil aparecerá aos outros',
-
-    persist: update && ((nickname) => update?.({ nickname })),
   })
 
   /** Campo de nome */
@@ -159,6 +155,24 @@ export const usePlayerFields = ({
     }
   )
 
+  const { alert } = useAlert()
+
+  const handleAutosaveError: HandleAutosaveError = (
+    { code, message },
+    _,
+    currentValue
+  ) => {
+    alert('error', message)
+
+    if (
+      maybeInvalidateEmail(currentValue, code) ||
+      maybeInvalidateNickname(currentValue, code)
+    )
+      return 'aborted'
+
+    return 'retry'
+  }
+
   return {
     fields: {
       email,
@@ -168,8 +182,8 @@ export const usePlayerFields = ({
       about,
       nickname,
     },
-    getErrorForCode,
-    invalidateEmail,
     maybeInvalidateEmail,
+    maybeInvalidateNickname,
+    handleAutosaveError,
   }
 }
