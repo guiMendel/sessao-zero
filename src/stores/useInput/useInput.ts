@@ -1,16 +1,19 @@
 import type { ButtonProps } from '@/components'
-import { FieldValidator } from '@/utils/functions'
+import { AllowedFieldTypes, FieldRef, FieldValidator } from '@/utils/functions'
 import { ref } from 'vue'
 import { defineStore } from '../defineStore'
 
-type AllowedInputTypes = string | boolean
-
 type ButtonConfig = { label?: string; buttonProps?: ButtonProps }
 
-type GeneralGetter<T extends AllowedInputTypes> = {
+type GeneralGetter<T> = {
   messageHtml: string
-  cancelValue?: T
+  cancelValue?: T | null
   messageClass?: string
+  /**
+   * Se definido, chama esse metodo ao apertar enviar.
+   * Esse metodo fica responsavel por chamar resolve
+   */
+  onSubmit?: (value: T, resolve: (value: any) => void) => void
 }
 
 type BooleanGetter = GeneralGetter<boolean> & {
@@ -27,15 +30,22 @@ type StringGetter = GeneralGetter<string> & {
   submitButton?: ButtonConfig
 }
 
-type InputGetter = StringGetter | BooleanGetter
+type FieldsGetter = GeneralGetter<Record<string, AllowedFieldTypes>> & {
+  type: 'fields'
+  fields: FieldRef<any>[]
+  submitButton?: ButtonConfig
+}
+
+type InputGetter = StringGetter | BooleanGetter | FieldsGetter
 
 export const useInput = defineStore('input', () => {
   /** Current input getter in action */
   const currentInput = ref<
     | {
-        resolve: (value: AllowedInputTypes) => void
-        cancelValue: AllowedInputTypes
+        resolve: (value: any) => void
+        cancelValue: any
         getter: InputGetter
+        onSubmit?: (value: any, resolve: (value: any) => void) => void
       }
     | undefined
   >(undefined)
@@ -63,6 +73,15 @@ export const useInput = defineStore('input', () => {
           resolve: makeResolve(resolve),
           cancelValue: inputGetter.cancelValue ?? false,
           getter: { ...inputGetter, type: 'boolean' },
+        }
+      }),
+
+    getFieldsInput: (inputGetter: Omit<FieldsGetter, 'type'>) =>
+      new Promise<Record<string, unknown> | undefined>((resolve) => {
+        currentInput.value = {
+          resolve: makeResolve(resolve),
+          cancelValue: inputGetter.cancelValue,
+          getter: { ...inputGetter, type: 'fields' },
         }
       }),
   }

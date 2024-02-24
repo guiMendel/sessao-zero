@@ -4,7 +4,7 @@ import { Player } from '.'
 
 type UsePlayerFieldsOptions = {
   storageKey?: string
-  initializeWith?: Player
+  initializeWith?: Partial<Player>
   /** Method that we can use to update an adventure with */
   update?: (newValue: Partial<Player>) => Promise<void>
 }

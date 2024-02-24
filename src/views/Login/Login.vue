@@ -1,14 +1,22 @@
 <script setup lang="ts">
+import { auth } from '@/api/firebase'
+import { useCurrentPlayer, usePlayerFields } from '@/api/players'
+import { GoogleIcon } from '@/assets/icons'
 import {
-  checkPlayerExists,
-  useCurrentPlayer,
-  usePlayerFields,
-} from '@/api/players'
-import { BackButton, Button, InputField, Logo, Typography } from '@/components'
+  BackButton,
+  Button,
+  InputField,
+  LoadingSpinner,
+  Logo,
+  Typography,
+} from '@/components'
 import { useAlert } from '@/stores'
 import { sessionStorageKeys } from '@/utils/config'
+import { fetchSignInMethodsForEmail } from 'firebase/auth'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+// import { useSignInWithGoogle } from '@/utils/hooks'
+import { useSignInWithGoogle } from '@/utils/hooks'
 import illustration from '../../assets/illustration.png'
 
 // Campos de login
@@ -18,8 +26,12 @@ const { fields, getErrorForCode } = usePlayerFields({
 
 const { email, password } = fields
 
+const signInWithGoogle = useSignInWithGoogle()
+
 // Nao valida formato da senha em login
 password.validate = () => true
+
+const loading = ref(false)
 
 // ==============================
 // PASSO 1 — FORNECER EMAIL
@@ -33,14 +45,23 @@ const emailConfirmed = ref(false)
 /** Envia um email para confirmacao
  * Se existir, passa para o passo 2. Se nao, vai para a tela de criar conta */
 const submitEmail = async () => {
+  loading.value = true
+
+  const methods = await fetchSignInMethodsForEmail(auth, email.value)
+
+  loading.value = false
+
   // Se nao encontrar nada, nao esta registrado
-  if ((await checkPlayerExists(email.value)) == false) {
+  if (methods.length === 0) {
     router.push({ name: 'create-player' })
     return
   }
 
-  // Se encontrar, vai para passo 2
-  emailConfirmed.value = true
+  // Usuario cadastrado com google
+  if (methods.includes('google.com')) return signInWithGoogle(email.value)
+
+  // Se encontrar password, vai para passo 2
+  if (methods.includes('password')) emailConfirmed.value = true
 }
 
 /** Volta para o passo 1 */
@@ -93,13 +114,36 @@ const submit = () => {
       <!-- Title -->
       <Logo class="logo" />
 
-      <!-- Email -->
-      <InputField
-        class="input"
-        v-if="emailConfirmed == false"
-        auto-focus
-        :field="fields.email"
-      />
+      <template v-if="emailConfirmed == false">
+        <!-- Email -->
+        <InputField class="input" auto-focus :field="fields.email" />
+
+        <!-- Enviar -->
+        <Button
+          @click.prevent="submit"
+          variant="colored"
+          :class="formValid || 'disabled'"
+          id="login"
+        >
+          <LoadingSpinner v-if="loading" />
+
+          <template v-else>
+            <font-awesome-icon :icon="['fas', 'paper-plane']" />Enviar
+          </template>
+        </Button>
+
+        <Typography variant="paragraph-secondary" class="method-separator-label"
+          >ou</Typography
+        >
+
+        <Button
+          @click.prevent="() => signInWithGoogle()"
+          class="sign-in-with-google"
+        >
+          <GoogleIcon />
+          entrar com google</Button
+        >
+      </template>
 
       <!-- Senha -->
       <template v-else>
@@ -114,27 +158,18 @@ const submit = () => {
         <InputField class="input" auto-focus :field="fields.password" />
 
         <!-- Esqueceu a senha -->
-        <Typography color="white" id="forgot-password"
-          >Esqueceu a senha?</Typography
+        <Typography id="forgot-password">Esqueceu a senha?</Typography>
+
+        <!-- Submit -->
+        <Button
+          @click.prevent="submit"
+          variant="colored"
+          :class="formValid || 'disabled'"
+          id="login"
         >
+          <font-awesome-icon :icon="['fas', 'right-to-bracket']" />Entrar
+        </Button>
       </template>
-
-      <!-- Submit -->
-      <Button
-        @click.prevent="submit"
-        variant="colored"
-        :class="formValid || 'disabled'"
-        id="login"
-      >
-        <font-awesome-icon
-          v-if="emailConfirmed"
-          :icon="['fas', 'right-to-bracket']"
-        />
-
-        <font-awesome-icon v-else :icon="['fas', 'paper-plane']" />
-
-        {{ emailConfirmed ? 'Entrar' : 'Enviar' }}
-      </Button>
     </form>
   </div>
 </template>
@@ -175,9 +210,17 @@ const submit = () => {
       width: 20rem;
     }
 
-    button {
-      width: 50%;
-      max-width: 100%;
+    .method-separator-label {
+      font-weight: 800;
+      color: var(--tx-main);
+    }
+
+    .sign-in-with-google {
+      font-weight: 600;
+
+      box-shadow: none;
+      background-color: var(--bg-main-lighter);
+      color: var(--tx-main-dark);
     }
 
     .email-display {

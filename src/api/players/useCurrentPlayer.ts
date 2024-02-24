@@ -12,10 +12,10 @@ import {
   updateProfile,
 } from 'firebase/auth'
 import { DocumentReference } from 'firebase/firestore'
-import { onBeforeUnmount } from 'vue'
-import { Player } from '.'
+import { onBeforeUnmount, ref } from 'vue'
+import { Player, usePlayerFields } from '.'
 import { Vase, vase } from '..'
-import { useCurrentAuth } from '../../stores'
+import { useCurrentAuth, useInput } from '../../stores'
 
 export const useCurrentPlayer = defineStore('current-player', () => {
   const { listenToAuthChange } = useCurrentAuth()
@@ -38,6 +38,69 @@ export const useCurrentPlayer = defineStore('current-player', () => {
     { resourceLayersLimit: 2 }
   )
 
+  const { getFieldsInput } = useInput()
+
+  player.fetcher.onFetch(async (snapshot) => {
+    // Se este jogador nao existe
+    if (!snapshot.exists()) {
+      const date = new Date().toJSON()
+
+      const { fields: allFields } = usePlayerFields({
+        initializeWith: authProviderData.value,
+      })
+
+      // Se o oauth providencia o email, nao permitimos mudar
+      const fields = authProviderData.value?.email
+        ? [allFields.name, allFields.nickname]
+        : [allFields.name, allFields.nickname, allFields.email]
+
+      type Fields = Pick<Player, 'email' | 'name' | 'nickname'>
+
+      const result = (await getFieldsInput({
+        messageHtml:
+          'Que bom te ver por aqui! Antes de podermos começar, vamos precisar de algumas informações suas:',
+        fields,
+        cancelValue: null,
+      })) as Fields | undefined
+
+      // Se o usuario desistir, desloga
+      if (!result || !auth.currentUser) {
+        logout()
+        return
+      }
+
+      if (!result.email) result.email = authProviderData.value!.email!
+
+      const newPlayer: Uploadable<Vase, 'players'> = {
+        ...result,
+        createdAt: date,
+        modifiedAt: date,
+        preferredGuildId: null,
+      }
+
+      // Set the auth and firestore data
+      await updateProfile(auth.currentUser, { displayName: newPlayer.nickname })
+
+      await updateEmail(auth.currentUser, newPlayer.email)
+
+      create(newPlayer, snapshot.id)
+
+      return
+    }
+
+    // If there is new data available from the provider, use it
+    const currentPlayer = snapshot.data() as Uploadable<Vase, 'players'>
+
+    if (
+      !currentPlayer.oauthProfilePicture &&
+      authProviderData.value?.oauthProfilePicture
+    ) {
+      updatePlayer({
+        oauthProfilePicture: authProviderData.value.oauthProfilePicture,
+      })
+    }
+  })
+
   // Sync do player logado
   listenToAuthChange(async (newUser) => {
     // Reset user
@@ -48,6 +111,11 @@ export const useCurrentPlayer = defineStore('current-player', () => {
       player.fetcher.trigger()
     }
   })
+
+  // Quando o login eh feito por auth, um player nao eh criado automaticamente.
+  // Guardamos os dados recebidos pelo oauth para utilizar caso detectemos que nao existe
+  // um jogador para o usuario logado.
+  const authProviderData = ref<undefined | Partial<Player>>(undefined)
 
   /** Realiza login do jogador */
   const login = async (email: string, password: string) =>
@@ -125,5 +193,6 @@ export const useCurrentPlayer = defineStore('current-player', () => {
     create: createPlayer,
     update: updatePlayer,
     deleteForever: deletePlayer,
+    authProviderData,
   }
 })

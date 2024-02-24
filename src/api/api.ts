@@ -6,8 +6,6 @@ import { Player } from './players'
 import { Adventure } from './adventures'
 import { Feedback } from './feedback'
 
-console.log(navigator, screen.width, screen.height, window.devicePixelRatio)
-
 /** Cliente firevase do sessao zero */
 export const vase = fillFirevase<{
   guilds: Guild

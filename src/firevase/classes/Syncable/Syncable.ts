@@ -17,7 +17,7 @@ export class Syncable<T extends DocumentReference | Query> extends Fetcher<
       (snapshot: QuerySnapshot | DocumentSnapshot) => {
         this._hasLoaded = true
 
-        this.onFetch(
+        this.emitFetch(
           snapshot as T extends Query ? QuerySnapshot : DocumentSnapshot,
           this.cleanup
         )

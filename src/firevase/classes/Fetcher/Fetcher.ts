@@ -11,6 +11,7 @@ export abstract class Fetcher<T, V> {
   private resetListeners: Array<() => void> = []
   private beforeFetchListeners: Array<() => void> = []
   private updateTargetListeners: Array<(target: T | undefined) => void> = []
+  private fetchListeners: Array<OnFetch<V>> = []
 
   /** Gerencia o cleanup dos snapshot listeners */
   protected cleanup: CleanupManager = new CleanupManager()
@@ -22,7 +23,14 @@ export abstract class Fetcher<T, V> {
   protected state: 'ready-to-fetch' | 'fetched' | 'disposed' = 'ready-to-fetch'
 
   /** Callback para executar sempre que houver um novo snapshot para este fetch */
-  protected onFetch: OnFetch<V>
+  protected emitFetch: OnFetch<V> = (snapshot, cleanupManager) => {
+    this._mainFetchListener(snapshot, cleanupManager)
+
+    for (const listener of this.fetchListeners)
+      listener(snapshot, cleanupManager)
+  }
+
+  private _mainFetchListener: OnFetch<V>
 
   /** Whether this fetcher has not received data from fetch yet */
   protected _hasLoaded = false
@@ -54,7 +62,7 @@ export abstract class Fetcher<T, V> {
 
   constructor(target: T | undefined, onFetch: OnFetch<V>) {
     this._target = target
-    this.onFetch = onFetch
+    this._mainFetchListener = onFetch
 
     this.cleanup.onDispose(() => (this.state = 'disposed'))
   }
@@ -126,5 +134,9 @@ export abstract class Fetcher<T, V> {
 
   onBeforeFetchTrigger = (callback: () => void) => {
     this.beforeFetchListeners.push(callback)
+  }
+
+  onFetch = (callback: OnFetch<V>) => {
+    this.fetchListeners.push(callback)
   }
 }

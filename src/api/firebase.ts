@@ -19,3 +19,5 @@ export const auth = getAuth(firebaseApp)
 
 // Initialize Firestore
 export const db = getFirestore(firebaseApp)
+
+auth.useDeviceLanguage()

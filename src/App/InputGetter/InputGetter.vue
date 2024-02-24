@@ -1,30 +1,11 @@
 <script setup lang="ts">
 import { Button, InputField, Modal } from '@/components'
+import { Fields } from '@/components/Fields'
 import { useInput } from '@/stores'
 import { fieldRef } from '@/utils/functions'
-import { onBeforeUnmount, watch } from 'vue'
+import { computed, onBeforeUnmount, watch } from 'vue'
 
 const { currentInput } = useInput()
-
-const fields = {
-  string: fieldRef<string>('resposta', {
-    initialValue: '',
-  }),
-}
-
-// Sempre que vier um tipo stirng, atualiza o campo
-watch(currentInput, (currentInput) => {
-  if (currentInput?.getter.type !== 'string') return
-
-  fields.string.name = currentInput.getter.inputFieldName ?? 'resposta'
-  fields.string.validate = currentInput.getter.validator ?? (() => true)
-  fields.string.value = currentInput.getter.initialValue ?? ''
-})
-
-const submitString = () => {
-  if (fields.string.validate(fields.string.value) === true)
-    currentInput.value!.resolve(fields.string.value)
-}
 
 const cancel = () => currentInput.value?.resolve(currentInput.value.cancelValue)
 
@@ -35,13 +16,85 @@ const cancelOnEscape = ({ key }: KeyboardEvent) => {
 window.addEventListener('keyup', cancelOnEscape)
 
 onBeforeUnmount(() => window.removeEventListener('keyup', cancelOnEscape))
+
+// =================================================
+// BOOLEAN TYPE
+// =================================================
+
+const submitBoolean = (value: boolean) => {
+  if (currentInput.value?.getter.type !== 'boolean') return
+
+  if (currentInput.value.onSubmit)
+    currentInput.value.onSubmit(value, currentInput.value.resolve)
+  else currentInput.value.resolve(value)
+}
+
+// =================================================
+// FIELDS TYPE
+// =================================================
+
+const fieldsAreValid = computed<boolean>(() => {
+  if (currentInput.value?.getter.type !== 'fields') return false
+
+  return currentInput.value.getter.fields.every(
+    (field) => field.validate(field.value) === true
+  )
+})
+
+const submitFields = () => {
+  if (currentInput.value?.getter.type !== 'fields' || !fieldsAreValid.value)
+    return
+
+  const fields = currentInput.value.getter.fields.reduce(
+    (fields, field) => ({ ...fields, [field.name]: field.value }),
+    {} as Record<string, any>
+  )
+
+  if (currentInput.value.onSubmit)
+    currentInput.value.onSubmit(fields, currentInput.value.resolve)
+  else currentInput.value.resolve(fields)
+}
+
+// =================================================
+// STRING TYPE
+// =================================================
+
+const stringFields = {
+  string: fieldRef<string>('resposta', {
+    initialValue: '',
+  }),
+}
+
+// Sempre que vier um tipo stirng, atualiza o campo
+watch(currentInput, (currentInput) => {
+  if (currentInput?.getter.type !== 'string') return
+
+  stringFields.string.name = currentInput.getter.inputFieldName ?? 'resposta'
+  stringFields.string.validate = currentInput.getter.validator ?? (() => true)
+  stringFields.string.value = currentInput.getter.initialValue ?? ''
+})
+
+const submitString = () => {
+  if (
+    !currentInput.value ||
+    stringFields.string.validate(stringFields.string.value) !== true
+  )
+    return
+
+  if (currentInput.value.onSubmit)
+    currentInput.value.onSubmit(
+      stringFields.string.value,
+      currentInput.value.resolve
+    )
+  else currentInput.value.resolve(stringFields.string.value)
+}
 </script>
 
 <template>
   <Modal
     :model-value="Boolean(currentInput)"
     @update:model-value="cancel"
-    :hide-close-button="currentInput?.cancelValue == undefined"
+    :hide-close-button="currentInput?.cancelValue === undefined"
     class="input-getter"
   >
     <template v-if="currentInput">
@@ -56,7 +109,7 @@ onBeforeUnmount(() => window.removeEventListener('keyup', cancelOnEscape))
       <template v-if="currentInput.getter.type === 'boolean'">
         <!-- true -->
         <Button
-          @click="currentInput.resolve(true)"
+          @click="submitBoolean(true)"
           v-bind="currentInput.getter.trueButton?.buttonProps"
         >
           {{ currentInput.getter.trueButton?.label ?? 'Sim' }}
@@ -64,7 +117,7 @@ onBeforeUnmount(() => window.removeEventListener('keyup', cancelOnEscape))
 
         <!-- false -->
         <Button
-          @click="currentInput.resolve(false)"
+          @click="submitBoolean(false)"
           v-bind="currentInput.getter.falseButton?.buttonProps"
         >
           {{ currentInput.getter.falseButton?.label ?? 'Não' }}
@@ -77,14 +130,33 @@ onBeforeUnmount(() => window.removeEventListener('keyup', cancelOnEscape))
         @submit.prevent="submitString"
       >
         <!-- Input -->
-        <InputField :field="fields.string" class="input" auto-focus />
+        <InputField :field="stringFields.string" class="input" auto-focus />
 
         <!-- Confirma -->
         <Button
           v-bind="currentInput.getter.submitButton?.buttonProps"
-          :disabled="fields.string.validate(fields.string.value) != true"
+          :disabled="
+            stringFields.string.validate(stringFields.string.value) != true
+          "
         >
           {{ currentInput.getter.submitButton?.label ?? 'Enviar' }}
+        </Button>
+      </form>
+
+      <!-- STRING TYPE -->
+      <form
+        v-else-if="currentInput.getter.type === 'fields'"
+        @submit.prevent="submitFields"
+      >
+        <!-- Fields -->
+        <Fields :fields="currentInput.getter.fields" class="fields" />
+
+        <!-- Confirma -->
+        <Button
+          v-bind="currentInput.getter.submitButton?.buttonProps"
+          :disabled="!fieldsAreValid"
+        >
+          {{ currentInput.getter.submitButton?.label ?? 'enviar' }}
         </Button>
       </form>
     </template>
@@ -109,6 +181,12 @@ onBeforeUnmount(() => window.removeEventListener('keyup', cancelOnEscape))
 
     .input {
       filter: brightness(0.98);
+    }
+
+    .fields {
+      flex-direction: column;
+      gap: 1.5rem;
+      align-items: stretch;
     }
   }
 }

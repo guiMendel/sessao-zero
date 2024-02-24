@@ -71,6 +71,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 
 import { faFile as faFileRegular } from '@fortawesome/free-regular-svg-icons'
+import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 
 export const initFontAwesome = (): [
   'font-awesome-icon',
@@ -142,7 +143,8 @@ export const initFontAwesome = (): [
     faFileRegular,
     faCropSimple,
     faEnvelopeOpenText,
-    faBug
+    faBug,
+    faGoogle
   )
 
   return ['font-awesome-icon', FontAwesomeIcon]

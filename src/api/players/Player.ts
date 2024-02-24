@@ -24,4 +24,7 @@ export interface Player {
    * 2 — Engenheiro
    */
   accessLevel?: number
+
+  /** Link de foto de perfil fornecida por oauth */
+  oauthProfilePicture?: string
 }
