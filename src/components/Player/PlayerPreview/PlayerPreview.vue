@@ -75,6 +75,12 @@ const pictureBackground = computed(() => {
 .player-preview {
   align-items: center;
   gap: 1rem;
+  cursor: pointer;
+  transition: all 100ms;
+
+  &:hover {
+    filter: brightness(0.97);
+  }
 
   &.background-main {
     background-color: var(--bg-main-lighter);

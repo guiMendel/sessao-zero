@@ -21,6 +21,8 @@ const { highContrast } = storeToRefs(useAccessibility())
 <style lang="scss" scoped>
 .configurations {
   width: 100%;
+  max-width: 30rem;
+  
   padding: 1.5rem 1.5rem 2rem;
 
   flex-direction: column;

@@ -78,7 +78,11 @@ const panelAsFeedback = computed(() =>
       @update:model-value="openPanel = undefined"
       class="player-panel"
     >
-      <PlayerPreview :player="player" @click="openPanel = undefined">
+      <PlayerPreview
+        :player="player"
+        @click="openPanel = undefined"
+        class="player-preview"
+      >
         <div class="see-profile">
           <Typography variant="paragraph-secondary">perfil</Typography>
 
@@ -149,7 +153,7 @@ const panelAsFeedback = computed(() =>
   }
 
   &:hover {
-    filter: brightness(0.97)
+    filter: brightness(0.97);
   }
 
   .picture {
@@ -171,6 +175,8 @@ const panelAsFeedback = computed(() =>
     background-color: var(--bg-main-lighter);
     padding: 0.3rem 0.8rem;
     border-radius: $border-radius;
+
+    transition: all 200ms;
 
     svg {
       font-size: 0.7rem;
@@ -194,5 +200,15 @@ const panelAsFeedback = computed(() =>
       gap: 0.3rem;
     }
   }
+}
+</style>
+
+
+<style lang="scss">
+.player-preview:hover .see-profile {
+  translate: -1rem 0;
+
+  background-color: var(--bg-main-light);
+  color: var(--tx-white);
 }
 </style>

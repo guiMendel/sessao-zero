@@ -143,6 +143,8 @@ const showAdmissionRequests = ref(false)
 
   width: 100%;
   text-align: left;
+  max-width: 30rem;
+  align-self: center;
 
   .sub-heading {
     margin-top: -0.8rem;
