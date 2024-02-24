@@ -7,8 +7,9 @@ withDefaults(
   defineProps<{
     modelValue: boolean
     drawDirection?: 'top' | 'bottom'
+    preferedSide?: 'right' | 'left'
   }>(),
-  { drawDirection: 'top' }
+  { drawDirection: 'top', preferedSide: 'right' }
 )
 
 const emit = defineEmits(['update:modelValue'])
@@ -19,7 +20,10 @@ const close = () => emit('update:modelValue', false)
 <template>
   <Transition name="slide">
     <div class="shadow" v-if="modelValue" @click.self="close">
-      <div class="panel" :class="`draw-direction-${drawDirection}`">
+      <div
+        class="panel"
+        :class="`draw-direction-${drawDirection} preferred-side-${preferedSide}`"
+      >
         <Button class="close-button" @click="close">
           <font-awesome-icon :icon="['fas', 'xmark']" />
         </Button>
@@ -50,19 +54,42 @@ const close = () => emit('update:modelValue', false)
   }
 
   .panel {
+    $limit: 30rem;
+
     position: absolute;
-    left: 0;
-    right: 0;
     background-color: var(--bg-main-washed);
     border-block: 1rem solid var(--tx-main-lighter);
 
     box-shadow: 0 0 100px 0 var(--bg-main-dark);
 
+    width: 100%;
+    max-width: $limit;
+
     @include high-contrast-border;
+
+    &.preferred-side-right {
+      right: 0;
+    }
+
+    &.preferred-side-left {
+      left: 0;
+    }
 
     &.draw-direction-top {
       top: -2rem;
       border-radius: 0 0 $border-radius $border-radius;
+
+      &.preferred-side-right {
+        @media (min-width: $limit) {
+          border-radius: 0 0 0 $border-radius;
+        }
+      }
+
+      &.preferred-side-left {
+        @media (min-width: $limit) {
+          border-radius: 0 0 $border-radius 0;
+        }
+      }
 
       .content {
         padding-block: 4rem 3rem;
@@ -76,6 +103,18 @@ const close = () => emit('update:modelValue', false)
     &.draw-direction-bottom {
       bottom: -2rem;
       border-radius: $border-radius $border-radius 0 0;
+
+      &.preferred-side-right {
+        @media (min-width: $limit) {
+          border-radius: $border-radius 0 0 0;
+        }
+      }
+
+      &.preferred-side-left {
+        @media (min-width: $limit) {
+          border-radius: 0 $border-radius 0 0;
+        }
+      }
 
       .content {
         padding-block: 3rem 4rem;
@@ -106,7 +145,7 @@ const close = () => emit('update:modelValue', false)
 
     .content {
       max-height: 90vh;
-      overflow: scroll;
+      overflow: auto;
       padding-inline: 1rem;
       min-width: 100%;
 

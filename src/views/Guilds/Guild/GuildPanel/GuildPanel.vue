@@ -70,6 +70,7 @@ const gotToAdventures = () => {
     v-if="guild != null && player != null"
     v-model="isOpen"
     class="guild-panel"
+    prefered-side="left"
   >
     <div class="heading">
       <Typography>painel da guilda</Typography>

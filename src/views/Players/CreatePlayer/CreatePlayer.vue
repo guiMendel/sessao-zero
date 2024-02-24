@@ -70,30 +70,39 @@ const tryCreate = () => {
 
 <template>
   <form @submit.prevent="tryCreate">
-    <img :src="newPlayerArt" class="illustration" />
+    <div class="group background">
+      <img :src="newPlayerArt" class="illustration" />
 
-    <!-- Titulo -->
-    <Typography class="heading" variant="title" color="white"
-      >Criar Jogador</Typography
-    >
+      <!-- Titulo -->
+      <Typography class="heading" variant="title" color="white"
+        >Criar Jogador</Typography
+      >
+    </div>
 
-    <Fields
-      class="fields"
-      :fields="[
-        fields.name,
-        fields.nickname,
-        fields.email,
-        fields.password,
-        fields.passwordConfirmation,
-      ]"
-    />
+    <div class="group ">
+      <Fields
+        class="fields"
+        :fields="[
+          fields.name,
+          fields.nickname,
+          fields.email,
+          fields.password,
+          fields.passwordConfirmation,
+        ]"
+      />
 
-    <!-- Submit -->
-    <Button :disabled="!formValid" id="login" class="submit" variant="colored">
-      <font-awesome-icon :icon="['fas', 'person-rays']" />
+      <!-- Submit -->
+      <Button
+        :disabled="!formValid"
+        id="login"
+        class="submit"
+        variant="colored"
+      >
+        <font-awesome-icon :icon="['fas', 'person-rays']" />
 
-      criar
-    </Button>
+        criar
+      </Button>
+    </div>
   </form>
 </template>
 
@@ -113,6 +122,35 @@ form {
   gap: 1rem;
 
   max-width: 100%;
+
+  @media (min-width: 700px) {
+    flex-direction: row;
+    align-items: center;
+    gap: 3rem;
+
+    .group {
+      &.background {
+        background-color: var(--bg-main-lighter);
+        padding: 1rem 2rem;
+        border-radius: $border-radius;
+        align-self: stretch;
+        justify-content: center;
+      }
+
+      .illustration {
+        width: 15rem;
+      }
+
+      .heading {
+        font-size: 2.3rem;
+      }
+    }
+  }
+
+  .group {
+    flex-direction: column;
+    gap: 1rem;
+  }
 
   .fields {
     flex-direction: column;
