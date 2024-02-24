@@ -149,7 +149,11 @@ const submitString = () => {
         @submit.prevent="submitFields"
       >
         <!-- Fields -->
-        <Fields :fields="currentInput.getter.fields" class="fields" />
+        <Fields
+          :fields="currentInput.getter.fields"
+          :auto-focus="currentInput.getter.autoFocus"
+          class="fields"
+        />
 
         <!-- Confirma -->
         <Button

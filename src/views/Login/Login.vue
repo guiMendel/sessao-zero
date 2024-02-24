@@ -10,14 +10,19 @@ import {
   Logo,
   Typography,
 } from '@/components'
-import { useAlert } from '@/stores'
+import { useAlert, useInput } from '@/stores'
 import { sessionStorageKeys } from '@/utils/config'
-import { fetchSignInMethodsForEmail } from 'firebase/auth'
+import {
+  confirmPasswordReset,
+  fetchSignInMethodsForEmail,
+  sendPasswordResetEmail,
+} from 'firebase/auth'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 // import { useSignInWithGoogle } from '@/utils/hooks'
 import { useSignInWithGoogle } from '@/utils/hooks'
 import illustration from '../../assets/illustration.png'
+import { fieldRef } from '@/utils/functions'
 
 // Campos de login
 const { fields, getErrorForCode } = usePlayerFields({
@@ -101,6 +106,20 @@ const submit = () => {
   if (emailConfirmed.value) tryLogin()
   else submitEmail()
 }
+
+const { alert } = useAlert()
+
+const resetPassword = async () => {
+  if (!email.value) return
+
+  loading.value = true
+
+  await sendPasswordResetEmail(auth, email.value)
+
+  loading.value = false
+
+  alert('success', 'email de recuperação enviado')
+}
 </script>
 
 <template>
@@ -157,9 +176,6 @@ const submit = () => {
 
         <InputField class="input" auto-focus :field="fields.password" />
 
-        <!-- Esqueceu a senha -->
-        <Typography id="forgot-password">Esqueceu a senha?</Typography>
-
         <!-- Submit -->
         <Button
           @click.prevent="submit"
@@ -167,8 +183,17 @@ const submit = () => {
           :class="formValid || 'disabled'"
           id="login"
         >
-          <font-awesome-icon :icon="['fas', 'right-to-bracket']" />Entrar
+          <LoadingSpinner v-if="loading" />
+
+          <template v-else>
+            <font-awesome-icon :icon="['fas', 'right-to-bracket']" />Entrar
+          </template>
         </Button>
+
+        <!-- Esqueceu a senha -->
+        <button class="forgot-password" @click.prevent="resetPassword">
+          <Typography>Esqueceu a senha?</Typography>
+        </button>
       </template>
     </form>
   </div>
@@ -241,8 +266,10 @@ const submit = () => {
       @include high-contrast-border;
     }
 
-    #forgot-password {
-      margin-block: 0.5rem -0.3rem;
+    .forgot-password {
+      margin-top: 0.5rem;
+      font-weight: 500;
+      opacity: 0.8;
     }
   }
 

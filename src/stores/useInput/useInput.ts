@@ -33,6 +33,7 @@ type StringGetter = GeneralGetter<string> & {
 type FieldsGetter = GeneralGetter<Record<string, AllowedFieldTypes>> & {
   type: 'fields'
   fields: FieldRef<any>[]
+  autoFocus?: string
   submitButton?: ButtonConfig
 }
 
