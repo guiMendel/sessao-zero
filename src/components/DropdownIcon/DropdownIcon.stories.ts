@@ -1,6 +1,6 @@
 import { Meta, StoryFn } from '@storybook/vue3'
+import { ref } from 'vue'
 import { DropdownIcon } from '.'
-import { ref, watchEffect } from 'vue'
 
 export default {
   title: 'Components/DropdownIcon',

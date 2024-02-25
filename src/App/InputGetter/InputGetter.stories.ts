@@ -25,7 +25,7 @@ const defaultSettings = {
   `,
 }
 
-export const Default: Story = (args) => ({
+export const Default: Story = () => ({
   ...defaultSettings,
   template: `
   <div :style="{
@@ -66,7 +66,7 @@ export const Default: Story = (args) => ({
   },
 })
 
-export const String: Story = (args) => ({
+export const String: Story = () => ({
   ...defaultSettings,
   setup: () => {
     const { getStringInput } = useInput()
@@ -84,7 +84,7 @@ export const String: Story = (args) => ({
   },
 })
 
-export const Boolean: Story = (args) => ({
+export const Boolean: Story = () => ({
   ...defaultSettings,
   setup: () => {
     const { getBooleanInput } = useInput()

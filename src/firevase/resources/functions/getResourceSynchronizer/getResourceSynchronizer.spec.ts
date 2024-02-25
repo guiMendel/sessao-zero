@@ -85,7 +85,7 @@ describe('getResourceSynchronizer', () => {
         DocumentReference
       >(fantasyVase, 'knights', 'empty-document', new CleanupManager())
 
-      sync(id, instanceRef)
+      sync(id, instanceRef as any)
 
       // Ensures it initializes properly
       expect(instanceRef.value).toStrictEqual(
@@ -179,7 +179,7 @@ describe('getResourceSynchronizer', () => {
 
       expect(listRef.value).toStrictEqual([])
 
-      syncList([], listRef)
+      syncList([], listRef as any)
 
       // Verifica se inicializa adequadamente
       expect(listRef.value).toStrictEqual(await indexDatabaseValues('knights'))

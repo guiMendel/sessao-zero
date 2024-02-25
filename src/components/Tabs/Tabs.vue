@@ -67,7 +67,6 @@ const selectedTransition = computed(() => `slide-${selectedDirection.value}`)
       <Transition
         v-for="tab in tabs"
         :name="tab === modelValue ? selectedTransition : transitionNameFor(tab)"
-        :key="tab"
       >
         <slot v-if="modelValue === tab" :name="modelValue"></slot>
       </Transition>

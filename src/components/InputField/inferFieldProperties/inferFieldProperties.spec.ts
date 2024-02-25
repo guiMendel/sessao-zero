@@ -25,7 +25,7 @@ describe('inferFieldProperties', () => {
   it.each(fieldNames)(
     'should return the correct properties for field %s',
     (fieldName) => {
-      expect(inferFieldProperties(fieldName)).toStrictEqual(
+      expect(inferFieldProperties(fieldName), '').toStrictEqual(
         cachedProperties[fieldName]
       )
     }

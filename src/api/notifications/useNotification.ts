@@ -17,7 +17,7 @@ export const useNotification = () => {
       { params, type }: NotificationParams<K>
     ) =>
       api.create({
-        body: notificationTypes[type].makeBody(params),
+        body: notificationTypes[type].makeBody(params as any),
         playerId,
         unread: true,
       }),

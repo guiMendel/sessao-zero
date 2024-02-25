@@ -68,11 +68,11 @@ export const makeResourceMocker = <
   ): PropertiesFrom<C>[P]
 
   /** Mocks in a properties level */
-  function mockResource(
-    level: 'unrefed-resource',
-    overrides: Partial<UnrefedResource<C, P>>,
-    mocksTable: MocksTable
-  ): UnrefedResource<C, P>
+  // function mockResource(
+  //   level: 'unrefed-resource',
+  //   overrides: Partial<UnrefedResource<C, P>>,
+  //   mocksTable: MocksTable
+  // ): UnrefedResource<C, P>
 
   // Implementation
   function mockResource(

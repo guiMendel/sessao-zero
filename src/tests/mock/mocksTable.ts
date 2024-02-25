@@ -15,9 +15,11 @@ export const mocksTable = {
   lands: mockLand,
   missions: mockMission,
   players: mockPlayer,
-} satisfies Record<
-  keyof FantasyVase['_tsAnchor'] | keyof Vase['_tsAnchor'],
-  (level?: any, overrides?: any) => any
+} satisfies Partial<
+  Record<
+    keyof FantasyVase['_tsAnchor'] | keyof Vase['_tsAnchor'],
+    (level?: any, overrides?: any) => any
+  >
 >
 
 export type MocksTable = typeof mocksTable

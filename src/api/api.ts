@@ -20,7 +20,7 @@ export const vase = fillFirevase<{
   'adventures',
   'feedback',
 ])
-  .configureFiles({ adventures: ['banner'] as const })
+  .configureFiles({ adventures: ['banner'] as ['banner'] })
 
   .configureManyToMany({
     /** As guildas das quais os jogadores sao membros */

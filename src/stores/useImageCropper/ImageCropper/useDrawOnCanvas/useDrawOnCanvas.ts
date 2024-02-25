@@ -1,4 +1,4 @@
-import { ComputedRef, Ref, ref, watch } from 'vue'
+import { Ref, ref, watch } from 'vue'
 
 type DrawnOnCanvasParams = {
   image: Ref<HTMLImageElement | null>

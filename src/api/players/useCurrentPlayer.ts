@@ -3,6 +3,7 @@ import { CleanupManager } from '@/firevase/classes/CleanupManager'
 import { syncableRef } from '@/firevase/classes/Syncable'
 import { Uploadable, useResource } from '@/firevase/resources'
 import { defineStore } from '@/stores/defineStore'
+import { CodeError } from '@/utils/classes'
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -11,12 +12,11 @@ import {
   updatePassword,
   updateProfile,
 } from 'firebase/auth'
-import { DocumentReference, query, where } from 'firebase/firestore'
+import { DocumentReference, where } from 'firebase/firestore'
 import { onBeforeUnmount, ref } from 'vue'
 import { Player, usePlayerFields } from '.'
 import { Vase, vase } from '..'
 import { useAlert, useCurrentAuth, useInput } from '../../stores'
-import { CodeError, errorCodeToMessage } from '@/utils/classes'
 
 export const useCurrentPlayer = defineStore('current-player', () => {
   const { listenToAuthChange } = useCurrentAuth()

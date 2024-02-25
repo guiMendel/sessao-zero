@@ -47,11 +47,11 @@ export const Default: Story = () => ({
     const promisedId = 'scooby'
 
     const showSuccess = () => {
-      store.trackPromise(sleep(100), promisedId)
+      store.trackPromise(sleep(100, 'success'), promisedId)
     }
 
     const showSuccessDelayed = () => {
-      store.trackPromise(sleep(1500), promisedId)
+      store.trackPromise(sleep(1500, 'success'), promisedId)
     }
 
     const showError = () => {
@@ -94,6 +94,6 @@ export const Success: Story = () => ({
 
     store.successStatusDuration = 9999999
 
-    store.trackPromise(Promise.resolve(undefined), 'scooby')
+    store.trackPromise(Promise.resolve('success'), 'scooby')
   },
 })

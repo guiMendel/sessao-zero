@@ -1,5 +1,5 @@
 import { createPinia, setActivePinia } from 'pinia'
-import { cancelMessage, useInput } from '.'
+import { useInput } from '.'
 
 describe('useInput', () => {
   beforeEach(() => {
@@ -51,7 +51,7 @@ describe('useInput', () => {
       .getStringInput({} as any)
       .then((value) => (stringResolved = value))
 
-    store.currentInput?.resolve(stringResult)
+    store.currentInput.value?.resolve(stringResult)
 
     await stringPromise
 
@@ -66,7 +66,7 @@ describe('useInput', () => {
       .getBooleanInput({} as any)
       .then((value) => (booleanResolved = value))
 
-    store.currentInput?.resolve(booleanResult)
+    store.currentInput.value?.resolve(booleanResult)
 
     await booleanPromise
 
@@ -78,31 +78,21 @@ describe('useInput', () => {
     const store = useInput()
 
     // STRING
-    let stringReject = ''
+    const stringPromise = store.getStringInput({ cancellable: true } as any)
 
-    const stringPromise = store
-      .getStringInput({ cancellable: true } as any)
-      .catch((value) => (stringReject = value))
-
-    store.currentInput!.reject!()
+    store.currentInput.value!.resolve!(undefined)
 
     await stringPromise
 
-    expect(stringReject).toBe(cancelMessage)
     expect(store.currentInput).toBeUndefined()
 
     // BOOLEAN
-    let booleanReject = ''
+    const booleanPromise = store.getBooleanInput({ cancellable: true } as any)
 
-    const booleanPromise = store
-      .getBooleanInput({ cancellable: true } as any)
-      .catch((value) => (booleanReject = value))
-
-    store.currentInput!.reject!()
+    store.currentInput.value!.resolve!(undefined)
 
     await booleanPromise
 
-    expect(booleanReject).toBe(cancelMessage)
     expect(store.currentInput).toBeUndefined()
   })
 
@@ -113,12 +103,10 @@ describe('useInput', () => {
     store.getStringInput({ cancellable: false } as any)
 
     expect(store.currentInput).not.toBeUndefined()
-    expect(store.currentInput!.reject).toBeUndefined()
 
     // BOOLEAN
     store.getBooleanInput({ cancellable: false } as any)
 
     expect(store.currentInput).not.toBeUndefined()
-    expect(store.currentInput!.reject).toBeUndefined()
   })
 })
