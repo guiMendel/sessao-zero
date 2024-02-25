@@ -82,7 +82,7 @@ export const useAdventureFields = ({
   const playerLimit = fieldRef<number>(
     { name: 'limite de jogadores', type: 'number', min: 1 },
     {
-      initialValue: initialAdventure?.playerLimit ?? 5,
+      initialValue: Math.max(initialAdventure?.playerLimit ?? 5, 1),
       sessionStoragePrefix,
       validator: (newValue: number) =>
         newValue <= 0

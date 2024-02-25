@@ -9,6 +9,7 @@ import { eraseInStorage, isFieldValid } from '@/utils/functions'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import magicalPenPicture from '../../../assets/magical-pen.png'
+import writingPicture from '@/assets/writing.png'
 
 // Campos de login
 const fields = useAdventureFields({
@@ -58,70 +59,127 @@ const tryCreate = () => {
 </script>
 
 <template>
-  <form @submit.prevent="tryCreate">
-    <img :src="magicalPenPicture" class="illustration" />
+  <div class="create-adventure">
+    <div class="banner">
+      <Typography variant="title" class="title">Criar aventura</Typography>
 
-    <!-- Titulo da pagina -->
-    <Typography variant="title" class="title">Criar aventura</Typography>
+      <Typography>você poderá alterar essas configurações depois</Typography>
 
-    <Typography variant="paragraph-secondary"
-      >você poderá alterar essas configurações depois</Typography
-    >
+      <img :src="writingPicture" class="writing-illustration" />
+    </div>
 
-    <Fields
-      class="fields"
-      :fields="[
-        fields.banner,
-        fields.name,
-        fields.description,
-        fields.open,
-        fields.requireAdmission,
-        fields.shouldLimitPlayers,
-        fields.shouldLimitPlayers.value && fields.playerLimit,
-      ]"
-      autoFocus="name"
-    />
+    <form @submit.prevent="tryCreate">
+      <div class="hide-desktop">
+        <img :src="magicalPenPicture" class="pen-illustration" />
 
-    <!-- Submit -->
-    <Button :disabled="!formValid" id="login" class="submit" variant="colored">
-      <font-awesome-icon :icon="['fas', 'signature']" />
+        <!-- Titulo da pagina -->
+        <Typography variant="title" class="title">Criar aventura</Typography>
 
-      criar
-    </Button>
-  </form>
+        <Typography variant="paragraph-secondary"
+          >você poderá alterar essas configurações depois</Typography
+        >
+      </div>
+
+      <Fields
+        class="fields"
+        :fields="[
+          fields.banner,
+          fields.name,
+          fields.description,
+          fields.open,
+          fields.requireAdmission,
+          fields.shouldLimitPlayers,
+          fields.shouldLimitPlayers.value && fields.playerLimit,
+        ]"
+        autoFocus="name"
+      />
+
+      <!-- Submit -->
+      <Button
+        :disabled="!formValid"
+        id="login"
+        class="submit"
+        variant="colored"
+      >
+        <font-awesome-icon :icon="['fas', 'signature']" />
+
+        criar
+      </Button>
+    </form>
+  </div>
 </template>
 
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
 
-form {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 1rem;
+#app .create-adventure {
+  width: 100%;
+
+  align-items: center;
+  justify-content: center;
   padding-inline: 1.5rem;
+  gap: 4rem;
 
-  .title {
-    align-self: center;
-  }
-
-  .illustration {
-    width: 10rem;
-    align-self: center;
-  }
-
-  .fields {
+  .banner {
+    display: none;
     flex-direction: column;
-    gap: 1.3rem;
+
+    align-items: center;
+    gap: 2rem;
+
+    .title {
+      font-size: 2rem;
+      margin-bottom: -1rem;
+    }
+
+    .writing-illustration {
+      max-width: 100%;
+    }
+
+    @media (min-width: 700px) {
+      display: flex;
+      flex: 0.8;
+      max-width: 30rem;
+    }
+  }
+
+  form {
+    flex-direction: column;
     align-items: stretch;
-  }
+    gap: 1rem;
+    flex: 1;
 
-  .submit {
-    width: 100%;
-    margin-top: 1rem;
-  }
+    max-width: 30rem;
 
-  .adventure-icon {
-    font-size: 4rem;
+    .hide-desktop {
+      @media (min-width: 700px) {
+        display: none;
+      }
+    }
+
+    .title {
+      align-self: center;
+    }
+
+    .pen-illustration {
+      width: 10rem;
+      align-self: center;
+    }
+
+    .fields {
+      flex-direction: column;
+      gap: 1.3rem;
+      align-items: stretch;
+    }
+
+    .submit {
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .adventure-icon {
+      font-size: 4rem;
+    }
   }
 }
 </style>

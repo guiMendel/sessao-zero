@@ -93,13 +93,13 @@ const acceptPlayer = async (targetPlayer: HalfResource<Vase, 'players'>) => {
     >
       <div @click.stop class="actions">
         <font-awesome-icon
-          class="admit"
+          class="admit option"
           @click="acceptPlayer(requestedPlayer)"
           :icon="['fas', 'circle-check']"
         />
 
         <font-awesome-icon
-          class="reject"
+          class="reject option"
           @click="rejectPlayer(requestedPlayer)"
           :icon="['fas', 'circle-xmark']"
         />
@@ -159,6 +159,14 @@ const acceptPlayer = async (targetPlayer: HalfResource<Vase, 'players'>) => {
     margin-inline: auto 0.5rem;
     gap: 1rem;
     font-size: 1.8rem;
+
+    .option {
+      transition: all 100ms;
+
+      &:hover {
+        filter: brightness(1.1);
+      }
+    }
 
     .admit {
       color: var(--main);

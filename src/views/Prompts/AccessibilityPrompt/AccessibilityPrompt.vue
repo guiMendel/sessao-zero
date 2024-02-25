@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Button } from '@/components';
 import { useAccessibility } from '@/stores/useAccessibility'
 import { useRouter } from 'vue-router'
 
@@ -29,8 +30,8 @@ const toggleHighContrastAndContinue = (value: boolean) => {
 
     <!-- Botoes -->
     <div class="control">
-      <button @click="toggleHighContrastAndContinue(true)">Sim</button>
-      <button @click="toggleHighContrastAndContinue(false)">Não</button>
+      <Button @click="toggleHighContrastAndContinue(true)">Sim</Button>
+      <Button @click="toggleHighContrastAndContinue(false)">Não</Button>
     </div>
   </div>
 </template>

@@ -3,7 +3,7 @@ import { RouteRecordRaw } from 'vue-router'
 /** Quais rotas voa ter fistVistPrompt
  * Precisa ser feito assim, se nao o storybook quebra. Ele eh lixoso assim mesmo
  */
-export const firstVisitPrompts = ['accessibility-prompt', 'beta-welcome']
+export const firstVisitPrompts = ['accessibility-prompt']
 
 /** Adiciona as metas de firstVisitPrompts as rotas */
 export const addFirstVisitPrompts = (routes: Array<RouteRecordRaw>) =>

@@ -12,7 +12,7 @@ import {
 import { Home } from '@/views/Home'
 import { Login } from '@/views/Login'
 import { CreatePlayer, Player } from '@/views/Players'
-import { AccessibilityPrompt, BetaWelcome } from '@/views/Prompts'
+import { AccessibilityPrompt } from '@/views/Prompts'
 import { RouteRecordRaw } from 'vue-router'
 import { addFirstVisitPrompts } from './firstVisitPrompts'
 
@@ -22,12 +22,6 @@ const routes: Array<RouteRecordRaw> = addFirstVisitPrompts([
     path: '/accessibility-prompt',
     component: AccessibilityPrompt,
     name: 'accessibility-prompt',
-    meta: { noGoBackButton: true },
-  },
-  {
-    path: '/beta-welcome',
-    component: BetaWelcome,
-    name: 'beta-welcome',
     meta: { noGoBackButton: true },
   },
   {
