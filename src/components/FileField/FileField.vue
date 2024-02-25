@@ -385,6 +385,10 @@ onBeforeUnmount(() => {
           background-color: var(--bg-main-light);
           color: var(--tx-main-dark);
           @include bevel(var(--main));
+
+          width: 100%;
+          max-width: 10rem;
+          align-self: center;
         }
 
         .drag-message {

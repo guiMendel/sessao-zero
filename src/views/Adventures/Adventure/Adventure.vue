@@ -80,17 +80,35 @@ const joinLabel = adventure.value?.requireAdmission
     class="adventure"
     :class="{ 'extra-bottom-padding': showEnter && !showEmptyRoomPrompt }"
   >
-    <Image
-      :src="toValue(adventure.banner)"
-      :backup-src="genericBanner"
-      :has-loaded="hasLoaded([adventure, 'banner'])"
-      class="banner"
-    />
+    <div class="group">
+      <Image
+        :src="toValue(adventure.banner)"
+        :backup-src="genericBanner"
+        :has-loaded="hasLoaded([adventure, 'banner'])"
+        class="banner"
+      />
+
+      <div class="column hide-on-mobile">
+        <Typography class="subheader">aventura</Typography>
+
+        <Typography variant="title" class="title">{{
+          adventure.name
+        }}</Typography>
+
+        <AdventureMembers
+          :join-label="joinLabel"
+          :show-empty-room-prompt="showEmptyRoomPrompt"
+          :show-enter="showEnter"
+          :guild-disallows-subscription="guildDisallowsSubscription"
+          @toggle-enter-request="enter"
+        />
+      </div>
+    </div>
 
     <div class="content">
-      <Typography class="subheader">aventura</Typography>
+      <Typography class="subheader hide-on-desktop">aventura</Typography>
 
-      <Typography variant="title" class="title">{{
+      <Typography variant="title" class="title hide-on-desktop">{{
         adventure.name
       }}</Typography>
 
@@ -98,12 +116,12 @@ const joinLabel = adventure.value?.requireAdmission
       <Button
         v-if="showEnter && !showEmptyRoomPrompt"
         variant="colored"
-        class="enter-guild-button"
+        class="enter-guild-button hide-on-desktop"
         @click="enter"
         ><font-awesome-icon :icon="['fas', 'dungeon']" />{{ joinLabel }}</Button
       >
 
-      <Tabs :tabs="allTabs" v-model="tab">
+      <Tabs :tabs="allTabs" v-model="tab" class="hide-on-desktop">
         <template #jogadores:option>
           <div class="tab" :class="{ active: tab === 'jogadores' }">
             <Typography>jogadores</Typography>
@@ -127,8 +145,11 @@ const joinLabel = adventure.value?.requireAdmission
             :show-empty-room-prompt="showEmptyRoomPrompt"
             :show-enter="showEnter"
             :guild-disallows-subscription="guildDisallowsSubscription"
+            @toggle-enter-request="enter"
         /></template>
       </Tabs>
+
+      <AdventureDetails class="hide-on-mobile extra-padding" />
     </div>
   </div>
 </template>
@@ -140,22 +161,64 @@ const joinLabel = adventure.value?.requireAdmission
   align-self: center;
 }
 
-.adventure {
+#app .adventure {
   flex-direction: column;
   align-items: stretch;
   gap: 1rem;
+  width: 100%;
 
-  &.extra-bottom-padding {
-    padding-bottom: 4rem;
+  @media (max-width: 850px) {
+    &.extra-bottom-padding {
+      padding-bottom: 4rem;
+    }
   }
 
-  .banner {
-    max-width: 50rem;
+  .group {
+    align-items: stretch;
+    background-color: var(--bg-main-lighter);
+
+    .banner {
+      flex: 1.2;
+    }
+
+    .column {
+      flex-direction: column;
+      flex: 1;
+      padding: 2rem;
+    }
+
+    @media (min-width: 1050px) {
+      .banner {
+        flex: 2;
+      }
+
+      .column {
+        flex: 1;
+      }
+    }
+  }
+
+  .hide-on-mobile {
+    display: none;
+
+    @media (min-width: 850px) {
+      display: flex;
+    }
+  }
+
+  .hide-on-desktop {
+    @media (min-width: 850px) {
+      display: none;
+    }
   }
 
   .divisor {
     color: var(--tx-main-light);
     margin-block: 0.8rem;
+  }
+
+  .extra-padding {
+    padding-inline: 20%;
   }
 
   .content {

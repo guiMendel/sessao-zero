@@ -19,9 +19,6 @@ const boundingDistances = reactive({ x: 99999, y: 99999 })
 /** O dropdown em si */
 const dropdown = ref<HTMLDivElement | null>(null)
 
-/** Box do container que limita o dropdown */
-// const containerBox = useContainerBox(computed(() => props.boundingContainer))
-
 /** Margem a aplicar quando ajeitar o dropdown para dentro da tela */
 const adjustmentMargin = 10
 
@@ -126,7 +123,6 @@ useResizeObserver(dropdown, adjustIntoScreen)
   z-index: 20;
 
   background-color: var(--bg-main-washed);
-  padding: 0.5rem;
   border-radius: calc($border-radius / 2);
   @include high-contrast-border;
 

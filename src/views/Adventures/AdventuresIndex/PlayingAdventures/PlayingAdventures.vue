@@ -57,7 +57,7 @@ const createNewAdventure = () => router.push({ name: 'create-adventure' })
 
 <template>
   <div class="playing-adventures">
-    <template v-if="adventures.length === 0">
+    <div class="column" v-if="adventures.length === 0">
       <Typography variant="paragraph" class="no-adventures-text"
         >(vazio)</Typography
       >
@@ -75,7 +75,7 @@ const createNewAdventure = () => router.push({ name: 'create-adventure' })
         <font-awesome-icon :icon="['fas', 'book-open']" />
         {{ isNarrator ? 'narrar' : 'torne-se narrador' }}</Button
       >
-    </template>
+    </div>
 
     <!-- Aventuras da guilda -->
     <AdventurePreview
@@ -114,9 +114,15 @@ const createNewAdventure = () => router.push({ name: 'create-adventure' })
     }
   }
 
-  .cricket-image {
-    width: 60%;
-    align-self: center;
+  .column {
+    flex-direction: column;
+    gap: 2rem;
+
+    .cricket-image {
+      width: 60%;
+      align-self: center;
+      max-width: 20rem;
+    }
   }
 }
 </style>

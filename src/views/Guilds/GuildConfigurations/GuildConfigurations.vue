@@ -173,6 +173,9 @@ Digite <code>${guild.value.name}</code> para confirmar.`,
   flex: 1;
   margin-top: 2rem;
 
+  max-width: 30rem;
+  align-self: center;
+
   .section {
     flex-direction: column;
     gap: 0.8rem;

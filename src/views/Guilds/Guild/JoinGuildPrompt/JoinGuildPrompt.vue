@@ -132,6 +132,7 @@ const icon = computed(() => {
   .button {
     margin-top: 0.7rem;
     color: inherit;
+    max-width: 30rem;
   }
 
   .request-sent-notice {

@@ -24,7 +24,7 @@ const createNewAdventure = () => router.push({ name: 'create-adventure' })
 
 <template>
   <div class="narrating-adventures">
-    <template v-if="adventures.length === 0">
+    <div class="column" v-if="adventures.length === 0">
       <Typography variant="paragraph" class="no-adventures-text"
         >Você ainda não narra nenhuma aventura por aqui!</Typography
       >
@@ -39,7 +39,7 @@ const createNewAdventure = () => router.push({ name: 'create-adventure' })
         <font-awesome-icon :icon="['fas', 'pen-ruler']" /> criar primeira
         aventura!</Button
       >
-    </template>
+    </div>
 
     <template v-else>
       <!-- Aventuras da guilda -->
@@ -79,15 +79,21 @@ const createNewAdventure = () => router.push({ name: 'create-adventure' })
     justify-content: center;
   }
 
-  .no-adventures-text {
-    align-self: center;
-    font-size: 1.1rem;
-    font-weight: 500;
-  }
+  .column {
+    flex-direction: column;
+    gap: 2rem;
 
-  .monk-image {
-    width: 80%;
-    align-self: center;
+    .no-adventures-text {
+      align-self: center;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .monk-image {
+      width: 80%;
+      align-self: center;
+      max-width: 15rem;
+    }
   }
 
   .create-adventure {

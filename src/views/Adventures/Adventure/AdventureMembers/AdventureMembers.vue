@@ -99,14 +99,6 @@ const kickPlayer = async (targetPlayer: HalfResource<Vase, 'players'>) => {
       <img :src="emptyRoomPicture" alt="sala vazia" />
 
       <Typography>parece meio vazio aqui... por enquanto!</Typography>
-
-      <Button
-        v-if="showEnter"
-        variant="colored"
-        class="empty-room-enter-prompt"
-        @click="emit('toggle-enter-request')"
-        ><font-awesome-icon :icon="['fas', 'dungeon']" />{{ joinLabel }}</Button
-      >
     </template>
 
     <template v-else>
@@ -131,7 +123,10 @@ const kickPlayer = async (targetPlayer: HalfResource<Vase, 'players'>) => {
           class="actions"
           v-if="player && isNarrator(player.id, adventure)"
         >
-          <div class="option" @click="kickPlayer(iterationPlayer)">
+          <div
+            class="adventure-member-action-option"
+            @click="kickPlayer(iterationPlayer)"
+          >
             <font-awesome-icon :icon="['fas', 'user-large-slash']" />
             expulsar
           </div>
@@ -194,6 +189,14 @@ const kickPlayer = async (targetPlayer: HalfResource<Vase, 'players'>) => {
         <template v-else> Esta aventura está de portas fechadas </template>
       </Typography>
     </template>
+
+    <Button
+      v-else-if="showEnter"
+      variant="colored"
+      class="empty-room-enter-prompt"
+      @click="emit('toggle-enter-request')"
+      ><font-awesome-icon :icon="['fas', 'dungeon']" />{{ joinLabel }}</Button
+    >
   </div>
 </template>
 
@@ -208,6 +211,13 @@ const kickPlayer = async (targetPlayer: HalfResource<Vase, 'players'>) => {
 
   .too-many-wizards {
     margin-inline: -1.5rem;
+    // height: 5rem;
+
+    @media (min-width: 850px) {
+      margin: 0;
+      max-width: 70%;
+      align-self: center;
+    }
   }
 
   .stop-knight {
@@ -223,25 +233,23 @@ const kickPlayer = async (targetPlayer: HalfResource<Vase, 'players'>) => {
     margin-left: auto;
     border-radius: $border-radius;
     padding: 0.2rem 0.6rem;
+
+    transition: all 100ms;
+
+    &:hover {
+      background-color: var(--bg-light-trans-45);
+    }
   }
 
   .actions {
     margin-inline: auto 0.5rem;
-
-    .option {
-      padding: 0.5rem;
-      gap: 0.3rem;
-      align-items: center;
-
-      svg {
-        font-size: 0.9rem;
-      }
-    }
   }
 }
 </style>
 
 <style lang="scss">
+@import '@/styles/variables.scss';
+
 #app .players .admission-request-sent .cancel button {
   min-width: unset;
   min-height: unset;
@@ -250,5 +258,22 @@ const kickPlayer = async (targetPlayer: HalfResource<Vase, 'players'>) => {
 
   background-color: var(--bg-trans-1);
   font-size: 0.9rem;
+}
+
+#app .adventure-member-action-option {
+  padding: 0.5rem 1rem;
+  gap: 0.3rem;
+  align-items: center;
+  cursor: pointer;
+  margin-block: 0.5rem;
+  transition: all 100ms;
+
+  svg {
+    font-size: 0.9rem;
+  }
+
+  &:hover {
+    background-color: var(--trans-03);
+  }
 }
 </style>

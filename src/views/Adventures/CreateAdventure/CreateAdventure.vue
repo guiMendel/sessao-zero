@@ -71,6 +71,7 @@ const tryCreate = () => {
     <Fields
       class="fields"
       :fields="[
+        fields.banner,
         fields.name,
         fields.description,
         fields.open,

@@ -2,7 +2,7 @@
 import { isNarrator } from '@/api/adventures'
 import { useCurrentAdventure } from '@/api/adventures/useCurrentAdventure'
 import { useCurrentPlayer } from '@/api/players'
-import { Button } from '@/components'
+import { Button, Typography } from '@/components'
 import { useInput } from '@/stores'
 import { ref, toValue } from 'vue'
 import { useRouter } from 'vue-router'
@@ -59,18 +59,16 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
 </script>
 
 <template>
-  <EditAdventure
-    v-if="adventure"
-    :key="adventure.id"
-    :adventure="adventure"
-    v-model="showEditPanel"
-  />
-
   <div class="details" v-if="adventure && player">
+    <EditAdventure
+      v-if="adventure"
+      :key="adventure.id"
+      :adventure="adventure"
+      v-model="showEditPanel"
+    />
+
     <!-- Descricao -->
     <Typography class="description">{{ adventure.description }}</Typography>
-
-    <Divisor class="divisor" />
 
     <!-- Narradores -->
     <Typography variant="paragraph-secondary" class="narrators-label"

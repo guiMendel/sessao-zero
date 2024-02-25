@@ -69,41 +69,45 @@ Digite <code>${player.value.nickname}</code> para confirmar.`,
 
   <div class="player" v-else>
     <header>
-      <!-- O handle do jogador -->
-      <Typography class="handle">@{{ player.nickname }}</Typography>
+      <div class="content">
+        <!-- O handle do jogador -->
+        <Typography class="handle">@{{ player.nickname }}</Typography>
 
-      <!-- Imagem e dados -->
-      <div class="row">
-        <ProfilePicture
-          class="picture"
-          :player="player"
-          background="main-washed"
-        />
+        <!-- Imagem e dados -->
+        <div class="row">
+          <ProfilePicture
+            class="picture"
+            :player="player"
+            background="main-washed"
+          />
 
-        <!-- Dados -->
-        <div class="data">
-          <div class="item">
-            <Typography class="label" variant="paragraph-secondary"
-              >jogando</Typography
-            >
-            <Typography class="content">{{
-              toValue(player.playerAdventures).length
-            }}</Typography>
-          </div>
+          <!-- Dados -->
+          <div class="data">
+            <div class="item">
+              <Typography class="label" variant="paragraph-secondary"
+                >jogando</Typography
+              >
+              <Typography class="content">{{
+                toValue(player.playerAdventures).length
+              }}</Typography>
+            </div>
 
-          <div class="item">
-            <Typography class="label" variant="paragraph-secondary"
-              >narrando</Typography
-            >
-            <Typography class="content">{{
-              toValue(player.narratorAdventures).length
-            }}</Typography>
+            <div class="item">
+              <Typography class="label" variant="paragraph-secondary"
+                >narrando</Typography
+              >
+              <Typography class="content">{{
+                toValue(player.narratorAdventures).length
+              }}</Typography>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Nome -->
-      <Typography variant="subtitle" class="name">{{ player.name }}</Typography>
+        <!-- Nome -->
+        <Typography variant="subtitle" class="name">{{
+          player.name
+        }}</Typography>
+      </div>
     </header>
 
     <!-- Sobre -->
@@ -142,6 +146,8 @@ Digite <code>${player.value.nickname}</code> para confirmar.`,
 @import '@/styles/variables.scss';
 
 .player {
+  $limit: 40rem;
+
   width: 100%;
   min-height: 100vh;
   align-items: stretch;
@@ -150,63 +156,69 @@ Digite <code>${player.value.nickname}</code> para confirmar.`,
   padding-bottom: 2rem;
 
   header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
-    padding: 1.3rem 1.5rem 1rem;
-
     background-color: var(--bg-main-lighter);
+    align-items: center;
+    justify-content: center;
 
-    .handle {
-      align-self: center;
-      margin-bottom: 2rem;
-      font-weight: 600;
-      color: var(--tx-main);
-    }
-
-    .row {
-      align-items: center;
+    .content {
+      flex-direction: column;
+      align-items: stretch;
       gap: 1rem;
+      padding: 1.3rem 1.5rem 1rem;
+      width: 100%;
+      max-width: $limit;
 
-      .picture {
-        font-size: 2rem;
+      .handle {
+        align-self: center;
+        margin-bottom: 2rem;
+        font-weight: 600;
+        color: var(--tx-main);
       }
 
-      .data {
-        flex: 1;
+      .row {
         align-items: center;
-        justify-content: space-around;
         gap: 1rem;
-        flex-wrap: wrap;
 
-        .item {
-          flex-direction: column;
+        .picture {
+          font-size: 2rem;
+        }
+
+        .data {
+          flex: 1;
           align-items: center;
-          text-align: center;
+          justify-content: space-around;
+          gap: 1rem;
+          flex-wrap: wrap;
 
-          .label {
-            @include field-label;
-            font-size: 0.8rem;
-            opacity: 0.6;
+          .item {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
 
-            @include high-contrast {
-              opacity: 1;
+            .label {
+              @include field-label;
+              font-size: 0.8rem;
+              opacity: 0.6;
+
+              @include high-contrast {
+                opacity: 1;
+              }
             }
-          }
 
-          .content {
-            color: var(--tx-main);
-            font-weight: 500;
-            font-size: 2rem;
+            .content {
+              color: var(--tx-main);
+              font-weight: 500;
+              font-size: 2rem;
+            }
           }
         }
       }
-    }
 
-    .name {
-      font-size: 2rem;
-      align-self: flex-start;
-      text-align: left;
+      .name {
+        font-size: 2rem;
+        align-self: flex-start;
+        text-align: left;
+      }
     }
   }
 
@@ -216,6 +228,10 @@ Digite <code>${player.value.nickname}</code> para confirmar.`,
     gap: 0.3rem;
     text-align: left;
     padding-inline: 1.5rem;
+
+    width: 100%;
+    max-width: $limit;
+    align-self: center;
 
     .label {
       @include field-label;
@@ -233,6 +249,10 @@ Digite <code>${player.value.nickname}</code> para confirmar.`,
     padding-inline: 1.5rem;
     flex-direction: column;
     gap: 1rem;
+
+    width: 100%;
+    max-width: $limit;
+    align-self: center;
   }
 }
 </style>
