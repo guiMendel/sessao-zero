@@ -113,7 +113,6 @@ export const mockPlayer = makeResourceMocker(vase, 'players', {
     'A dancer who can enchant with every move.',
     'A painter whose art comes to life.',
   ],
-  admin: [true, false],
   password: [
     'DragonBreath123!',
     '1WishUponAStar!',
@@ -126,4 +125,7 @@ export const mockPlayer = makeResourceMocker(vase, 'players', {
     'EnchantedFrogPrince123',
     'WizardHatTricks!',
   ],
+  preferredGuildId: null,
+  accessLevel: [1, 2, 3],
+  oauthProfilePicture: undefined,
 })
