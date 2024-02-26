@@ -292,6 +292,7 @@ const isClosed = computed(
     padding-bottom: 0.8rem;
     position: relative;
     white-space: pre-wrap;
+    word-break: break-word;
 
     &.cropped {
       white-space: normal;

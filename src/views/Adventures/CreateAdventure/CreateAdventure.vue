@@ -10,6 +10,8 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import magicalPenPicture from '../../../assets/magical-pen.png'
 import writingPicture from '@/assets/writing.png'
+import { setFile } from '@/firevase/files'
+import { Vase } from '@/api'
 
 // Campos de login
 const fields = useAdventureFields({
@@ -19,7 +21,7 @@ const fields = useAdventureFields({
 const { description, name, playerLimit, open, requireAdmission } = fields
 
 const { alert } = useAlert()
-const { create } = useAdventure()
+const { create, get } = useAdventure()
 
 /** Se os campos estao validos */
 const formValid = computed(() => isFieldValid(name, description, playerLimit))
@@ -40,6 +42,12 @@ const tryCreate = () => {
     requireAdmission: requireAdmission.value,
   })
     .then(async (adventureId) => {
+      const adventure = await get(adventureId)
+
+      // Adiciona a capa
+      if (fields.banner.value && adventure)
+        setFile<Vase, 'adventures'>(adventure, 'banner', fields.banner.value)
+
       // Redirect to home
       await router.push({ name: 'adventure', params: { adventureId } })
 

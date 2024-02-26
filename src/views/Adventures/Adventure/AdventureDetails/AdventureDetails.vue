@@ -115,6 +115,7 @@ Digite <code>${adventure.value.name}</code> para confirmar.`,
   gap: 1rem;
   text-align: left;
   white-space: pre-wrap;
+  word-break: break-word;
 
   .narrators-label {
     color: var(--tx-main-light);
