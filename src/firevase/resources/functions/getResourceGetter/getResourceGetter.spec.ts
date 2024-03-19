@@ -91,7 +91,7 @@ describe('getResourceGetter', () => {
         ({ name }) => name === 'Lancelot'
       )
 
-      const list = await getList([where('name', '==', 'Lancelot')])
+      const list = await getList({ query: [where('name', '==', 'Lancelot')] })
 
       expect(list).toStrictEqual(expectedResult)
       expect(list).not.toStrictEqual(await indexDatabaseValues('knights'))

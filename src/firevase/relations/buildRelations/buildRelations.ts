@@ -9,12 +9,11 @@ import {
   Query,
   collection,
   doc,
-  documentId,
   query,
   where,
 } from 'firebase/firestore'
-import { RelationDefinitionFrom, RelationsRefs } from '..'
 import { toRaw } from 'vue'
+import { RelationDefinitionFrom, RelationsRefs } from '..'
 
 /** Adiciona a um objeto uma flag que indica se ele nao deve ser descartado */
 export type WithDisposeFlag<T> = T & {

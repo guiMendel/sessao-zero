@@ -3,13 +3,7 @@ import { CleanupManager } from '@/firevase/classes/CleanupManager'
 import type { HalfResource, Resource } from '@/firevase/resources'
 import { getResourceGetter } from '@/firevase/resources/functions/getResourceGetter'
 import { PathsFrom, RelationsFrom } from '@/firevase/types'
-import {
-  collection,
-  documentId,
-  getDocs,
-  query,
-  where,
-} from 'firebase/firestore'
+import { collection, getDocs, query, where } from 'firebase/firestore'
 import { RelationDefinitionFrom, Relations } from '..'
 import { requireDefinition } from '../utils'
 
