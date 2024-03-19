@@ -1,5 +1,6 @@
 import type { RouteLocationNormalized } from 'vue-router'
 import { useNavigationData } from '@/stores/useNavigationData'
+import { toValue } from 'vue'
 
 export const promptGuard = (to: RouteLocationNormalized) => {
   // Verifica se ha prompts ainda nao visitados
@@ -8,8 +9,8 @@ export const promptGuard = (to: RouteLocationNormalized) => {
   // So age se ainda nao estiver em um prompt e houver outros prompts
   if (
     navigationData.isVisitingPrompt(to) == false &&
-    navigationData.unvisitedPrompts.length > 0
+    toValue(navigationData.unvisitedPrompts).length > 0
   )
     // Vai para o proximo prompt
-    return { name: navigationData.unvisitedPrompts[0] }
+    return { name: toValue(navigationData.unvisitedPrompts)[0] }
 }
