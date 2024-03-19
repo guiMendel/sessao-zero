@@ -263,12 +263,14 @@ const createManyToManyRelation = <
 
     const targetIds = snapshot.docs.map(
       (doc) => doc.data()[definition.targetResourcePath as string]
-    )
+    ) as string[]
+
+    // Filtra para conter somente os targets
+    targets.filter = (halfResource) => targetIds.includes(halfResource.id)
 
     // A query que retorna os alvos de fato
     const targetsQuery = query(
-      collection(client.db, definition.targetResourcePath as string),
-      where(documentId(), 'in', targetIds)
+      collection(client.db, definition.targetResourcePath as string)
     )
 
     // Atualiza o query dos targets

@@ -7,7 +7,6 @@ import { setTitle } from '@/utils/functions'
 import { computed, watchEffect } from 'vue'
 import { GuildPanel } from './GuildPanel'
 import { JoinGuildPrompt } from './JoinGuildPrompt'
-import { hasLoaded } from '@/firevase/resources'
 
 const { guild } = useCurrentGuild()
 const { player, update } = useCurrentPlayer()
@@ -17,8 +16,6 @@ const isVisitor = computed(() => !isMember(player.value, guild.value))
 
 // Seta essa guilda como a preferida do jogador
 watchEffect(() => {
-  console.log(guild.value, hasLoaded(guild))
-
   if (
     !player.value ||
     isVisitor.value ||

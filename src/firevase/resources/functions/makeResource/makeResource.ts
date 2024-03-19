@@ -5,7 +5,7 @@ import { DocumentSnapshot, QuerySnapshot } from 'firebase/firestore'
 import { populateFiles } from '../../../files/populateFiles'
 import { buildRelations } from '../../../relations/buildRelations'
 import { makeHalfResource } from '../../functions/makeHalfResource'
-import { Resource } from '../../types'
+import { HalfResource, Resource } from '../../types'
 
 /** Gera um (ou varios) Resource C, dos dados recebidos como documento ou query
  * @param client O cliente para usar para achar definiçao do recurso
@@ -25,10 +25,15 @@ export const makeResource = <C extends FirevaseClient, P extends PathsFrom<C>>(
   resourcePath: P,
   resourceLayersLimit: number,
   cleanupManager: CleanupManager,
-  previousValues: Resource<C, P>[]
+  previousValues: Resource<C, P>[],
+  filter?: (docs: HalfResource<C, P>) => boolean
 ): Array<Resource<C, P> | undefined> => {
   /** Gera os resources a partir dos snapshots */
-  const extractedResources = makeHalfResource<C, P>(snapshot, resourcePath)
+  const extractedResources = makeHalfResource<C, P>(
+    snapshot,
+    resourcePath,
+    filter
+  )
 
   if (resourceLayersLimit === 0) return extractedResources
 

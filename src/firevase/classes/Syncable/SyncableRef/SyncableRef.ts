@@ -4,7 +4,7 @@ import { makeResource } from '@/firevase/resources/functions/makeResource'
 import { DocumentReference, Query } from 'firebase/firestore'
 import { Ref, ref, toRaw } from 'vue'
 import { FirevaseClient } from '../../..'
-import { Resource } from '../../../resources'
+import { HalfResource, Resource } from '../../../resources'
 import {
   ConstrainRelationSettings,
   ManyToManyFrom,
@@ -21,9 +21,15 @@ export type SyncableRef<
   C extends FirevaseClient,
   P extends PathsFrom<C>,
   M extends Query | DocumentReference
-> = Ref<M extends Query ? Resource<C, P>[] : Resource<C, P> | undefined> & {
-  fetcher: Syncable<M>
-}
+> = Ref<M extends Query ? Resource<C, P>[] : Resource<C, P> | undefined> &
+  (M extends Query
+    ? {
+        fetcher: Syncable<M>
+        filter?: (docs: HalfResource<C, P>) => boolean
+      }
+    : {
+        fetcher: Syncable<M>
+      })
 
 export const isQueryTarget = (
   target: Query | DocumentReference | 'empty-document' | 'empty-query'
@@ -73,7 +79,8 @@ export const syncableRef = <
           resourcePath,
           options.resourceLayersLimit,
           ownCleanupManager,
-          previousValues
+          previousValues,
+          'filter' in syncedRef ? syncedRef.filter : undefined
         ) as Resource<C, P>[]
       }
 
@@ -128,7 +135,10 @@ export const syncableRef = <
   syncedRef.fetcher.onReset(() => (valueRef.value = emptyValue))
 
   // Associa o cleanup manager
-  parentCleanupManager.link('propagate-to', syncedRef.fetcher.getCleanupManager())
+  parentCleanupManager.link(
+    'propagate-to',
+    syncedRef.fetcher.getCleanupManager()
+  )
 
   // Quando limpar o target do sync, limpa o valor do ref
   syncedRef.fetcher.onUpdateTarget((newTarget) => {

@@ -126,7 +126,7 @@ const getHasManyRelation = <C extends FirevaseClient, P extends PathsFrom<C>>(
     where(definition.relationKey as string, '==', source.id),
   ]
 
-  return getList(targetFilters)
+  return getList({ query: targetFilters })
 }
 
 /** Retorna os ids do target path associados a este source de uma relacao many-to-many */
@@ -175,5 +175,7 @@ const getManyToManyRelation = async <
 
   if (targetIds.length === 0) return []
 
-  return getList([where(documentId(), 'in', targetIds)])
+  return getList({
+    filter: (halfResource) => targetIds.includes(halfResource.id),
+  })
 }

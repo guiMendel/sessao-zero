@@ -44,7 +44,7 @@ export const useCurrentPlayer = defineStore('current-player', () => {
   const { alert } = useAlert()
 
   const nicknameTaken = async (nickname: string) =>
-    (await getList([where('nickname', '==', nickname)])).length > 0
+    (await getList({ query: [where('nickname', '==', nickname)] })).length > 0
 
   player.fetcher.onFetch(async (snapshot) => {
     // Se este jogador nao existe

@@ -28,7 +28,13 @@ export const useGuild = () => {
   type GetList = GetListMethod<Vase, 'guilds', Resource<Vase, 'guilds'>[]>
 
   const getList: GetList = (filters) =>
-    api.getList([...(filters ?? []), where('listingBehavior', '==', 'public')])
+    api.getList({
+      query: [
+        ...(filters?.query ?? []),
+        where('listingBehavior', '==', 'public'),
+      ],
+      filter: filters?.filter,
+    })
 
   const syncList: SyncListMethod<Vase, 'guilds'> = (filters, existingRef) =>
     api.syncList(

@@ -15,11 +15,14 @@ export const makeHalfResource = <
   P extends PathsFrom<C>
 >(
   snapshot: DocumentSnapshot | QuerySnapshot,
-  resourcePath: P
+  resourcePath: P,
+  filter?: (docs: HalfResource<C, P>) => boolean
 ): Array<HalfResource<C, P> | undefined> => {
   // Lida com um query
   if ('docs' in snapshot) {
-    return snapshot.docs.map((doc) => documentToResource(doc, resourcePath))
+    return snapshot.docs
+      .map((doc) => documentToResource(doc, resourcePath))
+      .filter(filter ?? (() => true))
   }
 
   return [documentToResource(snapshot, resourcePath)]

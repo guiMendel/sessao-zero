@@ -21,7 +21,10 @@ export type GetListMethod<
   C extends FirevaseClient,
   P extends PathsFrom<C>,
   L extends Resource<C, P>[] | HalfResource<C, P>[]
-> = (filters?: QueryFieldFilterConstraint[]) => Promise<L>
+> = (props?: {
+  query?: QueryFieldFilterConstraint[]
+  filter?: (docs: HalfResource<C, P>) => boolean
+}) => Promise<L>
 
 export type GetMethod<
   C extends FirevaseClient,
@@ -96,8 +99,8 @@ export function getResourceGetter<
       ),
 
     /** Pega uma lista filtrada do recurso */
-    getList: (filters: QueryFieldFilterConstraint[] = []) =>
-      getDocs(query(resourceCollection, ...filters)).then((docs) =>
+    getList: (props) =>
+      getDocs(query(resourceCollection, ...(props?.query ?? []))).then((docs) =>
         cleanupManager != undefined
           ? (makeResource<C, P>(
               client,
@@ -105,9 +108,14 @@ export function getResourceGetter<
               resourcePath,
               resourceLayersLimit,
               cleanupManager,
-              []
+              [],
+              props?.filter
             ) as Resource<C, P>[])
-          : (makeHalfResource<C, P>(docs, resourcePath) as HalfResource<C, P>[])
+          : (makeHalfResource<C, P>(
+              docs,
+              resourcePath,
+              props?.filter
+            ) as HalfResource<C, P>[])
       ),
   }
 }
