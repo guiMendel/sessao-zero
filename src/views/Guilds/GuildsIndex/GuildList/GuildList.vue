@@ -3,6 +3,7 @@ import { Vase } from '@/api'
 import { useCurrentPlayer } from '@/api/players'
 import { LoadingSpinner, Typography } from '@/components'
 import { HalfResource, Resource, hasLoaded } from '@/firevase/resources'
+import { useNavigationData } from '@/stores'
 import { toValue } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -13,9 +14,12 @@ defineProps<{
 
 const { player } = useCurrentPlayer()
 const router = useRouter()
+const { redirectToPreferredGuild } = useNavigationData()
 
-const openGuildPage = (guild: HalfResource<Vase, 'guilds'>) =>
+const openGuildPage = (guild: HalfResource<Vase, 'guilds'>) => {
   router.push({ name: 'adventures', params: { guildId: guild.id } })
+  redirectToPreferredGuild.value = true
+}
 
 const isOwner = (guild: Resource<Vase, 'guilds'>) =>
   player.value?.id === toValue(guild.owner)?.id
@@ -100,7 +104,7 @@ const isOwner = (guild: Resource<Vase, 'guilds'>) =>
     transition: all 200ms;
 
     &:hover {
-      filter: brightness(1.04)
+      filter: brightness(1.04);
     }
 
     @include bevel(var(--main));
@@ -117,7 +121,6 @@ const isOwner = (guild: Resource<Vase, 'guilds'>) =>
         }
       }
     }
-    
 
     .data {
       flex: 1;
@@ -180,8 +183,8 @@ const isOwner = (guild: Resource<Vase, 'guilds'>) =>
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            
-            color: var(--tx-warning-darker)
+
+            color: var(--tx-warning-darker);
           }
         }
       }

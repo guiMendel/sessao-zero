@@ -5,22 +5,21 @@ import { Button, Divisor, Drawer, Typography } from '@/components'
 import { IconButton } from '@/components/IconButton'
 import { removeRelation } from '@/firevase/relations'
 import { HalfResource } from '@/firevase/resources'
-import { useInput } from '@/stores'
+import { useInput, useNavigationData } from '@/stores'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+const { redirectToPreferredGuild } = useNavigationData()
 
 const props = defineProps<{
   guild: HalfResource<Vase, 'guilds'>
 }>()
-
-const { update } = useCurrentPlayer()
 
 const router = useRouter()
 
 const isOpen = ref(false)
 
 const switchGuild = () => {
-  update({ preferredGuildId: null })
+  redirectToPreferredGuild.value = false
 
   router.push({ name: 'home' })
 }

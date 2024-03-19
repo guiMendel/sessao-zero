@@ -4,10 +4,12 @@ import { useCurrentPlayer } from '@/api/players'
 import { watch } from 'vue'
 import { PlayerPanel } from './PlayerPanel'
 import { useRouter } from 'vue-router'
+import { useNavigationData } from '@/stores'
 
 // Consome convites para guildas
 const { consumeLink } = useGuildInvitation()
 const { player } = useCurrentPlayer()
+const { redirectToPreferredGuild } = useNavigationData()
 
 const router = useRouter()
 
@@ -16,7 +18,11 @@ watch(
   (player) => {
     consumeLink()
 
-    if (player?.preferredGuildId && router.currentRoute.value.name === 'home')
+    if (
+      redirectToPreferredGuild.value &&
+      player?.preferredGuildId &&
+      router.currentRoute.value.name === 'home'
+    )
       router.push({
         name: 'adventures',
         params: { guildId: player.preferredGuildId },

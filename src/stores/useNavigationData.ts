@@ -1,9 +1,9 @@
 import { localStorageKeys } from '@/utils/config/storageKeys'
 import { firstVisitPrompts } from '@/router/firstVisitPrompts'
 import { useLocalStorage } from '@vueuse/core'
-import { defineStore } from 'pinia'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { RouteRecordName } from 'vue-router'
+import { defineStore } from './defineStore'
 
 export const useNavigationData = defineStore('navigation-data', () => {
   /** Rotas de first visit prompt que ja foram visitadas */
@@ -30,5 +30,13 @@ export const useNavigationData = defineStore('navigation-data', () => {
     )
   )
 
-  return { visitedPrompts, isVisitingPrompt, unvisitedPrompts }
+  /** Se deve ou nao ir automaticamente para a preferredGuildId do jogador em Home */
+  const redirectToPreferredGuild = ref(true)
+
+  return {
+    visitedPrompts,
+    isVisitingPrompt,
+    unvisitedPrompts,
+    redirectToPreferredGuild,
+  }
 })
