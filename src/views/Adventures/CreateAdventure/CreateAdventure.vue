@@ -160,6 +160,12 @@ const tryCreate = () => {
     max-width: 30rem;
 
     .hide-desktop {
+      display: flex;
+      flex-direction: inherit;
+      align-items: inherit;
+      justify-content: inherit;
+      gap: inherit;
+
       @media (min-width: 700px) {
         display: none;
       }
